@@ -4,9 +4,10 @@ type t =
   }
 
 let fleft x = x *. 0.1
+let sof = Enemy.stats_of
 
 let chance_of e w =
-  let c = Enemy.chance_of e in
+  let c = (sof e).chance in
   let f = fleft (float w.age) in
   c +. f
 
@@ -20,7 +21,7 @@ let pick_enemy w =
 let pick_count e w =
   let age = (float w.age) in
   let a = 1.0 +. Random.float (10.0 *. age) in
-  let b = Enemy.mod_of e in
+  let b = (sof e).modifier in
   let c = fleft age in
   (a *. (b +. c)) |> ceil |> truncate
 
@@ -43,7 +44,7 @@ let build wall =
   build_list wall wall.age []
 
 let outcome_of a =
-  let power = Enemy.power_of a.enemy in
+  let power = (sof a.enemy).power in
   let damage = a.count * power in
   let loss = Dice.deviate damage a.count in
   Outcome.make 0 -~loss
