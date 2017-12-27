@@ -5,19 +5,32 @@ type t =
   | Numendor
   | Clan
 
-let name_of = function
-  | Tulron -> "Tulron"
-  | Sodistan -> "Sodistan"
-  | Hekatium -> "Hekatium"
-  | Numendor -> "Numendor Council"
-  | Clan -> "Undermountain Clan"
+type stats =
+  { name : string;
+    ruler : string;
+  }
 
-let ruler_of = function
-  | Tulron -> "Melike Matis"
-  | Sodistan -> "Sultan Azim III"
-  | Hekatium -> "Emperor Levus IV"
-  | Numendor -> "Archduke Norgalad"
-  | Clan -> "Jarl Grorlon"
+let stats_of = function
+  | Tulron ->
+      { name = "Tulron";
+        ruler = "Melike Matis";
+      }
+  | Sodistan ->
+      { name = "Sodistan";
+        ruler = "Sultan Azim III";
+      }
+  | Hekatium ->
+      { name = "Hekatium";
+        ruler = "Emperor Levus IV";
+      }
+  | Numendor ->
+      { name = "Numendor Council";
+        ruler = "Archduke Norgalad";
+      }
+  | Clan ->
+      { name = "Undermountain Clan";
+        ruler = "Jarl Grorlon";
+      }
 
 let to_list () =
   [ Tulron;
