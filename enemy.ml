@@ -11,20 +11,20 @@ type stats =
 
 let stats_of = function
   | Dretch ->
-    { power = 1;
-      chance = 0.8;
-      modifier = 1.0;
-    }
+      { power = 1;
+        chance = 0.8;
+        modifier = 1.0;
+      }
   | Orc ->
-    { power = 3;
-      chance = 0.6;
-      modifier = 0.6;
-    }
+      { power = 3;
+        chance = 0.6;
+        modifier = 0.6;
+      }
   | Demon ->
-    { power = 5;
-      chance = 0.4;
-      modifier = 0.3;
-    }
+      { power = 5;
+        chance = 0.4;
+        modifier = 0.3;
+      }
 
 let to_list () =
   [ Dretch; Orc; Demon ]
