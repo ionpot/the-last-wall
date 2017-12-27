@@ -1,8 +1,8 @@
-type t = {
-  age : int;
-  supplies : int;
-  manpower : int;
-}
+type t =
+  { age : int;
+    supplies : int;
+    manpower : int;
+  }
 
 let make () =
   { age = 1;
