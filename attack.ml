@@ -47,4 +47,4 @@ let outcome_of a =
   let power = (sof a.enemy).power in
   let damage = a.count * power in
   let loss = Dice.deviate damage a.count in
-  Outcome.make 0 -~loss
+  Outcome.make 0 ~-loss
