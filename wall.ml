@@ -5,7 +5,7 @@ type t =
   }
 
 let make () =
-  { age = 1;
+  { age = 0;
     supplies = Dice.between 90 180;
     manpower = Dice.between 10 30;
   }
