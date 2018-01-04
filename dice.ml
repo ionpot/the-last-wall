@@ -9,4 +9,6 @@ let between x y =
   in x + Random.int d
 
 let deviate x y =
-  x + Random.int (y * 2) - y
+  let a = x - y in
+  let b = x + y in
+  between a b
