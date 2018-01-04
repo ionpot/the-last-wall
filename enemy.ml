@@ -1,5 +1,5 @@
 type t =
-  | Dretch
+  | Skeleton
   | Orc
   | Demon
 
@@ -10,7 +10,7 @@ type stats =
   }
 
 let stats_of = function
-  | Dretch ->
+  | Skeleton ->
       { power = 1;
         chance = 0.8;
         modifier = 1.0;
@@ -27,7 +27,7 @@ let stats_of = function
       }
 
 let to_list () =
-  [ Dretch; Orc; Demon ]
+  [ Skeleton; Orc; Demon ]
 
 let random () =
   let ls = to_list () in
