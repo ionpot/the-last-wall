@@ -1,7 +1,7 @@
 type t =
   { enemy : Enemy.t;
     count : int;
+    outcome : Outcome.t;
   }
 
-val build : Wall.t -> t list
-val outcome_of : t -> Outcome.t
+val build : Game.t -> t list
