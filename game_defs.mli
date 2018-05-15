@@ -14,9 +14,10 @@ module type Phase = sig
     | Nations : nation list query
     | Supplies : supply query
   type input
+  val first : 'a event
   val apply : type a. a event -> a -> unit
   val get : type a. a query -> a
-  val next : unit -> event
+  val next : 'a event -> 'b event
   val outcome_of : type a. a event -> a
   val set : input -> unit
 end

@@ -4,6 +4,7 @@ module type T = Phase with
   type _ event =
     Blessing : resource event
     Deity : unit event
+    End : unit event
     Nations : unit event
     Starting : resource event
     Support : resource event
