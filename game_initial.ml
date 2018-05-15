@@ -1,62 +1,71 @@
 open Game_defs
-open Pair
+
+module O = Game_outcomes
+module R = Resource
+
+type _ event =
+  | Blessing : resource event
+  | Deity : unit event
+  | End : unit event
+  | Nations : unit event
+  | Starting : resource event
+  | Support : resource event
+
+type input =
+  | Deity of deity
+  | Nations of nation list
 
 module Make( ) : T = struct
-  type _ event =
-    Blessing : resource event
-    Deity : unit event
-    Nations : unit event
-    Starting : resource event
-    Support : resource event
-
-  type _ query =
-    | Leader : leader query
-    | Manpower : manpower query
-    | Nations : nation list query
-    | Supplies : supply query
-
-  type input =
-    Deity of deity
-    Nations of nation list
-
   type wall =
     { mutable deity : deity;
-      mutable leader : leader;
       mutable nations : nation list;
-      mutable resources : resource;
+      mutable res : resource;
     }
 
-  let first_state = Deity
+  let first : _ event = Deity
+  let leader = Alive
 
   let wall =
     { deity = None;
-      leader = Alive;
       nations = [];
-      res = (0, 0);
+      res = R.make ();
     }
 
-  let apply = function
-    | Blessing p
-    | Starting p
-    | Support p ->
-        wall.res <- wall.res ++ p
+  let apply (type a) (ev : a event) (x : a) =
+    match ev with
+    | Blessing
+    | Starting
+    | Support ->
+        wall.res <- R.add x wall.res
     | Deity
     | End
     | Nations -> ()
 
-  let get = function
-    | Leader -> wall.leader
-    | Manpower -> fst wall.res
-    | Nations -> wall.nations
-    | Supplies -> snd wall.res
+  let get_deity () = wall.deity
+  let get_leader () = leader
+  let get_manpower () = R.manp wall.res
+  let get_nations () = wall.nations
+  let get_resources () = wall.res
+  let get_supplies () = R.supp wall.res
 
   let next = function
-    | Blessing -> Support
     | Deity -> Starting
-    | End -> End
-    | Nations -> Blessing
     | Starting -> Nations
+    | Nations -> Blessing
+    | Blessing -> Support
     | Support -> End
+    | End -> End
+
+  let outcome_of = function
+    | Blessing ->
+        O.blessing wall.deity
+    | Deity
+    | End
+    | Nations -> ()
+    | Starting ->
+        O.starting ()
+    | Support ->
+        O.support ()
 
   let set = function
     | Deity d ->
@@ -66,8 +75,8 @@ module Make( ) : T = struct
 end
 
 module Trans(X : T) : Transition = struct
-  val deity : deity
-  val leader : leader
-  val nations : nation list
-  val resource : resource
+  let deity = X.get_deity ()
+  let leader = X.get_leader ()
+  let nations = X.get_nations ()
+  let resource = X.get_resources ()
 end
