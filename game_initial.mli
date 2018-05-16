@@ -1,20 +1,19 @@
 open Game_defs
 
+type resource = Game_resource.t
+type support = Game_support.t
+
 type _ event =
-  | Blessing : resource event
-  | Deity : unit event
+  | Deity : deity event
   | End : unit event
-  | Nations : unit event
+  | Nations : nation list event
   | Starting : resource event
-  | Support : resource option event
+  | Support : support list event
 
-type input =
-  | Deity of deity
-  | Nations of nation list
-
-module type T = Phase with
-  type 'a event = 'a event and
-  type input = input
+module type T = sig
+  val first : unit -> 'a event
+  val next : 'a event -> 'a -> 'b event
+  val outcome : 'a event -> 'a
+end
 
 module Make( ) : T
-module Trans(X : T) : Transition

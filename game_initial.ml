@@ -1,82 +1,71 @@
 open Game_defs
 
 module O = Game_outcomes
-module R = Resource
+module R = Game_resource
+module S = Game_support
+
+type resource = R.t
+type support = S.t
 
 type _ event =
-  | Blessing : resource event
-  | Deity : unit event
+  | Deity : deity event
   | End : unit event
-  | Nations : unit event
+  | Nations : nation list event
   | Starting : resource event
-  | Support : resource event
+  | Support : support list event
 
-type input =
-  | Deity of deity
-  | Nations of nation list
+module type T = sig
+  val first : unit -> 'a event
+  val next : 'a event -> 'a -> 'b event
+  val outcome : 'a event -> 'a
+end
 
 module Make( ) : T = struct
-  type wall =
+  type t =
     { mutable deity : deity;
       mutable nations : nation list;
-      mutable res : resource;
+      mutable res : resource
     }
-
-  let first : _ event = Deity
-  let leader = Alive
 
   let wall =
-    { deity = None;
+    { deity = NoDeity;
       nations = [];
-      res = R.make ();
+      res = R.make R.Empty
     }
 
-  let apply (type a) (ev : a event) (x : a) =
-    match ev with
-    | Blessing
-    | Starting
-    | Support ->
-        wall.res <- R.add x wall.res
-    | Deity
-    | End
-    | Nations -> ()
+  let first () = Deity
 
-  let get_deity () = wall.deity
-  let get_leader () = leader
-  let get_manpower () = R.manp wall.res
-  let get_nations () = wall.nations
-  let get_resources () = wall.res
-  let get_supplies () = R.supp wall.res
+  let outcome : type a. a event -> a =
+    function
+      | Deity -> wall.deity
+      | End -> ()
+      | Nations -> wall.nations
+      | Starting -> O.starting wall.deity
+      | Support -> S.of_list wall.nations
 
-  let next = function
+  let apply : type a. a event -> a -> unit =
+    fun ev x ->
+      let open R in
+      match ev with
+      | Starting ->
+          wall.res <- wall.res ++ x
+      | Support ->
+          wall.res <- wall.res ++ S.total_of x
+      | Deity ->
+          wall.deity <- x
+      | End -> ()
+      | Nations ->
+          wall.nations <- x
+
+  let next_of : type a b. a event -> b event = function
     | Deity -> Starting
     | Starting -> Nations
-    | Nations -> Blessing
-    | Blessing -> Support
+    | Nations -> Support
     | Support -> End
     | End -> End
 
-  let outcome_of = function
-    | Blessing ->
-        O.blessing wall.deity
-    | Deity
-    | End
-    | Nations -> ()
-    | Starting ->
-        O.starting ()
-    | Support ->
-        O.support ()
-
-  let set = function
-    | Deity d ->
-        wall.deity <- d
-    | Nations ns ->
-        wall.nations <- ns
-end
-
-module Trans(X : T) : Transition = struct
-  let deity = X.get_deity ()
-  let leader = X.get_leader ()
-  let nations = X.get_nations ()
-  let resource = X.get_resources ()
+  let next : type a b. a event -> a -> b event =
+    fun ev x ->
+      apply ev x;
+      next_of ev
 end

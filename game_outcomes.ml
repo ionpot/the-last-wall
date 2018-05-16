@@ -1,48 +1,33 @@
 open Game_defs
+open Game_resource
 
-module R = Resource
-
-type t =
-  | Manp of manpower
-  | Supp of supply
-  | Both of (manpower * supply)
-  | None
-
-let res_of o =
-  let res = R.make () in
-  match o with
-  | Manp x -> R.add_m x res
-  | Supp x -> R.add_s x res
-  | Both (m, s) ->
-      res |> R.add_m m |> R.add_s s
-  | None -> res
+type resource = t
 
 let blessing d =
   let r n = Dice.deviate n 5 in
-  let o = match d with
-    | Elanis -> Manp (r 15)
-    | Sitera -> Supp (r 15)
-    | Sekrefir -> Both ((r 5), (r 5))
-    | None -> None
-  in
-  res_of o
+  let res = make Empty in
+  match d with
+  | Elanis -> res <+ Manpwr (r 15)
+  | Sitera -> res <+ Supply (r 15)
+  | Sekrefir -> res <+ Manpwr (r 5) <+ Supply (r 5)
+  | NoDeity -> res
 
-let starting () =
-  let man = Dice.between 10 30 in
-  let sup = Dice.between 90 180 in
-  res_of (Both (man, sup))
+let starting d =
+  blessing d
+    <+ Manpwr (Dice.between 10 30)
+    <+ Supply (Dice.between 90 180)
 
 let support () =
-  let make () =
+  let f () =
     let a = Dice.deviate 10 5 in
     let b = Dice.deviate 5 5 in
-    let o =
+    let (m, s) =
       if Random.bool ()
-      then Both (a, b)
-      else Both (b, a)
+      then (a, b)
+      else (b, a)
     in
-    res_of o
+    make (Manpwr m) <+ Supply s
   in
   if Dice.chance 0.8
-  then Some (make ())
+  then Some (f ())
   else None
