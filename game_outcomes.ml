@@ -31,3 +31,6 @@ let support () =
   if Dice.chance 0.8
   then Some (f ())
   else None
+
+let upkeep mp =
+  make (Supply mp)
