@@ -15,4 +15,4 @@ module type T = sig
   val next : event -> event
 end
 
-module Make( ) : T
+module Make(M : Game_state.T) : T

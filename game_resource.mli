@@ -13,3 +13,4 @@ val supp : t -> supply
 val (<+) : t -> kind -> t
 val (<~) : t -> kind -> t
 val (++) : t -> t -> t
+val (--) : t -> t -> t

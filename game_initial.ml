@@ -1,5 +1,7 @@
 open Game_defs
 
+module type State = Game_state.T
+
 module O = Game_outcomes
 module R = Game_resource
 module S = Game_support
@@ -19,38 +21,20 @@ module type T = sig
   val next : event -> event
 end
 
-module Make( ) : T = struct
-  type t =
-    { mutable deity : deity;
-      mutable nations : nation list;
-      mutable res : resource
-    }
+module Make(M : State) : T = struct
+  let first () = Deity (M.get_deity ())
 
-  let wall =
-    { deity = NoDeity;
-      nations = [];
-      res = R.make R.Empty
-    }
-
-  let first () = Deity wall.deity
-
-  let apply ev =
-    let open R in
-    match ev with
-    | Starting x ->
-        wall.res <- wall.res ++ x
-    | Support x ->
-        wall.res <- wall.res ++ S.total_of x
-    | Deity x ->
-        wall.deity <- x
+  let apply = function
+    | Starting x -> M.add_res x
+    | Support x -> M.add_res (S.total_of x)
+    | Deity x -> M.set_deity x
     | End -> ()
-    | Nations x ->
-        wall.nations <- x
+    | Nations x -> M.set_nats x
 
   let next_of = function
-    | Deity _ -> Starting (O.starting wall.deity)
-    | Starting _ -> Nations wall.nations
-    | Nations _ -> Support (S.of_list wall.nations)
+    | Deity _ -> Starting (O.starting (M.get_deity ()))
+    | Starting _ -> Nations (M.get_nats ())
+    | Nations _ -> Support (S.of_list (M.get_nats ()))
     | Support _ -> End
     | End -> End
 

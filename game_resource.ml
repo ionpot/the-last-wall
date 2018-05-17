@@ -26,3 +26,4 @@ let (<~) t = function
   | Supply x -> Pair.(~>) x t
 
 let (++) = Pair.(++)
+let (--) = Pair.(--)
