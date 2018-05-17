@@ -13,6 +13,8 @@ module type T = sig
   val set_deity : deity -> unit
   val get_nats : unit -> nation list
   val set_nats : nation list -> unit
+  val get_ldr : unit -> leader
+  val set_ldr : leader -> unit
+  val defeat : unit -> bool
 end
-
 module Make( ) : T

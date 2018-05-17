@@ -5,10 +5,10 @@ module R = Game_resource
 type resource = R.t
 type turn = int
 type t =
-  { mutable turn : turn;
-    mutable res : resource;
-    mutable deity : deity;
-    mutable nats : nation list
+  { mutable deity : deity;
+    mutable leader : leader;
+    mutable nats : nation list;
+    mutable res : resource
   }
 
 let pick_nats max ns =
@@ -27,6 +27,9 @@ module type T = sig
   val set_deity : deity -> unit
   val get_nats : unit -> nation list
   val set_nats : nation list -> unit
+  val get_ldr : unit -> leader
+  val set_ldr : leader -> unit
+  val defeat : unit -> bool
 end
 
 module Make( ) : T = struct
@@ -34,15 +37,17 @@ module Make( ) : T = struct
 
   let max_nats = 3
 
+  let turn = ref 0
+
   let t =
-    { turn = 0;
-      res = make Empty;
-      deity = NoDeity;
-      nats = []
+    { deity = NoDeity;
+      leader = Alive;
+      nats = [];
+      res = make Empty
     }
 
-  let get_turn () = t.turn
-  let inc_turn () = t.turn <- succ t.turn
+  let get_turn () = !turn
+  let inc_turn () = incr turn
 
   let get_res () = t.res
   let add_res r = t.res <- t.res ++ r
@@ -53,4 +58,9 @@ module Make( ) : T = struct
 
   let get_nats () = t.nats
   let set_nats ns = t.nats <- pick_nats max_nats ns
+
+  let get_ldr () = t.leader
+  let set_ldr x = t.leader <- x
+
+  let defeat () = (manp t.res) <= 0
 end
