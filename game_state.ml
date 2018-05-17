@@ -3,7 +3,7 @@ open Game_defs
 module R = Game_resource
 
 type resource = R.t
-type turn = int
+
 type t =
   { mutable deity : deity;
     mutable leader : leader;

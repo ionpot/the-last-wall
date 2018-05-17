@@ -1,7 +1,6 @@
 open Game_defs
 
 type resource = Game_resource.t
-type turn = int
 
 module type T = sig
   val get_turn : unit -> turn
@@ -17,4 +16,5 @@ module type T = sig
   val set_ldr : leader -> unit
   val defeat : unit -> bool
 end
+
 module Make( ) : T
