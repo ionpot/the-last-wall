@@ -11,3 +11,9 @@ let enemy_list =
 
 let nation_list =
   [Tulron; Sodistan; Hekatium; Numendor; Clan]
+
+module type Phase = sig
+  type event
+  val first : unit -> event
+  val next : event -> event
+end
