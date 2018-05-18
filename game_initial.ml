@@ -7,14 +7,14 @@ module Support = Game_support
 type resource = Resource.t
 type support = Support.t
 
-type events =
+type event =
   | Deity of deity
   | End
   | Nations of nation list
   | Starting of resource
   | Support of support list
 
-module type T = Phase with type event := events
+module type T = Phase with type event_def := event
 
 module Make(State : Game_state.T) : T = struct
   let first () = Deity (State.get_deity ())
