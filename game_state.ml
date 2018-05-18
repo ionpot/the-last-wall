@@ -1,8 +1,8 @@
 open Game_defs
 
-module R = Game_resource
+module Resource = Game_resource
 
-type resource = R.t
+type resource = Resource.t
 
 type t =
   { mutable deity : deity;
@@ -33,7 +33,7 @@ module type T = sig
 end
 
 module Make( ) : T = struct
-  open R
+  open Resource
 
   let max_nats = 3
 

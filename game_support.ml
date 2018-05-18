@@ -1,19 +1,19 @@
 open Game_defs
 
-module O = Game_outcomes
-module R = Game_resource
+module Outcome = Game_outcome
+module Resource = Game_resource
 
-type resource = R.t
+type resource = Resource.t
 type t = (nation * resource option)
 
 let of_nation n =
-  (n, O.support ())
+  (n, Outcome.support ())
 
 let of_list ns =
   List.map of_nation ns
 
 let total_of ns =
-  let open R in
+  let open Resource in
   let f total (_, maybe) =
     match maybe with
     | Some res -> total ++ res
