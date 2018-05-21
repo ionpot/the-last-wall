@@ -13,7 +13,7 @@ type event =
   | Scout of party list
   | Starvation of resource
   | Support of support list
-  | Turn of turn
+  | Turn
   | Upkeep of resource
 
 module type T = Phase with type event_def := event
