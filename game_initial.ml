@@ -29,7 +29,7 @@ module Make(State : Game_state.T) : T = struct
   let next_of = function
     | Deity _ -> Starting (Outcome.starting (State.get_deity ()))
     | Starting _ -> Nations (State.get_nats ())
-    | Nations _ -> Support (Support.of_list (State.get_nats ()))
+    | Nations _ -> Support (Support.of_nats (State.get_nats ()))
     | Support _ -> End
     | End -> End
 

@@ -9,7 +9,7 @@ type t = (nation * resource option)
 let of_nation n =
   (n, Outcome.support ())
 
-let of_list ns =
+let of_nats ns =
   List.map of_nation ns
 
 let total_of ns =
