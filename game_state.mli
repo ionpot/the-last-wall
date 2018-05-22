@@ -21,6 +21,8 @@ module type T = sig
   val set_nats : nation list -> unit
   val get_ldr : unit -> leader
   val set_ldr : leader -> unit
+  val is_scouting : unit -> bool
+  val set_scouting : bool -> unit
 end
 
 module Make( ) : T

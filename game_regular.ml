@@ -1,6 +1,7 @@
 open Game_defs
 
 module Enemy = Game_enemy
+module Garrison = Game_garrison
 module Leader = Game_leader
 module Outcome = Game_outcome
 module Resource = Game_resource
@@ -28,8 +29,7 @@ type event =
   | Upkeep of resource
 
 type t =
-  { mutable loss : manpower;
-    mutable seen : enemy list;
+  { mutable seen : enemy list;
     mutable arrived : enemy list
   }
 
@@ -40,8 +40,7 @@ let scouting_cost =
 
 module Make(State : Game_state.T) : T = struct
   let t =
-    { loss = 0;
-      seen = [];
+    { seen = [];
       arrived = []
     }
 
@@ -52,8 +51,7 @@ module Make(State : Game_state.T) : T = struct
   let first () = Turn
 
   let apply = function
-    | Attack enemies ->
-        t.loss <- Enemy.damage enemies
+    | Attack enemies -> ()
     | Blessing res ->
         State.add_res res
     | Casualty manp ->
@@ -68,7 +66,8 @@ module Make(State : Game_state.T) : T = struct
     | ScoutsBack _ -> ()
     | ScoutsSent res ->
         State.sub_res res
-    | SendScouts _ -> ()
+    | SendScouts yes ->
+        State.set_scouting yes
     | Starvation manp ->
         State.sub_manp manp
     | Support supp_list ->
@@ -76,34 +75,47 @@ module Make(State : Game_state.T) : T = struct
     | Turn ->
         State.inc_turn ();
         move_army ();
-        t.loss <- 0;
         t.seen <- Enemy.spawn (State.get_turn ())
     | Upkeep res ->
-        State.sub_res res;
-        t.loss <- State.missing_supp ()
+        State.sub_res res
 
   let to_upkeep () =
     Upkeep (Outcome.upkeep (State.get_manp ()))
 
+  let ask_scouting () =
+    SendScouts (State.is_scouting ())
+
+  let check_scouting () =
+    if State.is_scouting ()
+    then ScoutsSent scouting_cost
+    else to_upkeep ()
+
+  let check_report () =
+    if State.is_scouting ()
+    then ScoutsBack (Enemy.scout t.seen)
+    else Nations (State.get_nats ())
+
+  let get_casualty enemies =
+    let loss = Enemy.damage enemies in
+    State.get_garrison ()
+    |> Garrison.mitigate loss
+
   let next_of = function
     | Turn ->
         if State.has_ldr ()
-        then to_upkeep ()
+        then check_scouting ()
         else NewLeader (Leader.make ())
     | NewLeader _ ->
+        check_scouting ()
+    | ScoutsSent _ ->
         to_upkeep ()
     | Upkeep _ ->
-        if t.loss > 0
-        then Starvation t.loss
-        else SendScouts false
+        let loss = State.missing_supp () in
+        if loss > 0
+        then Starvation loss
+        else check_report ()
     | Starvation _ ->
-        SendScouts false
-    | SendScouts yes ->
-        if yes
-        then (ScoutsSent scouting_cost)
-        else Nations (State.get_nats ())
-    | ScoutsSent _ ->
-        ScoutsBack (Enemy.scout t.seen)
+        check_report ()
     | ScoutsBack _ ->
         Nations (State.get_nats ())
     | Nations _ ->
@@ -112,17 +124,20 @@ module Make(State : Game_state.T) : T = struct
         Support (Support.of_nats (State.get_nats ()))
     | Support _ ->
         if t.arrived = []
-        then Turn
+        then ask_scouting ()
         else Attack t.arrived
-    | Attack _ ->
-        if t.loss > 0
-        then Casualty t.loss
+    | Attack enemies ->
+        let loss = get_casualty enemies in
+        if loss > 0
+        then Casualty loss
         else Turn
     | Casualty _ ->
         if Leader.lives ()
-        then Turn
+        then ask_scouting ()
         else LeaderDied (State.get_ldr ())
-    | LeaderDied _ -> Turn
+    | LeaderDied _ ->
+        ask_scouting ()
+    | SendScouts _ -> Turn
     | End -> End
 
   let next ev =

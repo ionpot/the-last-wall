@@ -8,7 +8,8 @@ type t =
   { mutable deity : deity;
     mutable leader : leader;
     mutable nats : nation list;
-    mutable res : resource
+    mutable res : resource;
+    mutable scouting : bool
   }
 
 let pick_nats max ns =
@@ -36,6 +37,8 @@ module type T = sig
   val set_nats : nation list -> unit
   val get_ldr : unit -> leader
   val set_ldr : leader -> unit
+  val is_scouting : unit -> bool
+  val set_scouting : bool -> unit
 end
 
 module Make( ) : T = struct
@@ -49,7 +52,8 @@ module Make( ) : T = struct
     { deity = NoDeity;
       leader = Alive;
       nats = [];
-      res = make Empty
+      res = make Empty;
+      scouting = false
     }
 
   let get_turn () = !turn
@@ -79,5 +83,6 @@ module Make( ) : T = struct
   let get_ldr () = t.leader
   let set_ldr x = t.leader <- x
 
-  let defeat () = (manp t.res) <= 0
+  let is_scouting () = t.scouting
+  let set_scouting x = t.scouting <- x
 end
