@@ -35,18 +35,11 @@ type t =
 
 module type T = Phase with type event_def := event
 
-let scouting_cost =
-  Resource.make (Resource.Supply 10)
-
 module Make(State : Game_state.T) : T = struct
   let t =
     { seen = [];
       arrived = []
     }
-
-  let move_army () =
-    t.arrived <- t.seen;
-    t.seen <- []
 
   let first () = Turn
 
@@ -74,7 +67,7 @@ module Make(State : Game_state.T) : T = struct
         State.add_res (Support.total_of supp_list)
     | Turn ->
         State.inc_turn ();
-        move_army ();
+        t.arrived <- t.seen;
         t.seen <- Enemy.spawn (State.get_turn ())
     | Upkeep res ->
         State.sub_res res
@@ -87,13 +80,13 @@ module Make(State : Game_state.T) : T = struct
 
   let check_scouting () =
     if State.is_scouting ()
-    then ScoutsSent scouting_cost
+    then ScoutsSent Enemy.scouting_cost
     else to_upkeep ()
 
   let check_report () =
     if State.is_scouting ()
     then ScoutsBack (Enemy.scout t.seen)
-    else Nations (State.get_nats ())
+    else ScoutsBack (Enemy.vague_scout t.seen)
 
   let get_casualty enemies =
     let loss = Enemy.damage enemies in
