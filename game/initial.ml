@@ -3,9 +3,9 @@ open Defs
 type event =
   | Deity of Deity.t
   | End
-  | Nations of nation list
+  | Nations of Nation.t list
   | Starting of Resource.t
-  | Support of Support.t list
+  | Support of Nation.support list
 
 module type T = Phase with type event_def := event
 
@@ -20,7 +20,7 @@ module Make(M : State.T) : T = struct
 
   let apply = function
     | Starting x -> M.add_res x
-    | Support x -> M.add_res (Support.total_of x)
+    | Support x -> M.add_res (Nation.total_of x)
     | Deity x -> M.set_deity x
     | End -> ()
     | Nations x -> M.set_nats x
@@ -28,7 +28,7 @@ module Make(M : State.T) : T = struct
   let next_of = function
     | Deity _ -> Starting (starting (M.get_deity ()))
     | Starting _ -> Nations (M.get_nats ())
-    | Nations _ -> Support (Support.of_nats (M.get_nats ()))
+    | Nations _ -> Support (Nation.support_of_list (M.get_nats ()))
     | Support _ -> End
     | End -> End
 

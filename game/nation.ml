@@ -1,7 +1,15 @@
-open Defs
-
+type t = Tulron | Sodistan | Hekatium | Numendor | Clan
 type resource = Resource.t
-type t = (nation * resource option)
+type support = (t * resource option)
+
+let to_list () =
+  [Tulron; Sodistan; Hekatium; Numendor; Clan]
+
+let pickN max nats =
+  let f n = List.mem n nats in
+  to_list ()
+  |> List.filter f
+  |> Listx.pick_first max
 
 let total_of ns =
   let open Resource in
@@ -13,7 +21,6 @@ let total_of ns =
   List.fold_left f (make Empty) ns
 
 let to_outcome () =
-  let open Resource in
   let f () =
     let a = Dice.deviate 10 5 in
     let b = Dice.deviate 5 5 in
@@ -22,14 +29,14 @@ let to_outcome () =
       then (a, b)
       else (b, a)
     in
-    make (Manpwr m) <+ Supply s
+    Resource.(make (Manpwr m) <+ Supply s)
   in
   if Dice.chance 0.8
   then Some (f ())
   else None
 
-let of_nation n =
+let support_of n =
   (n, to_outcome ())
 
-let of_nats ns =
-  List.map of_nation ns
+let support_of_list ns =
+  List.map support_of ns

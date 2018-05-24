@@ -2,8 +2,9 @@ open Defs
 
 type enemy = Enemy.party
 type leader = Leader.t
+type nation = Nation.t
 type resource = Resource.t
-type support = Support.t
+type support = Nation.support
 
 type event =
   | Attack of enemy list
@@ -60,7 +61,7 @@ module Make(M : State.T) : T = struct
     | Starvation manp ->
         M.sub_manp manp
     | Support supp_list ->
-        M.add_res (Support.total_of supp_list)
+        M.add_res (Nation.total_of supp_list)
     | Turn ->
         M.inc_turn ();
         t.arrived <- t.seen;
@@ -115,7 +116,7 @@ module Make(M : State.T) : T = struct
     | Nations _ ->
         Blessing (Deity.blessing_of (M.get_deity ()))
     | Blessing _ ->
-        Support (Support.of_nats (M.get_nats ()))
+        Support (Nation.support_of_list (M.get_nats ()))
     | Support _ ->
         if t.arrived = []
         then ask_scouting ()

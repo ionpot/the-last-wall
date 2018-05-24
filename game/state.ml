@@ -12,12 +12,6 @@ type t =
     mutable scouting : bool
   }
 
-let pick_nats max ns =
-  let f n = List.mem n ns in
-  nation_list
-  |> List.filter f
-  |> Listx.pick_first max
-
 module type T = sig
   val get_turn : unit -> turn
   val inc_turn : unit -> unit
@@ -79,7 +73,7 @@ module Make( ) : T = struct
   let set_deity d = t.deity <- d
 
   let get_nats () = t.nats
-  let set_nats ns = t.nats <- pick_nats max_nats ns
+  let set_nats ns = t.nats <- Nation.pickN max_nats ns
 
   let get_ldr () = t.leader
   let set_ldr x = t.leader <- Some x
