@@ -1,6 +1,6 @@
-open Game_defs
+open Defs
 
-type resource = Game_resource.t
+type resource = Resource.t
 type t = (nation * resource option)
 
 val of_nation : nation -> t

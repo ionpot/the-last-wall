@@ -1,4 +1,4 @@
-open Game_defs
+open Defs
 
 type t = (manpower * supply)
 

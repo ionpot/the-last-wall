@@ -1,5 +1,5 @@
-open Game_defs
-open Game_resource
+open Defs
+open Resource
 
 type resource = t
 

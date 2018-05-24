@@ -1,8 +1,8 @@
-open Game_defs
+open Defs
 
 type count = int
 type party
-type resource = Game_resource.t
+type resource = Resource.t
 
 val scouting_cost : resource
 

@@ -1,7 +1,4 @@
-open Game_defs
-
-module Outcome = Game_outcome
-module Resource = Game_resource
+open Defs
 
 type resource = Resource.t
 type t = (nation * resource option)

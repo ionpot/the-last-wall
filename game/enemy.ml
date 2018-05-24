@@ -1,6 +1,4 @@
-open Game_defs
-
-module Resource = Game_resource
+open Defs
 
 type count = int
 type party = (enemy * count)
