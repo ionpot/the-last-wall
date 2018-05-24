@@ -1,5 +1,3 @@
-open Defs
-
 type event =
   | Deity of Deity.t
   | End
@@ -7,13 +5,7 @@ type event =
   | Starting of Resource.t
   | Support of Nation.support list
 
-module type T = Phase with type event_def := event
-
-let starting deity =
-  let open Resource in
-  Deity.blessing_of deity
-    <+ Manpwr (Dice.between 10 30)
-    <+ Supply (Dice.between 90 180)
+module type T = Defs.Phase with type event_def := event
 
 module Make(M : State.T) : T = struct
   let first () = Deity (M.get_deity ())
@@ -26,7 +18,7 @@ module Make(M : State.T) : T = struct
     | Nations x -> M.set_nats x
 
   let next_of = function
-    | Deity _ -> Starting (starting (M.get_deity ()))
+    | Deity _ -> Starting (Deity.starting (M.get_deity ()))
     | Starting _ -> Nations (M.get_nats ())
     | Nations _ -> Support (Nation.support_of_list (M.get_nats ()))
     | Support _ -> End
