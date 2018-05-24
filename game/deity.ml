@@ -1,9 +1,8 @@
-open Defs
 open Resource
 
-type resource = t
+type t = Elanis | Sekrefir | Sitera | NoDeity
 
-let blessing d =
+let blessing_of d =
   let r n = Dice.deviate n 5 in
   let res = make Empty in
   match d with
@@ -11,11 +10,3 @@ let blessing d =
   | Sitera -> res <+ Supply (r 15)
   | Sekrefir -> res <+ Manpwr (r 5) <+ Supply (r 5)
   | NoDeity -> res
-
-let starting d =
-  blessing d
-    <+ Manpwr (Dice.between 10 30)
-    <+ Supply (Dice.between 90 180)
-
-let upkeep mp =
-  make (Supply mp)

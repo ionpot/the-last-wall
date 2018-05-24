@@ -1,4 +1,3 @@
-type deity = Elanis | Sekrefir | Sitera | NoDeity
 type enemy = Skeleton | Orc | Demon
 type leader = Alive | Dead
 type manpower = int

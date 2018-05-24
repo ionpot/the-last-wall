@@ -28,6 +28,9 @@ type t =
 
 module type T = Phase with type event_def := event
 
+let upkeep mp =
+  Resource.(make (Supply mp))
+
 module Make(M : State.T) : T = struct
   let t =
     { seen = [];
@@ -66,7 +69,7 @@ module Make(M : State.T) : T = struct
         M.sub_res res
 
   let to_upkeep () =
-    Upkeep (Outcome.upkeep (M.get_manp ()))
+    Upkeep (upkeep (M.get_manp ()))
 
   let ask_scouting () =
     SendScouts (M.is_scouting ())
@@ -105,7 +108,7 @@ module Make(M : State.T) : T = struct
     | ScoutsBack _ ->
         Nations (M.get_nats ())
     | Nations _ ->
-        Blessing (Outcome.blessing (M.get_deity ()))
+        Blessing (Deity.blessing_of (M.get_deity ()))
     | Blessing _ ->
         Support (Support.of_nats (M.get_nats ()))
     | Support _ ->
