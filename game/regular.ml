@@ -74,6 +74,11 @@ module Make(M : State.T) : T = struct
   let ask_scouting () =
     SendScouts (M.is_scouting ())
 
+  let leader_died () =
+    match M.get_ldr () with
+    | Some x -> LeaderDied x
+    | None -> ask_scouting ()
+
   let check_scouting () =
     if M.is_scouting ()
     then ScoutsSent Enemy.scouting_cost
@@ -123,7 +128,7 @@ module Make(M : State.T) : T = struct
     | Casualty _ ->
         if Leader.lives ()
         then ask_scouting ()
-        else LeaderDied (M.get_ldr ())
+        else leader_died ()
     | LeaderDied _ ->
         ask_scouting ()
     | SendScouts _ -> Turn
