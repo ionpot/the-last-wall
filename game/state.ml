@@ -1,5 +1,6 @@
 open Defs
 
+type deity = Deity.t
 type resource = Resource.t
 
 type t =
@@ -47,7 +48,7 @@ module Make( ) : T = struct
   let turn = ref 0
 
   let t =
-    { deity = NoDeity;
+    { deity = Deity.None;
       leader = Alive;
       nats = [];
       res = make Empty;
