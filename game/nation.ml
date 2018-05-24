@@ -2,12 +2,12 @@ type t = Tulron | Sodistan | Hekatium | Numendor | Clan
 type resource = Resource.t
 type support = (t * resource option)
 
-let to_list () =
+let t_list =
   [Tulron; Sodistan; Hekatium; Numendor; Clan]
 
 let pickN max nats =
   let f n = List.mem n nats in
-  to_list ()
+  t_list
   |> List.filter f
   |> Listx.pick_first max
 

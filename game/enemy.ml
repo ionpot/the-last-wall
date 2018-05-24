@@ -8,7 +8,7 @@ type resource = Resource.t
 let scouting_cost =
   Resource.make (Resource.Supply 10)
 
-let to_list () =
+let t_list =
   [Skeleton; Orc; Demon]
 
 let abundance_of = function
@@ -74,6 +74,6 @@ let get_count turn enemy =
   Dice.deviate x (x / 2)
 
 let spawn turn =
-  let a = List.filter (can_spawn turn) (to_list ()) in
+  let a = List.filter (can_spawn turn) t_list in
   let b = List.map (get_count turn) a in
   List.combine a b
