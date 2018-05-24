@@ -1,10 +1,13 @@
 open Defs
 
+type t = Skeleton | Orc | Demon
 type count = int
 type party
 type resource = Resource.t
 
 val scouting_cost : resource
+
+val to_list : unit -> t list
 
 val count_of : party -> count
 val type_of : party -> enemy
