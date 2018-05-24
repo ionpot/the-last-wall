@@ -9,6 +9,9 @@ let pick_first i =
   in
   build f
 
+let pick_from ls =
+  List.length ls |> Random.int |> List.nth ls
+
 (* partially applied functions cannot be generalised *)
 let undupe ls =
   let f acc x =
