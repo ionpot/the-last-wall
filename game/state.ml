@@ -61,12 +61,12 @@ module Make( ) : T = struct
   let add_res r = t.res <- t.res ++ r
   let sub_res r = t.res <- t.res -- r
 
-  let add_manp m = t.res <+ Manpwr m
-  let sub_manp m = t.res <~ Manpwr m
+  let add_manp m = t.res <- t.res <+ Manpwr m
+  let sub_manp m = t.res <- t.res <~ Manpwr m
   let no_manp () = manp t.res <= 0
 
-  let add_supp m = t.res <+ Supply m
-  let sub_supp m = t.res <~ Supply m
+  let add_supp m = t.res <- t.res <+ Supply m
+  let sub_supp m = t.res <- t.res <~ Supply m
   let clr_supp () = t.res <- make (Manpwr (manp t.res))
   let missing_supp () =
     let x = supp t.res in

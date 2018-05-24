@@ -1,2 +1,2 @@
 "util": include
-<game/*.ml>: pack-for(Game)
+<game/*.ml>: for-pack(Game)
