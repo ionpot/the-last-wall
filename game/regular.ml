@@ -24,6 +24,13 @@ type event =
 
 module type T = Phase with type event_def := event
 
+let mitigate loss = function
+  | Some ldr ->
+      let lv = Leader.level_of ldr in
+      let x = 0.1 +. (0.01 *. float lv) in
+      loss - truncate (x *. float loss)
+  | None -> loss
+
 let upkeep mp =
   Resource.(make (Supply mp))
 
@@ -82,8 +89,7 @@ module Make(M : State.T) : T = struct
 
   let casualty_from enemies =
     let loss = Enemy.damage enemies in
-    M.get_garrison ()
-    |> Garrison.mitigate loss
+    M.get_ldr () |> mitigate loss
 
   let next_of = function
     | Turn ->
