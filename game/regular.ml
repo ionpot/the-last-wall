@@ -22,22 +22,12 @@ type event =
   | Turn
   | Upkeep of resource
 
-type t =
-  { mutable seen : enemy list;
-    mutable arrived : enemy list
-  }
-
 module type T = Phase with type event_def := event
 
 let upkeep mp =
   Resource.(make (Supply mp))
 
 module Make(M : State.T) : T = struct
-  let t =
-    { seen = [];
-      arrived = []
-    }
-
   let first () = Turn
 
   let apply = function
@@ -64,8 +54,7 @@ module Make(M : State.T) : T = struct
         M.add_res (Nation.total_of supp_list)
     | Turn ->
         M.inc_turn ();
-        t.arrived <- t.seen;
-        t.seen <- Enemy.spawn (M.get_turn ())
+        M.get_turn () |> Enemy.spawn |> M.move_enemies
     | Upkeep res ->
         M.sub_res res
 
@@ -86,11 +75,12 @@ module Make(M : State.T) : T = struct
     else to_upkeep ()
 
   let check_report () =
+    let seen = M.get_seen () in
     if M.is_scouting ()
-    then ScoutsBack (Enemy.scout t.seen)
-    else ScoutsBack (Enemy.vague_scout t.seen)
+    then ScoutsBack (Enemy.scout seen)
+    else ScoutsBack (Enemy.vague_scout seen)
 
-  let get_casualty enemies =
+  let casualty_from enemies =
     let loss = Enemy.damage enemies in
     M.get_garrison ()
     |> Garrison.mitigate loss
@@ -118,11 +108,12 @@ module Make(M : State.T) : T = struct
     | Blessing _ ->
         Support (Nation.support_of_list (M.get_nats ()))
     | Support _ ->
-        if t.arrived = []
+        let arrived = M.get_arrived () in
+        if arrived = []
         then ask_scouting ()
-        else Attack t.arrived
+        else Attack arrived
     | Attack enemies ->
-        let loss = get_casualty enemies in
+        let loss = casualty_from enemies in
         if loss > 0
         then Casualty loss
         else Turn

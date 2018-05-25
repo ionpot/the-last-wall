@@ -1,6 +1,7 @@
 open Defs
 
 type deity = Deity.t
+type enemy = Enemy.party
 type leader = Leader.t
 type nation = Nation.t
 type resource = Resource.t
@@ -10,7 +11,9 @@ type t =
     mutable leader : leader option;
     mutable nats : nation list;
     mutable res : resource;
-    mutable scouting : bool
+    mutable scouting : bool;
+    mutable seen : enemy list;
+    mutable arrived : enemy list
   }
 
 module type T = sig
@@ -37,6 +40,10 @@ module type T = sig
   val set_ldr : leader -> unit
   val is_scouting : unit -> bool
   val set_scouting : bool -> unit
+  val set_seen : enemy list -> unit
+  val get_seen : unit -> enemy list
+  val get_arrived : unit -> enemy list
+  val move_enemies : enemy list -> unit
 end
 
 module Make( ) : T = struct
@@ -51,7 +58,9 @@ module Make( ) : T = struct
       leader = None;
       nats = [];
       res = make Empty;
-      scouting = false
+      scouting = false;
+      seen = [];
+      arrived = []
     }
 
   let get_turn () = !turn
@@ -89,4 +98,11 @@ module Make( ) : T = struct
 
   let is_scouting () = t.scouting
   let set_scouting x = t.scouting <- x
+
+  let set_seen x = t.seen <- x
+  let get_seen () = t.seen
+  let get_arrived () = t.arrived
+  let move_enemies seen =
+    t.arrived <- t.seen;
+    t.seen <- seen
 end
