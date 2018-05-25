@@ -19,7 +19,7 @@ type event =
   | SendScouts of bool
   | Starvation of manpower
   | Support of support list
-  | Turn
+  | Turn of turn
   | Upkeep of resource
 
 module type T = Phase with type event_def := event
@@ -35,7 +35,12 @@ let upkeep mp =
   Resource.(make (Supply mp))
 
 module Make(M : State.T) : T = struct
-  let first () = Turn
+  let next_turn () =
+    let x = M.get_turn () + 1 in
+    Turn x
+
+  let first () =
+    next_turn ()
 
   let apply = function
     | Attack enemies -> ()
@@ -60,9 +65,9 @@ module Make(M : State.T) : T = struct
         M.sub_manp manp
     | Support supp_list ->
         M.add_res (Nation.total_of supp_list)
-    | Turn ->
-        M.inc_turn ();
-        M.get_turn () |> Enemy.spawn |> M.move_enemies
+    | Turn x ->
+        M.set_turn x;
+        Enemy.spawn x |> M.move_enemies
     | Upkeep res ->
         M.sub_res res
 
@@ -93,7 +98,7 @@ module Make(M : State.T) : T = struct
     M.get_ldr () |> mitigate loss
 
   let next_of = function
-    | Turn ->
+    | Turn _ ->
         if M.has_ldr ()
         then check_scouting ()
         else NewLeader (Leader.make ())
@@ -123,14 +128,14 @@ module Make(M : State.T) : T = struct
         let loss = casualty_from enemies in
         if loss > 0
         then Casualty loss
-        else Turn
+        else next_turn ()
     | Casualty _ ->
         if Leader.lives ()
         then ask_scouting ()
         else leader_died ()
     | LeaderDied _ ->
         ask_scouting ()
-    | SendScouts _ -> Turn
+    | SendScouts _ -> next_turn ()
     | End -> End
 
   let next ev =
