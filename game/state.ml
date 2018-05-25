@@ -2,6 +2,7 @@ open Defs
 
 type deity = Deity.t
 type leader = Leader.t
+type nation = Nation.t
 type resource = Resource.t
 
 type t =
@@ -18,6 +19,7 @@ module type T = sig
   val get_res : unit -> resource
   val add_res : resource -> unit
   val sub_res : resource -> unit
+  val get_manp : unit -> manpower
   val add_manp : manpower -> unit
   val sub_manp : manpower -> unit
   val no_manp : unit -> bool
@@ -30,6 +32,7 @@ module type T = sig
   val get_nats : unit -> nation list
   val set_nats : nation list -> unit
   val has_ldr : unit -> bool
+  val clr_ldr : unit -> unit
   val get_ldr : unit -> leader option
   val set_ldr : leader -> unit
   val is_scouting : unit -> bool
@@ -58,6 +61,7 @@ module Make( ) : T = struct
   let add_res r = t.res <- t.res ++ r
   let sub_res r = t.res <- t.res -- r
 
+  let get_manp () = manp t.res
   let add_manp m = t.res <- t.res <+ Manpwr m
   let sub_manp m = t.res <- t.res <~ Manpwr m
   let no_manp () = manp t.res <= 0

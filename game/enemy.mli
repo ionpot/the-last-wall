@@ -9,7 +9,7 @@ val scouting_cost : resource
 val t_list : t list
 
 val count_of : party -> count
-val type_of : party -> enemy
+val type_of : party -> t
 
 val damage : party list -> manpower
 val scout : party list -> party list

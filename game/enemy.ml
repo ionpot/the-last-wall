@@ -2,7 +2,7 @@ open Defs
 
 type t = Skeleton | Orc | Demon
 type count = int
-type party = (enemy * count)
+type party = (t * count)
 type resource = Resource.t
 
 let scouting_cost =
