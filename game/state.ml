@@ -38,6 +38,7 @@ module type T = sig
   val clr_ldr : unit -> unit
   val get_ldr : unit -> leader option
   val set_ldr : leader -> unit
+  val ldr_won : unit -> unit
   val is_scouting : unit -> bool
   val set_scouting : bool -> unit
   val set_seen : enemy list -> unit
@@ -95,6 +96,10 @@ module Make( ) : T = struct
     match t.leader with
     | Some _ -> true
     | None -> false
+  let ldr_won () =
+    match t.leader with
+    | Some x -> Leader.won x
+    | None -> ()
 
   let is_scouting () = t.scouting
   let set_scouting x = t.scouting <- x

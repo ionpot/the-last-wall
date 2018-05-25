@@ -42,7 +42,8 @@ module Make(M : State.T) : T = struct
     | Blessing res ->
         M.add_res res
     | Casualty manp ->
-        M.sub_manp manp
+        M.sub_manp manp;
+        M.ldr_won ()
     | End -> ()
     | LeaderDied _ ->
         M.clr_ldr ()
