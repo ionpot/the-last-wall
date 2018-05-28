@@ -2,6 +2,8 @@ open Resource
 
 type t = Elanis | Sekrefir | Sitera | None
 
+let t_list = [Elanis; Sekrefir; Sitera; None]
+
 let blessing_of deity =
   let r n = Dice.deviate n 5 in
   let res = make Empty in
