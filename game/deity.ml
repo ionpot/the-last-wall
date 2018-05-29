@@ -16,4 +16,4 @@ let blessing_of deity =
 let starting deity =
   blessing_of deity
     <+ Manpwr (Dice.between 10 30)
-    <+ Supply (Dice.between 90 180)
+    <+ Supply (Dice.between 150 300)
