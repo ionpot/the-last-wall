@@ -41,7 +41,7 @@ let damage enemies =
 let better_round x =
   let a = 0.1 *. float x in
   let f = if Dice.chance 0.5 then floor else ceil in
-  truncate (f a)
+  10 * truncate (f a)
 
 let vague_round x =
   let a = float x in
