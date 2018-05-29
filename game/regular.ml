@@ -139,10 +139,8 @@ module Make(M : State.T) : T = struct
     | End -> End
 
   let next ev =
+    apply ev;
     if M.no_manp ()
     then End
-    else begin
-      apply ev;
-      next_of ev
-    end
+    else next_of ev
 end
