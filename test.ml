@@ -36,7 +36,7 @@ let prompt_nations chosen =
   |> List.sort (fun (a, _) (b, _) -> Char.compare a b)
   |> List.iter (fun (c, s) -> printf " %c) %s" c s);
   print_string "\nchoose> ";
-  read_line () |> line2nats
+  read_line () |> line2nats chosen
 
 let nations_chosen ns =
   List.map nation2str ns

@@ -43,9 +43,12 @@ let nation2str = function
   | Nation.Numendor -> "numendor"
   | Nation.Clan -> "clan"
 
-let line2nats str =
-  Nation.t_list
-  |> List.filter (fun nat -> String.contains str (nation2char nat))
+let line2nats chosen str =
+  if str = ""
+  then chosen
+  else
+    Nation.t_list
+    |> List.filter (fun nat -> String.contains str (nation2char nat))
 
 let leader2str ldr =
   Leader.(sprintf "level %d %s" (level_of ldr) (type_of ldr |> ltype2str))
