@@ -5,6 +5,20 @@ type support = (t * resource option)
 let t_list =
   [Tulron; Sodistan; Hekatium; Numendor; Clan]
 
+let ranges_of =
+  let low = (0, 10) in
+  let mid = (10, 20) in
+  let high = (20, 30) in
+  function
+    | Tulron
+    | Sodistan -> (high, low)
+    | Hekatium
+    | Numendor -> (low, high)
+    | Clan -> (mid, mid)
+
+let roll (a, b) =
+  Dice.between a b
+
 let pickN max nats =
   let f n = List.mem n nats in
   t_list
@@ -20,15 +34,11 @@ let total_of ns =
   in
   List.fold_left f (make Empty) ns
 
-let to_outcome () =
+let to_outcome nat =
   let f () =
-    let a = Dice.between 5 30 in
-    let b = Dice.between 5 20 in
-    let (m, s) =
-      if Random.bool ()
-      then (a, b)
-      else (b, a)
-    in
+    let (a, b) = ranges_of nat in
+    let m = roll a in
+    let s = roll b in
     Resource.(make (Manpwr m) <+ Supply s)
   in
   if Dice.chance 0.8
@@ -36,7 +46,7 @@ let to_outcome () =
   else None
 
 let support_of n =
-  (n, to_outcome ())
+  (n, to_outcome n)
 
 let support_of_list ns =
   List.map support_of ns
