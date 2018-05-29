@@ -79,6 +79,9 @@ let r_event evt =
   | End -> None
   | LeaderDied _ ->
       print_string "leader died\n"; None
+  | LeaderLvup x ->
+      Leader.level_of x
+      |> printf "leader is now level %d\n"; None
   | Nations ls ->
       let ns = prompt_nations ls in
       nations_chosen ns;

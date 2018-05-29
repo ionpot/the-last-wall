@@ -12,6 +12,7 @@ type event =
   | Casualty of manpower
   | End
   | LeaderDied of leader
+  | LeaderLvup of leader
   | Nations of nation list
   | NewLeader of leader
   | ScoutsBack of enemy list
@@ -52,6 +53,8 @@ module Make(M : State.T) : T = struct
     | End -> ()
     | LeaderDied _ ->
         M.clr_ldr ()
+    | LeaderLvup ldr ->
+        M.set_ldr ldr
     | Nations nats ->
         M.set_nats nats
     | NewLeader ldr ->
@@ -81,6 +84,14 @@ module Make(M : State.T) : T = struct
   let leader_died () =
     match M.get_ldr () with
     | Some x -> LeaderDied x
+    | None -> ask_scouting ()
+
+  let check_lvup () =
+    match M.get_ldr () with
+    | Some x ->
+        if Leader.can_lvup x
+        then LeaderLvup (Leader.lvup x)
+        else ask_scouting ()
     | None -> ask_scouting ()
 
   let check_scouting () =
@@ -135,8 +146,10 @@ module Make(M : State.T) : T = struct
         else next_turn ()
     | Casualty _ ->
         if Leader.lives ()
-        then ask_scouting ()
+        then check_lvup ()
         else leader_died ()
+    | LeaderLvup _ ->
+        ask_scouting ()
     | LeaderDied _ ->
         ask_scouting ()
     | SendScouts _ -> next_turn ()
