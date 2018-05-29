@@ -106,9 +106,8 @@ let r_event evt =
       res2str res |> printf "upkeep: %s\n"; None
 
 let rec r_loop evt =
-  if evt = Regular.End
-  then print_status ()
-  else begin
+  if evt <> Regular.End
+  then begin
     let e =
       match r_event evt with
       | Some x -> x
