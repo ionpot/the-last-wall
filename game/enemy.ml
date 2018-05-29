@@ -67,7 +67,7 @@ let get_count turn enemy =
   let base = max 0 (10 - turn) in
   let abundance = abundance_of enemy in
   let amount =
-    abundance *. exp (float base)
+    abundance *. exp (float turn)
     |> ceil |> truncate
   in
   let x = base + amount in
