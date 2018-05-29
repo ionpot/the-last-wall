@@ -22,8 +22,8 @@ let total_of ns =
 
 let to_outcome () =
   let f () =
-    let a = Dice.deviate 10 5 in
-    let b = Dice.deviate 5 5 in
+    let a = Dice.between 5 30 in
+    let b = Dice.between 5 20 in
     let (m, s) =
       if Random.bool ()
       then (a, b)
