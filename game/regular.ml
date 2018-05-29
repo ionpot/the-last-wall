@@ -68,7 +68,7 @@ module Make(M : State.T) : T = struct
         M.add_res (Nation.total_of supp_list)
     | Turn x ->
         M.set_turn x;
-        Enemy.spawn x |> M.move_enemies
+        Enemy.spawn x |> M.set_enemies
     | Upkeep res ->
         M.sub_res res
 
@@ -89,10 +89,13 @@ module Make(M : State.T) : T = struct
     else to_upkeep ()
 
   let check_report () =
-    let seen = M.get_seen () in
-    if M.is_scouting ()
-    then ScoutsBack (Enemy.scout seen)
-    else ScoutsBack (Enemy.vague_scout seen)
+    let report =
+      let enemies = M.get_enemies () in
+      if M.is_scouting ()
+      then Enemy.scout enemies
+      else Enemy.vague_scout enemies
+    in
+    ScoutsBack report
 
   let casualty_from enemies =
     let loss = Enemy.damage enemies in
@@ -121,10 +124,10 @@ module Make(M : State.T) : T = struct
     | Blessing _ ->
         Support (Nation.support_of_list (M.get_nats ()))
     | Support _ ->
-        let arrived = M.get_arrived () in
-        if arrived = []
+        let enemies = M.get_enemies () in
+        if enemies = []
         then ask_scouting ()
-        else Attack arrived
+        else Attack enemies
     | Attack enemies ->
         let loss = casualty_from enemies in
         if loss > 0

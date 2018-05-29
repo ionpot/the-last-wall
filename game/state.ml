@@ -7,13 +7,12 @@ type nation = Nation.t
 type resource = Resource.t
 
 type t =
-  { mutable arrived : enemy list;
-    mutable deity : deity;
+  { mutable deity : deity;
+    mutable enemies : enemy list;
     mutable leader : leader option;
     mutable nats : nation list;
     mutable res : resource;
     mutable scouting : bool;
-    mutable seen : enemy list;
     mutable turn : turn
   }
 
@@ -42,10 +41,8 @@ module type T = sig
   val ldr_won : unit -> unit
   val is_scouting : unit -> bool
   val set_scouting : bool -> unit
-  val set_seen : enemy list -> unit
-  val get_seen : unit -> enemy list
-  val get_arrived : unit -> enemy list
-  val move_enemies : enemy list -> unit
+  val get_enemies : unit -> enemy list
+  val set_enemies : enemy list -> unit
 end
 
 module Make( ) : T = struct
@@ -54,13 +51,12 @@ module Make( ) : T = struct
   let max_nats = 3
 
   let t =
-    { arrived = [];
-      deity = Deity.None;
+    { deity = Deity.None;
+      enemies = [];
       leader = None;
       nats = [];
       res = make Empty;
       scouting = false;
-      seen = [];
       turn = 0
     }
 
@@ -104,10 +100,6 @@ module Make( ) : T = struct
   let is_scouting () = t.scouting
   let set_scouting x = t.scouting <- x
 
-  let set_seen x = t.seen <- x
-  let get_seen () = t.seen
-  let get_arrived () = t.arrived
-  let move_enemies seen =
-    t.arrived <- t.seen;
-    t.seen <- seen
+  let get_enemies () = t.enemies
+  let set_enemies x = t.enemies <- x
 end
