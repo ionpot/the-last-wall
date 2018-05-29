@@ -11,7 +11,7 @@ let ltypes = [Aristocrat; Expert; Warrior]
 
 let make () =
   { ltype = Listx.pick_from ltypes;
-    level = Dice.between 3 6;
+    level = Dice.between 3 5;
     xp = ref 0
   }
 

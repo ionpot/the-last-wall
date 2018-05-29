@@ -7,7 +7,7 @@ let chance fl =
 
 let between x y =
   let d = y - x in
-  x + Random.int d
+  x + Random.int (d + 1)
 
 let deviate x y =
   let a = x - y in
