@@ -62,7 +62,8 @@ module Make(M : State.T) : T = struct
     | SendScouts yes ->
         M.set_scouting yes
     | Starvation manp ->
-        M.sub_manp manp
+        M.sub_manp manp;
+        M.clr_supp ()
     | Support supp_list ->
         M.add_res (Nation.total_of supp_list)
     | Turn x ->
