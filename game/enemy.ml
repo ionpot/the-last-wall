@@ -64,13 +64,14 @@ let can_spawn turn enemy =
   Dice.chance (a +. b)
 
 let get_count turn enemy =
-  let base = max 0 (10 - turn) in
+  let minimum = 10 in
   let abundance = abundance_of enemy in
   let amount =
-    abundance *. exp (float turn)
+    let x = float turn in
+    abundance *. x *. log x
     |> ceil |> truncate
   in
-  let x = base + amount in
+  let x = minimum + amount in
   Dice.deviate x (x / 2)
 
 let spawn turn =
