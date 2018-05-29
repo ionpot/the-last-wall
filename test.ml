@@ -143,4 +143,5 @@ let rec i_loop evt =
       next x |> i_loop
 
 let () =
+  Random.self_init ();
   I.first () |> i_loop
