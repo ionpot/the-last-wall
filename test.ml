@@ -104,7 +104,7 @@ let r_event evt =
   | Support ls ->
       print_support ls; None
   | Turn x ->
-      printf "turn %d\n" x; None
+      printf "\nturn %d\n" x; None
   | Upkeep res ->
       res2str res |> printf "upkeep: %s\n"; None
 
