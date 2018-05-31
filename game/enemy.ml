@@ -4,6 +4,7 @@ type t = Skeleton | Orc | Demon
 type count = int
 type party = (t * count)
 type resource = Resource.t
+type vague_report = (count * t list)
 
 let scouting_cost =
   Resource.make (Resource.Supply 10)
@@ -38,25 +39,20 @@ let damage enemies =
   |> List.map to_mp
   |> List.fold_left (+) 0
 
-let better_round x =
+let round x =
   let a = 0.1 *. float x in
   let f = if Dice.chance 0.5 then floor else ceil in
   10 * truncate (f a)
 
-let vague_round x =
-  let a = float x in
-  let x1 = 10. ** floor (log10 a) in
-  let x5 = 5. *. x1 in
-  let b = if a < x5 then x1 else x5 in
-  truncate b
-
 let scout enemies =
-  let f (e, c) = (e, better_round c) in
+  let f (e, c) = (e, round c) in
   List.map f enemies
 
 let vague_scout enemies =
-  let f (e, c) = (e, vague_round c) in
-  List.map f enemies
+  let f (a, (_, c)) = a + round c in
+  let total = List.fold_left f 0 enemies in
+  let seen = List.map (fun (e, _) -> e) enemies in
+  (total, seen)
 
 let can_spawn turn enemy =
   let a = 0.1 *. float turn in
