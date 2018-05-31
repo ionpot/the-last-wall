@@ -12,9 +12,9 @@ let t_list =
   [Skeleton; Orc; Demon]
 
 let abundance_of = function
-  | Skeleton -> 1.0
-  | Orc -> 0.8
-  | Demon -> 0.6
+  | Skeleton -> 1.25
+  | Orc -> 0.6
+  | Demon -> 0.3
 
 let chance_of = function
   | Skeleton -> 0.8
@@ -64,15 +64,14 @@ let can_spawn turn enemy =
   Dice.chance (a +. b)
 
 let get_count turn enemy =
-  let minimum = 10 in
   let abundance = abundance_of enemy in
+  let minimum = 10. *. abundance in
   let amount =
-    let x = float turn in
+    let x = 1.3 *. float turn in
     abundance *. x *. log x
-    |> ceil |> truncate
   in
-  let x = minimum + amount in
-  Dice.deviate x (x / 2)
+  let x = ceil (minimum +. amount) |> truncate in
+  Dice.deviate x (x / 4)
 
 let spawn turn =
   let a = List.filter (can_spawn turn) t_list in
