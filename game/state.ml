@@ -75,9 +75,7 @@ module Make( ) : T = struct
   let add_supp m = t.res <- t.res <+ Supply m
   let sub_supp m = t.res <- t.res <~ Supply m
   let clr_supp () = t.res <- make (Manpwr (manp t.res))
-  let missing_supp () =
-    let x = supp t.res in
-    if x < 0 then abs x else 0
+  let missing_supp () = supp_missing t.res
 
   let get_deity () = t.deity
   let set_deity d = t.deity <- d

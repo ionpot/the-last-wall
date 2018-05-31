@@ -9,6 +9,7 @@ type kind =
 val make : kind -> t
 val manp : t -> manpower
 val supp : t -> supply
+val supp_missing : t -> supply
 
 val (<+) : t -> kind -> t
 val (<~) : t -> kind -> t

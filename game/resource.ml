@@ -14,6 +14,8 @@ let make = function
 
 let manp t = fst t
 let supp t = snd t
+let supp_missing (_, s) =
+  if s < 0 then abs s else 0
 
 let (<+) t = function
   | Empty -> t
