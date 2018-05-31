@@ -142,10 +142,13 @@ module Make(M : State.T) : T = struct
         then Casualty loss
         else next_turn ()
     | Casualty _ ->
-        let ldr = M.get_ldr () in
-        if Leader.lives ()
-        then check_lvup ldr
-        else LeaderDied ldr
+        if M.ldr_alive ()
+        then
+          let ldr = M.get_ldr () in
+          if Leader.lives ()
+          then check_lvup ldr
+          else LeaderDied ldr
+        else ask_scouting ()
     | LeaderLvup _
     | LeaderDied _ ->
         ask_scouting ()
