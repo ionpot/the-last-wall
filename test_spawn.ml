@@ -3,17 +3,19 @@ open Printf
 
 let turn = ref 1
 
-let e2s = Convert.enemies2str
+let str_of_sum x =
+  let (count, str) = Convert.sum2str x in
+  sprintf "%d (%s)" count str
 
 let rec loop i =
   if i > 0
   then begin
     let e = Enemy.spawn !turn in
-    printf "turn %d\nvague: %s\nscout: %s\nactual: %s\n"
+    printf "turn %d\nsumrep: %s\nreport: %s\nactual: %s\n"
       !turn
-      (Enemy.vague_scout e |> e2s)
-      (Enemy.scout e |> e2s)
-      (e2s e);
+      (Scout.sum_report_of e |> str_of_sum)
+      (Scout.report_of e |> Convert.report2str)
+      (Convert.enemies2str e);
     incr turn;
     loop (pred i)
   end

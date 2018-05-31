@@ -82,15 +82,18 @@ let r_event evt =
   | LeaderLvup x ->
       Leader.level_of x
       |> printf "leader is now level %d\n"; None
+  | LeaderNew x ->
+      print_leader x; None
   | Nations ls ->
       let ns = prompt_nations ls in
       nations_chosen ns;
       Some (Nations ns)
-  | NewLeader x ->
-      print_leader x; None
-  | ScoutsBack ls ->
-      enemies2str ls
-      |> printf "enemies seen: %s\n"; None
+  | ScoutReport ls ->
+      report2str ls
+      |> printf "seen: %s\n"; None
+  | ScoutSumReport x ->
+      let (count, str) = sum2str x in
+      printf "seen: about %d (%s)\n" count str; None
   | ScoutsSent res ->
       res2str res
       |> printf "scouts cost: %s\n"; None

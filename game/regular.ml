@@ -1,27 +1,22 @@
 open Defs
 
-type enemy = Enemy.party
-type leader = Leader.t
-type nation = Nation.t
-type resource = Resource.t
-type support = Nation.support
-
 type event =
-  | Attack of enemy list
-  | Blessing of resource
+  | Attack of Enemy.party list
+  | Blessing of Resource.t
   | Casualty of manpower
   | End
-  | LeaderDied of leader
-  | LeaderLvup of leader
-  | Nations of nation list
-  | NewLeader of leader
-  | ScoutsBack of enemy list
-  | ScoutsSent of resource
+  | LeaderDied of Leader.t
+  | LeaderLvup of Leader.t
+  | LeaderNew of Leader.t
+  | Nations of Nation.t list
+  | ScoutReport of Scout.report
+  | ScoutSumReport of Scout.sum_report
+  | ScoutsSent of Resource.t
   | SendScouts of bool
   | Starvation of manpower
-  | Support of support list
+  | Support of Nation.support list
   | Turn of turn
-  | Upkeep of resource
+  | Upkeep of Resource.t
 
 module type T = Phase with type event_def := event
 
@@ -61,13 +56,13 @@ module Make(M : State.T) : T = struct
     | End -> ()
     | LeaderDied _ ->
         M.ldr_died ()
-    | LeaderLvup ldr ->
+    | LeaderLvup ldr
+    | LeaderNew ldr ->
         M.set_ldr ldr
     | Nations nats ->
         M.set_nats nats
-    | NewLeader ldr ->
-        M.set_ldr ldr
-    | ScoutsBack _ -> ()
+    | ScoutReport _
+    | ScoutSumReport _ -> ()
     | ScoutsSent res ->
         M.sub_res res
     | SendScouts yes ->
@@ -97,24 +92,21 @@ module Make(M : State.T) : T = struct
 
   let check_scouting () =
     if M.is_scouting ()
-    then ScoutsSent Enemy.scouting_cost
+    then ScoutsSent Scout.cost
     else to_upkeep ()
 
   let check_report () =
-    let report =
-      let enemies = M.get_enemies () in
-      if M.is_scouting ()
-      then Enemy.scout enemies
-      else Enemy.vague_scout enemies
-    in
-    ScoutsBack report
+    let e = M.get_enemies () in
+    if M.is_scouting ()
+    then ScoutReport (Scout.report_of e)
+    else ScoutSumReport (Scout.sum_report_of e)
 
   let next_of = function
     | Turn _ ->
         if can_new_ldr ()
-        then NewLeader (Leader.make ())
+        then LeaderNew (Leader.make ())
         else check_scouting ()
-    | NewLeader _ ->
+    | LeaderNew _ ->
         check_scouting ()
     | ScoutsSent _ ->
         to_upkeep ()
@@ -125,7 +117,8 @@ module Make(M : State.T) : T = struct
         else check_report ()
     | Starvation _ ->
         check_report ()
-    | ScoutsBack _ ->
+    | ScoutReport _
+    | ScoutSumReport _ ->
         Nations (M.get_nats ())
     | Nations _ ->
         Blessing (Deity.blessing_of (M.get_deity ()))
