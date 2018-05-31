@@ -50,6 +50,10 @@ let prompt_scouting () =
 let scouting_chosen s =
   if s then print_string "scouts sent\n"
 
+let print_leader x =
+  leader2str x
+  |> printf "new leader: %s\n"
+
 let print_support ls =
   let f = function
     | Some x -> res2str x
@@ -62,10 +66,6 @@ let print_status () =
   S.get_res ()
   |> res2str
   |> printf "status: %s\n"
-
-let next x =
-  (*ignore (read_line ());*)
-  I.next x
 
 let r_event evt =
   let open Regular in
@@ -87,8 +87,7 @@ let r_event evt =
       nations_chosen ns;
       Some (Nations ns)
   | NewLeader x ->
-      leader2str x
-      |> printf "new leader: %s\n"; None
+      print_leader x; None
   | ScoutsBack ls ->
       enemies2str ls
       |> printf "enemies seen: %s\n"; None
@@ -122,28 +121,33 @@ let rec r_loop evt =
   end
 
 let rec i_loop evt =
+  let next_with e = I.next e |> i_loop in
+  let next () = next_with evt in
   let open Initial in
   match evt with
   | Deity _ ->
       let d = prompt_deity () in
       deity_chosen d;
-      Deity d |> next |> i_loop
+      next_with (Deity d)
   | End ->
       R.first () |> r_loop
   | Nations x ->
       let ns = prompt_nations x in
       nations_chosen ns;
-      Nations ns |> next |> i_loop
+      next_with (Nations ns)
+  | NewLeader x ->
+      print_leader x;
+      next ()
   | SendScouts _ ->
       let s = prompt_scouting () in
       scouting_chosen s;
-      SendScouts s |> next |> i_loop
-  | Starting res as x ->
+      next_with (SendScouts s)
+  | Starting res ->
       printf "starting: %s\n" (res2str res);
-      next x |> i_loop
-  | Support ls as x ->
+      next ()
+  | Support ls ->
       print_support ls;
-      next x |> i_loop
+      next ()
 
 let () =
   Random.self_init ();

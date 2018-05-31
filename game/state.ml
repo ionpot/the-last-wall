@@ -9,7 +9,7 @@ type resource = Resource.t
 type t =
   { mutable deity : deity;
     mutable enemies : enemy list;
-    mutable leader : leader option;
+    mutable leader : leader;
     mutable nats : nation list;
     mutable res : resource;
     mutable scouting : bool;
@@ -34,11 +34,12 @@ module type T = sig
   val set_deity : deity -> unit
   val get_nats : unit -> nation list
   val set_nats : nation list -> unit
-  val has_ldr : unit -> bool
-  val clr_ldr : unit -> unit
-  val get_ldr : unit -> leader option
+  val get_ldr : unit -> leader
   val set_ldr : leader -> unit
+  val ldr_alive : unit -> bool
   val ldr_won : unit -> unit
+  val ldr_died : unit -> unit
+  val ldr_died_at : unit -> turn
   val is_scouting : unit -> bool
   val set_scouting : bool -> unit
   val get_enemies : unit -> enemy list
@@ -53,7 +54,7 @@ module Make( ) : T = struct
   let t =
     { deity = Deity.None;
       enemies = [];
-      leader = None;
+      leader = Leader.make ();
       nats = [];
       res = make Empty;
       scouting = false;
@@ -84,16 +85,11 @@ module Make( ) : T = struct
   let set_nats ns = t.nats <- Nation.pickN max_nats ns
 
   let get_ldr () = t.leader
-  let set_ldr x = t.leader <- Some x
-  let clr_ldr x = t.leader <- None
-  let has_ldr () =
-    match t.leader with
-    | Some _ -> true
-    | None -> false
-  let ldr_won () =
-    match t.leader with
-    | Some x -> Leader.won x
-    | None -> ()
+  let set_ldr x = t.leader <- x
+  let ldr_alive () = Leader.alive t.leader
+  let ldr_won () = Leader.won t.leader
+  let ldr_died () = Leader.died t.leader t.turn
+  let ldr_died_at () = Leader.died_at t.leader
 
   let is_scouting () = t.scouting
   let set_scouting x = t.scouting <- x
