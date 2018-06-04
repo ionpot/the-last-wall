@@ -35,9 +35,8 @@ module Make(M : State.T) : T = struct
       M.get_turn () - M.ldr_died_at () > 1
 
   let mitigate loss =
-    let lv = M.get_ldr () |> Leader.level_of in
-    let x = 0.1 +. (0.01 *. float lv) in
-    loss - truncate (x *. float loss)
+    let x = M.get_ldr () |> Leader.mitigate loss in
+    loss - x
 
   let casualty_from enemies =
     let loss = Enemy.damage enemies in

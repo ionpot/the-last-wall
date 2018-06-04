@@ -1,5 +1,6 @@
 type ltype = Aristocrat | Expert | Warrior
 type level = int
+type loss = int
 
 type t =
   { ltype : ltype;
@@ -34,3 +35,7 @@ let lvup t =
     level = t.level + (xp / 2);
     xp = ref (xp mod 2)
   }
+let mitigate loss t =
+  let lv = level_of t in
+  let x = 0.1 +. (0.01 *. float lv) in
+  truncate (x *. float loss)
