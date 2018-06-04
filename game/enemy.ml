@@ -19,9 +19,9 @@ let chance_of = function
   | Demon -> 0.4
 
 let power_of = function
-  | Skeleton -> 0.2
+  | Skeleton -> 0.3
   | Orc -> 0.5
-  | Demon -> 0.8
+  | Demon -> 2.0
 
 let count_of party = snd party
 let type_of party = fst party
