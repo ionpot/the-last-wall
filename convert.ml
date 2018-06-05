@@ -56,7 +56,7 @@ let leader2str ldr =
   sprintf "level %d %s (cha %d)" lv ty cha
 
 let manp2str mp =
-  sprintf "(%d mnp)" mp
+  sprintf "%d mnp" mp
 
 let report2str ls =
   let f (count, e) = sprintf "%d %s" count (enemy2str e) in
@@ -69,7 +69,7 @@ let sum2str (count, enemies) =
   (count, str)
 
 let res2str res =
-  Resource.(sprintf "(%d mnp, %d sup)" (manp res) (supp res))
+  Resource.(sprintf "%d mnp, %d sup" (manp res) (supp res))
 
 let party2str pt =
   Enemy.(sprintf "%d %s" (count_of pt) (type_of pt |> enemy2str))
