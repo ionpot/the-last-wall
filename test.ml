@@ -50,9 +50,9 @@ let prompt_scouting () =
 let scouting_chosen s =
   if s then print_string "scouts sent\n"
 
-let print_leader x =
+let print_leader str x =
   leader2str x
-  |> printf "new leader: %s\n"
+  |> printf "%s %s\n" str
 
 let print_support ls =
   let f = function
@@ -78,13 +78,11 @@ let r_event evt =
       manp2str mp |> printf "casualty: %s\n"; None
   | End -> None
   | LeaderDied x ->
-      let lv, cha = Leader.(level_of x, cha_of x) in
-      printf "leader died, was level %d (cha %d)\n" lv cha; None
+      print_leader "leader died, was" x; None
   | LeaderLvup x ->
-      let lv, cha = Leader.(level_of x, cha_of x) in
-      printf "leader is now level %d (cha %d)\n" lv cha; None
+      print_leader "leader is now" x; None
   | LeaderNew x ->
-      print_leader x; None
+      print_leader "new leader:" x; None
   | Nations ls ->
       let ns = prompt_nations ls in
       nations_chosen ns;
@@ -140,7 +138,7 @@ let rec i_loop evt =
       nations_chosen ns;
       next_with (Nations ns)
   | NewLeader x ->
-      print_leader x;
+      print_leader "new leader:" x;
       next ()
   | SendScouts _ ->
       let s = prompt_scouting () in
