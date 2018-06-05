@@ -51,7 +51,9 @@ let line2nats chosen str =
     |> List.filter (fun nat -> String.contains str (nation2char nat))
 
 let leader2str ldr =
-  Leader.(sprintf "level %d %s" (level_of ldr) (type_of ldr |> ltype2str))
+  let lv, cha = Leader.(level_of ldr, cha_of ldr) in
+  let ty = Leader.type_of ldr |> ltype2str in
+  sprintf "level %d %s (cha %d)" lv ty cha
 
 let manp2str mp =
   sprintf "(%d mnp)" mp

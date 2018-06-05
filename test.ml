@@ -80,8 +80,8 @@ let r_event evt =
   | LeaderDied _ ->
       print_string "leader died\n"; None
   | LeaderLvup x ->
-      Leader.level_of x
-      |> printf "leader is now level %d\n"; None
+      let lv, cha = Leader.(level_of x, cha_of x) in
+      printf "leader is now level %d (cha %d)\n" lv cha; None
   | LeaderNew x ->
       print_leader x; None
   | Nations ls ->

@@ -50,3 +50,10 @@ let support_of n =
 
 let support_of_list ns =
   List.map support_of ns
+
+let apply_bonus ls res =
+  let f = function
+    | (n, Some x) -> (n, Some Resource.(x ++ res))
+    | x -> x
+  in
+  List.map f ls

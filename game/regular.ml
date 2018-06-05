@@ -34,6 +34,11 @@ module Make(M : State.T) : T = struct
     else
       M.get_turn () - M.ldr_died_at () > 1
 
+  let ldr_res_bonus () =
+    if M.ldr_alive ()
+    then M.get_ldr() |> Leader.res_bonus_of
+    else Resource.(make Empty)
+
   let mitigate loss =
     let x = M.get_ldr () |> Leader.mitigate loss in
     loss - x
@@ -77,6 +82,10 @@ module Make(M : State.T) : T = struct
         Enemy.spawn x |> M.set_enemies
     | Upkeep res ->
         M.sub_res res
+
+  let to_support () =
+    let ls = M.get_nats () |> Nation.support_of_list in
+    Support (ldr_res_bonus () |> Nation.apply_bonus ls)
 
   let to_upkeep () =
     Upkeep (upkeep (M.get_manp ()))
