@@ -77,8 +77,9 @@ let r_event evt =
   | Casualty mp ->
       manp2str mp |> printf "casualty: %s\n"; None
   | End -> None
-  | LeaderDied _ ->
-      print_string "leader died\n"; None
+  | LeaderDied x ->
+      let lv, cha = Leader.(level_of x, cha_of x) in
+      printf "leader died, was level %d (cha %d)\n" lv cha; None
   | LeaderLvup x ->
       let lv, cha = Leader.(level_of x, cha_of x) in
       printf "leader is now level %d (cha %d)\n" lv cha; None
