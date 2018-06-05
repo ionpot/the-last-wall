@@ -9,12 +9,13 @@ let ranges_of =
   let low = (0, 10) in
   let mid = (10, 20) in
   let high = (20, 30) in
+  let f x = Pair.(x <+> 5) in
   function
     | Tulron
-    | Sodistan -> (high, low)
+    | Sodistan -> (high, f low)
     | Hekatium
-    | Numendor -> (low, high)
-    | Clan -> (mid, mid)
+    | Numendor -> (low, f high)
+    | Clan -> (mid, f mid)
 
 let roll (a, b) =
   Dice.between a b

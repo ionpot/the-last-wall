@@ -15,3 +15,6 @@ let (++) (x, y) (a, b) =
 
 let (--) (x, y) (a, b) =
   (x - a, y - b)
+
+let (<+>) x y =
+  x ++ (y, y)
