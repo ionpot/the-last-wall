@@ -138,7 +138,7 @@ let rec i_loop evt =
       nations_chosen ns;
       next_with (Nations ns)
   | NewLeader x ->
-      print_leader "new leader:" x;
+      print_leader "leader:" x;
       next ()
   | SendScouts _ ->
       let s = prompt_scouting () in
