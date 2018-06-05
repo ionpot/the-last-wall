@@ -106,8 +106,8 @@ let r_event evt =
       print_support ls; None
   | Turn x ->
       printf "\nturn %d\n" x; None
-  | Upkeep res ->
-      res2str res |> printf "upkeep: %s\n"; None
+  | Upkeep sup ->
+      sup2str sup |> printf "upkeep: %s\n"; None
 
 let rec r_loop evt =
   if evt <> Regular.End

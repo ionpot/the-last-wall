@@ -58,6 +58,9 @@ let leader2str ldr =
 let manp2str mp =
   sprintf "%d mnp" mp
 
+let sup2str sp =
+  sprintf "%d sup" sp
+
 let report2str ls =
   let f (count, e) = sprintf "%d %s" count (enemy2str e) in
   List.map f ls
@@ -69,7 +72,8 @@ let sum2str (count, enemies) =
   (count, str)
 
 let res2str res =
-  Resource.(sprintf "%d mnp, %d sup" (manp res) (supp res))
+  let m, s = Resource.(manp res, supp res) in
+  sprintf "%s, %s" (manp2str m) (sup2str s)
 
 let party2str pt =
   Enemy.(sprintf "%d %s" (count_of pt) (type_of pt |> enemy2str))

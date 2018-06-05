@@ -16,12 +16,9 @@ type event =
   | Starvation of manpower
   | Support of Nation.support list
   | Turn of turn
-  | Upkeep of Resource.t
+  | Upkeep of supply
 
 module type T = Phase with type event_def := event
-
-let upkeep mp =
-  Resource.(make (Supply mp))
 
 module Make(M : State.T) : T = struct
   let next_turn () =
@@ -80,15 +77,15 @@ module Make(M : State.T) : T = struct
     | Turn x ->
         M.set_turn x;
         Enemy.spawn x |> M.set_enemies
-    | Upkeep res ->
-        M.sub_res res
+    | Upkeep sup ->
+        M.sub_supp sup
 
   let to_support () =
     let ls = M.get_nats () |> Nation.support_of_list in
     Support (ldr_res_bonus () |> Nation.apply_bonus ls)
 
   let to_upkeep () =
-    Upkeep (upkeep (M.get_manp ()))
+    Upkeep (M.get_manp ())
 
   let ask_scouting () =
     SendScouts (M.is_scouting ())
