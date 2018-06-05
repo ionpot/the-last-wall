@@ -8,7 +8,7 @@ let cost = Resource.(make (Supply 10))
 
 let round x =
   let a = 0.1 *. float x in
-  let f = if Dice.chance 0.5 then floor else ceil in
+  let f = if Random.bool () then floor else ceil in
   10 * truncate (f a)
 
 let try_round x =
