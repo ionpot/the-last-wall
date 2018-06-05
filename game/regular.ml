@@ -128,7 +128,7 @@ module Make(M : State.T) : T = struct
     | Nations _ ->
         Blessing (Deity.blessing_of (M.get_deity ()))
     | Blessing _ ->
-        Support (Nation.support_of_list (M.get_nats ()))
+        to_support ()
     | Support _ ->
         let enemies = M.get_enemies () in
         if enemies = []
