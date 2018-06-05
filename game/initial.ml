@@ -16,14 +16,14 @@ module Make(M : State.T) : T = struct
     | Deity x -> M.set_deity x
     | End -> ()
     | Nations x -> M.set_nats x
-    | NewLeader _ -> ()
+    | NewLeader x -> M.set_ldr x
     | SendScouts x -> M.set_scouting x
     | Starting x -> M.add_res x
     | Support x -> M.add_res (Nation.total_of x)
 
   let next_of = function
     | Deity _ -> Starting (Deity.starting (M.get_deity ()))
-    | Starting _ -> NewLeader (M.get_ldr ())
+    | Starting _ -> NewLeader (Leader.make ())
     | NewLeader _ -> Nations (M.get_nats ())
     | Nations _ -> SendScouts (M.is_scouting ())
     | SendScouts _ -> Support (Nation.support_of_list (M.get_nats ()))

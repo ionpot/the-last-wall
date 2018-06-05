@@ -6,6 +6,7 @@ type level = int
 type loss = int
 type charisma = int
 
+val make_empty : unit -> t
 val make : unit -> t
 val lives : unit -> bool
 val alive : t -> bool
