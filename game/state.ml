@@ -52,7 +52,7 @@ module Make( ) : T = struct
   let max_nats = 3
 
   let t =
-    { deity = Deity.None;
+    { deity = Deity.default;
       enemies = [];
       leader = Leader.make_empty ();
       nats = [];

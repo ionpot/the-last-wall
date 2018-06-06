@@ -7,10 +7,9 @@ let char2deity = function
   | '3' -> Deity.Lerota
   | '4' -> Deity.Sitera
   | '5' -> Deity.Sekrefir
-  | _ -> Deity.None
+  | _ -> Deity.default
 
 let deity2char = function
-  | Deity.None -> '0'
   | Deity.Arnerula -> '1'
   | Deity.Elanis -> '2'
   | Deity.Lerota -> '3'
@@ -18,7 +17,6 @@ let deity2char = function
   | Deity.Sekrefir -> '5'
 
 let deity2str = function
-  | Deity.None -> "none"
   | Deity.Arnerula -> "arnerula"
   | Deity.Elanis -> "elanis"
   | Deity.Lerota -> "lerota"
