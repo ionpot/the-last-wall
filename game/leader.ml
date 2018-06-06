@@ -12,6 +12,15 @@ type t =
     mutable died_at : Defs.turn
   }
 
+let empty =
+  { ltype = Aristocrat;
+    level = 0;
+    cha_base = 0;
+    cha_extra = 0;
+    xp = ref 0;
+    died_at = 0
+  }
+
 let ltypes = [Aristocrat; Expert; Warrior]
 
 let mod_of cha =
@@ -26,15 +35,6 @@ let resource_of cha = function
   | Aristocrat -> Resource.Manpwr (2 * cha)
   | Expert -> Resource.Supply (2 * cha)
   | Warrior -> Resource.Empty
-
-let make_empty () =
-  { ltype = Aristocrat;
-    level = 0;
-    cha_base = 0;
-    cha_extra = 0;
-    xp = ref 0;
-    died_at = 0
-  }
 
 let make () =
   let lv = Dice.between 3 5 in
