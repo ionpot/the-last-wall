@@ -35,7 +35,7 @@ module Make(M : State.T) : T = struct
   let ldr_res_bonus () =
     if M.ldr_alive ()
     then M.get_ldr() |> Leader.res_bonus_of
-    else Resource.(make Empty)
+    else Resource.empty
 
   let mitigate loss =
     let x = M.get_ldr () |> Leader.mitigate loss in

@@ -6,8 +6,8 @@ type kind =
   | Manpwr of manpower
   | Supply of supply
 
+val empty : t
 val make : kind -> t
-val empty : t -> bool
 val manp : t -> manpower
 val supp : t -> supply
 val supp_missing : t -> supply

@@ -56,7 +56,7 @@ module Make( ) : T = struct
       enemies = [];
       leader = Leader.make_empty ();
       nats = [];
-      res = make Empty;
+      res = empty;
       scouting = false;
       turn = 0
     }

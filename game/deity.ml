@@ -14,18 +14,16 @@ let rand a b =
   then Manpwr n
   else Supply n
 
-let resource_of =
-  let res = make Empty in
-  function
-  | Arnerula -> res <+ rand 0 30
-  | Elanis -> res <+ Manpwr (roll 10 20)
-  | Lerota -> res
-  | Sekrefir -> res <+ Manpwr (roll 0 10) <+ Supply (roll 0 10)
-  | Sitera -> res <+ Supply (roll 10 20)
+let resource_of = function
+  | Arnerula -> empty <+ rand 0 30
+  | Elanis -> empty <+ Manpwr (roll 10 20)
+  | Lerota -> empty
+  | Sekrefir -> empty <+ Manpwr (roll 0 10) <+ Supply (roll 0 10)
+  | Sitera -> empty <+ Supply (roll 10 20)
 
 let blessing_of deity =
   let res = resource_of deity in
-  if empty res
+  if res = empty
   then None
   else Some res
 

@@ -33,7 +33,7 @@ let total_of ns =
     | Some res -> total ++ res
     | None -> total
   in
-  List.fold_left f (make Empty) ns
+  List.fold_left f empty ns
 
 let to_outcome nat =
   let f () =
