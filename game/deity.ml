@@ -12,9 +12,9 @@ let rand a b =
   then Manpwr n
   else Supply n
 
-let blessing_of deity =
+let resource_of =
   let res = make Empty in
-  match deity with
+  function
   | Arnerula -> res <+ rand 0 30
   | Elanis -> res <+ Manpwr (roll 10 20)
   | Sitera -> res <+ Supply (roll 10 20)
@@ -22,7 +22,13 @@ let blessing_of deity =
   | Lerota
   | None -> res
 
+let blessing_of deity =
+  let res = resource_of deity in
+  if not (empty res)
+  then Some res
+  else None
+
 let starting deity =
-  blessing_of deity
-    <+ Manpwr (roll 10 30)
-    <+ Supply (roll 150 300)
+  resource_of deity
+  <+ Manpwr (roll 10 30)
+  <+ Supply (roll 150 300)

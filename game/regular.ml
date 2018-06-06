@@ -95,6 +95,11 @@ module Make(M : State.T) : T = struct
   let ask_scouting () =
     SendScouts (M.is_scouting ())
 
+  let check_blessing () =
+    match M.get_deity () |> Deity.blessing_of with
+    | Some x -> Blessing x
+    | None -> to_support ()
+
   let check_casualty enemies =
     let loss = casualty_from enemies in
     if loss > 0
@@ -142,10 +147,7 @@ module Make(M : State.T) : T = struct
     | ScoutSumReport _ ->
         Nations (M.get_nats ())
     | Nations _ ->
-        let bl = M.get_deity () |> Deity.blessing_of in
-        if Resource.empty bl
-        then to_support ()
-        else Blessing bl
+        check_blessing ()
     | Blessing _ ->
         to_support ()
     | Support _ ->
