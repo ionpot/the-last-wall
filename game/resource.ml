@@ -12,6 +12,9 @@ let make = function
   | Manpwr x -> (x, 0)
   | Supply x -> (0, x)
 
+let empty (a, b) =
+  a = 0 && b = 0
+
 let manp t = fst t
 let supp t = snd t
 let supp_missing (_, s) =

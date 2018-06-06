@@ -142,7 +142,10 @@ module Make(M : State.T) : T = struct
     | ScoutSumReport _ ->
         Nations (M.get_nats ())
     | Nations _ ->
-        Blessing (Deity.blessing_of (M.get_deity ()))
+        let bl = M.get_deity () |> Deity.blessing_of in
+        if Resource.empty bl
+        then to_support ()
+        else Blessing bl
     | Blessing _ ->
         to_support ()
     | Support _ ->
