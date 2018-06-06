@@ -62,10 +62,14 @@ let print_support ls =
   List.map (fun (nat, res) -> (nation2str nat, f res)) ls
   |> List.iter (fun (nat, res) -> printf "%s sent %s\n" nat res)
 
-let print_status () =
-  S.get_res ()
-  |> res2str
-  |> printf "status: %s\n"
+let print_status =
+  let x = ref (S.get_res ()) in
+  fun () ->
+    let y = S.get_res () in
+    if !x <> y then begin
+      x := y;
+      res2str y |> printf "status: %s\n"
+    end
 
 let r_event evt =
   let open Regular in
