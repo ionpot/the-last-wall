@@ -1,4 +1,4 @@
-type t = Arnerula | Elanis | Sekrefir | Sitera | None
+type t = Arnerula | Elanis | Lerota | Sekrefir | Sitera | None
 
 val t_list : t list
 

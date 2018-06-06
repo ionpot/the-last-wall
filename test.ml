@@ -100,6 +100,9 @@ let r_event evt =
       let s = prompt_scouting () in
       scouting_chosen s;
       Some (SendScouts s)
+  | Smite p ->
+      party2str p
+      |> printf "smitten: %s\n"; None
   | Starvation mp ->
       manp2str mp |> printf "starvation: %s\n"; None
   | Support ls ->

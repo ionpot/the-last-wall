@@ -4,21 +4,24 @@ open Printf
 let char2deity = function
   | '1' -> Deity.Arnerula
   | '2' -> Deity.Elanis
-  | '3' -> Deity.Sitera
-  | '4' -> Deity.Sekrefir
+  | '3' -> Deity.Lerota
+  | '4' -> Deity.Sitera
+  | '5' -> Deity.Sekrefir
   | _ -> Deity.None
 
 let deity2char = function
   | Deity.None -> '0'
   | Deity.Arnerula -> '1'
   | Deity.Elanis -> '2'
-  | Deity.Sitera -> '3'
-  | Deity.Sekrefir -> '4'
+  | Deity.Lerota -> '3'
+  | Deity.Sitera -> '4'
+  | Deity.Sekrefir -> '5'
 
 let deity2str = function
   | Deity.None -> "none"
   | Deity.Arnerula -> "arnerula"
   | Deity.Elanis -> "elanis"
+  | Deity.Lerota -> "lerota"
   | Deity.Sitera -> "sitera"
   | Deity.Sekrefir -> "sekrefir"
 

@@ -1,8 +1,8 @@
 open Resource
 
-type t = Arnerula | Elanis | Sekrefir | Sitera | None
+type t = Arnerula | Elanis | Lerota | Sekrefir | Sitera | None
 
-let t_list = [Arnerula; Elanis; Sekrefir; Sitera; None]
+let t_list = [Arnerula; Elanis; Lerota; Sekrefir; Sitera; None]
 
 let roll = Dice.between
 
@@ -19,6 +19,7 @@ let blessing_of deity =
   | Elanis -> res <+ Manpwr (roll 10 20)
   | Sitera -> res <+ Supply (roll 10 20)
   | Sekrefir -> res <+ Manpwr (roll 0 10) <+ Supply (roll 0 10)
+  | Lerota
   | None -> res
 
 let starting deity =

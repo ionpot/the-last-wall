@@ -12,3 +12,6 @@ val type_of : party -> t
 
 val damage : party list -> manpower
 val spawn : turn -> party list
+
+val smite : party list -> party option
+val reduce : party -> party list -> party list

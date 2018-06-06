@@ -13,6 +13,7 @@ type event =
   | ScoutSumReport of Scout.sum_report
   | ScoutsSent of Resource.t
   | SendScouts of bool
+  | Smite of Enemy.party
   | Starvation of manpower
   | Support of Nation.support list
   | Turn of turn
@@ -68,6 +69,10 @@ module Make(M : State.T) : T = struct
         M.sub_res res
     | SendScouts yes ->
         M.set_scouting yes
+    | Smite x ->
+        M.get_enemies ()
+        |> Enemy.reduce x
+        |> M.set_enemies
     | Starvation manp ->
         M.sub_manp manp;
         M.clr_supp ()
@@ -89,6 +94,17 @@ module Make(M : State.T) : T = struct
 
   let ask_scouting () =
     SendScouts (M.is_scouting ())
+
+  let check_casualty enemies =
+    let loss = casualty_from enemies in
+    if loss > 0
+    then Casualty loss
+    else next_turn ()
+
+  let check_smite enemies =
+    match Enemy.smite enemies with
+    | Some x -> Smite x
+    | None -> check_casualty enemies
 
   let check_lvup ldr =
     if Leader.can_lvup ldr
@@ -135,10 +151,12 @@ module Make(M : State.T) : T = struct
         then ask_scouting ()
         else Attack enemies
     | Attack enemies ->
-        let loss = casualty_from enemies in
-        if loss > 0
-        then Casualty loss
-        else next_turn ()
+        if M.get_deity () = Deity.Lerota
+        then check_smite enemies
+        else check_casualty enemies
+    | Smite _ ->
+        M.get_enemies ()
+        |> check_casualty
     | Casualty _ ->
         if M.ldr_alive ()
         then
