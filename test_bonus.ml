@@ -7,7 +7,7 @@ let to_str a b =
     | ((n, Some x), (_, Some y)) -> sprintf "%s -> %s -> %s" (nation2str n) (res2str x) (res2str y)
     | ((n, _), _) -> sprintf "%s -> none" (nation2str n)
   in
-  List.combine a b |> List.map f |> String.concat("\n")
+  List.combine a b |> List.map f |> String.concat "\n"
 
 let rec run i ldr res =
   let a = Nation.(support_of_list t_list) in
