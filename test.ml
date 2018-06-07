@@ -6,6 +6,11 @@ module S = State.Make( )
 module I = Initial.Make(S)
 module R = Regular.Make(S)
 
+let nat_list =
+  Nation.t_list
+  |> List.map (fun n -> nation2char n, n)
+  |> List.sort (fun (a, _) (b, _) -> Char.compare a b)
+
 let read_char () =
   match read_line () with
   | "" -> '0'
@@ -29,19 +34,34 @@ let nat_str n chosen =
   then sprintf "[%s]" str
   else sprintf "%s" str
 
+let filter_nats str =
+  nat_list
+  |> List.filter (fun (c, _) -> String.contains str c)
+
+let new_nats chosen str =
+  if str = "" then chosen else
+    match filter_nats str with
+    | [] -> chosen
+    | ls -> List.map snd ls
+
 let prompt_nations chosen =
   print_string "nations: ";
-  Nation.t_list
-  |> List.map (fun n -> (nation2char n, nat_str n chosen))
-  |> List.sort (fun (a, _) (b, _) -> Char.compare a b)
+  nat_list
+  |> List.map (fun (c, n) -> c, nat_str n chosen)
   |> List.iter (fun (c, s) -> printf " %c) %s" c s);
   print_string "\nchoose> ";
-  read_line () |> line2nats chosen
+  read_line () |> new_nats chosen
 
 let nations_chosen ns =
-  List.map nation2str ns
-  |> String.concat ", "
-  |> printf "chosen: %s\n"
+  let f = nation2char in
+  let str =
+    ns
+    |> List.sort (fun a b -> Char.compare (f a) (f b))
+    |> List.map nation2str
+    |> String.concat ", "
+  in
+  if str <> ""
+  then printf "chosen: %s\n" str
 
 let prompt_scouting () =
   print_string "send scouts? y/n> ";
