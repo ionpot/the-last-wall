@@ -55,7 +55,7 @@ let get_count turn enemy =
   let abundance = abundance_of enemy in
   let minimum = 10. *. abundance in
   let amount =
-    let x = 1.3 *. float turn in
+    let x = 1.3 *. float (turn + 3) in
     abundance *. x *. log x
   in
   let x = ceil (minimum +. amount) |> truncate in
