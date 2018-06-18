@@ -26,6 +26,7 @@ module type T = sig
   val add_manp : manpower -> unit
   val sub_manp : manpower -> unit
   val no_manp : unit -> bool
+  val get_supp : unit -> supply
   val add_supp : supply -> unit
   val sub_supp : supply -> unit
   val clr_supp : unit -> unit
@@ -73,6 +74,7 @@ module Make( ) : T = struct
   let sub_manp m = t.res <- t.res <~ Manpwr m
   let no_manp () = manp t.res <= 0
 
+  let get_supp () = supp t.res
   let add_supp m = t.res <- t.res <+ Supply m
   let sub_supp m = t.res <- t.res <~ Supply m
   let clr_supp () = t.res <- make (Manpwr (manp t.res))

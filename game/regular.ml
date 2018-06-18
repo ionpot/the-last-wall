@@ -8,6 +8,7 @@ type event =
   | LeaderDied of Leader.t
   | LeaderLvup of Leader.t
   | LeaderNew of Leader.t
+  | Mercs of manpower * bool
   | Nations of Nation.t list
   | ScoutReport of Scout.report
   | ScoutSumReport of Scout.sum_report
@@ -61,6 +62,11 @@ module Make(M : State.T) : T = struct
     | LeaderLvup ldr
     | LeaderNew ldr ->
         M.set_ldr ldr
+    | Mercs (count, accept) ->
+        if accept then begin
+          M.sub_supp count;
+          M.add_manp count
+        end
     | Nations nats ->
         M.set_nats nats
     | ScoutReport _
@@ -95,10 +101,22 @@ module Make(M : State.T) : T = struct
   let ask_scouting () =
     SendScouts (M.is_scouting ())
 
+  let check_atk () =
+    let enemies = M.get_enemies () in
+    if enemies = []
+    then ask_scouting ()
+    else Attack enemies
+
   let check_blessing () =
     match M.get_deity () |> Deity.blessing_of with
     | Some x -> Blessing x
     | None -> to_support ()
+
+  let check_mercs () =
+    let sup = M.get_supp () in
+    match Merc.roll sup with
+    | Some x -> Mercs (x, false)
+    | None -> check_atk ()
 
   let check_casualty enemies =
     let loss = casualty_from enemies in
@@ -151,10 +169,9 @@ module Make(M : State.T) : T = struct
     | Blessing _ ->
         to_support ()
     | Support _ ->
-        let enemies = M.get_enemies () in
-        if enemies = []
-        then ask_scouting ()
-        else Attack enemies
+        check_mercs ()
+    | Mercs _ ->
+        check_atk ()
     | Attack enemies ->
         if M.get_deity () = Deity.Lerota
         then check_smite enemies

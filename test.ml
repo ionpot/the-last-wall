@@ -63,6 +63,11 @@ let nations_chosen ns =
   if str <> ""
   then printf "chosen: %s\n" str
 
+let prompt_mercs x =
+  printf "%d mercenaries available\n" x;
+  print_string "accept? y/n> ";
+  read_char () |> yn2bool
+
 let prompt_scouting () =
   print_string "send scouts? y/n> ";
   read_char () |> yn2bool
@@ -107,6 +112,9 @@ let r_event evt =
       print_leader "leader is now" x; None
   | LeaderNew x ->
       print_leader "new leader:" x; None
+  | Mercs (x, _) ->
+      let ok = prompt_mercs x in
+      Some (Mercs (x, ok))
   | Nations ls ->
       let ns = prompt_nations ls in
       nations_chosen ns;
