@@ -3,10 +3,14 @@ open Defs
 type t = Skeleton | Orc | Demon
 type count = int
 type party = (t * count)
-type resource = Resource.t
+type report = party list
+type sum_report = (count * t list)
 
 let t_list =
   [Skeleton; Orc; Demon]
+
+let try_round x =
+  if x > 10 then Round.random x else x
 
 let abundance_of = function
   | Skeleton -> 1.25
@@ -30,19 +34,37 @@ let has_type t p =
   type_of p = t
 
 let same_type a b =
-  type_of a = type_of b
+  has_type (type_of a) b
+
+let with_count c party =
+  (type_of party, c)
+
+let map_count f party =
+  with_count (count_of party |> f) party
+
+let has_count party =
+  count_of party > 0
+
+let report_of parties =
+  List.map (map_count try_round) parties
 
 let sub a b =
   if same_type a b
-  then (type_of a, count_of a - count_of b)
+  then with_count (count_of a - count_of b) a
   else a
+
+let sum_report_of parties =
+  let f a party = a + count_of party in
+  let total = List.fold_left f 0 parties in
+  let seen = List.map type_of parties in
+  (try_round total, seen)
 
 let to_mp (enemy, count) =
   let p = power_of enemy in
   truncate (p *. float count)
 
-let damage enemies =
-  enemies
+let damage parties =
+  parties
   |> List.map to_mp
   |> List.fold_left (+) 0
 
@@ -68,15 +90,14 @@ let spawn turn =
 
 let roll_smite p =
   let x = Dice.between 10 30 in
-  let y = count_of p in
-  type_of p, min x y
+  map_count (min x) p
 
-let smite enemies =
-  match List.filter (has_type Skeleton) enemies with
+let smite parties =
+  match List.filter (has_type Skeleton) parties with
   | [] -> None
   | party :: _ -> Some (roll_smite party)
 
-let reduce party enemies =
-  enemies
+let reduce party parties =
+  parties
   |> List.map (fun p -> sub p party)
-  |> List.filter (fun p -> count_of p > 0)
+  |> List.filter has_count

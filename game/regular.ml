@@ -10,8 +10,8 @@ type event =
   | LeaderNew of Leader.t
   | Mercs of manpower * bool
   | Nations of Nation.t list
-  | ScoutReport of Scout.report
-  | ScoutSumReport of Scout.sum_report
+  | ScoutReport of Enemy.report
+  | ScoutSumReport of Enemy.sum_report
   | ScoutsSent of Resource.t
   | SendScouts of bool
   | Smite of Enemy.party
@@ -21,6 +21,8 @@ type event =
   | Upkeep of supply
 
 module type S = Phase with type event_def := event
+
+let scouting_cost = Resource.(make (Supply 10))
 
 module Make(M : State.S) : S = struct
   let next_turn () =
@@ -136,14 +138,14 @@ module Make(M : State.S) : S = struct
 
   let check_scouting () =
     if M.is_scouting ()
-    then ScoutsSent Scout.cost
+    then ScoutsSent scouting_cost
     else to_upkeep ()
 
   let check_report () =
     let e = M.get_enemies () in
     if M.is_scouting ()
-    then ScoutReport (Scout.report_of e)
-    else ScoutSumReport (Scout.sum_report_of e)
+    then ScoutReport (Enemy.report_of e)
+    else ScoutSumReport (Enemy.sum_report_of e)
 
   let next_of = function
     | Turn _ ->
