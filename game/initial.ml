@@ -7,9 +7,9 @@ type event =
   | Starting of Resource.t
   | Support of Nation.support list
 
-module type T = Defs.Phase with type event_def := event
+module type S = Defs.Phase with type event_def := event
 
-module Make(M : State.T) : T = struct
+module Make(M : State.S) : S = struct
   let first () = Deity (M.get_deity ())
 
   let apply = function

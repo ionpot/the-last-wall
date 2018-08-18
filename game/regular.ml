@@ -20,9 +20,9 @@ type event =
   | Turn of turn
   | Upkeep of supply
 
-module type T = Phase with type event_def := event
+module type S = Phase with type event_def := event
 
-module Make(M : State.T) : T = struct
+module Make(M : State.S) : S = struct
   let next_turn () =
     let x = M.get_turn () + 1 in
     Turn x

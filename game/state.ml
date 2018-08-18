@@ -16,7 +16,7 @@ type t =
     mutable turn : turn
   }
 
-module type T = sig
+module type S = sig
   val get_turn : unit -> turn
   val set_turn : turn -> unit
   val get_res : unit -> resource
@@ -47,7 +47,7 @@ module type T = sig
   val set_enemies : enemy list -> unit
 end
 
-module Make( ) : T = struct
+module Make( ) : S = struct
   open Resource
 
   let max_nats = 3
