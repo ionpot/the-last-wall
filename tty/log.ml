@@ -2,15 +2,8 @@ open Printf
 
 let lf = "\r\n"
 
-let get_fname () =
-  let t = Unix.(time () |> localtime) in
-  sprintf "%d-%02d-%02d %02d:%02d:%02d.txt"
-    (t.tm_year + 1900) t.tm_mon t.tm_mday
-    t.tm_hour t.tm_min t.tm_sec
-
 let fopen () =
-  let name = get_fname () in
-  open_out name
+  open_out "log.txt"
 
 let fclose =
   close_out
