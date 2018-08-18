@@ -65,16 +65,6 @@ let manp2str mp =
 let sup2str sp =
   sprintf "%d sup" sp
 
-let report2str ls =
-  let f (count, e) = sprintf "%d %s" count (enemy2str e) in
-  List.map f ls
-  |> String.concat ", "
-
-let sum2str (count, enemies) =
-  let ls = List.map enemy2str enemies in
-  let str = String.concat ", " ls in
-  (count, str)
-
 let res2str res =
   let m, s = Resource.(manp res, supp res) in
   sprintf "%s, %s" (manp2str m) (sup2str s)
@@ -85,3 +75,12 @@ let party2str pt =
 let enemies2str ls =
   List.map party2str ls
   |> String.concat ", "
+
+let report2str ls =
+  List.map party2str ls
+  |> String.concat ", "
+
+let sum2str (count, enemies) =
+  let ls = List.map enemy2str enemies in
+  let str = String.concat ", " ls in
+  (count, str)
