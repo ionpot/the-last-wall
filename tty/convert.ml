@@ -1,6 +1,13 @@
 open Game
 open Printf
 
+let str2char = function
+  | "" -> '0'
+  | x -> String.get x 0
+
+let char2bool ch =
+  ch = 'y'
+
 let char2deity = function
   | '1' -> Deity.Arnerula
   | '2' -> Deity.Elanis
@@ -78,6 +85,3 @@ let party2str pt =
 let enemies2str ls =
   List.map party2str ls
   |> String.concat ", "
-
-let yn2bool ch =
-  ch = 'y'

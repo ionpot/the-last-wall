@@ -11,22 +11,17 @@ let nat_list =
   |> List.map (fun n -> nation2char n, n)
   |> List.sort (fun (a, _) (b, _) -> Char.compare a b)
 
-let read_char () =
-  match read_line () with
-  | "" -> '0'
-  | x -> String.get x 0
-
 let prompt_deity () =
-  print_string "deities: ";
+  Tty.write "deities:";
   Deity.t_list
   |> List.map (fun d -> (deity2char d, deity2str d))
   |> List.sort (fun (a, _) (b, _) -> Char.compare a b)
-  |> List.iter (fun (c, s) -> printf " %c) %s" c s);
-  print_string "\nchoose> ";
-  read_char () |> char2deity
+  |> List.map (fun (c, s) -> sprintf " %c) %s" c s)
+  |> List.iter Tty.write;
+  Tty.lnprompt_char "choose>" |> char2deity
 
 let deity_chosen d =
-  printf "%s chosen\n" (deity2str d)
+  Tty.writeln @@ sprintf "%s chosen" (deity2str d)
 
 let nat_str n chosen =
   let str = nation2str n in
@@ -45,12 +40,12 @@ let new_nats chosen str =
     | ls -> List.map snd ls
 
 let prompt_nations chosen =
-  print_string "nations: ";
+  Tty.write "nations:";
   nat_list
   |> List.map (fun (c, n) -> c, nat_str n chosen)
-  |> List.iter (fun (c, s) -> printf " %c) %s" c s);
-  print_string "\nchoose> ";
-  read_line () |> new_nats chosen
+  |> List.map (fun (c, s) -> sprintf " %c) %s" c s)
+  |> List.iter Tty.write;
+  Tty.lnprompt "choose>" |> new_nats chosen
 
 let nations_chosen ns =
   let f = nation2char in
@@ -61,31 +56,30 @@ let nations_chosen ns =
     |> String.concat ", "
   in
   if str <> ""
-  then printf "chosen: %s\n" str
+  then Tty.pairln "chosen" str
 
 let prompt_mercs x =
-  printf "%d mercenaries available\n" x;
-  print_string "accept? y/n> ";
-  read_char () |> yn2bool
+  Tty.writeln (sprintf "%d mercenaries available" x);
+  Tty.prompt_yn "accept? y/n>"
 
 let prompt_scouting () =
-  print_string "send scouts? y/n> ";
-  read_char () |> yn2bool
+  Tty.prompt_yn "send scouts? y/n>"
 
 let scouting_chosen s =
-  if s then print_string "scouts sent\n"
+  if s then Tty.writeln "scouts sent"
 
 let print_leader str x =
-  leader2str x
-  |> printf "%s %s\n" str
+  Tty.writeln (sprintf "%s %s" str (leader2str x))
 
 let print_support ls =
   let f = function
     | Some x -> res2str x
     | None -> "nothing"
   in
-  List.map (fun (nat, res) -> (nation2str nat, f res)) ls
-  |> List.iter (fun (nat, res) -> printf "%s sent %s\n" nat res)
+  ls
+  |> List.map (fun (nat, res) -> (nation2str nat, f res))
+  |> List.map (fun (nat, res) -> sprintf "%s sent %s" nat res)
+  |> List.iter Tty.writeln
 
 let print_status =
   let x = ref (S.get_res ()) in
@@ -93,25 +87,47 @@ let print_status =
     let y = S.get_res () in
     if !x <> y then begin
       x := y;
-      res2str y |> printf "status: %s\n"
+      Tty.pairln "status" (res2str y)
     end
 
-let r_event evt =
+let r_out evt =
   let open Regular in
   match evt with
   | Attack ls ->
-      enemies2str ls |> printf "attack: %s\n"; None
+      Tty.pairln "attack" (enemies2str ls)
   | Blessing res ->
-      res2str res |> printf "blessing: %s\n"; None
+      Tty.pairln "blessing" (res2str res)
   | Casualty mp ->
-      manp2str mp |> printf "casualty: %s\n"; None
-  | End -> None
+      Tty.pairln "casualty" (manp2str mp)
   | LeaderDied x ->
-      print_leader "leader died, was" x; None
+      print_leader "leader died, was" x
   | LeaderLvup x ->
-      print_leader "leader is now" x; None
+      print_leader "leader is now" x
   | LeaderNew x ->
-      print_leader "new leader:" x; None
+      print_leader "new leader:" x
+  | ScoutReport ls ->
+      Tty.pairln "seen" (report2str ls)
+  | ScoutSumReport x ->
+      let (count, str) = sum2str x in
+      sprintf "seen: about %d (%s)" count str
+      |> Tty.writeln
+  | ScoutsSent res ->
+      Tty.pairln "scouts cost" (res2str res)
+  | Smite p ->
+      Tty.pairln "smitten" (party2str p)
+  | Starvation mp ->
+      Tty.pairln "starvation" (manp2str mp)
+  | Support ls ->
+      print_support ls
+  | Turn x ->
+      Tty.lnwriteln ("turn " ^ string_of_int x)
+  | Upkeep sup ->
+      Tty.pairln "upkeep" (sup2str sup)
+  | _ -> ()
+
+let r_in evt =
+  let open Regular in
+  match evt with
   | Mercs (x, _) ->
       let ok = prompt_mercs x in
       Some (Mercs (x, ok))
@@ -119,46 +135,32 @@ let r_event evt =
       let ns = prompt_nations ls in
       nations_chosen ns;
       Some (Nations ns)
-  | ScoutReport ls ->
-      report2str ls
-      |> printf "seen: %s\n"; None
-  | ScoutSumReport x ->
-      let (count, str) = sum2str x in
-      printf "seen: about %d (%s)\n" count str; None
-  | ScoutsSent res ->
-      res2str res
-      |> printf "scouts cost: %s\n"; None
   | SendScouts _ ->
       let s = prompt_scouting () in
       scouting_chosen s;
       Some (SendScouts s)
-  | Smite p ->
-      party2str p
-      |> printf "smitten: %s\n"; None
-  | Starvation mp ->
-      manp2str mp |> printf "starvation: %s\n"; None
-  | Support ls ->
-      print_support ls; None
-  | Turn x ->
-      printf "\nturn %d\n" x; None
-  | Upkeep sup ->
-      sup2str sup |> printf "upkeep: %s\n"; None
+  | _ -> None
 
 let rec r_loop evt =
-  if evt <> Regular.End
-  then begin
+  if evt = Regular.End
+  then Tty.fin ()
+  else begin
     let e =
-      match r_event evt with
+      match r_in evt with
       | Some x -> x
-      | None -> evt
+      | None -> r_out evt; evt
     in
     let x = R.next e in
     print_status ();
+    Tty.flush ();
     r_loop x
   end
 
 let rec i_loop evt =
-  let next_with e = I.next e |> i_loop in
+  let next_with e =
+    Tty.flush ();
+    I.next e |> i_loop
+  in
   let next () = next_with evt in
   let open Initial in
   match evt with
@@ -180,7 +182,7 @@ let rec i_loop evt =
       scouting_chosen s;
       next_with (SendScouts s)
   | Starting res ->
-      printf "starting: %s\n" (res2str res);
+      Tty.pairln "starting" (res2str res);
       next ()
   | Support ls ->
       print_support ls;
