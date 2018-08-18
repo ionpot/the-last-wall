@@ -111,8 +111,6 @@ let r_out evt =
       let (count, str) = sum2str x in
       sprintf "seen: about %d (%s)" count str
       |> Tty.writeln
-  | ScoutsSent res ->
-      Tty.pairln "scouts cost" (res2str res)
   | Smite p ->
       Tty.pairln "smitten" (party2str p)
   | Starvation mp ->

@@ -12,7 +12,6 @@ type event =
   | Nations of Nation.t list
   | ScoutReport of Enemy.report
   | ScoutSumReport of Enemy.sum_report
-  | ScoutsSent of Resource.t
   | SendScouts of bool
   | Smite of Enemy.party
   | Starvation of manpower
@@ -22,7 +21,7 @@ type event =
 
 module type S = Phase with type event_def := event
 
-let scouting_cost = Resource.(make (Supply 10))
+let scouting_cost = 10
 
 module Make(M : State.S) : S = struct
   let next_turn () =
@@ -73,8 +72,6 @@ module Make(M : State.S) : S = struct
         M.set_nats nats
     | ScoutReport _
     | ScoutSumReport _ -> ()
-    | ScoutsSent res ->
-        M.sub_res res
     | SendScouts yes ->
         M.set_scouting yes
     | Smite x ->
@@ -98,7 +95,9 @@ module Make(M : State.S) : S = struct
     Support (ldr_res_bonus () |> Nation.apply_bonus ls)
 
   let to_upkeep () =
-    Upkeep (M.get_manp ())
+    let x = M.get_manp () in
+    let y = if M.is_scouting () then scouting_cost else 0 in
+    Upkeep (x + y)
 
   let ask_scouting () =
     SendScouts (M.is_scouting ())
@@ -136,11 +135,6 @@ module Make(M : State.S) : S = struct
     then LeaderLvup (Leader.lvup ldr)
     else ask_scouting ()
 
-  let check_scouting () =
-    if M.is_scouting ()
-    then ScoutsSent scouting_cost
-    else to_upkeep ()
-
   let check_report () =
     let e = M.get_enemies () in
     if M.is_scouting ()
@@ -151,10 +145,8 @@ module Make(M : State.S) : S = struct
     | Turn _ ->
         if can_new_ldr ()
         then LeaderNew (Leader.make ())
-        else check_scouting ()
+        else to_upkeep ()
     | LeaderNew _ ->
-        check_scouting ()
-    | ScoutsSent _ ->
         to_upkeep ()
     | Upkeep _ ->
         let loss = M.missing_supp () in
