@@ -40,7 +40,7 @@ let to_outcome nat =
     let (a, b) = ranges_of nat in
     let m = roll a in
     let s = roll b in
-    Resource.(make (Manpwr m) <+ Supply s)
+    Resource.(of_manp m <+ Supply s)
   in
   if Dice.chance 0.8
   then Some (f ())

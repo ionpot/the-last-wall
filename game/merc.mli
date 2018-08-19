@@ -1,3 +1,1 @@
-open Defs
-
-val roll : supply -> manpower option
+val roll : unit -> Resource.t option

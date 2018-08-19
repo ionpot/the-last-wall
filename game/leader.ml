@@ -1,6 +1,6 @@
 type ltype = Aristocrat | Expert | Warrior
 type level = int
-type loss = int
+type loss = Resource.t
 type charisma = int
 
 type t =
@@ -32,9 +32,9 @@ let defense_of cha = function
   | Expert -> 0.0
 
 let resource_of cha = function
-  | Aristocrat -> Resource.Manpwr (2 * cha)
-  | Expert -> Resource.Supply (2 * cha)
-  | Warrior -> Resource.Empty
+  | Aristocrat -> Resource.of_manp (2 * cha)
+  | Expert -> Resource.of_supp (2 * cha)
+  | Warrior -> Resource.empty
 
 let make () =
   let lv = Dice.between 3 5 in
@@ -80,10 +80,11 @@ let mitigate loss t =
   let cha = cha_mod_of t in
   let extra = type_of t |> defense_of cha in
   let x = base +. extra in
-  truncate (x *. float loss)
+  let y = Resource.manp_of loss in
+  truncate (x *. float y)
+  |> Resource.of_manp
 
 let res_bonus_of t =
   let cha = cha_mod_of t in
-  type_of t
-  |> resource_of cha
-  |> Resource.make
+  let typ = type_of t in
+  resource_of cha typ

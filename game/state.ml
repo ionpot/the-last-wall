@@ -1,17 +1,15 @@
 open Defs
 
-type deity = Deity.t
+module R = Resource
+
 type enemy = Enemy.party
-type leader = Leader.t
-type nation = Nation.t
-type resource = Resource.t
 
 type t =
-  { mutable deity : deity;
+  { mutable deity : Deity.t;
     mutable enemies : enemy list;
-    mutable leader : leader;
-    mutable nats : nation list;
-    mutable res : resource;
+    mutable leader : Leader.t;
+    mutable nats : Nation.t list;
+    mutable res : R.t;
     mutable scouting : bool;
     mutable turn : turn
   }
@@ -19,24 +17,19 @@ type t =
 module type S = sig
   val get_turn : unit -> turn
   val set_turn : turn -> unit
-  val get_res : unit -> resource
-  val add_res : resource -> unit
-  val sub_res : resource -> unit
-  val get_manp : unit -> manpower
-  val add_manp : manpower -> unit
-  val sub_manp : manpower -> unit
-  val no_manp : unit -> bool
-  val get_supp : unit -> supply
-  val add_supp : supply -> unit
-  val sub_supp : supply -> unit
+  val get_res : unit -> R.t
+  val add_res : R.t -> unit
+  val sub_res : R.t -> unit
+  val can_afford : R.t -> bool
+  val has_manp : unit -> bool
   val clr_supp : unit -> unit
-  val missing_supp : unit -> supply
-  val get_deity : unit -> deity
-  val set_deity : deity -> unit
-  val get_nats : unit -> nation list
-  val set_nats : nation list -> unit
-  val get_ldr : unit -> leader
-  val set_ldr : leader -> unit
+  val missing_supp : unit -> R.t option
+  val get_deity : unit -> Deity.t
+  val set_deity : Deity.t -> unit
+  val get_nats : unit -> Nation.t list
+  val set_nats : Nation.t list -> unit
+  val get_ldr : unit -> Leader.t
+  val set_ldr : Leader.t -> unit
   val ldr_alive : unit -> bool
   val ldr_won : unit -> unit
   val ldr_died : unit -> unit
@@ -48,8 +41,6 @@ module type S = sig
 end
 
 module Make( ) : S = struct
-  open Resource
-
   let max_nats = 3
 
   let t =
@@ -57,7 +48,7 @@ module Make( ) : S = struct
       enemies = [];
       leader = Leader.empty;
       nats = [];
-      res = empty;
+      res = R.empty;
       scouting = false;
       turn = 0
     }
@@ -66,19 +57,16 @@ module Make( ) : S = struct
   let set_turn x = t.turn <- x
 
   let get_res () = t.res
-  let add_res r = t.res <- t.res ++ r
-  let sub_res r = t.res <- t.res -- r
+  let add_res r = t.res <- R.(t.res ++ r)
+  let sub_res r = t.res <- R.(t.res -- r)
+  let has_manp () = R.has_manp t.res
+  let clr_supp () = t.res <- R.clr_supp t.res
+  let missing_supp () =
+    let x = R.mis_supp t.res in
+    if R.has_supp x then Some x else None
 
-  let get_manp () = manp t.res
-  let add_manp m = t.res <- t.res <+ Manpwr m
-  let sub_manp m = t.res <- t.res <~ Manpwr m
-  let no_manp () = manp t.res <= 0
-
-  let get_supp () = supp t.res
-  let add_supp m = t.res <- t.res <+ Supply m
-  let sub_supp m = t.res <- t.res <~ Supply m
-  let clr_supp () = t.res <- make (Manpwr (manp t.res))
-  let missing_supp () = supp_missing t.res
+  let can_afford res =
+    R.can_afford res t.res
 
   let get_deity () = t.deity
   let set_deity d = t.deity <- d
