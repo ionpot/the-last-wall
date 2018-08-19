@@ -13,3 +13,8 @@ let deviate x y =
   let a = x - y in
   let b = x + y in
   between a b
+
+let round x =
+  let a = 0.1 *. float x in
+  let f = if Random.bool () then floor else ceil in
+  10 * truncate (f a)

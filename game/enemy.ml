@@ -10,7 +10,7 @@ let t_list =
   [Skeleton; Orc; Demon]
 
 let try_round x =
-  if x > 10 then Round.random x else x
+  if x > 10 then Dice.round x else x
 
 let abundance_of = function
   | Skeleton -> 1.25
