@@ -1,5 +1,3 @@
-open Defs
-
 type event =
   | Attack of Enemy.party list
   | Blessing of Resource.t
@@ -16,10 +14,10 @@ type event =
   | Smite of Enemy.party
   | Starvation of Resource.t
   | Support of Nation.support list
-  | Turn of turn
+  | Turn of Defs.turn
   | Upkeep of Resource.t
 
-module type S = Phase with type event_def := event
+module type S = Phase.S with type event_def := event
 
 module Make(M : State.S) : S = struct
   let next_turn () =
