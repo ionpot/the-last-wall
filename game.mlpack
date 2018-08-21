@@ -1,10 +1,13 @@
 Defs
 Deity
 Enemy
-Initial
 Leader
+Main
 Merc
 Nation
-Regular
+Phase
+Phase1
+Phase2
+Phase3
 Resource
 State
