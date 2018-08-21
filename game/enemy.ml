@@ -1,5 +1,3 @@
-open Defs
-
 type t = Skeleton | Orc | Demon
 type count = int
 type party = (t * count)
@@ -67,6 +65,7 @@ let damage parties =
   parties
   |> List.map to_mp
   |> List.fold_left (+) 0
+  |> Resource.of_manp
 
 let can_spawn turn enemy =
   let a = 0.1 *. float turn in

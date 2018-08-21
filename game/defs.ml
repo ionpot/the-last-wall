@@ -1,5 +1,3 @@
-type manpower = int
-type supply = int
 type turn = int
 
 module type Phase = sig

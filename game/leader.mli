@@ -3,7 +3,7 @@ open Defs
 type t
 type ltype = Aristocrat | Expert | Warrior
 type level = int
-type loss = int
+type loss = Resource.t
 type charisma = int
 
 val empty : t

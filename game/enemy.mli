@@ -14,7 +14,7 @@ val type_of : party -> t
 val report_of : party list -> report
 val sum_report_of : party list -> sum_report
 
-val damage : party list -> manpower
+val damage : party list -> Resource.t
 val spawn : turn -> party list
 
 val smite : party list -> party option
