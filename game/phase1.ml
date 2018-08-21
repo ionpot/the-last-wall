@@ -9,7 +9,7 @@ type event =
 
 module type S = Phase.S with type event_def := event
 
-module Make(M : State.S) : S = struct
+module Make (M : State.S) : S = struct
   let first () = Deity (M.get_deity ())
 
   let apply = function
@@ -21,7 +21,7 @@ module Make(M : State.S) : S = struct
     | Starting x -> M.add_res x
     | Support x -> M.add_res (Nation.total_of x)
 
-  let next_of = function
+  let next = function
     | Deity _ -> Starting (Deity.starting (M.get_deity ()))
     | Starting _ -> NewLeader (Leader.make ())
     | NewLeader _ -> Nations (M.get_nats ())
@@ -29,8 +29,4 @@ module Make(M : State.S) : S = struct
     | SendScouts _ -> Support (Nation.support_of_list (M.get_nats ()))
     | Support _ -> End
     | End -> End
-
-  let next ev =
-    apply ev;
-    next_of ev
 end
