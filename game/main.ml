@@ -21,15 +21,15 @@ module Make (M : State.S) : S = struct
     | End -> ()
 
   let next_of = function
-    | Ph2 P2.Defeat
-    | Ph3 P3.Defeat
+    | Ph2 Phase2.Defeat
+    | Ph3 Phase3.Defeat
     | End -> End
-    | Ph1 P1.End
-    | Ph3 P3.End -> Ph2 (P2.first ())
-    | Ph2 P2.End -> Ph3 (P3.first ())
-    | Ph1 x -> P1.next x
-    | Ph2 x -> P2.next x
-    | Ph3 x -> P3.next x
+    | Ph1 Phase1.End
+    | Ph3 Phase3.End -> Ph2 (P2.first ())
+    | Ph2 Phase2.End -> Ph3 (P3.first ())
+    | Ph1 x -> Ph1 (P1.next x)
+    | Ph2 x -> Ph2 (P2.next x)
+    | Ph3 x -> Ph3 (P3.next x)
 
   let first () = Ph1 (P1.first ())
   let next ev = apply ev; next_of ev
