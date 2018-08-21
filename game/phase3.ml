@@ -28,8 +28,7 @@ module Make(M : State.S) : S = struct
     | Defeat
     | End -> ()
     | LeaderDied _ -> M.ldr_died ()
-    | LeaderLvup ldr
-    | LeaderNew ldr -> M.set_ldr ldr
+    | LeaderLvup ldr -> M.set_ldr ldr
     | SendScouts yes -> M.set_scouting yes
     | Smite party ->
         M.get_enemies ()
