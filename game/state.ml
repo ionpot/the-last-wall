@@ -23,7 +23,6 @@ module type S = sig
   val sub_res : R.t -> unit
   val has_manp : unit -> bool
   val clr_supp : unit -> unit
-  val missing_supp : unit -> R.t option
   val get_deity : unit -> Deity.t
   val set_deity : Deity.t -> unit
   val get_nats : unit -> Nation.t list
@@ -61,9 +60,6 @@ module Make( ) : S = struct
   let sub_res r = t.res <- R.(t.res -- r)
   let has_manp () = R.has_manp t.res
   let clr_supp () = t.res <- R.clr_supp t.res
-  let missing_supp () =
-    let x = R.mis_supp t.res in
-    if R.has_supp x then Some x else None
 
   let get_deity () = t.deity
   let set_deity d = t.deity <- d

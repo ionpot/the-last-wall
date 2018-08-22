@@ -87,9 +87,10 @@ module Make(M : State.S) : S = struct
     else ScoutSumReport (Enemy.sum_report_of e)
 
   let check_starvation () =
-    match M.missing_supp () with
-    | Some loss -> Starvation loss
-    | None -> check_report ()
+    let res = Resource.mis_supp (M.get_res ()) in
+    if res = Resource.empty
+    then Starvation Resource.(supp2manp res)
+    else check_report ()
 
   let next = function
     | Turn _ ->
