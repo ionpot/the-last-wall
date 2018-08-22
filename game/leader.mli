@@ -1,19 +1,23 @@
 open Defs
 
 type t
+type state
 type ltype = Aristocrat | Expert | Warrior
 type level = int
 type loss = Resource.t
 type charisma = int
 
-val empty : t
+val empty : state
+val dead : state
+
+val of_state : state -> t option
+val state_of : t -> state
+val need : state -> bool
+val tick : state -> state
 
 val make : unit -> t
 val lives : unit -> bool
-val alive : t -> bool
 val won : t -> unit
-val died : t -> turn -> unit
-val died_at : t -> turn
 val can_lvup : t -> bool
 val lvup : t -> t
 val type_of : t -> ltype

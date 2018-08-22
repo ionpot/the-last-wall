@@ -7,7 +7,7 @@ type enemy = Enemy.party
 type t =
   { mutable deity : Deity.t;
     mutable enemies : enemy list;
-    mutable leader : Leader.t;
+    mutable leader : Leader.state;
     mutable nats : Nation.t list;
     mutable res : R.t;
     mutable scouting : bool;
@@ -28,12 +28,11 @@ module type S = sig
   val set_deity : Deity.t -> unit
   val get_nats : unit -> Nation.t list
   val set_nats : Nation.t list -> unit
-  val get_ldr : unit -> Leader.t
+  val get_ldr : unit -> Leader.t option
   val set_ldr : Leader.t -> unit
-  val ldr_alive : unit -> bool
-  val ldr_won : unit -> unit
+  val need_ldr : unit -> bool
+  val ldr_tick : unit -> unit
   val ldr_died : unit -> unit
-  val ldr_died_at : unit -> turn
   val is_scouting : unit -> bool
   val set_scouting : bool -> unit
   val get_enemies : unit -> enemy list
@@ -74,12 +73,11 @@ module Make( ) : S = struct
   let get_nats () = t.nats
   let set_nats ns = t.nats <- Nation.pickN max_nats ns
 
-  let get_ldr () = t.leader
-  let set_ldr x = t.leader <- x
-  let ldr_alive () = Leader.alive t.leader
-  let ldr_won () = Leader.won t.leader
-  let ldr_died () = Leader.died t.leader t.turn
-  let ldr_died_at () = Leader.died_at t.leader
+  let get_ldr () = Leader.of_state t.leader
+  let set_ldr x = t.leader <- Leader.state_of x
+  let need_ldr () = Leader.need t.leader
+  let ldr_tick () = t.leader <- Leader.tick t.leader
+  let ldr_died () = t.leader <- Leader.dead
 
   let is_scouting () = t.scouting
   let set_scouting x = t.scouting <- x

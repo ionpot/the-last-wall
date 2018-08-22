@@ -22,6 +22,10 @@ module Make(M : State.S) : S = struct
     then ask_scouting ()
     else Attack enemies
 
+  let leader_won = function
+    | Some ldr -> Leader.won ldr
+    | None -> ()
+
   let apply = function
     | Attack enemies -> ()
     | Casualty res -> M.sub_res res
@@ -34,15 +38,17 @@ module Make(M : State.S) : S = struct
         M.get_enemies ()
         |> Enemy.reduce party
         |> M.set_enemies
-    | Victory -> M.ldr_won ()
+    | Victory -> leader_won (M.get_ldr ())
 
-  let mitigate loss =
-    let x = M.get_ldr () |> Leader.mitigate loss in
+  let mitigate loss ldr =
+    let x = Leader.mitigate loss ldr in
     Resource.(loss -- x)
 
   let casualty_from enemies =
     let loss = Enemy.damage enemies in
-    if M.ldr_alive () then mitigate loss else loss
+    match M.get_ldr () with
+    | Some ldr -> mitigate loss ldr
+    | None -> loss
 
   let to_casualty enemies =
     Casualty (casualty_from enemies)
@@ -57,11 +63,15 @@ module Make(M : State.S) : S = struct
     then LeaderLvup (Leader.lvup ldr)
     else ask_scouting ()
 
-  let check_ldr () =
-    let ldr = M.get_ldr () in
+  let check_ldr_survives ldr =
     if Leader.lives ()
     then check_lvup ldr
     else LeaderDied ldr
+
+  let check_ldr () =
+    match M.get_ldr () with
+    | Some ldr -> check_ldr_survives ldr
+    | None -> ask_scouting ()
 
   let is_victory casualty =
     let res = M.get_res () in
@@ -75,10 +85,7 @@ module Make(M : State.S) : S = struct
     | Smite _ -> to_casualty @@ M.get_enemies ()
     | Casualty res ->
         if is_victory res then Victory else Defeat
-    | Victory ->
-        if M.ldr_alive ()
-        then check_ldr ()
-        else ask_scouting ()
+    | Victory -> check_ldr ()
     | LeaderLvup _
     | LeaderDied _ -> ask_scouting ()
     | SendScouts _

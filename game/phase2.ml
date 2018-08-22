@@ -45,19 +45,14 @@ module Make(M : State.S) : S = struct
         |> M.add_res
     | Turn x ->
         M.set_turn x;
+        M.ldr_tick ();
         M.set_enemies (Enemy.spawn x)
     | Upkeep res -> M.sub_res res
 
-  let can_new_ldr () =
-    if M.ldr_alive ()
-    then false
-    else
-      M.get_turn () - M.ldr_died_at () > 1
-
   let ldr_res_bonus () =
-    if M.ldr_alive ()
-    then M.get_ldr() |> Leader.res_bonus_of
-    else Resource.empty
+    match M.get_ldr () with
+    | Some ldr -> Leader.res_bonus_of ldr
+    | None -> Resource.empty
 
   let to_support () =
     let ls = M.get_nats () |> Nation.support_of_list in
@@ -101,7 +96,7 @@ module Make(M : State.S) : S = struct
 
   let next = function
     | Turn _ ->
-        if can_new_ldr ()
+        if M.need_ldr ()
         then LeaderNew (Leader.make ())
         else to_upkeep ()
     | LeaderNew _ -> to_upkeep ()

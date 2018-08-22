@@ -8,20 +8,23 @@ type t =
     level : level;
     cha_base : charisma;
     cha_extra : charisma;
-    xp : int ref;
-    mutable died_at : Defs.turn
+    xp : int ref
   }
 
-let empty =
-  { ltype = Aristocrat;
-    level = 0;
-    cha_base = 0;
-    cha_extra = 0;
-    xp = ref 0;
-    died_at = 0
-  }
+type state = Alive of t | Wait of Defs.turn
 
-let ltypes = [Aristocrat; Expert; Warrior]
+let empty = Wait 0
+let dead = Wait 1
+
+let of_state = function
+  | Alive ldr -> Some ldr
+  | Wait _ -> None
+let state_of ldr = Alive ldr
+let need state = state = Wait 0
+let tick = function
+  | Alive _
+  | Wait 0 as x -> x
+  | Wait x -> Wait (x - 1)
 
 let mod_of cha =
   (cha - 10) / 2
@@ -36,24 +39,21 @@ let resource_of cha = function
   | Expert -> Resource.of_supp (2 * cha)
   | Warrior -> Resource.empty
 
+let ltypes = [Aristocrat; Expert; Warrior]
+
 let make () =
   let lv = Dice.between 3 5 in
   { ltype = Listx.pick_from ltypes;
     level = lv;
     cha_base = Dice.between 10 15;
     cha_extra = (lv / 4);
-    xp = ref 0;
-    died_at = 0
+    xp = ref 0
   }
 
 let lives () =
   Dice.chance 0.95
 
-let alive t =
-  t.died_at = 0
 let won t = incr t.xp
-let died t turn = t.died_at <- turn
-let died_at t = t.died_at
 let type_of t = t.ltype
 let level_of t = t.level
 let cha_of t = t.cha_base + t.cha_extra
