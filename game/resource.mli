@@ -18,8 +18,8 @@ val supp_of : t -> supply
 val mis_supp : t -> t
 val clr_supp : t -> t
 
-val cost_of : t -> t
-val can_afford : t -> t -> bool
+val manp2supp : t -> t
+val supp2manp : t -> t
 
 val (<+) : t -> kind -> t
 val (<~) : t -> kind -> t

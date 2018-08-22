@@ -15,11 +15,10 @@ let manp_of = fst
 let supp_of = snd
 let has_manp (x, _) = x > 0
 let has_supp (_, x) = x > 0
-let mis_supp (_, x) =
-  of_supp (if x < 0 then abs x else 0)
+let mis_supp (_, x) = of_supp ~-(min 0 x)
 let clr_supp (x, _) = (x, 0)
-let cost_of (m, _) = (0, m)
-let can_afford (m, _) (_, s) = m < s
+let manp2supp (x, _) = (0, x)
+let supp2manp (_, x) = (x, 0)
 
 let (<+) t = function
   | Empty -> t

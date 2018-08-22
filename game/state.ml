@@ -18,9 +18,9 @@ module type S = sig
   val get_turn : unit -> turn
   val set_turn : turn -> unit
   val get_res : unit -> R.t
+  val set_res : R.t -> unit
   val add_res : R.t -> unit
   val sub_res : R.t -> unit
-  val can_afford : R.t -> bool
   val has_manp : unit -> bool
   val clr_supp : unit -> unit
   val missing_supp : unit -> R.t option
@@ -56,6 +56,7 @@ module Make( ) : S = struct
   let set_turn x = t.turn <- x
 
   let get_res () = t.res
+  let set_res r = t.res <- r
   let add_res r = t.res <- R.(t.res ++ r)
   let sub_res r = t.res <- R.(t.res -- r)
   let has_manp () = R.has_manp t.res
@@ -63,9 +64,6 @@ module Make( ) : S = struct
   let missing_supp () =
     let x = R.mis_supp t.res in
     if R.has_supp x then Some x else None
-
-  let can_afford res =
-    R.can_afford res t.res
 
   let get_deity () = t.deity
   let set_deity d = t.deity <- d

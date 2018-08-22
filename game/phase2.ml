@@ -22,18 +22,18 @@ module Make(M : State.S) : S = struct
   let first () =
     next_turn ()
 
-  let buy_mercs res =
-    let cost = Resource.cost_of res in
-    M.sub_res cost;
-    M.add_res res
+  let buy_mercs mercs =
+    let res = M.get_res () in
+    let new_res = Merc.buy mercs res in
+    M.set_res new_res
 
   let apply = function
     | Blessing res -> M.add_res res
     | Defeat
     | End -> ()
     | LeaderNew ldr -> M.set_ldr ldr
-    | Mercs (res, accept) ->
-        if accept then buy_mercs res
+    | Mercs (mercs, accept) ->
+        if accept then buy_mercs mercs
     | Nations nats -> M.set_nats nats
     | ScoutReport _
     | ScoutSumReport _ -> ()
@@ -65,7 +65,7 @@ module Make(M : State.S) : S = struct
 
   let to_upkeep () =
     let res = M.get_res () in
-    let x = Resource.cost_of res in
+    let x = Resource.manp2supp res in
     let y = scouting_cost () in
     Upkeep Resource.(x ++ y)
 
@@ -77,10 +77,7 @@ module Make(M : State.S) : S = struct
 
   let check_mercs () =
     match Merc.roll () with
-    | Some res ->
-        if M.can_afford res
-        then Mercs (res, false)
-        else End
+    | Some res -> Mercs (res, false)
     | None -> End
 
   let check_report () =
