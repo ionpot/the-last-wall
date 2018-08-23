@@ -28,10 +28,9 @@ let filter nats =
   |> Listx.pick_first max_allowed
 
 let total_of ns =
-  let open Resource in
   let f total (_, maybe) =
     match maybe with
-    | Some res -> total ++ res
+    | Some res -> Resource.(total ++ res)
     | None -> total
   in
   List.fold_left f empty ns
