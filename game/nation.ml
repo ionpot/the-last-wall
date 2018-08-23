@@ -1,6 +1,7 @@
 type t = Tulron | Sodistan | Hekatium | Numendor | Clan
-type resource = Resource.t
-type support = (t * resource option)
+type support = (t * Resource.t option)
+
+let max_allowed = 3
 
 let t_list =
   [Tulron; Sodistan; Hekatium; Numendor; Clan]
@@ -20,11 +21,11 @@ let ranges_of =
 let roll (a, b) =
   Dice.between a b
 
-let pickN max nats =
+let filter nats =
   let f n = List.mem n nats in
   t_list
   |> List.filter f
-  |> Listx.pick_first max
+  |> Listx.pick_first max_allowed
 
 let total_of ns =
   let open Resource in

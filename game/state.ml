@@ -39,8 +39,6 @@ module type S = sig
 end
 
 module Make( ) : S = struct
-  let max_nats = 3
-
   let t =
     { deity = Deity.default;
       enemies = [];
@@ -65,7 +63,7 @@ module Make( ) : S = struct
   let set_deity d = t.deity <- d
 
   let get_nats () = t.nats
-  let set_nats ns = t.nats <- Nation.pickN max_nats ns
+  let set_nats ns = t.nats <- Nation.filter ns
 
   let get_ldr () = Leader.of_state t.leader
   let set_ldr x = t.leader <- Leader.state_of x
