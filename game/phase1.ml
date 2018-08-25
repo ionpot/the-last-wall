@@ -27,6 +27,6 @@ module Make (M : State.S) : S = struct
     | NewLeader _ -> Nations (M.get_nats ())
     | Nations _ -> SendScouts (M.is_scouting ())
     | SendScouts _ -> Support (Nation.support_of_list (M.get_nats ()))
-    | Support _ -> End
+    | Support _
     | End -> End
 end
