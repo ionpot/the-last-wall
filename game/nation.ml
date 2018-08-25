@@ -33,7 +33,7 @@ let total_of ns =
     | Some res -> Resource.(total ++ res)
     | None -> total
   in
-  List.fold_left f empty ns
+  List.fold_left f Resource.empty ns
 
 let to_outcome nat =
   let f () =
