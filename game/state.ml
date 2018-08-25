@@ -38,7 +38,7 @@ module type S = sig
   val set_enemies : enemy list -> unit
 end
 
-module Make( ) : S = struct
+module Make ( ) : S = struct
   let t =
     { deity = Deity.default;
       enemies = [];

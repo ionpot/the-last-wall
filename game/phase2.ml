@@ -14,7 +14,7 @@ type event =
 
 module type S = Phase.S with type event_def := event
 
-module Make(M : State.S) : S = struct
+module Make (M : State.S) : S = struct
   let first () =
     let x = M.get_turn () + 1 in
     Turn x
