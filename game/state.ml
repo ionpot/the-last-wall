@@ -5,7 +5,7 @@ module R = Resource
 type enemy = Enemy.party
 
 type t =
-  { mutable deity : Deity.t;
+  { deity : Deity.t;
     mutable enemies : enemy list;
     mutable leader : Leader.state;
     mutable nats : Nation.t list;
@@ -13,6 +13,10 @@ type t =
     mutable scouting : bool;
     mutable turn : turn
   }
+
+module type Init = sig
+  val deity : Deity.t
+end
 
 module type S = sig
   val get_turn : unit -> turn
@@ -24,7 +28,6 @@ module type S = sig
   val has_manp : unit -> bool
   val clr_supp : unit -> unit
   val get_deity : unit -> Deity.t
-  val set_deity : Deity.t -> unit
   val get_nats : unit -> Nation.t list
   val set_nats : Nation.t list -> unit
   val get_ldr : unit -> Leader.t option
@@ -38,9 +41,9 @@ module type S = sig
   val set_enemies : enemy list -> unit
 end
 
-module Make ( ) : S = struct
+module Make (M : Init) : S = struct
   let t =
-    { deity = Deity.default;
+    { deity = M.deity;
       enemies = [];
       leader = Leader.empty;
       nats = [];
@@ -60,7 +63,6 @@ module Make ( ) : S = struct
   let clr_supp () = t.res <- R.clr_supp t.res
 
   let get_deity () = t.deity
-  let set_deity d = t.deity <- d
 
   let get_nats () = t.nats
   let set_nats ns = t.nats <- Nation.filter ns

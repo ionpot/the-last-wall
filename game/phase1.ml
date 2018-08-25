@@ -1,5 +1,4 @@
 type event =
-  | Deity of Deity.t
   | End
   | Nations of Nation.t list
   | NewLeader of Leader.t
@@ -10,10 +9,11 @@ type event =
 module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
-  let first () = Deity (M.get_deity ())
+  let first () =
+    let deity = M.get_deity () in
+    Starting (Deity.starting deity)
 
   let apply = function
-    | Deity x -> M.set_deity x
     | End -> ()
     | Nations x -> M.set_nats x
     | NewLeader x -> M.set_ldr x
@@ -22,7 +22,6 @@ module Make (M : State.S) : S = struct
     | Support x -> M.add_res (Nation.total_of x)
 
   let next = function
-    | Deity _ -> Starting (Deity.starting (M.get_deity ()))
     | Starting _ -> NewLeader (Leader.make ())
     | NewLeader _ -> Nations (M.get_nats ())
     | Nations _ -> SendScouts (M.is_scouting ())
