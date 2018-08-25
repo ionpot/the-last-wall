@@ -5,8 +5,7 @@ type event =
   | LeaderNew of Leader.t
   | Mercs of Resource.t * bool
   | Nations of Nation.t list
-  | ScoutReport of Enemy.report
-  | ScoutSumReport of Enemy.sum_report
+  | Scout of Scouting.report
   | Starvation of Resource.t
   | Support of Nation.support list
   | Turn of Defs.turn
@@ -15,6 +14,8 @@ type event =
 module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
+  module Scouts = Scouting.Make (M)
+
   let first () =
     let x = M.get_turn () + 1 in
     Turn x
@@ -32,8 +33,7 @@ module Make (M : State.S) : S = struct
     | Mercs (mercs, accept) ->
         if accept then buy_mercs mercs
     | Nations nats -> M.set_nats nats
-    | ScoutReport _
-    | ScoutSumReport _ -> ()
+    | Scout _ -> ()
     | Starvation res ->
         M.sub_res res;
         M.clr_supp ()
@@ -55,15 +55,10 @@ module Make (M : State.S) : S = struct
     let ls = M.get_nats () |> Nation.support_of_list in
     Support (ldr_res_bonus () |> Nation.apply_bonus ls)
 
-  let scouting_cost () =
-    if M.is_scouting ()
-    then Resource.of_supp 10
-    else Resource.empty
-
   let to_upkeep () =
     let res = M.get_res () in
     let x = Resource.manp2supp res in
-    let y = scouting_cost () in
+    let y = Scouts.get_cost () in
     Upkeep Resource.(x ++ y)
 
   let check_blessing () =
@@ -77,17 +72,11 @@ module Make (M : State.S) : S = struct
     | Some res -> Mercs (res, false)
     | None -> End
 
-  let check_report () =
-    let e = M.get_enemies () in
-    if M.is_scouting ()
-    then ScoutReport (Enemy.report_of e)
-    else ScoutSumReport (Enemy.sum_report_of e)
-
   let check_starvation () =
     let res = Resource.mis_supp (M.get_res ()) in
     if res = Resource.empty
     then Starvation Resource.(supp2manp res)
-    else check_report ()
+    else Scout (Scouts.get_report ())
 
   let next = function
     | Turn _ ->
@@ -98,10 +87,9 @@ module Make (M : State.S) : S = struct
     | Upkeep _ -> check_starvation ()
     | Starvation _ ->
         if M.has_manp ()
-        then check_report ()
+        then Scout (Scouts.get_report ())
         else Defeat
-    | ScoutReport _
-    | ScoutSumReport _ -> Nations (M.get_nats ())
+    | Scout _ -> Nations (M.get_nats ())
     | Nations _ -> check_blessing ()
     | Blessing _ -> to_support ()
     | Support _ -> check_mercs ()
