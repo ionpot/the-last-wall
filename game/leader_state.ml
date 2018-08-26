@@ -3,10 +3,10 @@ type t = Alive of Leader.t | Wait of Defs.turn
 let empty = Wait 0
 let dead = Wait 1
 
-let leader_of = function
+let get = function
   | Alive ldr -> Some ldr
   | Wait _ -> None
-let of_leader ldr = Alive ldr
+let make ldr = Alive ldr
 let need t = t = Wait 0
 let tick = function
   | Alive _

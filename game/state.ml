@@ -68,8 +68,8 @@ module Make (M : Init) : S = struct
   let get_nats () = t.nats
   let set_nats ns = t.nats <- Nation.filter ns
 
-  let get_ldr () = LeaderS.leader_of t.leader
-  let set_ldr x = t.leader <- LeaderS.of_leader x
+  let get_ldr () = LeaderS.get t.leader
+  let set_ldr x = t.leader <- LeaderS.make x
   let need_ldr () = LeaderS.need t.leader
   let ldr_tick () = t.leader <- LeaderS.tick t.leader
   let ldr_died () = t.leader <- LeaderS.dead
