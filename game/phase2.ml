@@ -81,7 +81,7 @@ module Make (M : State.S) : S = struct
   let next = function
     | Turn _ ->
         if M.need_ldr ()
-        then LeaderNew (Leader.make ())
+        then LeaderNew (Leader.random ())
         else to_upkeep ()
     | LeaderNew _ -> to_upkeep ()
     | Upkeep _ -> check_starvation ()

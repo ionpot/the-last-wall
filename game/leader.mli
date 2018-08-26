@@ -4,7 +4,8 @@ type level = int
 type loss = Resource.t
 type charisma = int
 
-val make : unit -> t
+val make : ltype -> t
+val random : unit -> t
 val lives : unit -> bool
 val won : t -> unit
 val can_lvup : t -> bool

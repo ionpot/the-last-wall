@@ -22,7 +22,7 @@ module Make (M : State.S) : S = struct
     | Support x -> M.add_res (Nation.total_of x)
 
   let next = function
-    | Starting _ -> NewLeader (Leader.make ())
+    | Starting _ -> NewLeader (Leader.random ())
     | NewLeader _ -> Nations (M.get_nats ())
     | Nations _ -> SendScouts (M.is_scouting ())
     | SendScouts _ -> Support (Nation.support_of_list (M.get_nats ()))

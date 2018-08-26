@@ -11,6 +11,8 @@ type t =
     xp : int ref
   }
 
+let ltypes = [Aristocrat; Expert; Warrior]
+
 let mod_of cha =
   (cha - 10) / 2
 
@@ -24,16 +26,17 @@ let resource_of cha = function
   | Expert -> Resource.of_supp (2 * cha)
   | Warrior -> Resource.empty
 
-let ltypes = [Aristocrat; Expert; Warrior]
-
-let make () =
+let make ltype =
   let lv = Dice.between 3 5 in
-  { ltype = Listx.pick_from ltypes;
+  { ltype;
     level = lv;
     cha_base = Dice.between 10 15;
     cha_extra = (lv / 4);
     xp = ref 0
   }
+
+let random () =
+  make (Listx.pick_from ltypes)
 
 let lives () =
   Dice.chance 0.95
