@@ -1,5 +1,6 @@
 open Defs
 
+module LeaderS = Leader_state
 module R = Resource
 
 type enemy = Enemy.party
@@ -7,7 +8,7 @@ type enemy = Enemy.party
 type t =
   { deity : Deity.t;
     mutable enemies : enemy list;
-    mutable leader : Leader.state;
+    mutable leader : LeaderS.t;
     mutable nats : Nation.t list;
     mutable res : R.t;
     mutable scouting : bool;
@@ -45,7 +46,7 @@ module Make (M : Init) : S = struct
   let t =
     { deity = M.deity;
       enemies = [];
-      leader = Leader.empty;
+      leader = LeaderS.empty;
       nats = [];
       res = R.empty;
       scouting = false;
@@ -67,11 +68,11 @@ module Make (M : Init) : S = struct
   let get_nats () = t.nats
   let set_nats ns = t.nats <- Nation.filter ns
 
-  let get_ldr () = Leader.of_state t.leader
-  let set_ldr x = t.leader <- Leader.state_of x
-  let need_ldr () = Leader.need t.leader
-  let ldr_tick () = t.leader <- Leader.tick t.leader
-  let ldr_died () = t.leader <- Leader.dead
+  let get_ldr () = LeaderS.leader_of t.leader
+  let set_ldr x = t.leader <- LeaderS.of_leader x
+  let need_ldr () = LeaderS.need t.leader
+  let ldr_tick () = t.leader <- LeaderS.tick t.leader
+  let ldr_died () = t.leader <- LeaderS.dead
 
   let is_scouting () = t.scouting
   let set_scouting x = t.scouting <- x

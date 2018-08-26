@@ -1,19 +1,8 @@
-open Defs
-
 type t
-type state
 type ltype = Aristocrat | Expert | Warrior
 type level = int
 type loss = Resource.t
 type charisma = int
-
-val empty : state
-val dead : state
-
-val of_state : state -> t option
-val state_of : t -> state
-val need : state -> bool
-val tick : state -> state
 
 val make : unit -> t
 val lives : unit -> bool

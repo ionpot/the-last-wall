@@ -11,21 +11,6 @@ type t =
     xp : int ref
   }
 
-type state = Alive of t | Wait of Defs.turn
-
-let empty = Wait 0
-let dead = Wait 1
-
-let of_state = function
-  | Alive ldr -> Some ldr
-  | Wait _ -> None
-let state_of ldr = Alive ldr
-let need state = state = Wait 0
-let tick = function
-  | Alive _
-  | Wait 0 as x -> x
-  | Wait x -> Wait (x - 1)
-
 let mod_of cha =
   (cha - 10) / 2
 
