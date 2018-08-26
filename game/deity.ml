@@ -2,8 +2,6 @@ open Resource
 
 type t = Arnerula | Elanis | Lerota | Sekrefir | Sitera
 
-let default = Sekrefir
-
 let t_list = [Arnerula; Elanis; Lerota; Sekrefir; Sitera]
 
 let roll = Dice.between
