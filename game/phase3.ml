@@ -1,10 +1,11 @@
+module CL = Check_leader
+
 type event =
   | Attack of Enemy.party list
   | Casualty of Resource.t
   | Defeat
   | End
-  | LeaderDied of Leader.t
-  | LeaderLvup of Leader.t
+  | Leader of CL.event
   | SendScouts of bool
   | Smite of Enemy.party
   | Victory
@@ -13,6 +14,7 @@ module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
   module Divine = Check_divine.Make (M)
+  module Ldr = CL.Make (M)
 
   let ask_scouting () =
     SendScouts (M.is_scouting ())
@@ -32,8 +34,8 @@ module Make (M : State.S) : S = struct
     | Casualty res -> M.sub_res res
     | Defeat
     | End -> ()
-    | LeaderDied _ -> M.ldr_died ()
-    | LeaderLvup ldr -> M.set_ldr ldr
+    | Leader CL.Died _ -> M.ldr_died ()
+    | Leader CL.LvUp ldr -> M.set_ldr ldr
     | SendScouts yes -> M.set_scouting yes
     | Smite party ->
         M.get_enemies ()
@@ -59,24 +61,14 @@ module Make (M : State.S) : S = struct
     | Some party -> Smite party
     | None -> to_casualty enemies
 
-  let check_lvup ldr =
-    if Leader.can_lvup ldr
-    then LeaderLvup (Leader.lvup ldr)
-    else ask_scouting ()
-
-  let check_ldr_survives ldr =
-    if Leader.lives ()
-    then check_lvup ldr
-    else LeaderDied ldr
-
-  let check_ldr () =
-    match M.get_ldr () with
-    | Some ldr -> check_ldr_survives ldr
-    | None -> ask_scouting ()
-
   let is_victory casualty =
     let res = M.get_res () in
     Resource.(has_manp (res -- casualty))
+
+  let check_ldr () =
+    match Ldr.check () with
+    | Some x -> Leader x
+    | None -> ask_scouting ()
 
   let next = function
     | Attack enemies -> check_smite enemies
@@ -84,8 +76,7 @@ module Make (M : State.S) : S = struct
     | Casualty res ->
         if is_victory res then Victory else Defeat
     | Victory -> check_ldr ()
-    | LeaderLvup _
-    | LeaderDied _ -> ask_scouting ()
+    | Leader _ -> ask_scouting ()
     | SendScouts _
     | Defeat
     | End -> End
