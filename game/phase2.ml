@@ -14,6 +14,7 @@ type event =
 module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
+  module Divine = Divine.Make (M)
   module Scouting = Scouting.Make (M)
   module Upkeep = Upkeep.Make (M)
   module Support = Support.Make (M)
@@ -55,8 +56,7 @@ module Make (M : State.S) : S = struct
     Upkeep (Upkeep.get ())
 
   let check_blessing () =
-    let deity = M.get_deity () in
-    match Deity.blessing_of deity with
+    match Divine.blessing () with
     | Some res -> Blessing res
     | None -> to_support ()
 

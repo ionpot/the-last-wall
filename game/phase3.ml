@@ -12,6 +12,7 @@ type event =
 module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
+  module Divine = Divine.Make (M)
 
   let ask_scouting () =
     SendScouts (M.is_scouting ())
@@ -54,7 +55,7 @@ module Make (M : State.S) : S = struct
     Casualty (casualty_from enemies)
 
   let check_smite enemies =
-    match Enemy.smite enemies with
+    match Divine.smite enemies with
     | Some party -> Smite party
     | None -> to_casualty enemies
 
@@ -78,10 +79,7 @@ module Make (M : State.S) : S = struct
     Resource.(has_manp (res -- casualty))
 
   let next = function
-    | Attack enemies ->
-        if M.get_deity () = Deity.Lerota
-        then check_smite enemies
-        else to_casualty enemies
+    | Attack enemies -> check_smite enemies
     | Smite _ -> to_casualty @@ M.get_enemies ()
     | Casualty res ->
         if is_victory res then Victory else Defeat
