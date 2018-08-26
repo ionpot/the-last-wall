@@ -8,6 +8,8 @@ type event =
 module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
+  module Support = Check_support.Make (M)
+
   let first () =
     let deity = M.get_deity () in
     Starting (Deity.starting deity)
@@ -22,7 +24,7 @@ module Make (M : State.S) : S = struct
   let next = function
     | Starting _ -> Nations (M.get_nats ())
     | Nations _ -> SendScouts (M.is_scouting ())
-    | SendScouts _ -> Support (Nation.support_of_list (M.get_nats ()))
+    | SendScouts _ -> Support (Support.get ())
     | Support _
     | End -> End
 end
