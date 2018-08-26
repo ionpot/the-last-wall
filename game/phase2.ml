@@ -16,6 +16,7 @@ module type S = Phase.S with type event_def := event
 module Make (M : State.S) : S = struct
   module Scouts = Scouting.Make (M)
   module Up = Upkeep.Make (M)
+  module Support = Support.Make (M)
 
   let first () =
     let x = M.get_turn () + 1 in
@@ -47,14 +48,8 @@ module Make (M : State.S) : S = struct
         M.set_enemies (Enemy.spawn x)
     | Upkeep res -> M.sub_res res
 
-  let ldr_res_bonus () =
-    match M.get_ldr () with
-    | Some ldr -> Leader.res_bonus_of ldr
-    | None -> Resource.empty
-
   let to_support () =
-    let ls = M.get_nats () |> Nation.support_of_list in
-    Support (ldr_res_bonus () |> Nation.apply_bonus ls)
+    Support (Support.get ())
 
   let to_upkeep () =
     Upkeep (Up.get ())
