@@ -13,6 +13,7 @@ type event =
 module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
+  module Casualty = Check_casualty.Make (M)
   module Divine = Check_divine.Make (M)
   module Ldr = CL.Make (M)
 
@@ -43,26 +44,15 @@ module Make (M : State.S) : S = struct
         |> M.set_enemies
     | Victory -> leader_won (M.get_ldr ())
 
-  let mitigate loss ldr =
-    let x = Leader.mitigate loss ldr in
-    Resource.(loss -- x)
-
-  let casualty_from enemies =
-    let loss = Enemy.damage enemies in
-    match M.get_ldr () with
-    | Some ldr -> mitigate loss ldr
-    | None -> loss
-
-  let to_casualty enemies =
-    Casualty (casualty_from enemies)
+  let check_casualty enemies =
+    match Casualty.check enemies with
+    | Some x -> Casualty x
+    | None -> ask_scouting ()
 
   let check_smite enemies =
     match Divine.smite enemies with
     | Some party -> Smite party
-    | None -> to_casualty enemies
-
-  let is_victory () =
-    Resource.has_manp (M.get_res ())
+    | None -> check_casualty enemies
 
   let check_ldr () =
     match Ldr.check () with
@@ -71,9 +61,9 @@ module Make (M : State.S) : S = struct
 
   let next = function
     | Attack enemies -> check_smite enemies
-    | Smite _ -> to_casualty @@ M.get_enemies ()
+    | Smite _ -> check_casualty (M.get_enemies ())
     | Casualty _ ->
-        if is_victory () then Victory else Defeat
+        if Casualty.is_victory () then Victory else Defeat
     | Victory -> check_ldr ()
     | Leader _ -> ask_scouting ()
     | SendScouts _
