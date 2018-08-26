@@ -15,6 +15,7 @@ module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
   module Scouts = Scouting.Make (M)
+  module Up = Upkeep.Make (M)
 
   let first () =
     let x = M.get_turn () + 1 in
@@ -56,10 +57,7 @@ module Make (M : State.S) : S = struct
     Support (ldr_res_bonus () |> Nation.apply_bonus ls)
 
   let to_upkeep () =
-    let res = M.get_res () in
-    let x = Resource.manp2supp res in
-    let y = Scouts.get_cost () in
-    Upkeep Resource.(x ++ y)
+    Upkeep (Up.get ())
 
   let check_blessing () =
     let deity = M.get_deity () in
@@ -73,10 +71,9 @@ module Make (M : State.S) : S = struct
     | None -> End
 
   let check_starvation () =
-    let res = Resource.mis_supp (M.get_res ()) in
-    if res = Resource.empty
-    then Starvation Resource.(supp2manp res)
-    else Scout (Scouts.get_report ())
+    match Up.get_starvation () with
+    | Some res -> Starvation res
+    | None -> Scout (Scouts.get_report ())
 
   let next = function
     | Turn _ ->
