@@ -16,8 +16,8 @@ module type S = Phase.S with type event_def := event
 module Make (M : State.S) : S = struct
   module Divine = Divine.Make (M)
   module Scouting = Scouting.Make (M)
-  module Upkeep = Upkeep.Make (M)
   module Support = Support.Make (M)
+  module Upkeep = Upkeep.Make (M)
 
   let first () =
     let x = M.get_turn () + 1 in
