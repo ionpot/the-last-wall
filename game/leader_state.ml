@@ -1,6 +1,5 @@
 type t = Alive of Leader.t | Wait of Defs.turn
 
-let empty = Wait 0
 let dead = Wait 1
 
 let get = function

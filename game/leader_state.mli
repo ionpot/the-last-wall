@@ -1,6 +1,5 @@
 type t
 
-val empty : t
 val dead : t
 
 val get : t -> Leader.t option

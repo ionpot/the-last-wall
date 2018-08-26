@@ -17,6 +17,7 @@ type t =
 
 module type Init = sig
   val deity : Deity.t
+  val leader : Leader.t
 end
 
 module type S = sig
@@ -46,7 +47,7 @@ module Make (M : Init) : S = struct
   let t =
     { deity = M.deity;
       enemies = [];
-      leader = LeaderS.empty;
+      leader = LeaderS.make M.leader;
       nats = [];
       res = R.empty;
       scouting = false;
