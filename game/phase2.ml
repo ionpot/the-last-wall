@@ -14,8 +14,8 @@ type event =
 module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
-  module Scouts = Scouting.Make (M)
-  module Up = Upkeep.Make (M)
+  module Scouting = Scouting.Make (M)
+  module Upkeep = Upkeep.Make (M)
   module Support = Support.Make (M)
 
   let first () =
@@ -52,7 +52,7 @@ module Make (M : State.S) : S = struct
     Support (Support.get ())
 
   let to_upkeep () =
-    Upkeep (Up.get ())
+    Upkeep (Upkeep.get ())
 
   let check_blessing () =
     let deity = M.get_deity () in
@@ -66,9 +66,9 @@ module Make (M : State.S) : S = struct
     | None -> End
 
   let check_starvation () =
-    match Up.get_starvation () with
+    match Upkeep.get_starvation () with
     | Some res -> Starvation res
-    | None -> Scout (Scouts.get_report ())
+    | None -> Scout (Scouting.get_report ())
 
   let next = function
     | Turn _ ->
@@ -79,7 +79,7 @@ module Make (M : State.S) : S = struct
     | Upkeep _ -> check_starvation ()
     | Starvation _ ->
         if M.has_manp ()
-        then Scout (Scouts.get_report ())
+        then Scout (Scouting.get_report ())
         else Defeat
     | Scout _ -> Nations (M.get_nats ())
     | Nations _ -> check_blessing ()

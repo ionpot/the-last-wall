@@ -1,10 +1,10 @@
 module Make (M : State.S) = struct
-  module Scouts = Scouting.Make (M)
+  module Scouting = Scouting.Make (M)
 
   let get () =
     let res = M.get_res () in
     let x = Resource.manp2supp res in
-    let y = Scouts.get_cost () in
+    let y = Scouting.get_cost () in
     Resource.(x ++ y)
 
   let get_starvation () =
