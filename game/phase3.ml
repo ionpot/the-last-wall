@@ -61,9 +61,8 @@ module Make (M : State.S) : S = struct
     | Some party -> Smite party
     | None -> to_casualty enemies
 
-  let is_victory casualty =
-    let res = M.get_res () in
-    Resource.(has_manp (res -- casualty))
+  let is_victory () =
+    Resource.has_manp (M.get_res ())
 
   let check_ldr () =
     match Ldr.check () with
@@ -73,8 +72,8 @@ module Make (M : State.S) : S = struct
   let next = function
     | Attack enemies -> check_smite enemies
     | Smite _ -> to_casualty @@ M.get_enemies ()
-    | Casualty res ->
-        if is_victory res then Victory else Defeat
+    | Casualty _ ->
+        if is_victory () then Victory else Defeat
     | Victory -> check_ldr ()
     | Leader _ -> ask_scouting ()
     | SendScouts _
