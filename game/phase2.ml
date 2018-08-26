@@ -49,6 +49,9 @@ module Make (M : State.S) : S = struct
         M.set_enemies (Enemy.spawn x)
     | Upkeep res -> M.sub_res res
 
+  let to_scouting () =
+    Scout (Scouting.get_report ())
+
   let to_support () =
     Support (Support.get ())
 
@@ -60,6 +63,16 @@ module Make (M : State.S) : S = struct
     | Some res -> Blessing res
     | None -> to_support ()
 
+  let check_defeat () =
+    if M.has_manp ()
+    then to_scouting ()
+    else Defeat
+
+  let check_leader () =
+    if M.need_ldr ()
+    then LeaderNew (Leader.random ())
+    else to_upkeep ()
+
   let check_mercs () =
     match Merc.roll () with
     | Some res -> Mercs (res, false)
@@ -68,19 +81,13 @@ module Make (M : State.S) : S = struct
   let check_starvation () =
     match Upkeep.get_starvation () with
     | Some res -> Starvation res
-    | None -> Scout (Scouting.get_report ())
+    | None -> to_scouting ()
 
   let next = function
-    | Turn _ ->
-        if M.need_ldr ()
-        then LeaderNew (Leader.random ())
-        else to_upkeep ()
+    | Turn _ -> check_leader ()
     | LeaderNew _ -> to_upkeep ()
     | Upkeep _ -> check_starvation ()
-    | Starvation _ ->
-        if M.has_manp ()
-        then Scout (Scouting.get_report ())
-        else Defeat
+    | Starvation _ -> check_defeat ()
     | Scout _ -> Nations (M.get_nats ())
     | Nations _ -> check_blessing ()
     | Blessing _ -> to_support ()
