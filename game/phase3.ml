@@ -12,7 +12,7 @@ type event =
 module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
-  module Divine = Divine.Make (M)
+  module Divine = Check_divine.Make (M)
 
   let ask_scouting () =
     SendScouts (M.is_scouting ())

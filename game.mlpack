@@ -1,6 +1,9 @@
+Check_divine
+Check_scouting
+Check_support
+Check_upkeep
 Defs
 Deity
-Divine
 Enemy
 Leader
 Leader_state
@@ -12,7 +15,4 @@ Phase1
 Phase2
 Phase3
 Resource
-Scouting
 State
-Support
-Upkeep

@@ -5,7 +5,7 @@ type event =
   | LeaderNew of Leader.t
   | Mercs of Resource.t * bool
   | Nations of Nation.t list
-  | Scout of Scouting.report
+  | Scout of Check_scouting.report
   | Starvation of Resource.t
   | Support of Nation.support list
   | Turn of Defs.turn
@@ -14,10 +14,10 @@ type event =
 module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
-  module Divine = Divine.Make (M)
-  module Scouting = Scouting.Make (M)
-  module Support = Support.Make (M)
-  module Upkeep = Upkeep.Make (M)
+  module Divine = Check_divine.Make (M)
+  module Scouting = Check_scouting.Make (M)
+  module Support = Check_support.Make (M)
+  module Upkeep = Check_upkeep.Make (M)
 
   let first () =
     let x = M.get_turn () + 1 in
