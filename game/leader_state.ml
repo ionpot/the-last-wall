@@ -12,5 +12,3 @@ let tick = function
   | Alive _
   | Wait 0 as x -> x
   | Wait x -> Wait (x - 1)
-
-
