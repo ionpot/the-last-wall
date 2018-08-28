@@ -47,7 +47,7 @@ module Make (M : State.S) : S = struct
         |> M.add_res
     | Turn x ->
         M.set_turn x;
-        M.bld_manp ();
+        M.bld_tick ();
         M.ldr_tick ();
         M.set_enemies (Enemy.spawn x)
     | Upkeep res -> M.sub_res res
