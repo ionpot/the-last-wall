@@ -17,7 +17,7 @@ module Make (M : State.S) : S = struct
 
   let apply = function
     | Build x -> M.build x
-    | End -> M.bld_manp ()
+    | End -> ()
     | Nations x -> M.set_nats x
     | SendScouts x -> M.set_scouting x
     | Starting x -> M.add_res x
