@@ -1,4 +1,5 @@
 type event =
+  | Build of Building.t list
   | End
   | Nations of Nation.t list
   | SendScouts of bool
@@ -15,7 +16,8 @@ module Make (M : State.S) : S = struct
     Starting (Deity.starting deity)
 
   let apply = function
-    | End -> ()
+    | Build x -> M.build x
+    | End -> M.bld_manp ()
     | Nations x -> M.set_nats x
     | SendScouts x -> M.set_scouting x
     | Starting x -> M.add_res x
@@ -25,6 +27,7 @@ module Make (M : State.S) : S = struct
     | Starting _ -> Nations (M.get_nats ())
     | Nations _ -> SendScouts (M.is_scouting ())
     | SendScouts _ -> Support (Support.get ())
-    | Support _
+    | Support _ -> Build []
+    | Build _
     | End -> End
 end
