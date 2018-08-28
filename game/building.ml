@@ -23,13 +23,18 @@ let is_t t (x, _) = x = t
 let in_state state t =
   List.exists (is_t t) state
 
+let deduce_manp res r =
+  let new_res, new_r = Resource.deduce_manp res r in
+  if new_r = Resource.empty
+  then new_res, Built
+  else new_res, Waiting new_r
+
 let advance res = function
   | Absent -> res, Absent
   | Waiting r ->
-      let new_res, new_r = Resource.deduce_manp res r in
-      if new_r = Resource.empty
-      then new_res, Built
-      else new_res, Waiting new_r
+      if Resource.has_supp r
+      then res, Waiting r
+      else deduce_manp res r
   | Built
   | Ready -> res, Ready
 
