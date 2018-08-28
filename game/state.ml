@@ -6,7 +6,8 @@ module R = Resource
 type enemy = Enemy.party
 
 type t =
-  { deity : Deity.t;
+  { mutable builds : Building.state;
+    deity : Deity.t;
     mutable enemies : enemy list;
     mutable leader : LeaderS.t;
     mutable nats : Nation.t list;
@@ -21,6 +22,11 @@ module type Init = sig
 end
 
 module type S = sig
+  val get_bld : unit -> Building.state
+  val build : Building.t list -> unit
+  val bld_report : unit -> Building.report
+  val bld_manp : unit -> unit
+  val bld_supp : unit -> unit
   val get_turn : unit -> turn
   val set_turn : turn -> unit
   val get_res : unit -> R.t
@@ -45,7 +51,8 @@ end
 
 module Make (M : Init) : S = struct
   let t =
-    { deity = M.deity;
+    { builds = Building.initial;
+      deity = M.deity;
       enemies = [];
       leader = LeaderS.make M.leader;
       nats = [];
@@ -53,6 +60,16 @@ module Make (M : Init) : S = struct
       scouting = false;
       turn = 0
     }
+
+  let get_bld () = t.builds
+  let build ls = t.builds <- Building.build ls t.builds
+  let bld_ready b = Building.is_ready b t.builds
+  let bld_report () = Building.report_of t.builds
+  let bld_manp () =
+    t.builds <- Building.apply_manp t.res t.builds
+  let bld_supp () =
+    let r, b = Building.draw_supp t.res t.builds in
+    t.res <- r; t.builds <- b
 
   let get_turn () = t.turn
   let set_turn x = t.turn <- x
