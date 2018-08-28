@@ -38,12 +38,11 @@ let advance res = function
   | Built
   | Ready -> res, Ready
 
-let rec apply_manp state res =
-  match state with
+let rec apply_manp res = function
   | [] -> []
   | (t, s) :: rest ->
       let new_res, new_s = advance res s in
-      (t, new_s) :: apply_manp rest new_res
+      (t, new_s) :: apply_manp new_res rest
 
 let apply_supp res = function
   | Waiting r ->
