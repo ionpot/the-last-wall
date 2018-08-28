@@ -50,15 +50,6 @@ let apply_supp res = function
       new_res, Waiting new_r
   | x -> res, x
 
-let cost_of t =
-  let a, b = cost_pair_of t in
-  Resource.(empty <+ a <+ b)
-
-let build ls state =
-  List.filter (fun x -> not @@ in_state state x) ls
-  |> List.map (fun t -> t, Waiting (cost_of t))
-  |> List.append state
-
 let draw_supp res state =
   let f (r, new_state) (t, status) =
     let rem, new_status = apply_supp r status in
@@ -66,6 +57,18 @@ let draw_supp res state =
   in
   let (r, s) = List.fold_left f (res, []) state in
   r, List.rev s
+
+let cost_of t =
+  let a, b = cost_pair_of t in
+  Resource.(empty <+ a <+ b)
+
+let add ls state =
+  List.filter (fun x -> not @@ in_state state x) ls
+  |> List.map (fun t -> t, Waiting (cost_of t))
+  |> List.append state
+
+let build ls res state =
+  add ls state |> draw_supp res
 
 let is_ready t state =
   List.exists ((=) (t, Ready)) state

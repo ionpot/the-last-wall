@@ -26,7 +26,6 @@ module type S = sig
   val build : Building.t list -> unit
   val bld_report : unit -> Building.report
   val bld_manp : unit -> unit
-  val bld_supp : unit -> unit
   val get_turn : unit -> turn
   val set_turn : turn -> unit
   val get_res : unit -> R.t
@@ -62,13 +61,12 @@ module Make (M : Init) : S = struct
     }
 
   let get_bld () = t.builds
-  let build ls = t.builds <- Building.build ls t.builds
   let bld_ready b = Building.is_ready b t.builds
   let bld_report () = Building.report_of t.builds
   let bld_manp () =
     t.builds <- Building.apply_manp t.res t.builds
-  let bld_supp () =
-    let r, b = Building.draw_supp t.res t.builds in
+  let build ls =
+    let r, b = Building.build ls t.res t.builds in
     t.res <- r; t.builds <- b
 
   let get_turn () = t.turn
