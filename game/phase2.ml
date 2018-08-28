@@ -1,5 +1,6 @@
 type event =
   | Blessing of Resource.t
+  | Build of Building.t list
   | Defeat
   | End
   | LeaderNew of Leader.t
@@ -30,6 +31,7 @@ module Make (M : State.S) : S = struct
 
   let apply = function
     | Blessing res -> M.add_res res
+    | Build x -> M.build x
     | Defeat
     | End -> ()
     | LeaderNew ldr -> M.set_ldr ldr
@@ -45,6 +47,7 @@ module Make (M : State.S) : S = struct
         |> M.add_res
     | Turn x ->
         M.set_turn x;
+        M.bld_manp ();
         M.ldr_tick ();
         M.set_enemies (Enemy.spawn x)
     | Upkeep res -> M.sub_res res
@@ -91,7 +94,8 @@ module Make (M : State.S) : S = struct
     | Scout _ -> Nations (M.get_nats ())
     | Nations _ -> check_blessing ()
     | Blessing _ -> to_support ()
-    | Support _ -> check_mercs ()
+    | Support _ -> Build []
+    | Build _ -> check_mercs ()
     | Mercs _
     | Defeat
     | End -> End
