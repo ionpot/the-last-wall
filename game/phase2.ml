@@ -31,7 +31,7 @@ module Make (M : State.S) : S = struct
 
   let apply = function
     | Blessing res -> M.add_res res
-    | Build x -> M.build x
+    | Build x -> M.build x; M.bld_supp ()
     | Defeat
     | End -> ()
     | LeaderNew ldr -> M.set_ldr ldr
