@@ -1,4 +1,4 @@
-type t = Market | Tavern | Temple | Stable
+type t = Market | Stable | Tavern | Temple
 type status =
   | Absent
   | Waiting of Resource.t
@@ -8,15 +8,15 @@ type report = (t * status) list
 type state = report
 
 let initial = [Tavern, Ready]
-let tlist = [Market; Tavern; Temple; Stable]
+let tlist = [Market; Stable; Tavern; Temple]
 
 let cost_pair_of =
   let open Resource in
   function
   | Market -> Manpwr 48, Supply 53
+  | Stable -> Manpwr 49, Supply 54
   | Tavern -> Manpwr 0, Supply 0
   | Temple -> Manpwr 29, Supply 28
-  | Stable -> Manpwr 49, Supply 54
 
 let is_t t (x, _) = x = t
 

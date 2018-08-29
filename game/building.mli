@@ -1,4 +1,4 @@
-type t = Market | Tavern | Temple | Stable
+type t = Market | Stable | Tavern | Temple
 type status =
   | Absent
   | Waiting of Resource.t
