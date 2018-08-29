@@ -16,7 +16,7 @@ let resource_of = function
   | Arnerula -> empty <+ rand 0 30
   | Elanis -> empty <+ Manpwr (roll 10 20)
   | Lerota -> empty
-  | Sekrefir -> empty <+ Manpwr (roll 0 10) <+ Supply (roll 0 10)
+  | Sekrefir -> empty <+ Manpwr 5 <+ Supply 10
   | Sitera -> empty <+ Supply (roll 10 20)
 
 let blessing_of deity =
