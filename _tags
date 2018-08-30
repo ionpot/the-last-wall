@@ -1,2 +1,3 @@
 "util": include
 <game/*.ml>: for-pack(Game)
+<main.*>: use_str

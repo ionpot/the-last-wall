@@ -8,6 +8,10 @@ type sum_report = (count * t list)
 
 val t_list : t list
 
+val make : count -> t -> party
+
+val power_of : t -> float
+
 val count_of : party -> count
 val type_of : party -> t
 

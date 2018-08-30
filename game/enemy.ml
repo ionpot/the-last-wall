@@ -25,6 +25,7 @@ let power_of = function
   | Orc -> 0.5
   | Demon -> 2.0
 
+let make c t = t, c
 let count_of party = snd party
 let type_of party = fst party
 
