@@ -1,5 +1,5 @@
 module Make (M : State.S) = struct
-  module Scouting = Check_scouting.Make (M)
+  module Scouting = Check_scouting.Make(M)
 
   let get () =
     let res = M.get_res () in

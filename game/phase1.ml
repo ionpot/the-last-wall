@@ -9,7 +9,7 @@ type event =
 module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
-  module Support = Check_support.Make (M)
+  module Support = Check_support.Make(M)
 
   let first () =
     let deity = M.get_deity () in

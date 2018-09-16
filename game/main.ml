@@ -10,9 +10,9 @@ module type S = sig
 end
 
 module Make (M : State.S) : S = struct
-  module P1 = Phase1.Make (M)
-  module P2 = Phase2.Make (M)
-  module P3 = Phase3.Make (M)
+  module P1 = Phase1.Make(M)
+  module P2 = Phase2.Make(M)
+  module P3 = Phase3.Make(M)
 
   let apply = function
     | Ph1 x -> P1.apply x

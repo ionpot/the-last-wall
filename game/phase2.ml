@@ -15,10 +15,10 @@ type event =
 module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
-  module Divine = Check_divine.Make (M)
-  module Scouting = Check_scouting.Make (M)
-  module Support = Check_support.Make (M)
-  module Upkeep = Check_upkeep.Make (M)
+  module Divine = Check_divine.Make(M)
+  module Scouting = Check_scouting.Make(M)
+  module Support = Check_support.Make(M)
+  module Upkeep = Check_upkeep.Make(M)
 
   let first () =
     let x = M.get_turn () + 1 in
