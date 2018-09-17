@@ -22,16 +22,12 @@ let clr_supp (x, _) = (x, 0)
 let manp2supp (x, _) = (0, x)
 let supp2manp (_, x) = (x, 0)
 
-let deduce a b =
-  let d = a - b in
-  if d > 0 then d, 0 else 0, abs d
-
 let deduce_manp a b =
-  let x, y = deduce (manp_of a) (manp_of b) in
+  let x, y = Number.deduce (manp_of a) (manp_of b) in
   set_manp a x, set_manp b y
 
 let deduce_supp a b =
-  let x, y = deduce (supp_of a) (supp_of b) in
+  let x, y = Number.deduce (supp_of a) (supp_of b) in
   set_supp a x, set_supp b y
 
 let (<+) t = function
