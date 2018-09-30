@@ -1,23 +1,18 @@
 module B = Building
-module C = Construction
 module S = Building_status
 
 type t =
   { stats : S.t list;
-    built : C.t Stack.t;
-    queue : C.t Queue.t
+    queue : S.t Queue.t
   }
 
 let make () =
   { stats = List.map S.make B.tlist;
-    built = Stack.create ();
     queue = Queue.create ()
   }
 
 let s_of t b =
-  t.stats
-  |> List.filter (S.is b)
-  |> List.hd
+  List.find (S.is b) t.stats
 
 let count_of b t =
   S.count_of (s_of t b)
@@ -25,37 +20,34 @@ let count_of b t =
 let is_ready b t =
   S.is_ready (s_of t b)
 
-let start t cons =
-  Queue.add cons t.queue;
-  C.start cons
+let start t s =
+  Queue.add s t.queue;
+  S.start s
 
 let build ls t =
   ls |> List.map (s_of t)
   |> List.filter S.can_start
-  |> List.map C.make
   |> List.iter (start t)
 
 let draw f res t =
-  Queue.fold (fun r c -> f r c) res t.queue
+  Queue.fold f res t.queue
 
-let draw_manp = draw C.add_manp
-let draw_supp = draw C.add_supp
+let draw_manp = draw S.add_manp
+let draw_supp = draw S.add_supp
 
-let take_if cond f q =
-  if not (Queue.is_empty q)
-  then
-    if cond (Queue.peek q)
-    then f (Queue.take q)
+let take_if_built q =
+  if (Queue.is_empty q)
+  then None
+  else
+    if S.is_built (Queue.peek q)
+    then Some (Queue.take q)
+    else None
 
-let rec to_built t =
-  take_if C.is_built (fun c ->
-    Stack.push c t.built;
-    to_built t) t.queue
-
-let fin_built t =
-  Stack.iter C.fin t.built;
-  Stack.clear t.built
+let rec take_built q =
+  match take_if_built q with
+  | Some _ -> take_built q
+  | None -> ()
 
 let tick t =
-  fin_built t;
-  to_built t
+  List.iter S.tick t.stats;
+  take_built t.queue
