@@ -21,8 +21,7 @@ module Make (M : State.S) : S = struct
   module Upkeep = Check_upkeep.Make(M)
 
   let first () =
-    let x = M.get_turn () + 1 in
-    Turn x
+    Turn (M.get_turn () + 1)
 
   let buy_mercs mercs =
     let res = M.get_res () in
