@@ -1,11 +1,13 @@
 type event =
   | Blessing of Resource.t
   | Build of Building.t list
+  | Built of Building.t list
   | Defeat
   | End
   | LeaderNew of Leader.t
   | Mercs of Resource.t * bool
   | Nations of Nation.t list
+  | Needs of Buildings.queued list
   | Scout of Check_scouting.report
   | Starvation of Resource.t
   | Support of Nation.support list
@@ -31,12 +33,14 @@ module Make (M : State.S) : S = struct
   let apply = function
     | Blessing res -> M.add_res res
     | Build x -> M.build x; M.bld_supp ()
+    | Built _
     | Defeat
     | End -> ()
     | LeaderNew ldr -> M.set_ldr ldr
     | Mercs (mercs, accept) ->
         if accept then buy_mercs mercs
     | Nations nats -> M.set_nats nats
+    | Needs _
     | Scout _ -> ()
     | Starvation res ->
         M.sub_res res;
@@ -47,7 +51,6 @@ module Make (M : State.S) : S = struct
     | Turn x ->
         M.set_turn x;
         M.bld_manp ();
-        M.bld_tick ();
         M.ldr_tick ();
         M.set_enemies (Enemy.spawn x)
     | Upkeep res -> M.sub_res res
@@ -76,6 +79,16 @@ module Make (M : State.S) : S = struct
     then LeaderNew (Leader.random ())
     else to_upkeep ()
 
+  let check_needs () =
+    match M.bld_needs () with
+    | [] -> check_leader ()
+    | ls -> Needs ls
+
+  let check_built () =
+    match M.bld_done () with
+    | [] -> check_needs ()
+    | ls -> Built ls
+
   let check_mercs () =
     match Merc.roll () with
     | Some res -> Mercs (res, false)
@@ -87,7 +100,9 @@ module Make (M : State.S) : S = struct
     | None -> to_scouting ()
 
   let next = function
-    | Turn _ -> check_leader ()
+    | Turn _ -> check_built ()
+    | Built _ -> check_needs ()
+    | Needs _ -> check_leader ()
     | LeaderNew _ -> to_upkeep ()
     | Upkeep _ -> check_starvation ()
     | Starvation _ -> check_defeat ()

@@ -24,11 +24,12 @@ end
 
 module type S = sig
   val build : Building.t list -> unit
+  val bld_done : unit -> Building.t list
+  val bld_needs : unit -> B.queued list
   val bld_count : Building.t -> int
   val bld_ready : Building.t -> bool
   val bld_manp : unit -> unit
   val bld_supp : unit -> unit
-  val bld_tick : unit -> unit
   val get_turn : unit -> turn
   val set_turn : turn -> unit
   val get_res : unit -> R.t
@@ -64,6 +65,8 @@ module Make (M : Init) : S = struct
     }
 
   let build ls = B.build ls t.builds
+  let bld_done () = B.tick t.builds
+  let bld_needs () = B.in_queue t.builds
   let bld_count b = B.count_of b t.builds
   let bld_ready b = B.is_ready b t.builds
   let bld_apply f =
@@ -71,7 +74,6 @@ module Make (M : Init) : S = struct
     t.res <- res
   let bld_manp () = bld_apply B.draw_manp
   let bld_supp () = bld_apply B.draw_supp
-  let bld_tick () = B.tick t.builds
 
   let get_turn () = t.turn
   let set_turn x = t.turn <- x

@@ -1,6 +1,7 @@
 module B = Building
 module S = Building_status
 
+type queued = (B.t * Resource.t)
 type t =
   { stats : S.t list;
     queue : S.t Queue.t
@@ -35,6 +36,9 @@ let draw f res t =
 let draw_manp = draw S.add_manp
 let draw_supp = draw S.add_supp
 
+let in_queue t =
+  Queuex.map_to_list (fun s -> S.(which s, cost_of s)) t.queue
+
 let take_if_built q =
   if (Queue.is_empty q)
   then None
@@ -43,11 +47,12 @@ let take_if_built q =
     then Some (Queue.take q)
     else None
 
-let rec take_built q =
+let rec take_built q ls =
   match take_if_built q with
-  | Some _ -> take_built q
-  | None -> ()
+  | Some s -> take_built q (s :: ls)
+  | None -> ls
 
 let tick t =
   List.iter S.tick t.stats;
-  take_built t.queue
+  take_built t.queue []
+  |> List.map S.which
