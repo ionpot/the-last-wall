@@ -37,6 +37,7 @@ module type S = sig
   val set_res : R.t -> unit
   val add_res : R.t -> unit
   val sub_res : R.t -> unit
+  val with_res : (R.t -> 'a) -> 'a
   val has_manp : unit -> bool
   val clr_supp : unit -> unit
   val get_deity : unit -> Deity.t
@@ -84,6 +85,7 @@ module Make (M : Init) : S = struct
   let map_res f = set_res (f t.res)
   let add_res r = t.res <- R.(t.res ++ r)
   let sub_res r = t.res <- R.(t.res -- r)
+  let with_res f = f t.res
   let has_manp () = R.has_manp t.res
   let clr_supp () = t.res <- R.clr_supp t.res
 

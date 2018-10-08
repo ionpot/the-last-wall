@@ -16,5 +16,5 @@ module Make (M : State.S) = struct
     else None
 
   let is_victory () =
-    Resource.has_manp (M.get_res ())
+    M.with_res Resource.has_manp
 end
