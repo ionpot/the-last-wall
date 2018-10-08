@@ -21,10 +21,9 @@ module Make (M : State.S) : S = struct
     SendScouts (M.is_scouting ())
 
   let first () =
-    let enemies = M.get_enemies () in
-    if enemies = []
-    then ask_scouting ()
-    else Attack enemies
+    match M.get_enemies () with
+    | [] -> ask_scouting ()
+    | ls -> Attack ls
 
   let leader_won = function
     | Some ldr -> Leader.won ldr
