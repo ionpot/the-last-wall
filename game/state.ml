@@ -52,6 +52,7 @@ module type S = sig
   val set_scouting : bool -> unit
   val get_enemies : unit -> enemy list
   val set_enemies : enemy list -> unit
+  val map_enemies : (enemy list -> enemy list) -> unit
 end
 
 module Make (M : Init) : S = struct
@@ -105,4 +106,5 @@ module Make (M : Init) : S = struct
 
   let get_enemies () = t.enemies
   let set_enemies x = t.enemies <- x
+  let map_enemies f = set_enemies (f t.enemies)
 end

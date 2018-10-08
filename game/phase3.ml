@@ -38,10 +38,7 @@ module Make (M : State.S) : S = struct
     | Leader CL.Died _ -> M.ldr_died ()
     | Leader CL.LvUp ldr -> M.set_ldr ldr
     | SendScouts yes -> M.set_scouting yes
-    | Smite party ->
-        M.get_enemies ()
-        |> Enemy.reduce party
-        |> M.set_enemies
+    | Smite party -> M.map_enemies (Enemy.reduce party)
     | Victory -> leader_won (M.get_ldr ())
 
   let check_casualty enemies =
