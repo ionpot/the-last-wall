@@ -26,9 +26,7 @@ module Make (M : State.S) : S = struct
     Turn (M.get_turn () + 1)
 
   let buy_mercs mercs =
-    let res = M.get_res () in
-    let new_res = Merc.buy mercs res in
-    M.set_res new_res
+    M.map_res (Merc.buy mercs)
 
   let apply = function
     | Blessing res -> M.add_res res

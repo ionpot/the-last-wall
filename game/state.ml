@@ -33,6 +33,7 @@ module type S = sig
   val get_turn : unit -> turn
   val set_turn : turn -> unit
   val get_res : unit -> R.t
+  val map_res : (R.t -> R.t) -> unit
   val set_res : R.t -> unit
   val add_res : R.t -> unit
   val sub_res : R.t -> unit
@@ -80,6 +81,7 @@ module Make (M : Init) : S = struct
 
   let get_res () = t.res
   let set_res r = t.res <- r
+  let map_res f = set_res (f t.res)
   let add_res r = t.res <- R.(t.res ++ r)
   let sub_res r = t.res <- R.(t.res -- r)
   let has_manp () = R.has_manp t.res
