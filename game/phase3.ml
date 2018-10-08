@@ -58,7 +58,7 @@ module Make (M : State.S) : S = struct
 
   let next = function
     | Attack enemies -> check_smite enemies
-    | Smite _ -> check_casualty (M.get_enemies ())
+    | Smite _ -> M.with_enemies check_casualty
     | Casualty _ ->
         if Casualty.is_victory () then Victory else Defeat
     | Victory -> check_ldr ()

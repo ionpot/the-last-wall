@@ -53,6 +53,7 @@ module type S = sig
   val get_enemies : unit -> enemy list
   val set_enemies : enemy list -> unit
   val map_enemies : (enemy list -> enemy list) -> unit
+  val with_enemies : (enemy list -> 'a) -> 'a
 end
 
 module Make (M : Init) : S = struct
@@ -107,4 +108,5 @@ module Make (M : Init) : S = struct
   let get_enemies () = t.enemies
   let set_enemies x = t.enemies <- x
   let map_enemies f = set_enemies (f t.enemies)
+  let with_enemies f = f t.enemies
 end
