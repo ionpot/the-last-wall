@@ -1,5 +1,4 @@
-type manpower = int
-type supply = int
+open Defs
 
 type t = (manpower * supply)
 

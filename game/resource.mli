@@ -1,6 +1,6 @@
+open Defs
+
 type t
-type manpower = int
-type supply = int
 type kind =
   | Empty
   | Manpwr of manpower
