@@ -5,6 +5,9 @@ let count x xs =
   List.filter ((=) x) xs
   |> List.length
 
+let discard f ls =
+  List.filter (fun x -> not (f x)) ls
+
 let pick_first i =
   let f ls n =
     if List.length ls < i

@@ -11,7 +11,7 @@ type t =
 
 let make () =
   { built = [];
-    ignored = [];
+    ignored = Listx.discard B.multiple B.ready;
     queue = Q.empty;
     ready = B.ready
   }
