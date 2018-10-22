@@ -7,7 +7,7 @@ module R = Resource
 type enemy = Enemy.party
 
 type t =
-  { builds : B.t;
+  { mutable builds : B.t;
     deity : Deity.t;
     mutable enemies : enemy list;
     mutable leader : LeaderS.t;
@@ -24,12 +24,13 @@ end
 
 module type S = sig
   val build : Building.t list -> unit
-  val bld_done : unit -> Building.t list
-  val bld_needs : unit -> B.queued list
+  val built : unit -> Building.t list
+  val bld_queued : unit -> B.queued list
   val bld_count : Building.t -> int
   val bld_ready : Building.t -> bool
   val bld_manp : unit -> unit
   val bld_supp : unit -> unit
+  val bld_tick : unit -> unit
   val get_turn : unit -> turn
   val set_turn : turn -> unit
   val get_res : unit -> R.t
@@ -68,17 +69,6 @@ module Make (M : Init) : S = struct
       turn = 0
     }
 
-  let build ls = B.build ls t.builds
-  let bld_done () = B.tick t.builds
-  let bld_needs () = B.in_queue t.builds
-  let bld_count b = B.count_of b t.builds
-  let bld_ready b = B.is_ready b t.builds
-  let bld_apply f =
-    let res = f t.res t.builds in
-    t.res <- res
-  let bld_manp () = bld_apply B.draw_manp
-  let bld_supp () = bld_apply B.draw_supp
-
   let get_turn () = t.turn
   let set_turn x = t.turn <- x
 
@@ -88,8 +78,27 @@ module Make (M : Init) : S = struct
   let add_res r = t.res <- R.(t.res ++ r)
   let sub_res r = t.res <- R.(t.res -- r)
   let with_res f = f t.res
+
+  let get_manp () = R.manp_of t.res
   let has_manp () = R.has_manp t.res
+  let set_manp x = t.res <- R.set_manp t.res x
+
   let clr_supp () = t.res <- R.clr_supp t.res
+  let get_supp () = R.supp_of t.res
+  let set_supp x = t.res <- R.set_supp t.res x
+
+  let map_bld f = t.builds <- f t.builds
+  let build ls = map_bld (B.build ls)
+  let built () = B.built t.builds
+  let bld_queued () = B.in_queue t.builds
+  let bld_count b = B.count_of b t.builds
+  let bld_ready b = B.is_ready b t.builds
+  let bld_apply (get, set) f =
+    let r, b = f (get ()) t.builds in
+    set r; t.builds <- b
+  let bld_manp () = bld_apply (get_manp, set_manp) B.add_manp
+  let bld_supp () = bld_apply (get_supp, set_supp) B.add_supp
+  let bld_tick () = map_bld B.tick
 
   let get_deity () = t.deity
 

@@ -1,58 +1,61 @@
 module B = Building
-module S = Building_status
+module Q = Building_queue
 
 type queued = (B.t * Resource.t)
 type t =
-  { stats : S.t list;
-    queue : S.t Queue.t
+  { built : B.t list;
+    ignored : B.t list;
+    queue : Q.t;
+    ready : B.t list
   }
 
 let make () =
-  { stats = List.map S.make B.tlist;
-    queue = Queue.create ()
+  { built = [];
+    ignored = [];
+    queue = Q.empty;
+    ready = B.ready
   }
 
-let s_of t b =
-  List.find (S.is b) t.stats
-
 let count_of b t =
-  S.count_of (s_of t b)
+  Listx.count b t.ready
 
 let is_ready b t =
-  S.is_ready (s_of t b)
+  List.mem b t.ready
 
-let start t s =
-  Queue.add s t.queue;
-  S.start s
+let ignore b bs =
+  if B.multiple b || List.mem b bs
+  then bs
+  else b :: bs
+
+let start t b =
+  let ignored = ignore b t.ignored in
+  let queue = Q.add b t.queue in
+  { t with ignored; queue }
+
+let can_start t b =
+  if B.multiple b then true
+  else not (List.mem b t.ignored)
 
 let build ls t =
-  ls |> List.map (s_of t)
-  |> List.filter S.can_start
-  |> List.iter (start t)
+  List.filter (can_start t) ls
+  |> List.fold_left start t
 
-let draw f res t =
-  Queue.fold f res t.queue
+let with_q (f : int -> Q.t -> int * Q.t) x t =
+  let y, queue = f x t.queue in
+  y, { t with queue }
 
-let draw_manp = draw S.add_manp
-let draw_supp = draw S.add_supp
+let add_manp m t = with_q Q.add_manp m t
+let add_supp s t = with_q Q.add_supp s t
+
+let built t = t.built
 
 let in_queue t =
-  Queuex.map_to_list (fun s -> S.(which s, cost_of s)) t.queue
-
-let take_if_built q =
-  if (Queue.is_empty q)
-  then None
-  else
-    if S.is_built (Queue.peek q)
-    then Some (Queue.take q)
-    else None
-
-let rec take_built q ls =
-  match take_if_built q with
-  | Some s -> take_built q (s :: ls)
-  | None -> ls
+  Q.status_of t.queue
 
 let tick t =
-  List.iter S.tick t.stats;
-  take_built t.queue []
-  |> List.map S.which
+  let built, queue = Q.tick t.queue in
+  { t with
+    built;
+    queue;
+    ready = t.ready @ t.built
+  }

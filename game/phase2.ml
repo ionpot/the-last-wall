@@ -49,6 +49,7 @@ module Make (M : State.S) : S = struct
     | Turn x ->
         M.set_turn x;
         M.bld_manp ();
+        M.bld_tick ();
         M.ldr_tick ();
         M.set_enemies (Enemy.spawn x)
     | Upkeep res -> M.sub_res res
@@ -78,12 +79,12 @@ module Make (M : State.S) : S = struct
     else to_upkeep ()
 
   let check_needs () =
-    match M.bld_needs () with
+    match M.bld_queued () with
     | [] -> check_leader ()
     | ls -> Needs ls
 
   let check_built () =
-    match M.bld_done () with
+    match M.built () with
     | [] -> check_needs ()
     | ls -> Built ls
 

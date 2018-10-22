@@ -20,8 +20,8 @@ val set_supp : t -> supply -> t
 val mis_supp : t -> t
 val clr_supp : t -> t
 
-val deduce_manp : t -> t -> t * t
-val deduce_supp : t -> t -> t * t
+val deduce_manp : manpower -> t -> manpower * t
+val deduce_supp : supply -> t -> supply * t
 
 val manp2supp : t -> t
 val supp2manp : t -> t

@@ -1,6 +1,10 @@
 let build f =
   List.fold_left f []
 
+let count x xs =
+  List.filter ((=) x) xs
+  |> List.length
+
 let pick_first i =
   let f ls n =
     if List.length ls < i

@@ -1,8 +1,8 @@
 type t = Market | Stable | Tavern | Temple
 
+let ready = [Tavern]
 let tlist = [Market; Stable; Tavern; Temple]
 
-let built t = t = Tavern
 let multiple t = t = Stable
 
 let cost_pair_of =
