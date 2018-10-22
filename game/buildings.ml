@@ -33,8 +33,7 @@ let start t b =
   { t with ignored; queue }
 
 let can_start t b =
-  if B.multiple b then true
-  else not (List.mem b t.ignored)
+  B.multiple b || not (List.mem b t.ignored)
 
 let build ls t =
   List.filter (can_start t) ls
