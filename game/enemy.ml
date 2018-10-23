@@ -58,14 +58,12 @@ let sum_report_of parties =
   (try_round total, seen)
 
 let to_mp (enemy, count) =
-  let p = power_of enemy in
-  truncate (p *. float count)
+  power_of enemy *. float count
 
 let damage parties =
   parties
   |> List.map to_mp
-  |> List.fold_left (+) 0
-  |> Resource.of_manp
+  |> List.fold_left (+.) 0.
 
 let can_spawn turn enemy =
   let a = 0.1 *. float turn in

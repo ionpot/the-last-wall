@@ -2,7 +2,7 @@ module CL = Check_leader
 
 type event =
   | Attack of Enemy.party list
-  | Casualty of Resource.t
+  | Casualty of Defs.manpower
   | Defeat
   | End
   | Leader of CL.event
@@ -31,7 +31,7 @@ module Make (M : State.S) : S = struct
 
   let apply = function
     | Attack enemies -> ()
-    | Casualty res -> M.sub_res res
+    | Casualty manp -> M.sub_manp manp
     | Defeat
     | End -> ()
     | Leader CL.Died _ -> M.ldr_died ()

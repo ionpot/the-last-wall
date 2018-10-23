@@ -1,6 +1,5 @@
 type ltype = Aristocrat | Expert | Warrior
 type level = int
-type loss = Resource.t
 type charisma = int
 
 type t =
@@ -16,7 +15,7 @@ let ltypes = [Aristocrat; Expert; Warrior]
 let mod_of cha =
   (cha - 10) / 2
 
-let defense_of cha = function
+let def_bonus_of cha = function
   | Warrior -> 0.01 *. float cha
   | Aristocrat
   | Expert -> 0.0
@@ -63,14 +62,11 @@ let base_defense t =
   let lv = level_of t in
   0.1 +. (0.01 *. float lv)
 
-let mitigate loss t =
+let defense_of t =
   let base = base_defense t in
   let cha = cha_mod_of t in
-  let extra = type_of t |> defense_of cha in
-  let x = base +. extra in
-  let y = Resource.manp_of loss in
-  truncate (x *. float y)
-  |> Resource.of_manp
+  let bonus = type_of t |> def_bonus_of cha in
+  base +. bonus
 
 let res_bonus_of t =
   let cha = cha_mod_of t in

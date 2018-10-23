@@ -40,6 +40,7 @@ module type S = sig
   val sub_res : R.t -> unit
   val with_res : (R.t -> 'a) -> 'a
   val has_manp : unit -> bool
+  val sub_manp : manpower -> unit
   val clr_supp : unit -> unit
   val get_deity : unit -> Deity.t
   val get_nats : unit -> Nation.t list
@@ -81,6 +82,7 @@ module Make (M : Init) : S = struct
 
   let get_manp () = R.manp_of t.res
   let has_manp () = R.has_manp t.res
+  let sub_manp x = sub_res (R.of_manp x)
   let set_manp x = t.res <- R.set_manp t.res x
 
   let clr_supp () = t.res <- R.clr_supp t.res
