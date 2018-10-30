@@ -1,3 +1,5 @@
+open Defs
+
 type event =
   | Blessing of Resource.t
   | Build of Building.t list
@@ -5,22 +7,21 @@ type event =
   | Defeat
   | End
   | LeaderNew of Leader.t
-  | Mercs of Defs.manpower * bool
+  | Mercs of manpower * bool
   | Nations of Nation.t list
   | Needs of Buildings.queued list
   | Report of Enemy.report
   | ReportSum of Enemy.sum_report
-  | Starvation of Resource.t
+  | Starvation of manpower
   | Support of Nation.support list
-  | Turn of Defs.turn
-  | Upkeep of Resource.t
+  | Turn of turn
+  | Upkeep of supply
 
 module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
   module Divine = Check_divine.Make(M)
   module Support = Check_support.Make(M)
-  module Upkeep = Check_upkeep.Make(M)
 
   let first () =
     Turn (M.get_turn () + 1)
@@ -41,8 +42,8 @@ module Make (M : State.S) : S = struct
     | Needs _
     | Report _
     | ReportSum _ -> ()
-    | Starvation res ->
-        M.sub_res res;
+    | Starvation mp ->
+        M.sub_manp mp;
         M.clr_supp ()
     | Support supp_list ->
         Nation.total_of supp_list
@@ -53,7 +54,7 @@ module Make (M : State.S) : S = struct
         M.bld_tick ();
         M.ldr_tick ();
         M.set_enemies (Enemy.spawn x)
-    | Upkeep res -> M.sub_res res
+    | Upkeep sp -> M.sub_supp sp
 
   let to_report () =
     let e = M.get_enemies () in
@@ -65,7 +66,9 @@ module Make (M : State.S) : S = struct
     Support (Support.get ())
 
   let to_upkeep () =
-    Upkeep (Upkeep.get ())
+    let s = M.is_scouting () in
+    let sp = M.get_supp () in
+    Upkeep (Upkeep.cost_from s sp)
 
   let check_blessing () =
     match Divine.blessing () with
@@ -98,8 +101,8 @@ module Make (M : State.S) : S = struct
     | None -> End
 
   let check_starvation () =
-    match Upkeep.get_starvation () with
-    | Some res -> Starvation res
+    match M.with_supp Upkeep.check_starvation with
+    | Some manp -> Starvation manp
     | None -> to_report ()
 
   let next = function
