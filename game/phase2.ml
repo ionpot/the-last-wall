@@ -8,7 +8,8 @@ type event =
   | Mercs of Defs.manpower * bool
   | Nations of Nation.t list
   | Needs of Buildings.queued list
-  | Scout of Check_scouting.report
+  | Report of Enemy.report
+  | ReportSum of Enemy.sum_report
   | Starvation of Resource.t
   | Support of Nation.support list
   | Turn of Defs.turn
@@ -18,7 +19,6 @@ module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
   module Divine = Check_divine.Make(M)
-  module Scouting = Check_scouting.Make(M)
   module Support = Check_support.Make(M)
   module Upkeep = Check_upkeep.Make(M)
 
@@ -39,7 +39,8 @@ module Make (M : State.S) : S = struct
         if accept then buy_mercs mercs
     | Nations nats -> M.set_nats nats
     | Needs _
-    | Scout _ -> ()
+    | Report _
+    | ReportSum _ -> ()
     | Starvation res ->
         M.sub_res res;
         M.clr_supp ()
@@ -54,8 +55,11 @@ module Make (M : State.S) : S = struct
         M.set_enemies (Enemy.spawn x)
     | Upkeep res -> M.sub_res res
 
-  let to_scouting () =
-    Scout (Scouting.get_report ())
+  let to_report () =
+    let e = M.get_enemies () in
+    if M.is_scouting ()
+    then Report (Enemy.report_of e)
+    else ReportSum (Enemy.sum_report_of e)
 
   let to_support () =
     Support (Support.get ())
@@ -70,7 +74,7 @@ module Make (M : State.S) : S = struct
 
   let check_defeat () =
     if M.has_manp ()
-    then to_scouting ()
+    then to_report ()
     else Defeat
 
   let check_leader () =
@@ -96,7 +100,7 @@ module Make (M : State.S) : S = struct
   let check_starvation () =
     match Upkeep.get_starvation () with
     | Some res -> Starvation res
-    | None -> to_scouting ()
+    | None -> to_report ()
 
   let next = function
     | Turn _ -> check_built ()
@@ -105,7 +109,8 @@ module Make (M : State.S) : S = struct
     | LeaderNew _ -> to_upkeep ()
     | Upkeep _ -> check_starvation ()
     | Starvation _ -> check_defeat ()
-    | Scout _ -> Nations (M.get_nats ())
+    | Report _
+    | ReportSum _ -> Nations (M.get_nats ())
     | Nations _ -> check_blessing ()
     | Blessing _ -> to_support ()
     | Support _ -> Build []

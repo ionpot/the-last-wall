@@ -1,9 +1,12 @@
 module Make (M : State.S) = struct
-  module Scouting = Check_scouting.Make(M)
+  let scouting_cost () =
+    if M.is_scouting ()
+    then Resource.of_supp 10
+    else Resource.empty
 
   let get () =
     let x = M.with_res Resource.manp2supp in
-    let y = Scouting.get_cost () in
+    let y = scouting_cost () in
     Resource.(x ++ y)
 
   let get_starvation () =
