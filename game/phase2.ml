@@ -5,7 +5,7 @@ type event =
   | Defeat
   | End
   | LeaderNew of Leader.t
-  | Mercs of Resource.t * bool
+  | Mercs of Defs.manpower * bool
   | Nations of Nation.t list
   | Needs of Buildings.queued list
   | Scout of Check_scouting.report
@@ -26,7 +26,7 @@ module Make (M : State.S) : S = struct
     Turn (M.get_turn () + 1)
 
   let buy_mercs mercs =
-    M.map_res (Merc.buy mercs)
+    M.buy_manp_with (Merc.buy mercs)
 
   let apply = function
     | Blessing res -> M.add_res res
@@ -90,7 +90,7 @@ module Make (M : State.S) : S = struct
 
   let check_mercs () =
     match Merc.roll () with
-    | Some res -> Mercs (res, false)
+    | Some mercs -> Mercs (mercs, false)
     | None -> End
 
   let check_starvation () =

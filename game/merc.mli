@@ -1,4 +1,4 @@
-type mercs = Resource.t
+open Defs
 
-val roll : unit -> mercs option
-val buy : mercs -> Resource.t -> Resource.t
+val roll : unit -> manpower option
+val buy : manpower -> supply -> manpower * supply

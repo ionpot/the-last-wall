@@ -41,6 +41,7 @@ module type S = sig
   val with_res : (R.t -> 'a) -> 'a
   val has_manp : unit -> bool
   val sub_manp : manpower -> unit
+  val buy_manp_with : (supply -> manpower * supply) -> unit
   val clr_supp : unit -> unit
   val get_deity : unit -> Deity.t
   val get_nats : unit -> Nation.t list
@@ -80,14 +81,20 @@ module Make (M : Init) : S = struct
   let sub_res r = t.res <- R.(t.res -- r)
   let with_res f = f t.res
 
-  let get_manp () = R.manp_of t.res
-  let has_manp () = R.has_manp t.res
-  let sub_manp x = sub_res (R.of_manp x)
-  let set_manp x = t.res <- R.set_manp t.res x
-
   let clr_supp () = t.res <- R.clr_supp t.res
   let get_supp () = R.supp_of t.res
   let set_supp x = t.res <- R.set_supp t.res x
+  let sub_supp x = sub_res (R.of_supp x)
+
+  let get_manp () = R.manp_of t.res
+  let has_manp () = R.has_manp t.res
+  let add_manp x = add_res (R.of_manp x)
+  let sub_manp x = sub_res (R.of_manp x)
+  let set_manp x = t.res <- R.set_manp t.res x
+  let buy_manp_with f =
+    let mp, sp = f (get_supp ()) in
+    add_manp mp;
+    sub_supp sp
 
   let map_bld f = t.builds <- f t.builds
   let build ls = map_bld (B.build ls)
