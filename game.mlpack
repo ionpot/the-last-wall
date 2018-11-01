@@ -1,5 +1,4 @@
 Check_casualty
-Check_divine
 Check_leader
 Check_support
 Building
@@ -18,5 +17,6 @@ Phase1
 Phase2
 Phase3
 Resource
+Smite
 State
 Upkeep

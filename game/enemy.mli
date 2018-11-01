@@ -17,5 +17,5 @@ val sum_report_of : party list -> sum_report
 val damage : party list -> float
 val spawn : turn -> party list
 
-val smite : party list -> party option
+val find : count -> t -> party list -> party option
 val reduce : party -> party list -> party list

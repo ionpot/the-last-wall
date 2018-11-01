@@ -85,14 +85,10 @@ let spawn turn =
   let b = List.map (get_count turn) a in
   List.combine a b
 
-let roll_smite p =
-  let x = Dice.between 10 30 in
-  map_count (min x) p
-
-let smite parties =
-  match List.filter (has_type Skeleton) parties with
+let find count t parties =
+  match List.filter (has_type t) parties with
   | [] -> None
-  | party :: _ -> Some (roll_smite party)
+  | party :: _ -> Some (map_count (min count) party)
 
 let reduce party parties =
   parties

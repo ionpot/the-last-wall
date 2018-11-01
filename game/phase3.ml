@@ -14,7 +14,6 @@ module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
   module Casualty = Check_casualty.Make(M)
-  module Divine = Check_divine.Make(M)
   module Ldr = CL.Make(M)
 
   let ask_scouting () =
@@ -46,7 +45,7 @@ module Make (M : State.S) : S = struct
     | None -> ask_scouting ()
 
   let check_smite enemies =
-    match Divine.smite enemies with
+    match M.with_deity (Smite.check enemies) with
     | Some party -> Smite party
     | None -> check_casualty enemies
 
