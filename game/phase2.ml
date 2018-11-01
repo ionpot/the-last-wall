@@ -20,7 +20,6 @@ type event =
 module type S = Phase.S with type event_def := event
 
 module Make (M : State.S) : S = struct
-  module Divine = Check_divine.Make(M)
   module Support = Check_support.Make(M)
 
   let first () =
@@ -71,7 +70,7 @@ module Make (M : State.S) : S = struct
     Upkeep (Upkeep.cost_from s sp)
 
   let check_blessing () =
-    match Divine.blessing () with
+    match M.with_deity Deity.blessing_of with
     | Some res -> Blessing res
     | None -> to_support ()
 

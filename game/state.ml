@@ -47,6 +47,7 @@ module type S = sig
   val get_supp : unit -> supply
   val clr_supp : unit -> unit
   val get_deity : unit -> Deity.t
+  val with_deity : (Deity.t -> 'a) -> 'a
   val get_nats : unit -> Nation.t list
   val set_nats : Nation.t list -> unit
   val get_ldr : unit -> Leader.t option
@@ -114,6 +115,7 @@ module Make (M : Init) : S = struct
   let bld_tick () = map_bld B.tick
 
   let get_deity () = t.deity
+  let with_deity f = f t.deity
 
   let get_nats () = t.nats
   let set_nats ns = t.nats <- Nation.filter ns
