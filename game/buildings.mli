@@ -3,7 +3,7 @@ open Defs
 type t
 type queued = (Building.t * Resource.t)
 
-val make : unit -> t
+val empty : t
 
 val build : Building.t list -> t -> t
 
@@ -13,7 +13,7 @@ val is_ready : Building.t -> t -> bool
 val in_queue : t -> queued list
 val built : t -> Building.t list
 
-val add_manp : manpower -> t -> manpower * t
-val add_supp : supply -> t -> supply * t
+val apply_manp : manpower -> t -> t
+val deduce : supply -> t -> supply * t
 
 val tick : t -> t

@@ -65,7 +65,7 @@ end
 
 module Make (M : Init) : S = struct
   let t =
-    { builds = B.make ();
+    { builds = B.empty;
       deity = M.deity;
       enemies = [];
       leader = LeaderS.make M.leader;
@@ -107,11 +107,10 @@ module Make (M : Init) : S = struct
   let bld_queued () = B.in_queue t.builds
   let bld_count b = B.count_of b t.builds
   let bld_ready b = B.is_ready b t.builds
-  let bld_apply (get, set) f =
-    let r, b = f (get ()) t.builds in
-    set r; t.builds <- b
-  let bld_manp () = bld_apply (get_manp, set_manp) B.add_manp
-  let bld_supp () = bld_apply (get_supp, set_supp) B.add_supp
+  let bld_manp () = map_bld (B.apply_manp (get_manp ()))
+  let bld_supp () =
+    let s, b = B.deduce (get_supp ()) t.builds in
+    set_supp s; t.builds <- b
   let bld_tick () = map_bld B.tick
 
   let get_deity () = t.deity

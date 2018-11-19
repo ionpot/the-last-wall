@@ -9,7 +9,7 @@ type t =
     ready : B.t list
   }
 
-let make () =
+let empty =
   { built = [];
     ignored = Listx.discard B.multiple B.ready;
     queue = Q.empty;
@@ -39,12 +39,12 @@ let build ls t =
   List.filter (can_start t) ls
   |> List.fold_left start t
 
-let with_q (f : int -> Q.t -> int * Q.t) x t =
-  let y, queue = f x t.queue in
-  y, { t with queue }
+let apply_manp m t =
+  { t with queue = Q.apply_manp m t.queue }
 
-let add_manp m t = with_q Q.add_manp m t
-let add_supp s t = with_q Q.add_supp s t
+let deduce supp t =
+  let remaining, queue = Q.deduce supp t.queue in
+  remaining, { t with queue }
 
 let built t = t.built
 

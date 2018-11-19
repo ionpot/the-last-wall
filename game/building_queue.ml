@@ -13,19 +13,20 @@ let sub_manp m cost =
   then (m, cost)
   else R.deduce_manp m cost
 
-let add_manp m t =
+let apply_manp m t =
   let f (b, cost1) (m1, ls) =
     let m2, cost2 = sub_manp m1 cost1 in
     m2, (b, cost2) :: ls
   in
   List.fold_right f t (m, [])
+  |> snd
 
-let add_supp s t =
+let deduce supply t =
   let f (b, cost1) (s1, ls) =
     let s2, cost2 = R.deduce_supp s1 cost1 in
     s2, (b, cost2) :: ls
   in
-  List.fold_right f t (s, [])
+  List.fold_right f t (supply, [])
 
 let status_of t = t
 
