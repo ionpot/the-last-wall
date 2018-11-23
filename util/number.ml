@@ -1,3 +1,7 @@
+let sub a b =
+  max 0 (a - b)
+
 let deduce a b =
-  let d = a - b in
-  if d > 0 then d, 0 else 0, ~-d
+  if a < 1
+  then a, b
+  else sub a b, sub b a
