@@ -13,7 +13,10 @@ val is_ready : Building.t -> t -> bool
 val in_queue : t -> queued list
 val built : t -> Building.t list
 
-val apply_manp : manpower -> t -> t
-val deduce : supply -> t -> supply * t
+val manp_cost : t -> manpower
+val supp_cost : t -> supply
+
+val apply_manp : manpower -> manpower -> t -> t
+val deduce : supply -> supply -> t -> supply * t
 
 val tick : t -> t

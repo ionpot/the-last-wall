@@ -28,8 +28,10 @@ module type S = sig
   val bld_queued : unit -> B.queued list
   val bld_count : Building.t -> int
   val bld_ready : Building.t -> bool
-  val bld_manp : unit -> unit
-  val bld_supp : unit -> unit
+  val bld_manp_cost : unit -> manpower
+  val bld_supp_cost : unit -> supply
+  val bld_manp : manpower -> unit
+  val bld_supp : supply -> unit
   val bld_tick : unit -> unit
   val get_turn : unit -> turn
   val set_turn : turn -> unit
@@ -107,10 +109,13 @@ module Make (M : Init) : S = struct
   let bld_queued () = B.in_queue t.builds
   let bld_count b = B.count_of b t.builds
   let bld_ready b = B.is_ready b t.builds
-  let bld_manp () = map_bld (B.apply_manp (get_manp ()))
-  let bld_supp () =
-    let s, b = B.deduce (get_supp ()) t.builds in
-    set_supp s; t.builds <- b
+  let bld_manp_cost () = B.manp_cost t.builds
+  let bld_supp_cost () = B.supp_cost t.builds
+  let bld_manp m = map_bld (B.apply_manp (get_manp ()) m)
+  let bld_supp s =
+    let s2, b = B.deduce (get_supp ()) s t.builds in
+    set_supp s2;
+    t.builds <- b
   let bld_tick () = map_bld B.tick
 
   let get_deity () = t.deity

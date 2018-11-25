@@ -29,6 +29,7 @@ module type Num = sig
   val clr : unit -> unit
   val deduce : int -> int
   val deduce_from : int -> int
+  val take : int -> int
 end
 
 module From (M : From) = struct
@@ -69,6 +70,9 @@ module Num (M : FromNum) : Num = struct
   let deduce_from i =
     let a, b = return (Number.deduce i) in
     set b; a
+  let take i =
+    let a, b = Number.take (get ()) i in
+    set a; b
 end
 
 module BitSet : FromBit = struct let empty = true end

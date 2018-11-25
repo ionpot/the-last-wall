@@ -6,8 +6,11 @@ val empty : t
 
 val add : Building.t -> t -> t
 
-val apply_manp : manpower -> t -> t
-val deduce : supply -> t -> supply * t
+val manp_cost : t -> manpower
+val supp_cost : t -> supply
+
+val set_manp : manpower -> t -> t
+val set_supp : supply -> t -> t
 
 val status_of : t -> (Building.t * Resource.t) list
 

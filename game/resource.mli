@@ -12,6 +12,7 @@ val has_manp : t -> bool
 val of_manp : manpower -> t
 val manp_of : t -> manpower
 val set_manp : t -> manpower -> t
+val map_manp : (manpower -> manpower) -> t -> t
 
 val has_supp : t -> bool
 val of_supp : supply -> t
@@ -19,6 +20,7 @@ val supp_of : t -> supply
 val set_supp : t -> supply -> t
 val mis_supp : t -> t
 val clr_supp : t -> t
+val map_supp : (supply -> supply) -> t -> t
 
 val deduce_manp : manpower -> t -> manpower * t
 val deduce_supp : supply -> t -> supply * t

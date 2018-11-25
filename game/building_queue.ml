@@ -8,25 +8,27 @@ let empty = []
 let add b t =
   (b, B.cost_of b) :: t
 
-let sub_manp m cost =
-  if R.has_supp cost
-  then (m, cost)
-  else R.deduce_manp m cost
+let manp_cost t =
+  let f acc (_, res) = acc + R.manp_of res in
+  List.fold_left f 0 t
 
-let apply_manp m t =
-  let f (b, cost1) (m1, ls) =
-    let m2, cost2 = sub_manp m1 cost1 in
-    m2, (b, cost2) :: ls
-  in
-  List.fold_right f t (m, [])
-  |> snd
+let supp_cost t =
+  let f acc (_, res) = acc + R.supp_of res in
+  List.fold_left f 0 t
 
-let deduce supply t =
-  let f (b, cost1) (s1, ls) =
-    let s2, cost2 = R.deduce_supp s1 cost1 in
-    s2, (b, cost2) :: ls
+let set_manp m t =
+  let module M = (val Value.of_num m) in
+  let f (b, res) =
+    b, if R.has_supp res then res else R.map_manp M.take res
   in
-  List.fold_right f t (supply, [])
+  List.map f t
+
+let set_supp s t =
+  let module S = (val Value.of_num s) in
+  let f (b, res) =
+    b, R.map_supp S.take res
+  in
+  List.map f t
 
 let status_of t = t
 

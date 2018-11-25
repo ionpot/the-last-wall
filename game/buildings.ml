@@ -39,12 +39,17 @@ let build ls t =
   List.filter (can_start t) ls
   |> List.fold_left start t
 
-let apply_manp m t =
-  { t with queue = Q.apply_manp m t.queue }
+let manp_cost t = Q.manp_cost t.queue
+let supp_cost t = Q.supp_cost t.queue
 
-let deduce supp t =
-  let remaining, queue = Q.deduce supp t.queue in
-  remaining, { t with queue }
+let apply_manp m need t =
+  let mis = Number.sub need m in
+  { t with queue = Q.set_manp mis t.queue }
+
+let deduce supp need t =
+  let rem, mis = Number.deduce supp need in
+  let queue = Q.set_supp mis t.queue in
+  rem, { t with queue }
 
 let built t = t.built
 

@@ -29,6 +29,12 @@ let deduce_supp s res =
   let s2, s3 = Number.deduce s (supp_of res) in
   s2, set_supp res s3
 
+let map_manp f res =
+  set_manp res (f (manp_of res))
+
+let map_supp f res =
+  set_supp res (f (supp_of res))
+
 let (<+) t = function
   | Empty -> t
   | Manpwr x -> Pair.(+<) x t

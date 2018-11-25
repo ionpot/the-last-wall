@@ -3,6 +3,8 @@ open Defs
 type event =
   | Blessing of Resource.t
   | Build of Building.t list
+  | BuildManpower of manpower
+  | BuildSupply of supply
   | Built of Building.t list
   | Defeat
   | End
@@ -30,7 +32,11 @@ module Make (M : State.S) : S = struct
 
   let apply = function
     | Blessing res -> M.add_res res
-    | Build x -> M.build x; M.bld_supp ()
+    | Build x -> M.build x
+    | BuildManpower x ->
+        M.bld_manp x;
+        M.bld_tick ()
+    | BuildSupply x -> M.bld_supp x
     | Built _
     | Defeat
     | End -> ()
@@ -49,8 +55,6 @@ module Make (M : State.S) : S = struct
         |> M.add_res
     | Turn x ->
         M.set_turn x;
-        M.bld_manp ();
-        M.bld_tick ();
         M.ldr_tick ();
         M.set_enemies (Enemy.spawn x)
     | Upkeep sp -> M.sub_supp sp
@@ -94,10 +98,22 @@ module Make (M : State.S) : S = struct
     | [] -> check_needs ()
     | ls -> Built ls
 
+  let check_bld_manp () =
+    let cost = M.bld_manp_cost () in
+    if cost > 0
+    then BuildManpower cost
+    else check_built ()
+
   let check_mercs () =
     match Merc.roll () with
     | Some mercs -> Mercs (mercs, false)
     | None -> End
+
+  let check_bld_supp () =
+    let cost = M.bld_supp_cost () in
+    if cost > 0
+    then BuildSupply cost
+    else check_mercs ()
 
   let check_starvation () =
     match M.with_supp Upkeep.check_starvation with
@@ -105,7 +121,8 @@ module Make (M : State.S) : S = struct
     | None -> to_report ()
 
   let next = function
-    | Turn _ -> check_built ()
+    | Turn _ -> check_bld_manp ()
+    | BuildManpower _ -> check_built ()
     | Built _ -> check_needs ()
     | Needs _ -> check_leader ()
     | LeaderNew _ -> to_upkeep ()
@@ -116,7 +133,8 @@ module Make (M : State.S) : S = struct
     | Nations _ -> check_blessing ()
     | Blessing _ -> to_support ()
     | Support _ -> Build []
-    | Build _ -> check_mercs ()
+    | Build _ -> check_bld_supp ()
+    | BuildSupply _ -> check_mercs ()
     | Mercs _
     | Defeat
     | End -> End
