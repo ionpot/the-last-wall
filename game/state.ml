@@ -11,9 +11,10 @@ type t =
     deity : Deity.t;
     mutable enemies : enemy list;
     mutable leader : LeaderS.t;
+    mutable manp : manpower;
     mutable nats : Nation.t list;
-    mutable res : R.t;
     mutable scouting : bool;
+    mutable supp : supply;
     mutable turn : turn
   }
 
@@ -35,12 +36,8 @@ module type S = sig
   val bld_tick : unit -> unit
   val get_turn : unit -> turn
   val set_turn : turn -> unit
-  val get_res : unit -> R.t
-  val map_res : (R.t -> R.t) -> unit
-  val set_res : R.t -> unit
   val add_res : R.t -> unit
   val sub_res : R.t -> unit
-  val with_res : (R.t -> 'a) -> 'a
   val has_manp : unit -> bool
   val sub_manp : manpower -> unit
   val buy_manp_with : (supply -> manpower * supply) -> unit
@@ -71,37 +68,40 @@ module Make (M : Init) : S = struct
       deity = M.deity;
       enemies = [];
       leader = LeaderS.make M.leader;
+      manp = 0;
       nats = [];
-      res = R.empty;
       scouting = false;
+      supp = 0;
       turn = 0
     }
 
   let get_turn () = t.turn
   let set_turn x = t.turn <- x
 
-  let get_res () = t.res
-  let set_res r = t.res <- r
-  let map_res f = set_res (f t.res)
-  let add_res r = t.res <- R.(t.res ++ r)
-  let sub_res r = t.res <- R.(t.res -- r)
-  let with_res f = f t.res
+  let get_supp () = t.supp
+  let set_supp x = t.supp <- x
+  let clr_supp () = t.supp <- 0
+  let add_supp x = t.supp <- t.supp + x
+  let sub_supp x = t.supp <- t.supp - x
+  let with_supp f = f t.supp
 
-  let clr_supp () = t.res <- R.clr_supp t.res
-  let get_supp () = R.supp_of t.res
-  let set_supp x = t.res <- R.set_supp t.res x
-  let sub_supp x = sub_res (R.of_supp x)
-  let with_supp f = f (get_supp ())
-
-  let get_manp () = R.manp_of t.res
-  let has_manp () = R.has_manp t.res
-  let add_manp x = add_res (R.of_manp x)
-  let sub_manp x = sub_res (R.of_manp x)
-  let set_manp x = t.res <- R.set_manp t.res x
+  let get_manp () = t.manp
+  let set_manp x = t.manp <- x
+  let has_manp () = t.manp > 0
+  let add_manp x = t.manp <- t.manp + x
+  let sub_manp x = t.manp <- t.manp - x
   let buy_manp_with f =
-    let mp, sp = f (get_supp ()) in
+    let mp, sp = f t.supp in
     add_manp mp;
     sub_supp sp
+
+  let add_res r =
+    add_manp (R.manp_of r);
+    add_supp (R.supp_of r)
+
+  let sub_res r =
+    sub_manp (R.manp_of r);
+    sub_supp (R.supp_of r)
 
   let map_bld f = t.builds <- f t.builds
   let build ls = map_bld (B.build ls)
@@ -111,10 +111,10 @@ module Make (M : Init) : S = struct
   let bld_ready b = B.is_ready b t.builds
   let bld_manp_cost () = B.manp_cost t.builds
   let bld_supp_cost () = B.supp_cost t.builds
-  let bld_manp m = map_bld (B.apply_manp (get_manp ()) m)
+  let bld_manp m = map_bld (B.apply_manp t.manp m)
   let bld_supp s =
-    let s2, b = B.deduce (get_supp ()) s t.builds in
-    set_supp s2;
+    let s2, b = B.deduce t.supp s t.builds in
+    t.supp <- s2;
     t.builds <- b
   let bld_tick () = map_bld B.tick
 
