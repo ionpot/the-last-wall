@@ -45,7 +45,8 @@ module Make (M : State.S) : S = struct
     | None -> ask_scouting ()
 
   let check_smite enemies =
-    match M.with_deity (Smite.check enemies) with
+    let module S = Smite.Check(M) in
+    match S.attacking enemies with
     | Some party -> Smite party
     | None -> check_casualty enemies
 

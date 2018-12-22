@@ -74,7 +74,8 @@ module Make (M : State.S) : S = struct
     Upkeep (Upkeep.cost_from s sp)
 
   let check_blessing () =
-    match M.with_deity Deity.blessing_of with
+    let module B = Blessing.Check(M) in
+    match B.value with
     | Some res -> Blessing res
     | None -> to_support ()
 
