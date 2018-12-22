@@ -27,6 +27,7 @@ module type Num = sig
   val add : int -> unit
   val sub : int -> unit
   val clr : unit -> unit
+  val ptv : unit -> bool
   val deduce : int -> int
   val deduce_from : int -> int
   val take : int -> int
@@ -64,6 +65,7 @@ module Num (M : FromNum) : Num = struct
   let add i = map ((+) i)
   let sub i = map ((-) i)
   let clr () = set 0
+  let ptv () = return ((<) 0)
   let deduce i =
     let a, b = Number.deduce (get ()) i in
     set a; b

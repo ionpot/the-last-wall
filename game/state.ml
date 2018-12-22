@@ -24,6 +24,7 @@ module type Init = sig
 end
 
 module type S = sig
+  module Cavalry : Value.Num
   val build : Building.t list -> unit
   val built : unit -> Building.t list
   val bld_queued : unit -> B.queued list
@@ -39,6 +40,7 @@ module type S = sig
   val add_res : R.t -> unit
   val sub_res : R.t -> unit
   val has_manp : unit -> bool
+  val get_manp : unit -> manpower
   val sub_manp : manpower -> unit
   val buy_manp_with : (supply -> manpower * supply) -> unit
   val with_supp : (supply -> 'a) -> 'a
@@ -64,6 +66,8 @@ module type S = sig
 end
 
 module Make (M : Init) : S = struct
+  module Cavalry = Value.Num(Value.Zero)
+
   let t =
     { builds = B.empty;
       deity = M.deity;

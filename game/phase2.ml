@@ -6,6 +6,7 @@ type event =
   | BuildManpower of manpower
   | BuildSupply of supply
   | Built of Building.t list
+  | Cavalry of manpower
   | Defeat
   | End
   | LeaderNew of Leader.t
@@ -15,7 +16,7 @@ type event =
   | Needs of Buildings.queued list
   | Report of Enemy.report
   | ReportSum of Enemy.sum_report
-  | Starvation of manpower
+  | Starvation of manpower * manpower
   | Support of Nation.support list
   | Turn of turn
   | Upkeep of supply
@@ -38,7 +39,10 @@ module Make (M : State.S) : S = struct
         M.bld_manp x;
         M.bld_tick ()
     | BuildSupply x -> M.bld_supp x
-    | Built _
+    | Built _ -> ()
+    | Cavalry x ->
+        M.Cavalry.add x;
+        M.sub_supp x
     | Defeat
     | End -> ()
     | LeaderNew ldr -> M.set_ldr ldr
@@ -49,8 +53,9 @@ module Make (M : State.S) : S = struct
     | Needs _
     | Report _
     | ReportSum _ -> ()
-    | Starvation mp ->
-        M.sub_manp mp;
+    | Starvation (men, cavs) ->
+        M.sub_manp men;
+        M.Cavalry.sub cavs;
         M.clr_supp ()
     | Support supp_list ->
         Nation.total_of supp_list
@@ -71,9 +76,8 @@ module Make (M : State.S) : S = struct
     Support (Support.get ())
 
   let to_upkeep () =
-    let s = M.is_scouting () in
-    let sp = M.get_supp () in
-    Upkeep (Upkeep.cost_from s sp)
+    let module U = Upkeep.Check(M) in
+    Upkeep U.total
 
   let check_blessing () =
     let module B = Blessing.Check(M) in
@@ -118,6 +122,12 @@ module Make (M : State.S) : S = struct
     | Some mercs -> Mercs (mercs, false)
     | None -> End
 
+  let check_cavalry () =
+    let module S = Cavalry.Check(M) in
+    match S.value with
+    | Some count -> Cavalry count
+    | None -> check_mercs ()
+
   let check_bld_supp () =
     let cost = M.bld_supp_cost () in
     if cost > 0
@@ -125,8 +135,9 @@ module Make (M : State.S) : S = struct
     else check_mercs ()
 
   let check_starvation () =
-    match M.with_supp Upkeep.check_starvation with
-    | Some manp -> Starvation manp
+    let module U = Upkeep.Starvation(M) in
+    match U.value with
+    | Some (men, cav) -> Starvation (men, cav)
     | None -> to_report ()
 
   let next = function
@@ -144,7 +155,8 @@ module Make (M : State.S) : S = struct
     | Blessing _ -> to_support ()
     | Support _ -> Build []
     | Build _ -> check_bld_supp ()
-    | BuildSupply _ -> check_mercs ()
+    | BuildSupply _ -> check_cavalry ()
+    | Cavalry _ -> check_mercs ()
     | Mercs _
     | Defeat
     | End -> End

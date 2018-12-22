@@ -2,7 +2,7 @@ module CL = Check_leader
 
 type event =
   | Attack of Enemy.party list
-  | Casualty of Defs.manpower
+  | Casualty of Defs.manpower * Defs.manpower
   | Defeat
   | End
   | Leader of CL.event
@@ -30,7 +30,9 @@ module Make (M : State.S) : S = struct
 
   let apply = function
     | Attack enemies -> ()
-    | Casualty manp -> M.sub_manp manp
+    | Casualty (men, cav) ->
+        M.sub_manp men;
+        M.Cavalry.sub cav
     | Defeat
     | End -> ()
     | Leader CL.Died _ -> M.ldr_died ()
@@ -41,7 +43,7 @@ module Make (M : State.S) : S = struct
 
   let check_casualty enemies =
     match Casualty.check enemies with
-    | Some x -> Casualty x
+    | Some (men, cav) -> Casualty (men, cav)
     | None -> ask_scouting ()
 
   let check_smite enemies =

@@ -1,4 +1,9 @@
 open Defs
 
-val cost_from : bool -> manpower -> supply
-val check_starvation : supply -> manpower option
+module Check (M: State.S) : sig
+  val total : manpower
+end
+
+module Starvation (M: State.S) : sig
+  val value : (manpower * manpower) option
+end
