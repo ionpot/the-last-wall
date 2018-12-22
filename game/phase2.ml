@@ -9,6 +9,7 @@ type event =
   | Defeat
   | End
   | LeaderNew of Leader.t
+  | Market of supply
   | Mercs of manpower * bool
   | Nations of Nation.t list
   | Needs of Buildings.queued list
@@ -41,6 +42,7 @@ module Make (M : State.S) : S = struct
     | Defeat
     | End -> ()
     | LeaderNew ldr -> M.set_ldr ldr
+    | Market x -> M.add_supp x
     | Mercs (mercs, accept) ->
         if accept then buy_mercs mercs
     | Nations nats -> M.set_nats nats
@@ -105,6 +107,12 @@ module Make (M : State.S) : S = struct
     then BuildManpower cost
     else check_built ()
 
+  let check_market () =
+    let module S = Market.Check(M) in
+    match S.value with
+    | Some res -> Market res
+    | None -> check_bld_manp ()
+
   let check_mercs () =
     match Merc.roll () with
     | Some mercs -> Mercs (mercs, false)
@@ -122,7 +130,8 @@ module Make (M : State.S) : S = struct
     | None -> to_report ()
 
   let next = function
-    | Turn _ -> check_bld_manp ()
+    | Turn _ -> check_market ()
+    | Market _ -> check_bld_manp ()
     | BuildManpower _ -> check_built ()
     | Built _ -> check_needs ()
     | Needs _ -> check_leader ()

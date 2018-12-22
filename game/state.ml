@@ -42,6 +42,7 @@ module type S = sig
   val sub_manp : manpower -> unit
   val buy_manp_with : (supply -> manpower * supply) -> unit
   val with_supp : (supply -> 'a) -> 'a
+  val add_supp : supply -> unit
   val sub_supp : supply -> unit
   val get_supp : unit -> supply
   val clr_supp : unit -> unit
