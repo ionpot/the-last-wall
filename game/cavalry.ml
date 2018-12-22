@@ -30,8 +30,8 @@ let range_of dmg men cav =
   f mn, f dmg
 
 let calc dmg cav men =
-  let roll = Random.int (cav + men) in
-  if roll > men
+  let roll = Random.float (float (cav + men)) in
+  if roll > float men
   then how_many (range_of dmg men cav)
   else 0
 
