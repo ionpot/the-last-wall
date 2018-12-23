@@ -1,4 +1,4 @@
-type t = Market | Stable | Tavern | Temple
+type t = Fort | Market | Stable | Tavern | Temple
 
 val ready : t list
 val tlist : t list

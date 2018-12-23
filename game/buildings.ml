@@ -39,6 +39,10 @@ let build ls t =
   List.filter (can_start t) ls
   |> List.fold_left start t
 
+let raze b t =
+  let ready = Listx.rm b t.ready in
+  { t with ready }
+
 let manp_cost t = Q.manp_cost t.queue
 let supp_cost t = Q.supp_cost t.queue
 

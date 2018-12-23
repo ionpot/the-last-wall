@@ -3,4 +3,5 @@ val count : 'a -> 'a list -> int
 val discard : ('a -> bool) -> 'a list -> 'a list
 val pick_first : int -> 'a list -> 'a list
 val pick_from : 'a list -> 'a
+val rm : 'a -> 'a list -> 'a list
 val undupe : 'a list -> 'a list

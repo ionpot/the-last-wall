@@ -1,5 +1,7 @@
 open Defs
 
+val strength : manpower
+
 module Check (M: State.S) : sig
   val value : manpower option
 end

@@ -19,6 +19,9 @@ let pick_first i =
 let pick_from ls =
   List.length ls |> Random.int |> List.nth ls
 
+let rm x ls =
+  List.filter ((<>) x) ls
+
 (* partially applied functions cannot be generalised *)
 let undupe ls =
   let f acc x =

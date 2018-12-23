@@ -1,13 +1,14 @@
-type t = Market | Stable | Tavern | Temple
+type t = Fort | Market | Stable | Tavern | Temple
 
 let ready = [Tavern]
-let tlist = [Market; Stable; Tavern; Temple]
+let tlist = [Fort; Market; Stable; Tavern; Temple]
 
 let multiple t = t = Stable
 
 let cost_pair_of =
   let open Resource in
   function
+  | Fort -> Manpwr 124, Supply 136
   | Market -> Manpwr 48, Supply 53
   | Stable -> Manpwr 49, Supply 54
   | Tavern -> Manpwr 0, Supply 0

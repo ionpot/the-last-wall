@@ -27,6 +27,7 @@ module type S = sig
   module Cavalry : Value.Num
   val build : Building.t list -> unit
   val built : unit -> Building.t list
+  val bld_raze : Building.t -> unit
   val bld_queued : unit -> B.queued list
   val bld_count : Building.t -> int
   val bld_ready : Building.t -> bool
@@ -41,6 +42,7 @@ module type S = sig
   val sub_res : R.t -> unit
   val has_manp : unit -> bool
   val get_manp : unit -> manpower
+  val set_manp : manpower -> unit
   val sub_manp : manpower -> unit
   val buy_manp_with : (supply -> manpower * supply) -> unit
   val with_supp : (supply -> 'a) -> 'a
@@ -111,6 +113,7 @@ module Make (M : Init) : S = struct
   let map_bld f = t.builds <- f t.builds
   let build ls = map_bld (B.build ls)
   let built () = B.built t.builds
+  let bld_raze b = map_bld (B.raze b)
   let bld_queued () = B.in_queue t.builds
   let bld_count b = B.count_of b t.builds
   let bld_ready b = B.is_ready b t.builds

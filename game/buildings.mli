@@ -6,6 +6,7 @@ type queued = (Building.t * Resource.t)
 val empty : t
 
 val build : Building.t list -> t -> t
+val raze : Building.t -> t -> t
 
 val count_of : Building.t -> t -> int
 val is_ready : Building.t -> t -> bool
