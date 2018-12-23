@@ -1,14 +1,15 @@
 type t = Tulron | Sodistan | Hekatium | Numendor | Clan
-type resource = Resource.t
-type support = (t * resource option)
+type support = (t * Resource.t option)
+
+let max_allowed = 3
 
 let t_list =
   [Tulron; Sodistan; Hekatium; Numendor; Clan]
 
 let ranges_of =
-  let low = (0, 10) in
-  let mid = (10, 20) in
-  let high = (20, 30) in
+  let low = (10, 20) in
+  let mid = (20, 30) in
+  let high = (30, 40) in
   let f x = Pair.(x <+> 5) in
   function
     | Tulron
@@ -20,27 +21,26 @@ let ranges_of =
 let roll (a, b) =
   Dice.between a b
 
-let pickN max nats =
+let filter nats =
   let f n = List.mem n nats in
   t_list
   |> List.filter f
-  |> Listx.pick_first max
+  |> Listx.pick_first max_allowed
 
 let total_of ns =
-  let open Resource in
   let f total (_, maybe) =
     match maybe with
-    | Some res -> total ++ res
+    | Some res -> Resource.(total ++ res)
     | None -> total
   in
-  List.fold_left f empty ns
+  List.fold_left f Resource.empty ns
 
 let to_outcome nat =
   let f () =
     let (a, b) = ranges_of nat in
     let m = roll a in
     let s = roll b in
-    Resource.(make (Manpwr m) <+ Supply s)
+    Resource.(of_manp m <+ Supply s)
   in
   if Dice.chance 0.8
   then Some (f ())
@@ -52,7 +52,7 @@ let support_of n =
 let support_of_list ns =
   List.map support_of ns
 
-let apply_bonus ls res =
+let apply_bonus res ls =
   let f = function
     | (n, Some x) -> (n, Some Resource.(x ++ res))
     | x -> x

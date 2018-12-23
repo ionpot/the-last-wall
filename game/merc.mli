@@ -1,3 +1,4 @@
 open Defs
 
-val roll : supply -> manpower option
+val roll : unit -> manpower option
+val buy : manpower -> supply -> manpower * supply

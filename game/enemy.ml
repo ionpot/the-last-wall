@@ -1,5 +1,3 @@
-open Defs
-
 type t = Skeleton | Orc | Demon
 type count = int
 type party = (t * count)
@@ -60,13 +58,12 @@ let sum_report_of parties =
   (try_round total, seen)
 
 let to_mp (enemy, count) =
-  let p = power_of enemy in
-  truncate (p *. float count)
+  power_of enemy *. float count
 
 let damage parties =
   parties
   |> List.map to_mp
-  |> List.fold_left (+) 0
+  |> List.fold_left (+.) 0.
 
 let can_spawn turn enemy =
   let a = 0.1 *. float turn in
@@ -88,14 +85,10 @@ let spawn turn =
   let b = List.map (get_count turn) a in
   List.combine a b
 
-let roll_smite p =
-  let x = Dice.between 10 30 in
-  map_count (min x) p
-
-let smite parties =
-  match List.filter (has_type Skeleton) parties with
+let find count t parties =
+  match List.filter (has_type t) parties with
   | [] -> None
-  | party :: _ -> Some (roll_smite party)
+  | party :: _ -> Some (map_count (min count) party)
 
 let reduce party parties =
   parties

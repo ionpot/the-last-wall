@@ -1,9 +1,6 @@
-type manpower = int
-type supply = int
-type turn = int
-
-module type Phase = sig
+module type S = sig
   type event_def
   val first : unit -> event_def
+  val apply : event_def -> unit
   val next : event_def -> event_def
 end

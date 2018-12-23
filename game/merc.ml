@@ -1,8 +1,12 @@
-open Defs
-
 let chance x =
-  if Dice.chance 0.8 then Some x else None
+  if Dice.chance 0.8
+  then Some x
+  else None
 
-let roll supply =
+let roll () =
   let x = Dice.between 10 30 in
-  if x < supply then chance x else None
+  chance x
+
+let buy mercs supply =
+  let bought = min mercs supply in
+  bought, supply - bought

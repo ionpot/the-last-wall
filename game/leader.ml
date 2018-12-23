@@ -1,6 +1,5 @@
 type ltype = Aristocrat | Expert | Warrior
 type level = int
-type loss = int
 type charisma = int
 
 type t =
@@ -8,17 +7,7 @@ type t =
     level : level;
     cha_base : charisma;
     cha_extra : charisma;
-    xp : int ref;
-    mutable died_at : Defs.turn
-  }
-
-let empty =
-  { ltype = Aristocrat;
-    level = 0;
-    cha_base = 0;
-    cha_extra = 0;
-    xp = ref 0;
-    died_at = 0
+    xp : int ref
   }
 
 let ltypes = [Aristocrat; Expert; Warrior]
@@ -26,34 +15,32 @@ let ltypes = [Aristocrat; Expert; Warrior]
 let mod_of cha =
   (cha - 10) / 2
 
-let defense_of cha = function
+let def_bonus_of cha = function
   | Warrior -> 0.01 *. float cha
   | Aristocrat
   | Expert -> 0.0
 
 let resource_of cha = function
-  | Aristocrat -> Resource.Manpwr (2 * cha)
-  | Expert -> Resource.Supply (2 * cha)
-  | Warrior -> Resource.Empty
+  | Aristocrat -> Resource.of_manp (2 * cha)
+  | Expert -> Resource.of_supp (2 * cha)
+  | Warrior -> Resource.empty
 
-let make () =
+let make ltype =
   let lv = Dice.between 3 5 in
-  { ltype = Listx.pick_from ltypes;
+  { ltype;
     level = lv;
     cha_base = Dice.between 10 15;
     cha_extra = (lv / 4);
-    xp = ref 0;
-    died_at = 0
+    xp = ref 0
   }
+
+let random () =
+  make (Listx.pick_from ltypes)
 
 let lives () =
   Dice.chance 0.95
 
-let alive t =
-  t.died_at = 0
 let won t = incr t.xp
-let died t turn = t.died_at <- turn
-let died_at t = t.died_at
 let type_of t = t.ltype
 let level_of t = t.level
 let cha_of t = t.cha_base + t.cha_extra
@@ -75,15 +62,13 @@ let base_defense t =
   let lv = level_of t in
   0.1 +. (0.01 *. float lv)
 
-let mitigate loss t =
+let defense_of t =
   let base = base_defense t in
   let cha = cha_mod_of t in
-  let extra = type_of t |> defense_of cha in
-  let x = base +. extra in
-  truncate (x *. float loss)
+  let bonus = type_of t |> def_bonus_of cha in
+  base +. bonus
 
 let res_bonus_of t =
   let cha = cha_mod_of t in
-  type_of t
-  |> resource_of cha
-  |> Resource.make
+  let typ = type_of t in
+  resource_of cha typ
