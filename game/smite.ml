@@ -4,12 +4,12 @@ module Check (M : State.S) = struct
     then 10
     else 0
 
-  let find enemies =
+  let find () =
     let x = Dice.between 10 30 + boost in
-    Enemy.(find x Skeleton enemies)
+    M.with_enemies Enemy.(find x Skeleton)
 
-  let attacking enemies =
+  let value =
     if M.get_deity () = Deity.Lerota
-    then find enemies
+    then find ()
     else None
 end

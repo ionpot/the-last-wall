@@ -10,10 +10,6 @@ let fort_cap = 20
 
 let sub a b = a -. a *. b
 
-let mitigate loss ldr =
-  let def = Leader.defense_of ldr in
-  truncate (sub loss def)
-
 let mp_of cav = cav * cav_str
 
 let rec rand cap (m, men) (c, cav) =
@@ -47,6 +43,15 @@ module Make (M : State.S) = struct
 
   let save () =
     pick (M.get_manp ()) (M.Cavalry.get ())
+
+  let mitigate loss ldr =
+    let def = Leader.defense_of ldr in
+    let brg =
+      if M.Barraging.get ()
+      then Barrage.dr_penalty
+      else 0.
+    in
+    truncate (sub loss (def -. brg))
 
   let try_mitigate loss =
     let x = sub loss Cav_dr.value in

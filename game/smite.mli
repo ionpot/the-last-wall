@@ -1,3 +1,3 @@
 module Check (M : State.S) : sig
-  val attacking : Enemy.party list -> Enemy.party option
+  val value : Enemy.party option
 end

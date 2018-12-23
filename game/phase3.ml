@@ -2,6 +2,8 @@ module CL = Check_leader
 
 type event =
   | Attack of Enemy.party list
+  | Barrage of bool
+  | Barraged of Enemy.party
   | Casualty of Defs.manpower * Defs.manpower
   | Defeat
   | End
@@ -31,6 +33,8 @@ module Make (M : State.S) : S = struct
 
   let apply = function
     | Attack enemies -> ()
+    | Barrage x -> M.Barraging.set_to x
+    | Barraged party -> M.map_enemies (Enemy.reduce party)
     | Casualty (men, cav) ->
         M.sub_manp men;
         M.Cavalry.sub cav
@@ -46,18 +50,29 @@ module Make (M : State.S) : S = struct
     | Smite party -> M.map_enemies (Enemy.reduce party)
     | Victory -> leader_won (M.get_ldr ())
 
-  let check_casualty enemies =
+  let check_casualty () =
     let module C = Check_casualty in
-    match Casualty.check enemies with
+    match M.with_enemies Casualty.check with
     | C.Loss (men, cav) -> Casualty (men, cav)
     | C.Fort (men, cav) -> Fort (men, cav)
     | C.Ok -> ask_scouting ()
 
-  let check_smite enemies =
+  let check_barrage () =
+    match M.get_ldr () with
+    | Some _ -> Barrage (M.Barraging.get ())
+    | None -> check_casualty ()
+
+  let check_barraged () =
+    let module B = Barrage.Check(M) in
+    match B.value with
+    | Some party -> Barraged party
+    | None -> check_casualty ()
+
+  let check_smite () =
     let module S = Smite.Check(M) in
-    match S.attacking enemies with
+    match S.value with
     | Some party -> Smite party
-    | None -> check_casualty enemies
+    | None -> check_barrage ()
 
   let check_ldr () =
     match Ldr.check () with
@@ -65,8 +80,10 @@ module Make (M : State.S) : S = struct
     | None -> ask_scouting ()
 
   let next = function
-    | Attack enemies -> check_smite enemies
-    | Smite _ -> M.with_enemies check_casualty
+    | Attack _ -> check_smite ()
+    | Smite _ -> check_barrage ()
+    | Barrage _ -> check_barraged ()
+    | Barraged _ -> check_casualty ()
     | Casualty _ ->
         if Casualty.is_victory () then Victory else Defeat
     | Fort _ -> Victory

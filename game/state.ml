@@ -24,6 +24,7 @@ module type Init = sig
 end
 
 module type S = sig
+  module Barraging : Value.Bit
   module Cavalry : Value.Num
   val build : Building.t list -> unit
   val built : unit -> Building.t list
@@ -68,6 +69,7 @@ module type S = sig
 end
 
 module Make (M : Init) : S = struct
+  module Barraging = Value.Bit(Value.BitClr)
   module Cavalry = Value.Num(Value.Zero)
 
   let t =

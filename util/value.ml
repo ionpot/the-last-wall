@@ -20,6 +20,7 @@ module type Bit = sig
   val clr : unit -> unit
   val flip : unit -> unit
   val set : unit -> unit
+  val set_to : bool -> unit
 end
 
 module type Num = sig
@@ -54,6 +55,7 @@ module Bit (M : FromBit) : Bit = struct
   end)
   let clr () = set false
   let flip () = map not
+  let set_to x = set x
   let set () = set true
 end
 
