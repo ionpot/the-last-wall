@@ -79,11 +79,17 @@ module Make (M : State.S) : S = struct
     let module U = Upkeep.Check(M) in
     Upkeep U.total
 
+  let check_market () =
+    let module S = Market.Check(M) in
+    match S.value with
+    | Some res -> Market res
+    | None -> to_support ()
+
   let check_blessing () =
     let module B = Blessing.Check(M) in
     match B.value with
     | Some res -> Blessing res
-    | None -> to_support ()
+    | None -> check_market ()
 
   let check_defeat () =
     if M.has_manp ()
@@ -111,12 +117,6 @@ module Make (M : State.S) : S = struct
     then BuildManpower cost
     else check_built ()
 
-  let check_market () =
-    let module S = Market.Check(M) in
-    match S.value with
-    | Some res -> Market res
-    | None -> check_bld_manp ()
-
   let check_mercs () =
     match Merc.roll () with
     | Some mercs -> Mercs (mercs, false)
@@ -141,8 +141,7 @@ module Make (M : State.S) : S = struct
     | None -> to_report ()
 
   let next = function
-    | Turn _ -> check_market ()
-    | Market _ -> check_bld_manp ()
+    | Turn _ -> check_bld_manp ()
     | BuildManpower _ -> check_built ()
     | Built _ -> check_needs ()
     | Needs _ -> check_leader ()
@@ -152,7 +151,8 @@ module Make (M : State.S) : S = struct
     | Report _
     | ReportSum _ -> Nations (M.get_nats ())
     | Nations _ -> check_blessing ()
-    | Blessing _ -> to_support ()
+    | Blessing _ -> check_market ()
+    | Market _ -> to_support ()
     | Support _ -> Build []
     | Build _ -> check_bld_supp ()
     | BuildSupply _ -> check_cavalry ()
