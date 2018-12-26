@@ -132,7 +132,7 @@ module Make (M : State.S) : S = struct
     let cost = M.bld_supp_cost () in
     if cost > 0
     then BuildSupply cost
-    else check_mercs ()
+    else check_cavalry ()
 
   let check_starvation () =
     let module U = Upkeep.Starvation(M) in
