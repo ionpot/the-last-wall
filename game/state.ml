@@ -36,6 +36,7 @@ module type S = sig
   val bld_supp_cost : unit -> supply
   val bld_manp : manpower -> unit
   val bld_supp : supply -> unit
+  val with_bld : (B.t -> 'a) -> 'a
   val bld_tick : unit -> unit
   val get_turn : unit -> turn
   val set_turn : turn -> unit
@@ -127,6 +128,7 @@ module Make (M : Init) : S = struct
     t.supp <- s2;
     t.builds <- b
   let bld_tick () = map_bld B.tick
+  let with_bld f = f t.builds
 
   let get_deity () = t.deity
   let with_deity f = f t.deity
