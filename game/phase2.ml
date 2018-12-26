@@ -39,6 +39,7 @@ module Make (M : State.S) : S = struct
     | Built _ -> ()
     | Cavalry x ->
         M.Cavalry.add x;
+        M.sub_manp x;
         M.sub_supp x
     | Defeat
     | End -> ()

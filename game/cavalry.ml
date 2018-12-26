@@ -10,7 +10,7 @@ let too_many cav men =
 module Check (M : State.S) = struct
   let cap = per_stable * M.bld_count Building.Stable
   let need = Number.sub cap (M.Cavalry.get ())
-  let avlb = min need (M.get_supp ())
+  let avlb = Listx.min_of [M.get_manp (); M.get_supp (); need]
   let value = if avlb > 0 then Some avlb else None
 end
 

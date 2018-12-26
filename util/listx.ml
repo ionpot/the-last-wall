@@ -8,6 +8,11 @@ let count x xs =
 let discard f ls =
   List.filter (fun x -> not (f x)) ls
 
+let rec min_of = function
+  | [] -> 0
+  | x :: [] -> x
+  | x :: xs -> min x (min_of xs)
+
 let pick_first i =
   let f ls n =
     if List.length ls < i
