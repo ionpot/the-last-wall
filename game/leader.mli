@@ -3,6 +3,8 @@ type ltype = Aristocrat | Expert | Warrior
 type level = int
 type charisma = int
 
+val ltypes : ltype list
+
 val make : ltype -> t
 val random : unit -> t
 val lives : unit -> bool
