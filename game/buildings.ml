@@ -19,6 +19,9 @@ let empty =
 let count_of b t =
   Listx.count b t.ready
 
+let is_ignored b t =
+  List.mem b t.ignored
+
 let is_ready b t =
   List.mem b t.ready
 
