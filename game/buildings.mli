@@ -9,6 +9,7 @@ val build : Building.t list -> t -> t
 val raze : Building.t -> t -> t
 
 val count_of : Building.t -> t -> int
+val is_ignored : Building.t -> t -> bool
 val is_ready : Building.t -> t -> bool
 
 val in_queue : t -> queued list

@@ -20,7 +20,7 @@ let blessing_of = function
   | Sitera -> empty <+ Supply (roll 10 20)
 
 let boosted_of = function
-  | Arnerula -> empty <+ rand 0 40
+  | Arnerula -> empty <+ rand 0 50
   | Lerota -> empty
   | deity -> blessing_of deity <+ Manpwr 10 <+ Supply 10
 

@@ -65,7 +65,7 @@ module Num (M : FromNum) : Num = struct
     let empty = M.empty
   end)
   let add i = map ((+) i)
-  let sub i = map ((-) i)
+  let sub i = map (fun x -> x - i)
   let clr () = set 0
   let ptv () = return ((<) 0)
   let deduce i =

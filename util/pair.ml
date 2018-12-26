@@ -18,3 +18,5 @@ let (--) (x, y) (a, b) =
 
 let (<+>) x y =
   x ++ (y, y)
+
+let map (f, g) (a, b) = (f a, g b)

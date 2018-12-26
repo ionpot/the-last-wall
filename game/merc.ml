@@ -6,7 +6,3 @@ let chance x =
 let roll () =
   let x = Dice.between 10 30 in
   chance x
-
-let buy mercs supply =
-  let bought = min mercs supply in
-  bought, supply - bought

@@ -5,6 +5,7 @@ type event =
   | Build of Building.t list
   | BuildManpower of manpower
   | BuildSupply of supply
+  | BuildTick
   | Built of Building.t list
   | Cavalry of manpower
   | Defeat
@@ -29,16 +30,12 @@ module Make (M : State.S) : S = struct
   let first () =
     Turn (M.get_turn () + 1)
 
-  let buy_mercs mercs =
-    M.buy_manp_with (Merc.buy mercs)
-
   let apply = function
     | Blessing res -> M.add_res res
     | Build x -> M.build x
-    | BuildManpower x ->
-        M.bld_manp x;
-        M.bld_tick ()
+    | BuildManpower x -> M.bld_manp x
     | BuildSupply x -> M.bld_supp x
+    | BuildTick -> M.bld_tick ()
     | Built _ -> ()
     | Cavalry x ->
         M.Cavalry.add x;
@@ -47,8 +44,7 @@ module Make (M : State.S) : S = struct
     | End -> ()
     | LeaderNew ldr -> M.set_ldr ldr
     | Market x -> M.add_supp x
-    | Mercs (mercs, accept) ->
-        if accept then buy_mercs mercs
+    | Mercs (mercs, accept) -> if accept then M.supp2manp mercs
     | Nations nats -> M.set_nats nats
     | Needs _
     | Report _
@@ -115,7 +111,7 @@ module Make (M : State.S) : S = struct
     let cost = M.bld_manp_cost () in
     if cost > 0
     then BuildManpower cost
-    else check_built ()
+    else BuildTick
 
   let check_mercs () =
     match Merc.roll () with
@@ -132,7 +128,7 @@ module Make (M : State.S) : S = struct
     let cost = M.bld_supp_cost () in
     if cost > 0
     then BuildSupply cost
-    else check_mercs ()
+    else check_cavalry ()
 
   let check_starvation () =
     let module U = Upkeep.Starvation(M) in
@@ -142,7 +138,8 @@ module Make (M : State.S) : S = struct
 
   let next = function
     | Turn _ -> check_bld_manp ()
-    | BuildManpower _ -> check_built ()
+    | BuildManpower _ -> BuildTick
+    | BuildTick -> check_built ()
     | Built _ -> check_needs ()
     | Needs _ -> check_leader ()
     | LeaderNew _ -> to_upkeep ()
