@@ -16,17 +16,21 @@ let rec rand cap (m, men) (c, cav) =
   if cap = 0 then m, c
   else
     let ms = min cap men in
-    let cs = min cap (cav * cav_str) in
-    let x = Random.int (ms + cs) in
+    let cs = min (cap / cav_str) cav in
+    let x =
+      if ms = 0 then cs
+      else if cs = 0 then ms
+      else Dice.roll (ms + cs)
+    in
     if x > ms
     then
       let y = x - ms in
       rand (cap - y * cav_str) (m, ms) (c + y, cs - y)
     else rand (cap - x) (m + x, ms - x) (c, cs)
 
-let pick men cav =
-  if fort_cap < men + mp_of cav
-  then rand fort_cap (0, men) (0, cav)
+let pick cap men cav =
+  if cap < men + mp_of cav
+  then rand cap (0, men) (0, cav)
   else men, cav
 
 module Make (M : State.S) = struct
@@ -36,13 +40,8 @@ module Make (M : State.S) = struct
     let cav_mp = M.Cavalry.return mp_of in
     loss > M.get_manp () + cav_mp
 
-  let cas_of loss =
-    let module Cav = Cavalry.Casualty(M) in
-    let cav = Cav.check loss in
-    loss - cav, cav
-
-  let save () =
-    pick (M.get_manp ()) (M.Cavalry.get ())
+  let pick_for cap =
+    pick cap (M.get_manp ()) (M.Cavalry.get ())
 
   let mitigate loss ldr =
     let def = Leader.defense_of ldr in
@@ -61,8 +60,8 @@ module Make (M : State.S) = struct
 
   let check_fort loss =
     if is_defeat loss && M.bld_ready Building.Fort
-    then Fort (save ())
-    else Loss (cas_of loss)
+    then Fort (pick_for fort_cap)
+    else Loss (pick_for loss)
 
   let check enemies =
     let dmg = Enemy.damage enemies in
