@@ -46,12 +46,12 @@ module type S = sig
   val get_manp : unit -> manpower
   val set_manp : manpower -> unit
   val sub_manp : manpower -> unit
-  val buy_manp_with : (supply -> manpower * supply) -> unit
   val with_supp : (supply -> 'a) -> 'a
   val add_supp : supply -> unit
   val sub_supp : supply -> unit
   val get_supp : unit -> supply
   val clr_supp : unit -> unit
+  val supp2manp : supply -> unit
   val get_deity : unit -> Deity.t
   val with_deity : (Deity.t -> 'a) -> 'a
   val get_nats : unit -> Nation.t list
@@ -100,10 +100,11 @@ module Make (M : Init) : S = struct
   let has_manp () = t.manp > 0
   let add_manp x = t.manp <- t.manp + x
   let sub_manp x = t.manp <- t.manp - x
-  let buy_manp_with f =
-    let mp, sp = f t.supp in
-    add_manp mp;
-    sub_supp sp
+
+  let supp2manp sup =
+    let s = min sup t.supp in
+    add_manp s;
+    sub_supp s
 
   let add_res r =
     add_manp (R.manp_of r);

@@ -30,9 +30,6 @@ module Make (M : State.S) : S = struct
   let first () =
     Turn (M.get_turn () + 1)
 
-  let buy_mercs mercs =
-    M.buy_manp_with (Merc.buy mercs)
-
   let apply = function
     | Blessing res -> M.add_res res
     | Build x -> M.build x
@@ -47,8 +44,7 @@ module Make (M : State.S) : S = struct
     | End -> ()
     | LeaderNew ldr -> M.set_ldr ldr
     | Market x -> M.add_supp x
-    | Mercs (mercs, accept) ->
-        if accept then buy_mercs mercs
+    | Mercs (mercs, accept) -> if accept then M.supp2manp mercs
     | Nations nats -> M.set_nats nats
     | Needs _
     | Report _
