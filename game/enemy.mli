@@ -14,6 +14,7 @@ val type_of : party -> t
 val report_of : party list -> report
 val sum_report_of : party list -> sum_report
 
+val make : (count * t) list -> party list
 val damage : party list -> float
 val spawn : turn -> party list
 
