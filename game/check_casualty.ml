@@ -13,7 +13,8 @@ let sub a b = a -. a *. b
 let mp_of cav = cav * cav_str
 
 let rec rand cap (m, men) (c, cav) =
-  if cap = 0 then m, c
+  if cap = 0 || men = 0 && cav = 0
+  then m, c
   else
     let ms = min cap men in
     let cs = min (cap / cav_str) cav in
