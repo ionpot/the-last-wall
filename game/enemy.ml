@@ -7,6 +7,9 @@ type sum_report = (count * t list)
 let t_list =
   [Skeleton; Orc; Demon]
 
+let make ls =
+  List.map (fun (n, t) -> t, n) ls
+
 let try_round x =
   if x > 10 then Dice.round x else x
 
