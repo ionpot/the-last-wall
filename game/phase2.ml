@@ -80,7 +80,7 @@ module Make (M : State.S) : S = struct
     let module S = Market.Check(M) in
     match S.value with
     | Some res -> Market res
-    | None -> to_support ()
+    | None -> Nations (M.get_nats ())
 
   let check_blessing () =
     let module B = Blessing.Check(M) in
@@ -147,10 +147,10 @@ module Make (M : State.S) : S = struct
     | Upkeep _ -> check_starvation ()
     | Starvation _ -> check_defeat ()
     | Report _
-    | ReportSum _ -> Nations (M.get_nats ())
-    | Nations _ -> check_blessing ()
+    | ReportSum _ -> check_blessing ()
     | Blessing _ -> check_market ()
-    | Market _ -> to_support ()
+    | Market _ -> Nations (M.get_nats ())
+    | Nations _ -> to_support ()
     | Support _ -> Build []
     | Build _ -> check_bld_supp ()
     | BuildSupply _ -> check_cavalry ()
