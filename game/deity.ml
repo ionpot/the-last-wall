@@ -28,5 +28,5 @@ let boosted_of = function
 
 let starting deity =
   blessing_of deity
-  <+ Manpwr (roll 10 30)
-  <+ Supply (roll 150 300)
+  <+ Manpwr (roll 20 40)
+  <+ Supply (roll 60 120)
