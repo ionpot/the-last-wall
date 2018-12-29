@@ -89,7 +89,7 @@ module Make (M : State.S) : S = struct
     | None -> check_market ()
 
   let check_defeat () =
-    if M.has_manp ()
+    if M.has_manp () || M.Cavalry.ptv ()
     then to_report ()
     else Defeat
 
