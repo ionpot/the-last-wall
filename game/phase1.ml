@@ -33,10 +33,10 @@ module Make (M : State.S) : S = struct
 
   let next = function
     | Starting _ -> Nations (M.get_nats ())
-    | Nations _ -> SendScouts (M.is_scouting ())
-    | SendScouts _ -> Support (Support.get ())
+    | Nations _ -> Support (Support.get ())
     | Support _ -> Build []
     | Build _ -> check_supp ()
-    | BuildSupply _
+    | BuildSupply _ -> SendScouts (M.is_scouting ())
+    | SendScouts _
     | End -> End
 end
