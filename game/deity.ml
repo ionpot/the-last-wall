@@ -21,8 +21,10 @@ let blessing_of = function
 
 let boosted_of = function
   | Arnerula -> empty <+ rand 0 50
+  | Elanis as x -> blessing_of x <+ Manpwr 10
   | Lerota -> empty
-  | deity -> blessing_of deity <+ Manpwr 10 <+ Supply 10
+  | Sekrefir as x -> blessing_of x <+ Manpwr 10 <+ Supply 10
+  | Sitera as x -> blessing_of x <+ Supply 10
 
 let starting deity =
   blessing_of deity
