@@ -35,8 +35,6 @@ let pick cap men cav =
   else men, cav
 
 module Make (M : State.S) = struct
-  module Cav_dr = Cavalry.Dr(M)
-
   let is_defeat loss =
     let cav_mp = M.Cavalry.return mp_of in
     loss > M.get_manp () + cav_mp
@@ -54,6 +52,7 @@ module Make (M : State.S) = struct
     truncate (sub loss (def -. brg))
 
   let try_mitigate loss =
+    let module Cav_dr = Cavalry.Dr(M) in
     let x = sub loss Cav_dr.value in
     match M.get_ldr () with
     | Some ldr -> mitigate x ldr
