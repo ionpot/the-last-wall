@@ -7,9 +7,12 @@ Building
 Building_queue
 Buildings
 Cavalry
+Cond
 Defs
 Deity
 Enemy
+Event
+Input
 Leader
 Leader_state
 Main
