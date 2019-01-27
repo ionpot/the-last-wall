@@ -7,10 +7,10 @@ let t_list =
   [Tulron; Sodistan; Hekatium; Numendor; Clan]
 
 let ranges_of =
-  let low = (10, 20) in
-  let mid = (20, 30) in
-  let high = (30, 40) in
-  let f x = Pair.(x <+> 5) in
+  let low = (0, 10) in
+  let mid = (10, 20) in
+  let high = (20, 30) in
+  let f x = Pair.(x <+> 10) in
   function
     | Tulron
     | Sodistan -> (high, f low)
