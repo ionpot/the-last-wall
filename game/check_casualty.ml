@@ -1,5 +1,7 @@
 open Defs
 
+let pf = Printf.printf
+
 type t =
   | Loss of (manpower * manpower)
   | Fort of (manpower * manpower)
@@ -55,7 +57,10 @@ module Make (M : State.S) = struct
       then Barrage.dr_penalty
       else 0.
     in
-    truncate (sub loss (ldr +. cav -. brg))
+    let final = sub loss (ldr +. cav -. brg) in
+    pf "combat: dmg(%f) ldr(%f) cav(%f) brg(%f)\n" loss ldr cav brg;
+    pf "loss: %f\n" final;
+    truncate final
 
   let check_fort loss =
     if is_defeat loss && M.bld_ready Building.Fort
