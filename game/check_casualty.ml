@@ -42,21 +42,20 @@ module Make (M : State.S) = struct
   let pick_for cap =
     pick cap (M.get_manp ()) (M.Cavalry.get ())
 
-  let mitigate loss ldr =
-    let def = Leader.defense_of ldr in
+  let def_of = function
+    | Some ldr -> Leader.defense_of ldr
+    | None -> 0.
+
+  let mitigate loss =
+    let module Cav_dr = Cavalry.Dr(M) in
+    let cav = Cav_dr.value in
+    let ldr = def_of (M.get_ldr ()) in
     let brg =
       if M.Barraging.get ()
       then Barrage.dr_penalty
       else 0.
     in
-    truncate (sub loss (def -. brg))
-
-  let try_mitigate loss =
-    let module Cav_dr = Cavalry.Dr(M) in
-    let x = sub loss Cav_dr.value in
-    match M.get_ldr () with
-    | Some ldr -> mitigate x ldr
-    | None -> truncate x
+    truncate (sub loss (ldr +. cav -. brg))
 
   let check_fort loss =
     if is_defeat loss && M.bld_ready Building.Fort
@@ -65,7 +64,7 @@ module Make (M : State.S) = struct
 
   let check enemies =
     let dmg = Enemy.damage enemies in
-    let loss = try_mitigate dmg in
+    let loss = mitigate dmg in
     if loss > 0
     then check_fort loss
     else Ok
