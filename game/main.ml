@@ -1,65 +1,38 @@
 type event =
-  | Ph1 of Phase1.output
-  | Ph2 of Phase2.output
-  | Ph3 of Phase3.output
+  | Ph1 of (Phase1.Output.t * Phase1.Steps.t)
+  | Ph2 of (Phase2.Output.t * Phase2.Steps.t)
+  | Ph3 of (Phase3.Output.t * Phase3.Steps.t)
   | End
 
-type _ step =
-  | One : Phase1.output step
-  | Two : Phase2.output step
-  | Three : Phase3.output step
+type ('output, 'steps) phase =
+  | One : (Phase1.Output.t * Phase1.Steps.t) phase
+  | Two : (Phase2.Output.t * Phase2.Steps.t) phase
+  | Three : (Phase3.Output.t * Phase3.Steps.t) phase
 
-let phase_of : type a. a step -> (module Phase.S with type output = a) =
-  function
+let module_of
+  : type o s. (o, s) phase
+  -> (module Phase.Steps with type Output.t = o and t = s)
+  = function
     | One -> (module Phase1)
     | Two -> (module Phase2)
     | Three -> (module Phase3)
 
-module Apply (S : State.S) = struct
-  let value : type a. a -> a step -> unit =
-    fun x s ->
-      let module P = (val phase_of s) in
-      let module M = Seek.Apply(P)(S) in
-      M.value x
-end
-
-module FirstStep (S : State.S) = struct
-  let value : type a. a step -> a Seek.t =
-    fun s ->
-      let module P = (val phase_of s) in
-      let module M = Seek.First(P)(S) in
-      M.value
-end
-
-module NextStep (S : State.S) = struct
-  let value : type a. a Seek.t -> a step -> a Seek.t =
-    fun x s ->
-      let module P = (val phase_of s) in
-      let module M = Seek.Next(P)(S) in
-      M.value x
-end
-
 module Make (S : State.S) = struct
-  module F = FirstStep(S)
-  let rec seek : type a. (a step -> a Seek.t) -> a step -> event =
-    fun f p ->
-      let next n = seek F.value n in
-      match f p, p with
-      | N.This e, One -> Ph1 e
-      | N.This e, Two -> Ph2 e
-      | N.This e, Three -> Ph3 e
-      | N.Next, One -> next Two
-      | N.Next, Two -> next Three
-      | N.Next, Three -> next Two
-      | N.End, _ -> End
+  let rec next_of : type s. s -> (_, s) phase -> event =
+    fun steps p ->
+      let module P = (val module_of p) in
+      let module N = Step.Next(P.Steps)(S) in
+      match N.value steps, p with
+      | Some e, One -> Ph1 e
+      | Some e, Two -> Ph2 e
+      | Some e, Three -> Ph3 e
+      | None, One -> first_of Two
+      | None, Two -> first_of Three
+      | None, Three -> first_of Two
 
-  let first_of p =
-    seek F.value p
-
-  let next_of : type a. a -> a step -> event =
-    fun x p ->
-      let module N = NextStep(S) in
-      seek (N.value x) p
+  and first_of p =
+    let module P = (val module_of p) in
+    next_of P.steps p
 end
 
 module First (S : State.S) = struct
@@ -68,15 +41,31 @@ module First (S : State.S) = struct
 end
 
 module Next (S : State.S) = struct
-  let next_of x p =
-    let module A = Apply(S) in
+  let apply output phase =
+    let module P = (val module_of phase) in
+    let module A = P.Apply(S) in
+    match output with
+    | Event x -> A.event x
+    | Input x -> A.input x
+    | Notify _ -> ()
+
+  let is_end output phase =
+    let module P = (val module_of phase) in
+    P.is_end output
+
+  let next_of steps phase =
     let module M = Make(S) in
-    A.value x p;
-    M.next_of x p
+    M.next_of steps phase
+
+  let handle : type o, s. (o * s) -> (o, s) phase -> event =
+    fun (output, steps) phase ->
+      apply output phase;
+      if is_end output phase then End
+      else next_of steps phase
 
   let value = function
-    | Ph1 x -> next_of x One
-    | Ph2 x -> next_of x Two
-    | Ph3 x -> next_of x Three
+    | Ph1 x -> handle x One
+    | Ph2 x -> handle x Two
+    | Ph3 x -> handle x Three
     | End -> End
 end

@@ -8,18 +8,6 @@ let count x xs =
 let discard f ls =
   List.filter (fun x -> not (f x)) ls
 
-let rec first_some = function
-  | [] -> None
-  | f :: ls ->
-      match f () with
-      | Some _ as x -> x
-      | None -> first_some ls
-
-let rec last_of = function
-  | [] -> []
-  | x :: [] -> x
-  | _ :: xs -> last_of xs
-
 let rec min_of = function
   | [] -> 0
   | x :: [] -> x
@@ -41,7 +29,7 @@ let rm x ls =
 
 let rec slice_from f = function
   | [] -> []
-  | x :: xs as ls -> if f x then ls else slice_from xs
+  | x :: xs as ls -> if f x then ls else slice_from f xs
 
 (* partially applied functions cannot be generalised *)
 let undupe ls =
