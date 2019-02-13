@@ -4,34 +4,32 @@ type event =
   | Ph3 of (Phase3.Output.t * Phase3.Steps.t)
   | End
 
-type ('output, 'steps) phase =
-  | One : (Phase1.Output.t * Phase1.Steps.t) phase
-  | Two : (Phase2.Output.t * Phase2.Steps.t) phase
-  | Three : (Phase3.Output.t * Phase3.Steps.t) phase
+type phase =
+  | One of (module Phase1.Steps)
+  | Two of (module Phase2.Steps)
+  | Three of (module Phase3.Steps)
 
-let module_of
-  : type o s. (o, s) phase
-  -> (module Phase.Steps with type Output.t = o and t = s)
+let steps_of : phase -> (module Phase.Steps)
   = function
-    | One -> (module Phase1)
-    | Two -> (module Phase2)
-    | Three -> (module Phase3)
-
+    | One x -> x
+    | Two x -> x
+    | Three x -> x
+(*
 module Make (S : State.S) = struct
-  let rec next_of : type s. s -> (_, s) phase -> event =
+  let rec next_of : 'a -> 'a phase -> event =
     fun steps p ->
-      let module P = (val module_of p) in
-      let module N = Step.Next(P.Steps)(S) in
+      let module P = (val steps_of p) in
+      let module N = Step.Next(P)(S) in
       match N.value steps, p with
-      | Some e, One -> Ph1 e
-      | Some e, Two -> Ph2 e
-      | Some e, Three -> Ph3 e
-      | None, One -> first_of Two
-      | None, Two -> first_of Three
-      | None, Three -> first_of Two
+      | Some e, One _ -> Ph1 e
+      | Some e, Two _ -> Ph2 e
+      | Some e, Three _ -> Ph3 e
+      | None, One _ -> first_of (Two (module Phase2.Steps))
+      | None, Two _ -> first_of (Three (module Phase3.Steps))
+      | None, Three _ -> first_of (Two (module Phase2.Steps))
 
   and first_of p =
-    let module P = (val module_of p) in
+    let module P = (val steps_of p) in
     next_of P.steps p
 end
 
@@ -42,7 +40,7 @@ end
 
 module Next (S : State.S) = struct
   let apply output phase =
-    let module P = (val module_of phase) in
+    let module P = (val steps_of phase) in
     let module A = P.Apply(S) in
     match output with
     | Event x -> A.event x
@@ -50,14 +48,14 @@ module Next (S : State.S) = struct
     | Notify _ -> ()
 
   let is_end output phase =
-    let module P = (val module_of phase) in
+    let module P = (val steps_of phase) in
     P.is_end output
 
   let next_of steps phase =
     let module M = Make(S) in
     M.next_of steps phase
 
-  let handle : type o, s. (o * s) -> (o, s) phase -> event =
+  let handle : type o s. (o * s) -> (o, s) phase -> event =
     fun (output, steps) phase ->
       apply output phase;
       if is_end output phase then End
@@ -69,3 +67,22 @@ module Next (S : State.S) = struct
     | Ph3 x -> handle x Three
     | End -> End
 end
+
+module Handle (State : State.S) (Steps : Phase.Steps) = struct
+  let apply output =
+    let module A = Steps.Apply(State) in
+    match output with
+    | Event x -> A.event x
+    | Input x -> A.input x
+    | Notify _ -> ()
+
+  let next_of steps phase =
+    let module S = Seek(Steps)(State) in
+    match S.value steps with
+    | Some x ->
+
+  let value (output, steps) phase =
+    apply output;
+    if Steps.is_end output then End
+    else next_of steps phase
+end*)

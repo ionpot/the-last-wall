@@ -14,13 +14,13 @@ module Output = struct
   type t = (event, input, notify) Phase.output
 end
 
-module type S = Phase.Steps with
+module type Steps = Phase.Steps with
   type Output.event = Output.event and
   type Output.input = Output.input and
   type Output.notify = Output.notify and
   type Output.t = Output.t
 
-module Steps : S = struct
+module Steps : Steps = struct
   module Output = Output
 
   type cond = BuildSupply
