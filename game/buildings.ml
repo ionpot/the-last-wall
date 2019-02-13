@@ -43,8 +43,10 @@ let build ls t =
   |> List.fold_left start t
 
 let raze b t =
-  let ready = Listx.rm b t.ready in
-  { t with ready }
+  let rm_from = Listx.rm b in
+  let ready = rm_from t.ready in
+  let ignored = rm_from t.ignored in
+  { t with ignored; ready }
 
 let manp_cost t = Q.manp_cost t.queue
 let supp_cost t = Q.supp_cost t.queue
