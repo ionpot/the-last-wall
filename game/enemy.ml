@@ -69,7 +69,7 @@ let damage parties =
   |> List.fold_left (+.) 0.
 
 let can_spawn turn enemy =
-  let a = 0.1 *. float turn in
+  let a = 0.1 *. float (Number.sub turn 1) in
   let b = chance_of enemy in
   Dice.chance (a +. b)
 
