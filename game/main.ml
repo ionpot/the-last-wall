@@ -4,33 +4,31 @@ type event =
   | Ph3 of (Phase3.Output.t * Phase3.Steps.t)
   | End
 
-type phase =
-  | One of (module Phase1.Steps)
-  | Two of (module Phase2.Steps)
-  | Three of (module Phase3.Steps)
+type _ phase =
+  | One : Phase1.Steps.t phase
+  | Two : Phase2.Steps.t phase
+  | Three : Phase3.Steps.t phase
 
-let steps_of : phase -> (module Phase.Steps)
-  = function
-    | One x -> x
-    | Two x -> x
-    | Three x -> x
+let steps_of : type s. s phase -> (module Phase.Steps with type t = s) = function
+  | One -> (module Phase1.Steps)
+  | Two -> (module Phase2.Steps)
+  | Three -> (module Phase3.Steps)
 (*
-module Make (S : State.S) = struct
-  let rec next_of : 'a -> 'a phase -> event =
-    fun steps p ->
-      let module P = (val steps_of p) in
-      let module N = Step.Next(P)(S) in
-      match N.value steps, p with
-      | Some e, One _ -> Ph1 e
-      | Some e, Two _ -> Ph2 e
-      | Some e, Three _ -> Ph3 e
-      | None, One _ -> first_of (Two (module Phase2.Steps))
-      | None, Two _ -> first_of (Three (module Phase3.Steps))
-      | None, Three _ -> first_of (Two (module Phase2.Steps))
+module Make (State : State.S) = struct
+  let rec next_of steps p =
+    let module Steps = (val steps_of p) in
+    let module N = Step.Next(Steps)(State) in
+    match N.value steps, p with
+    | Some e, One _ -> Ph1 e
+    | Some e, Two _ -> Ph2 e
+    | Some e, Three _ -> Ph3 e
+    | None, One _ -> first_of (Two (module Phase2.Steps))
+    | None, Two _ -> first_of (Three (module Phase3.Steps))
+    | None, Three _ -> first_of (Two (module Phase2.Steps))
 
   and first_of p =
-    let module P = (val steps_of p) in
-    next_of P.steps p
+    let module Steps = (val steps_of p) in
+    next_of Steps.steps p
 end
 
 module First (S : State.S) = struct
