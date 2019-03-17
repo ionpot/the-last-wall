@@ -1,3 +1,19 @@
-module Next (Steps : Phase.Steps) : State.S -> sig
-  val value : Steps.t -> (Steps.Output.t * Steps.t) option
+module Of (Phase : Phase.S) : sig
+  type output =
+    | Event of Phase.Output.event
+    | Input of Phase.Output.input
+    | Notify of Phase.Output.notify
+  type steps
+  type event = output * steps
+
+  val is_end : output -> bool
+
+  module Apply : State.S -> sig
+    val value : output -> unit
+  end
+
+  module Seek : State.S -> sig
+    val first : unit -> event option
+    val next : steps -> event option
+  end
 end

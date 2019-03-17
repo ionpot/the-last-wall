@@ -1,56 +1,72 @@
 let is_in event = function
-  | Phase.Do a
-  | Phase.JumpIfNo (a, _) -> a = event
-  | Phase.Either (a, b) -> a = event || b = event
+  | Steps.Do a
+  | Steps.JumpIfNo (a, _) -> a = event
+  | Steps.Either (a, b) -> a = event || b = event
 
 let slice_from event steps =
   Listx.slice_from (is_in event) steps
 
-module Next (Steps : Phase.Steps) (State : State.S) = struct
-  type _ t =
-    | Cond : Steps.cond t
-    | Input : Steps.input t
-    | Notify : Steps.notify t
+module Of (Phase : Phase.S) = struct
+  module Output = Phase.Output
 
-  let to_check : type a. a -> a t -> (module Event.Check) =
-    fun x -> function
-      | Cond -> Steps.Check.cond x
-      | Input -> Steps.Check.input x
-      | Notify -> Steps.Check.notify x
+  type output =
+    | Event of Output.event
+    | Input of Output.input
+    | Notify of Output.notify
+  type steps = Phase.Steps.t
+  type event = output * steps
 
-  let to_bool x t =
-    let module Check = (val to_check x t) in
-    let module M = Check(State) in
-    M.value
+  let is_end = function
+    | Event _
+    | Input _ -> false
+    | Notify n -> Output.is_end n
 
-  let is_ok = function
-    | Phase.Cond x -> to_bool x Cond
-    | Phase.Direct _ -> true
-    | Phase.Input x -> to_bool x Input
-    | Phase.Notify x -> to_bool x Notify
+  module Apply (State : State.S) = struct
+    module Apply = Output.Apply(State)
 
-  let rec next_of = function
-    | [] -> None
-    | Phase.Do a :: rest ->
-        if is_ok a then Some (a, rest)
-        else next_of rest
-    | Phase.Either (a, b) :: rest ->
-        if is_ok a then Some (a, rest)
-        else next_of ((Phase.Do b) :: rest)
-    | Phase.JumpIfNo (a, b) :: rest ->
-        if is_ok a then Some (a, rest)
-        else next_of (slice_from b rest)
+    let value = function
+      | Event e -> Apply.event e
+      | Input i -> Apply.input i
+      | Notify _ -> ()
+  end
 
-  let output_of event =
-    let module M = Steps.Make(State) in
-    match event with
-    | Phase.Cond x -> Phase.Event (M.cond x)
-    | Phase.Direct x -> Phase.Event (M.direct x)
-    | Phase.Input x -> Phase.Input (M.input x)
-    | Phase.Notify x -> Phase.Notify (M.notify x)
+  module Seek (State : State.S) = struct
+    module Make = Phase.Make(State)
 
-  let value steps =
-    match next_of steps with
-    | Some (event, steps) -> Some (output_of event, steps)
-    | None -> None
+    let output_of = function
+      | Steps.Cond x -> Event (Make.cond x)
+      | Steps.Direct x -> Event (Make.direct x)
+      | Steps.Input x -> Input (Make.input x)
+      | Steps.Notify x -> Notify (Make.notify x)
+
+    let to_bool (module Check : Event.Check) =
+      let module Result = Check(State) in
+      Result.value
+
+    let is_ok = function
+      | Steps.Cond x -> to_bool (Phase.Check.cond x)
+      | Steps.Direct _ -> true
+      | Steps.Input x -> to_bool (Phase.Check.input x)
+      | Steps.Notify x -> to_bool (Phase.Check.notify x)
+
+    let rec seek = function
+      | [] -> None
+      | Steps.Do a :: rest ->
+          if is_ok a then Some (a, rest)
+          else seek rest
+      | Steps.Either (a, b) :: rest ->
+          if is_ok a then Some (a, rest)
+          else seek ((Steps.Do b) :: rest)
+      | Steps.JumpIfNo (a, b) :: rest ->
+          if is_ok a then Some (a, rest)
+          else seek (slice_from b rest)
+
+    let next steps =
+      match seek steps with
+      | Some (etype, rest) -> Some (output_of etype, rest)
+      | None -> None
+
+    let first () =
+      next Phase.Steps.list
+  end
 end

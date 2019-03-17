@@ -1,44 +1,26 @@
-type ('e, 'i, 'n) output =
-  | Event of 'e
-  | Input of 'i
-  | Notify of 'n
-
-type ('c, 'd, 'i, 'n) etype =
-  | Cond of 'c
-  | Direct of 'd
-  | Input of 'i
-  | Notify of 'n
-
-type 'a step =
-  | Do of 'a
-  | Either of ('a * 'a)
-  | JumpIfNo of ('a * 'a)
+type t = One | Two | Three
 
 module type Output = sig
   type event and input and notify
-  type t = (event, input, notify) output
+  val is_end : notify -> bool
+  module Apply : State.S -> sig
+    val event : event -> unit
+    val input : input -> unit
+  end
 end
 
-module type Steps = sig
+module type S = sig
   module Output : Output
-  type cond and direct and input and notify
-  type event = (cond, direct, input, notify) etype
-  type t = event step list
-  val steps : t
-  val is_end : Output.t -> bool
-  module Apply : State.S -> sig
-    val event : Output.event -> unit
-    val input : Output.input -> unit
-  end
+  module Steps : Steps.S
   module Check : sig
-    val cond : cond -> (module Event.Check)
-    val input : input -> (module Event.Check)
-    val notify : notify -> (module Event.Check)
+    val cond : Steps.cond -> (module Event.Check)
+    val input : Steps.input -> (module Event.Check)
+    val notify : Steps.notify -> (module Event.Check)
   end
   module Make : State.S -> sig
-    val cond : cond -> Output.event
-    val direct : direct -> Output.event
-    val input : input -> Output.input
-    val notify : notify -> Output.notify
+    val cond : Steps.cond -> Output.event
+    val direct : Steps.direct -> Output.event
+    val input : Steps.input -> Output.input
+    val notify : Steps.notify -> Output.notify
   end
 end

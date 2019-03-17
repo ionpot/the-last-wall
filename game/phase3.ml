@@ -11,50 +11,37 @@ module Output = struct
 
   type notify = unit
 
-  type t = (event, input, notify) Phase.output
+  let is_end () = false
+
+  module Apply (State : State.S) = struct
+    let event = function
+      | BuildSupply x -> State.bld_supp x
+      | Starting x -> State.add_res x
+      | Support x -> State.add_res (Nation.total_of x)
+
+    let input = function
+      | Build x -> State.build x
+      | Nations x -> State.set_nats x
+      | Scout x -> State.set_scouting x
+  end
 end
 
-module type Steps = Phase.Steps with
+module Steps = Steps.Phase3
+
+module type S = Phase.S with
   type Output.event = Output.event and
   type Output.input = Output.input and
   type Output.notify = Output.notify and
-  type Output.t = Output.t
+  type Steps.cond = Steps.cond and
+  type Steps.direct = Steps.direct and
+  type Steps.input = Steps.input and
+  type Steps.notify = Steps.notify
 
-module Steps : Steps = struct
+module S : S = struct
   module Output = Output
+  module Steps = Steps
 
-  type cond = BuildSupply
-  type direct = Starting | Support
-  type input = Build | Nations | Scout
-  type notify = unit
-
-  type event = (cond, direct, input, notify) Phase.etype
-
-  type t = event Phase.step list
-
-  let steps =
-    let open Phase in
-    [ Do (Direct Starting);
-      Do (Input Nations);
-      Do (Direct Support);
-      Do (Input Build);
-      Do (Cond BuildSupply);
-      Do (Input Scout)
-    ]
-
-  let is_end _ = false
-
-  module Apply (S : State.S) = struct
-    let event = function
-      | Output.BuildSupply x -> S.bld_supp x
-      | Output.Starting x -> S.add_res x
-      | Output.Support x -> S.add_res (Nation.total_of x)
-
-    let input = function
-      | Output.Build x -> S.build x
-      | Output.Nations x -> S.set_nats x
-      | Output.Scout x -> S.set_scouting x
-  end
+  open Steps
 
   module Check = struct
     let cond : cond -> (module Event.Check) = function
@@ -65,8 +52,8 @@ module Steps : Steps = struct
       | Nations -> (module Input.Nations.Check)
       | Scout -> (module Input.Scout.Check)
 
-    let notify : notify -> (module Event.Check) = fun () ->
-      (module Event.Never)
+    let notify : notify -> (module Event.Check) =
+      fun () -> (module Event.Never)
   end
 
   module Make (S : State.S) = struct
@@ -86,7 +73,6 @@ module Steps : Steps = struct
     let notify () = ()
   end
 end
-
 (*module CL = Check_leader
 
 type event =
