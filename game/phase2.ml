@@ -26,7 +26,7 @@ module Output = struct
   end
 end
 
-module Steps = Steps.Phase2
+module Steps = Steps.Phase1
 
 module type S = Phase.S with
   type Output.event = Output.event and

@@ -1,11 +1,3 @@
-let is_in event = function
-  | Steps.Do a
-  | Steps.JumpIfNo (a, _) -> a = event
-  | Steps.Either (a, b) -> a = event || b = event
-
-let slice_from event steps =
-  Listx.slice_from (is_in event) steps
-
 module Of (Phase : Phase.S) = struct
   module Output = Phase.Output
 
@@ -15,11 +7,6 @@ module Of (Phase : Phase.S) = struct
     | Notify of Output.notify
   type steps = Phase.Steps.t
   type event = output * steps
-
-  let is_end = function
-    | Event _
-    | Input _ -> false
-    | Notify n -> Output.is_end n
 
   module Apply (State : State.S) = struct
     module Apply = Output.Apply(State)
@@ -57,9 +44,9 @@ module Of (Phase : Phase.S) = struct
       | Steps.Either (a, b) :: rest ->
           if is_ok a then Some (a, rest)
           else seek ((Steps.Do b) :: rest)
-      | Steps.JumpIfNo (a, b) :: rest ->
-          if is_ok a then Some (a, rest)
-          else seek (slice_from b rest)
+      | Steps.Branch (cond, ls) :: rest ->
+          if is_ok cond then Some (cond, ls)
+          else seek rest
 
     let next steps =
       match seek steps with

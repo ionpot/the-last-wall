@@ -6,8 +6,6 @@ module Of (Phase : Phase.S) : sig
   type steps
   type event = output * steps
 
-  val is_end : output -> bool
-
   module Apply : State.S -> sig
     val value : output -> unit
   end

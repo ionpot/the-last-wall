@@ -2,7 +2,6 @@ type t = One | Two | Three
 
 module type Output = sig
   type event and input and notify
-  val is_end : notify -> bool
   module Apply : State.S -> sig
     val event : event -> unit
     val input : input -> unit

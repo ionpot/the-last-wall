@@ -11,8 +11,6 @@ module Output = struct
 
   type notify = unit
 
-  let is_end () = false
-
   module Apply (State : State.S) = struct
     let event = function
       | BuildSupply x -> State.bld_supp x

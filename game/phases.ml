@@ -6,7 +6,6 @@ type event =
 type step =
   | Next of event
   | EndOf of Phase.t
-  | End
 
 module Step (State : State.S) (Phase : Phase.S) = struct
   module Step = Step.Of(Phase)
@@ -22,8 +21,7 @@ module Step (State : State.S) (Phase : Phase.S) = struct
     | None -> EndOf phase
 
   let next_of (output, steps) phase next =
-    if Step.is_end output then End
-    else match Seek.next steps with
+    match Seek.next steps with
     | Some event -> Next (next event)
     | None -> EndOf phase
 end

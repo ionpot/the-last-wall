@@ -16,13 +16,13 @@ module Make (State : State.S) = struct
   and check = function
     | Phases.Next event -> Event event
     | Phases.EndOf phase -> first_of (transition phase)
-    | Phases.End -> End
 
   let next = function
     | End -> End
     | Event e ->
         Handle.apply e;
-        check (Handle.next_of e)
+        if State.Ended.get () then End
+        else check (Handle.next_of e)
 
   let first () =
     first_of Phase.One

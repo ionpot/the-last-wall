@@ -6,7 +6,6 @@ type event =
 type step =
   | Next of event
   | EndOf of Phase.t
-  | End
 
 module Handle : State.S -> sig
   val apply : event -> unit
