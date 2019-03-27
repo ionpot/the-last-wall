@@ -37,8 +37,9 @@ module Of (Phase : Phase.S) = struct
       | Steps.Input x -> make_input (Make.input x)
       | Steps.Notify x -> make_nfy (Make.notify x)
 
-    let to_bool (event, _) =
-      Event.to_bool event
+    let to_bool ((module Event : Event.CanCheck), _) =
+      let module Result = Event.Check(State) in
+      Result.value
 
     let is_ok = function
       | Steps.Cond x -> to_bool (Make.cond x)

@@ -28,9 +28,7 @@ module type S = sig
   module Leader : Value.S
   module Turn : Value.Num
   val build : Building.t list -> unit
-  val built : unit -> Building.t list
   val bld_raze : Building.t -> unit
-  val bld_queued : unit -> B.queued list
   val bld_count : Building.t -> int
   val bld_ready : Building.t -> bool
   val bld_manp_cost : unit -> manpower
@@ -73,7 +71,8 @@ module Make (M : Init) : S = struct
   module Leader = Value.Of(Ldr)
   module Turn = Value.Num(Value.Zero)
 
-  Leader.set (Ldr.make M.leader)
+  let _ =
+    Leader.set (Ldr.make M.leader)
 
   let t =
     { builds = B.empty;
@@ -115,7 +114,6 @@ module Make (M : Init) : S = struct
 
   let map_bld f = t.builds <- f t.builds
   let build ls = map_bld (B.build ls)
-  let built () = B.built t.builds
   let bld_raze b = map_bld (B.raze b)
   let bld_count b = B.count_of b t.builds
   let bld_ready b = B.is_ready b t.builds
@@ -126,7 +124,7 @@ module Make (M : Init) : S = struct
     let s2, b = B.deduce t.supp s t.builds in
     t.supp <- s2;
     t.builds <- b
-  let bld_status () = map_bld B.to_status
+  let bld_status () = B.to_status t.builds
   let bld_update status = map_bld (B.update status)
   let with_bld f = f t.builds
 

@@ -3,7 +3,7 @@ type count = int
 type party = (t * count)
 type report =
   | Accurate of party list
-  | Vague of count * t list
+  | Vague of (count * t list)
 
 let t_list =
   [Skeleton; Orc; Demon]
@@ -59,7 +59,7 @@ let sum_report_of parties =
   let f a party = a + count_of party in
   let total = List.fold_left f 0 parties in
   let seen = List.map type_of parties in
-  (try_round total, seen)
+  try_round total, seen
 
 let to_report parties scouting =
   if scouting

@@ -2,10 +2,6 @@ module type CanCheck = sig
   module Check : State.S -> sig val value : bool end
 end
 
-let to_bool (module Event : Event.CanCheck) =
-  let module Result = Event.Check(State) in
-  Result.value
-
 module type CanMake = sig
   type t
   module Make : State.S -> sig val value : t end

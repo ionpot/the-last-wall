@@ -5,7 +5,7 @@ type count = int
 type party
 type report =
   | Accurate of party list
-  | Vague of count * t list
+  | Vague of (count * t list)
 
 val t_list : t list
 

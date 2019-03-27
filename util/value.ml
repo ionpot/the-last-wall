@@ -48,7 +48,7 @@ module From (M : From) = struct
   let map f = set (f !x)
 end
 
-module Of (M : From) : S = struct
+module Of (M : From) : S with type t = M.t = struct
   include From(M)
 end
 
