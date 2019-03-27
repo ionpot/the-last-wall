@@ -1,40 +1,50 @@
 module Of (Phase : Phase.S) = struct
   module Output = Phase.Output
 
+  type apply = unit -> unit
   type output =
-    | Event of Output.event
+    | Event of (Output.event * apply)
     | Input of Output.input
     | Notify of Output.notify
   type steps = Phase.Steps.t
   type event = output * steps
 
-  module Apply (State : State.S) = struct
-    module Apply = Output.Apply(State)
+  module Do (State : State.S) = struct
+    module Make = Phase.Make
 
-    let value = function
-      | Event e -> Apply.event e
-      | Input i -> Apply.input i
+    let apply = function
+      | Event (_, apply) -> apply ()
+      | Input i -> let module A = Output.Apply(State) in A.input i
       | Notify _ -> ()
-  end
 
-  module Seek (State : State.S) = struct
-    module Make = Phase.Make(State)
+    let make ((module Event : Event.Direct), convert) =
+      let module Make = Event.Make(State) in
+      let module Apply = Event.Apply(State) in
+      let apply () = Apply.value Make.value in
+      Event (convert Make.value, apply)
+
+    let make_input ((module Event : Event.Input), convert) =
+      let module Make = Event.Make(State) in
+      Input (convert Make.value)
+
+    let make_nfy ((module Event : Event.CanMake), convert) =
+      let module Make = Event.Make(State) in
+      Notify (convert Make.value)
 
     let output_of = function
-      | Steps.Cond x -> Event (Make.cond x)
-      | Steps.Direct x -> Event (Make.direct x)
-      | Steps.Input x -> Input (Make.input x)
-      | Steps.Notify x -> Notify (Make.notify x)
+      | Steps.Cond x -> make (Make.cond x)
+      | Steps.Direct x -> make (Make.direct x)
+      | Steps.Input x -> make_input (Make.input x)
+      | Steps.Notify x -> make_nfy (Make.notify x)
 
-    let to_bool (module Check : Event.Check) =
-      let module Result = Check(State) in
-      Result.value
+    let to_bool (event, _) =
+      Event.to_bool event
 
     let is_ok = function
-      | Steps.Cond x -> to_bool (Phase.Check.cond x)
+      | Steps.Cond x -> to_bool (Make.cond x)
       | Steps.Direct _ -> true
-      | Steps.Input x -> to_bool (Phase.Check.input x)
-      | Steps.Notify x -> to_bool (Phase.Check.notify x)
+      | Steps.Input x -> to_bool (Make.input x)
+      | Steps.Notify x -> to_bool (Make.notify x)
 
     let rec seek = function
       | [] -> None

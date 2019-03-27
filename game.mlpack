@@ -2,7 +2,6 @@ Check_casualty
 Check_leader
 Check_support
 Barrage
-Blessing
 Building
 Building_queue
 Buildings
@@ -14,10 +13,7 @@ Enemy
 Event
 Input
 Leader
-Leader_state
 Main
-Market
-Merc
 Nation
 Phase
 Phase1

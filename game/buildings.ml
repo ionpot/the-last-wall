@@ -2,6 +2,7 @@ module B = Building
 module Q = Building_queue
 
 type queued = (B.t * Resource.t)
+type status = B.t list * B.t list * queued list
 type t =
   { built : B.t list;
     ignored : B.t list;
@@ -60,15 +61,13 @@ let deduce supp need t =
   let queue = Q.set_supp mis t.queue in
   rem, { t with queue }
 
-let built t = t.built
+let to_status t =
+  let built, ongoing = Q.status_of t.queue in
+  t.built, built, ongoing
 
-let in_queue t =
-  Q.status_of t.queue
-
-let tick t =
-  let built, queue = Q.tick t.queue in
+let update (ready, built, ongoing) t =
   { t with
     built;
-    queue;
-    ready = t.ready @ t.built
+    queue = Q.update ongoing t.queue;
+    ready = t.ready @ ready
   }

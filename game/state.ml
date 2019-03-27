@@ -1,7 +1,7 @@
 open Defs
 
 module B = Buildings
-module LeaderS = Leader_state
+module Ldr = Leader
 module R = Resource
 
 type enemy = Enemy.party
@@ -10,23 +10,23 @@ type t =
   { mutable builds : B.t;
     deity : Deity.t;
     mutable enemies : enemy list;
-    mutable leader : LeaderS.t;
     mutable manp : manpower;
     mutable nats : Nation.t list;
     mutable scouting : bool;
-    mutable supp : supply;
-    mutable turn : turn
+    mutable supp : supply
   }
 
 module type Init = sig
   val deity : Deity.t
-  val leader : Leader.ltype
+  val leader : Ldr.ltype
 end
 
 module type S = sig
   module Barraging : Value.Bit
   module Cavalry : Value.Num
   module Ended : Value.Bit
+  module Leader : Value.S
+  module Turn : Value.Num
   val build : Building.t list -> unit
   val built : unit -> Building.t list
   val bld_raze : Building.t -> unit
@@ -38,16 +38,17 @@ module type S = sig
   val bld_manp : manpower -> unit
   val bld_supp : supply -> unit
   val with_bld : (B.t -> 'a) -> 'a
-  val bld_tick : unit -> unit
-  val get_turn : unit -> turn
-  val set_turn : turn -> unit
+  val bld_status : unit -> B.status
+  val bld_update : B.status -> unit
   val add_res : R.t -> unit
   val sub_res : R.t -> unit
   val has_manp : unit -> bool
+  val no_manp : unit -> bool
   val get_manp : unit -> manpower
   val set_manp : manpower -> unit
   val sub_manp : manpower -> unit
   val with_supp : (supply -> 'a) -> 'a
+  val has_supp : unit -> bool
   val add_supp : supply -> unit
   val sub_supp : supply -> unit
   val get_supp : unit -> supply
@@ -57,11 +58,6 @@ module type S = sig
   val with_deity : (Deity.t -> 'a) -> 'a
   val get_nats : unit -> Nation.t list
   val set_nats : Nation.t list -> unit
-  val get_ldr : unit -> Leader.t option
-  val set_ldr : Leader.t -> unit
-  val need_ldr : unit -> bool
-  val ldr_tick : unit -> unit
-  val ldr_died : unit -> unit
   val is_scouting : unit -> bool
   val set_scouting : bool -> unit
   val get_enemies : unit -> enemy list
@@ -74,25 +70,25 @@ module Make (M : Init) : S = struct
   module Barraging = Value.Bit(Value.BitClr)
   module Cavalry = Value.Num(Value.Zero)
   module Ended = Value.Bit(Value.BitClr)
+  module Leader = Value.Of(Ldr)
+  module Turn = Value.Num(Value.Zero)
+
+  Leader.set (Ldr.make M.leader)
 
   let t =
     { builds = B.empty;
       deity = M.deity;
       enemies = [];
-      leader = LeaderS.make (Leader.make M.leader);
       manp = 0;
       nats = [];
       scouting = false;
-      supp = 0;
-      turn = 0
+      supp = 0
     }
-
-  let get_turn () = t.turn
-  let set_turn x = t.turn <- x
 
   let get_supp () = t.supp
   let set_supp x = t.supp <- x
   let clr_supp () = t.supp <- 0
+  let has_supp () = t.supp > 0
   let add_supp x = t.supp <- t.supp + x
   let sub_supp x = t.supp <- t.supp - x
   let with_supp f = f t.supp
@@ -100,6 +96,7 @@ module Make (M : Init) : S = struct
   let get_manp () = t.manp
   let set_manp x = t.manp <- x
   let has_manp () = t.manp > 0
+  let no_manp () = t.manp <= 0
   let add_manp x = t.manp <- t.manp + x
   let sub_manp x = t.manp <- t.manp - x
 
@@ -120,7 +117,6 @@ module Make (M : Init) : S = struct
   let build ls = map_bld (B.build ls)
   let built () = B.built t.builds
   let bld_raze b = map_bld (B.raze b)
-  let bld_queued () = B.in_queue t.builds
   let bld_count b = B.count_of b t.builds
   let bld_ready b = B.is_ready b t.builds
   let bld_manp_cost () = B.manp_cost t.builds
@@ -130,7 +126,8 @@ module Make (M : Init) : S = struct
     let s2, b = B.deduce t.supp s t.builds in
     t.supp <- s2;
     t.builds <- b
-  let bld_tick () = map_bld B.tick
+  let bld_status () = map_bld B.to_status
+  let bld_update status = map_bld (B.update status)
   let with_bld f = f t.builds
 
   let get_deity () = t.deity
@@ -138,12 +135,6 @@ module Make (M : Init) : S = struct
 
   let get_nats () = t.nats
   let set_nats ns = t.nats <- Nation.filter ns
-
-  let get_ldr () = LeaderS.get t.leader
-  let set_ldr x = t.leader <- LeaderS.make x
-  let need_ldr () = LeaderS.need t.leader
-  let ldr_tick () = t.leader <- LeaderS.tick t.leader
-  let ldr_died () = t.leader <- LeaderS.dead
 
   let is_scouting () = t.scouting
   let set_scouting x = t.scouting <- x

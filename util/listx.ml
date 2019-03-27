@@ -1,3 +1,6 @@
+let apply_to ls x =
+  List.iter (fun f -> f x) ls
+
 let build f =
   List.fold_left f []
 

@@ -36,33 +36,31 @@ module Phase1 = struct
 end
 
 module Phase2 = struct
-  type cond = Blessing | BuildManp | BuildSupply | Cavalry | Defeat | LeaderNew | Market | Mercs | Starvation
-  type direct = BuildTick | Support | Turn | Upkeep
-  type input = Build | Nations
-  type notify = BuildNeeds | Built | Report | ReportSum
+  type cond = Cavalry | Defeat | LeaderNew | Market | Starvation
+  type direct = Blessing | BuildManp | BuildStatus | BuildSupply | Enemies | Support | Turn | Upkeep
+  type input = Build | Mercs | Nations
+  type notify = unit
 
   type event = (cond, direct, input, notify) etype
   type t = event step list
 
   let list =
     [ Do (Direct Turn);
-      Do (Cond BuildManp);
-      Do (Direct BuildTick);
-      Do (Notify Built);
-      Do (Notify BuildNeeds);
+      Do (Direct BuildManp);
+      Do (Direct BuildStatus);
       Do (Cond LeaderNew);
       Do (Direct Upkeep);
       Do (Cond Starvation);
       Do (Cond Defeat);
-      Either (Notify Report, Notify ReportSum);
-      Do (Cond Blessing);
+      Do (Direct Enemies);
+      Do (Direct Blessing);
       Do (Cond Market);
       Do (Input Nations);
       Do (Direct Support);
       Do (Input Build);
-      Do (Cond BuildSupply);
+      Do (Direct BuildSupply);
       Do (Cond Cavalry);
-      Do (Cond Mercs)
+      Do (Input Mercs)
     ]
 end
 

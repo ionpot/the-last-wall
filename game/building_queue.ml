@@ -1,7 +1,9 @@
 module B = Building
 module R = Resource
 
-type t = (B.t * R.t) list
+type ongoing = (B.t * R.t) list
+type status = B.t list * ongoing
+type t = ongoing
 
 let empty = []
 
@@ -30,10 +32,10 @@ let set_supp s t =
   in
   List.map f t
 
-let status_of t = t
-
 let is_built (_, cost) = cost = R.empty
 
-let tick t =
-  let built, needs = List.partition is_built t in
-  List.map fst built, needs
+let status_of t =
+  let built, ongoing = List.partition is_built t in
+  List.map fst built, ongoing
+
+let update ongoing _ = ongoing

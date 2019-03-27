@@ -7,10 +7,21 @@ type t =
     level : level;
     cha_base : charisma;
     cha_extra : charisma;
-    xp : int ref
+    xp : int;
+    died : Defs.turn
+  }
+
+let empty =
+  { ltype = Aristocrat;
+    level = 0;
+    cha_base = 0;
+    cha_extra = 0;
+    xp = 0;
+    died = 0
   }
 
 let ltypes = [Aristocrat; Expert; Warrior]
+let respawn_time = 2 (* turns *)
 
 let mod_of cha =
   (cha - 10) / 2
@@ -31,29 +42,20 @@ let make ltype =
     level = lv;
     cha_base = Dice.between 10 15;
     cha_extra = (lv / 4);
-    xp = ref 0
+    xp = 0;
+    died = 0
   }
 
 let random () =
   make (Listx.pick_from ltypes)
 
-let lives () =
-  Dice.chance 0.95
-
-let won t = incr t.xp
 let type_of t = t.ltype
 let level_of t = t.level
 let cha_of t = t.cha_base + t.cha_extra
-let can_lvup t = !(t.xp) > 1
-
-let lvup t =
-  let xp = !(t.xp) in
-  let lv = t.level + (xp / 2) in
-  { t with
-    level = lv;
-    cha_extra = lv / 4;
-    xp = ref (xp mod 2)
-  }
+let can_lvup t = t.xp > 1
+let can_respawn turn t =
+  t.died > 0 && t.died + respawn_time <= turn
+let is_alive t = t.died = 0
 
 let cha_mod_of t =
   t |> cha_of |> mod_of
@@ -72,3 +74,17 @@ let res_bonus_of t =
   let cha = cha_mod_of t in
   let typ = type_of t in
   resource_of cha typ
+
+let died turn t =
+  { t with died = turn }
+
+let lvup t =
+  let lv = t.level + (t.xp / 2) in
+  { t with
+    level = lv;
+    cha_extra = lv / 4;
+    xp = t.xp mod 2
+  }
+
+let won t =
+  { t with xp = t.xp + 1 }

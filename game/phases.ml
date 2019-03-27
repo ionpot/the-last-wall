@@ -9,19 +9,17 @@ type step =
 
 module Step (State : State.S) (Phase : Phase.S) = struct
   module Step = Step.Of(Phase)
-  module Apply = Step.Apply(State)
-  module Seek = Step.Seek(State)
+  module Do = Step.Do(State)
 
-  let apply (output, _) =
-    Apply.value output
+  let apply = Do.apply
 
   let first_of phase next =
-    match Seek.first () with
+    match Do.first () with
     | Some event -> Next (next event)
     | None -> EndOf phase
 
-  let next_of (output, steps) phase next =
-    match Seek.next steps with
+  let next_of step phase next =
+    match Do.next step with
     | Some event -> Next (next event)
     | None -> EndOf phase
 end

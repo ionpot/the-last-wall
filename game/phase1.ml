@@ -1,6 +1,6 @@
 module Output = struct
   type event =
-    | BuildSupply of Cond.BuildSupply.t
+    | BuildSupply of Direct.BuildSupply.t
     | Starting of Direct.Starting.t
     | Support of Direct.Support.t
 
@@ -12,32 +12,23 @@ module Output = struct
   type notify = unit
 
   module Apply (State : State.S) = struct
+    module Apply = Event.Apply(State)
+
     let event = function
-      | BuildSupply x -> State.bld_supp x
-      | Starting x -> State.add_res x
-      | Support x -> State.add_res (Nation.total_of x)
+      | BuildSupply x -> Apply.value x (module Direct.BuildSupply)
+      | Starting x -> Apply.value x (module Direct.Starting)
+      | Support x -> Apply.value x (module Direct.Support)
 
     let input = function
-      | Build x -> State.build x
-      | Nations x -> State.set_nats x
-      | Scout x -> State.set_scouting x
+      | Build x -> Apply.value x (module Input.Build)
+      | Nations x -> Apply.value x (module Input.Nations)
+      | Scout x -> Apply.value x (module Input.Scout)
   end
 end
 
-module Steps = Steps.Phase1
-
-module type S = Phase.S with
-  type Output.event = Output.event and
-  type Output.input = Output.input and
-  type Output.notify = Output.notify and
-  type Steps.cond = Steps.cond and
-  type Steps.direct = Steps.direct and
-  type Steps.input = Steps.input and
-  type Steps.notify = Steps.notify
-
-module S : S = struct
+module S = struct
   module Output = Output
-  module Steps = Steps
+  module Steps = Steps.Phase1
 
   open Steps
 

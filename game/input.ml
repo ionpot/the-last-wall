@@ -1,9 +1,7 @@
-module type S = Event.Conditional
-
-module Build : S with type t = Building.t list = struct
+module Build = struct
   type t = Building.t list
   module Apply (S : State.S) = struct
-    let value x = S.build x
+    let value = S.build
   end
   module Check = Event.Always
   module Make (S : State.S) = struct
@@ -11,10 +9,23 @@ module Build : S with type t = Building.t list = struct
   end
 end
 
-module Nations : S with type t = Nation.t list = struct
+module Mercs = struct
+  type t = Defs.manpower
+  module Apply (S : State.S) = struct
+    let value = S.supp2manp
+  end
+  module Check (S : State.S) = struct
+    let value = Dice.chance 0.8
+  end
+  module Make (S : State.S) = struct
+    let value = Dice.between 10 30
+  end
+end
+
+module Nations = struct
   type t = Nation.t list
   module Apply (S : State.S) = struct
-    let value x = S.set_nats x
+    let value = S.set_nats
   end
   module Check = Event.Always
   module Make (S : State.S) = struct
@@ -22,10 +33,10 @@ module Nations : S with type t = Nation.t list = struct
   end
 end
 
-module Scout : S with type t = bool = struct
+module Scout = struct
   type t = bool
   module Apply (S : State.S) = struct
-    let value x = S.set_scouting x
+    let value = S.set_scouting
   end
   module Check = Event.Always
   module Make (S : State.S) = struct
