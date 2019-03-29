@@ -3,8 +3,8 @@ module type From = sig
   val empty : t
 end
 
-module type FromBit = From with type t := bool
-module type FromNum = From with type t := int
+module type FromBit = From with type t = bool
+module type FromNum = From with type t = int
 
 module type S = sig
   type t
@@ -17,27 +17,27 @@ module type S = sig
 end
 
 module type Bit = sig
-  include S with type t := bool
+  include S with type t = bool
   val clr : unit -> unit
   val flip : unit -> unit
   val set : unit -> unit
-  val set_to : bool -> unit
+  val set_to : t -> unit
 end
 
 module type Num = sig
-  include S with type t := int
-  val add : int -> unit
-  val sub : int -> unit
+  include S with type t = int
+  val add : t -> unit
+  val sub : t -> unit
   val clr : unit -> unit
-  val next : unit -> int
+  val next : unit -> t
   val ptv : unit -> bool
-  val deduce : int -> int
-  val deduce_from : int -> int
-  val take : int -> int
+  val deduce : t -> t
+  val deduce_from : t -> t
+  val take : t -> t
   val zero : unit -> bool
 end
 
-module From (M : From) = struct
+module From (M : From) : S with type t = M.t = struct
   type t = M.t
   let x = ref M.empty
   let get () = !x
@@ -48,15 +48,8 @@ module From (M : From) = struct
   let map f = set (f !x)
 end
 
-module Of (M : From) : S with type t = M.t = struct
-  include From(M)
-end
-
 module Bit (M : FromBit) : Bit = struct
-  include From(struct
-    type t = bool
-    let empty = M.empty
-  end)
+  include From(M)
   let clr () = set false
   let flip () = map not
   let set_to x = set x
@@ -64,10 +57,7 @@ module Bit (M : FromBit) : Bit = struct
 end
 
 module Num (M : FromNum) : Num = struct
-  include From(struct
-    type t = int
-    let empty = M.empty
-  end)
+  include From(M)
   let add i = map ((+) i)
   let sub i = map (fun x -> x - i)
   let clr () = set 0
@@ -85,13 +75,13 @@ module Num (M : FromNum) : Num = struct
   let zero () = return ((=) 0)
 end
 
-module BitSet : FromBit = struct let empty = true end
-module BitClr : FromBit = struct let empty = false end
+module True = struct type t = bool let empty = true end
+module False = struct type t = bool let empty = false end
 
-module Zero : FromNum = struct let empty = 0 end
+module Zero = struct type t = int let empty = 0 end
 
 let of_num x =
-  let module M : FromNum = struct
+  (module Num(struct
+    type t = int
     let empty = x
-  end in
-  (module Num(M) : Num)
+  end) : Num)

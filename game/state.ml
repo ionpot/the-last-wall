@@ -65,10 +65,10 @@ module type S = sig
 end
 
 module Make (M : Init) : S = struct
-  module Barraging = Value.Bit(Value.BitClr)
+  module Barraging = Value.Bit(Value.False)
   module Cavalry = Value.Num(Value.Zero)
-  module Ended = Value.Bit(Value.BitClr)
-  module Leader = Value.Of(Ldr)
+  module Ended = Value.Bit(Value.False)
+  module Leader = Value.From(Ldr)
   module Turn = Value.Num(Value.Zero)
 
   let _ =
