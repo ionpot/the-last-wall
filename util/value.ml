@@ -29,12 +29,12 @@ module type Num = sig
   val add : t -> unit
   val sub : t -> unit
   val clr : unit -> unit
+  val is_zero : unit -> bool
   val next : unit -> t
   val ptv : unit -> bool
   val deduce : t -> t
   val deduce_from : t -> t
   val take : t -> t
-  val zero : unit -> bool
 end
 
 module From (M : From) : S with type t = M.t = struct
@@ -61,6 +61,7 @@ module Num (M : FromNum) : Num = struct
   let add i = map ((+) i)
   let sub i = map (fun x -> x - i)
   let clr () = set 0
+  let is_zero () = return ((=) 0)
   let ptv () = return ((<) 0)
   let next () = return ((+) 1)
   let deduce i =
@@ -72,7 +73,6 @@ module Num (M : FromNum) : Num = struct
   let take i =
     let a, b = Number.take (get ()) i in
     set a; b
-  let zero () = return ((=) 0)
 end
 
 module True = struct type t = bool let empty = true end

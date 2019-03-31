@@ -1,9 +1,9 @@
 open Defs
 
-module Check (M: State.S) : sig
-  val total : manpower
+module Make (M: State.S) : sig
+  val value : manpower
 end
 
 module Starvation (M: State.S) : sig
-  val value : (manpower * manpower) option
+  val value : manpower * manpower
 end

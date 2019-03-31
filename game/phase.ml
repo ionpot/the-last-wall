@@ -1,25 +1,49 @@
 type t = One | Two | Three
 
-module type Output = sig
-  type event and input and notify
-  module Apply : State.S -> sig
-    val input : input -> unit
-  end
+module Apply (State : State.S) = struct
+  let value (type a) (x : a) (module Event : Event.CanApply with type t = a) =
+    let module A = Event.Apply(State) in A.value x
 end
 
-module Direct (Output : Output) = struct
-  type 'a convert = 'a Event.direct -> Output.event
-  type 'a t = 'a Event.direct * 'a convert
-  let make (type a) (m: a Event.direct) (fn : a convert) : a t = m, fn
+module type Direct = sig
+  module Event : Event.Direct
+  type t
+  val make : Event.t -> t
+end
+
+module type Cond = sig
+  module Event : Event.Conditional
+  type t
+  val make : Event.t -> t
+end
+
+module type Notify = sig
+  module Event : Event.Notify
+  type t
+  val make : Event.t -> t
 end
 
 module type S = sig
-  module Output : Output
   module Steps : Steps.S
-  module Make : State.S -> sig
-    val cond : Steps.cond -> Output.event
-    val direct : Steps.direct -> 'a Direct(Output).t
-    val input : Steps.input -> Output.input
-    val notify : Steps.notify -> Output.notify
+
+  module Input : sig
+    type event
+    module type Cond = Cond with type t := event
+    module type Direct = Direct with type t := event
+    val direct : Steps.Input.direct -> (module Direct)
+    val cond : Steps.Input.cond -> (module Cond)
+    module Apply : State.S -> sig
+      val event : event -> unit
+    end
+  end
+
+  module Output : sig
+    type event
+    module type Cond = Cond with type t := event
+    module type Direct = Direct with type t := event
+    module type Notify = Notify with type t := event
+    val direct : Steps.Output.direct -> (module Direct)
+    val cond : Steps.Output.cond -> (module Cond)
+    val notify : Steps.Output.notify -> (module Notify)
   end
 end

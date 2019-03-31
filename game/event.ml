@@ -41,6 +41,12 @@ module NoValue = struct
   module Make (_ : State.S) = struct let value = () end
 end
 
+module Empty = struct
+  include NoValue
+  module Apply (_ : State.S) = struct let value () = () end
+  module Check = Never
+end
+
 module Apply (State : State.S) = struct
   let value (type a) (x : a) (direct : a direct) =
     let module Event = (val direct) in

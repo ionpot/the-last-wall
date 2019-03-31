@@ -8,7 +8,6 @@ type enemy = Enemy.party
 
 type t =
   { mutable builds : B.t;
-    deity : Deity.t;
     mutable enemies : enemy list;
     mutable manp : manpower;
     mutable nats : Nation.t list;
@@ -16,16 +15,12 @@ type t =
     mutable supp : supply
   }
 
-module type Init = sig
-  val deity : Deity.t
-  val leader : Ldr.ltype
-end
-
 module type S = sig
   module Barraging : Value.Bit
   module Cavalry : Value.Num
+  module Deity : Value.S with type t = Deity.t
   module Ended : Value.Bit
-  module Leader : Value.S
+  module Leader : Value.S with type t = Ldr.t
   module Turn : Value.Num
   val build : Building.t list -> unit
   val bld_raze : Building.t -> unit
@@ -52,8 +47,6 @@ module type S = sig
   val get_supp : unit -> supply
   val clr_supp : unit -> unit
   val supp2manp : supply -> unit
-  val get_deity : unit -> Deity.t
-  val with_deity : (Deity.t -> 'a) -> 'a
   val get_nats : unit -> Nation.t list
   val set_nats : Nation.t list -> unit
   val is_scouting : unit -> bool
@@ -64,19 +57,16 @@ module type S = sig
   val with_enemies : (enemy list -> 'a) -> 'a
 end
 
-module Make (M : Init) : S = struct
+module Make ( ) : S = struct
   module Barraging = Value.Bit(Value.False)
   module Cavalry = Value.Num(Value.Zero)
+  module Deity = Value.From(Deity)
   module Ended = Value.Bit(Value.False)
   module Leader = Value.From(Ldr)
   module Turn = Value.Num(Value.Zero)
 
-  let _ =
-    Leader.set (Ldr.make M.leader)
-
   let t =
     { builds = B.empty;
-      deity = M.deity;
       enemies = [];
       manp = 0;
       nats = [];
@@ -127,9 +117,6 @@ module Make (M : Init) : S = struct
   let bld_status () = B.to_status t.builds
   let bld_update status = map_bld (B.update status)
   let with_bld f = f t.builds
-
-  let get_deity () = t.deity
-  let with_deity f = f t.deity
 
   let get_nats () = t.nats
   let set_nats ns = t.nats <- Nation.filter ns

@@ -8,7 +8,7 @@ module Blessing = struct
       if S.bld_ready Building.Temple
       then Deity.boosted_of
       else Deity.blessing_of
-    let value = S.with_deity bless
+    let value = S.Deity.return bless
   end
 end
 
@@ -60,7 +60,7 @@ module Starting = struct
     let value = S.add_res
   end
   module Make (S : State.S) = struct
-    let value = Deity.starting (S.get_deity ())
+    let value = S.Deity.return Deity.starting
   end
 end
 

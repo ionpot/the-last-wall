@@ -3,9 +3,28 @@ module Build = struct
   module Apply (S : State.S) = struct
     let value = S.build
   end
-  module Check = Event.Always
   module Make (S : State.S) = struct
     let value = []
+  end
+end
+
+module Deity = struct
+  type t = Deity.t
+  module Apply (S : State.S) = struct
+    let value = S.Deity.set
+  end
+  module Make (S : State.S) = struct
+    let value = Deity.empty
+  end
+end
+
+module Leader = struct
+  type t = Leader.ltype
+  module Apply (S : State.S) = struct
+    let value ltype = S.Leader.set (Leader.make ltype)
+  end
+  module Make (S : State.S) = struct
+    let value = Leader.Aristocrat
   end
 end
 
@@ -27,7 +46,6 @@ module Nations = struct
   module Apply (S : State.S) = struct
     let value = S.set_nats
   end
-  module Check = Event.Always
   module Make (S : State.S) = struct
     let value = S.get_nats ()
   end
@@ -38,7 +56,6 @@ module Scout = struct
   module Apply (S : State.S) = struct
     let value = S.set_scouting
   end
-  module Check = Event.Always
   module Make (S : State.S) = struct
     let value = S.is_scouting ()
   end
