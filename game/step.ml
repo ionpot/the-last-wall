@@ -54,6 +54,8 @@ module Of (Phase : Phase.S) = struct
   type steps = Phase.Steps.t list
   type t = event * steps
 
+  let first = Phase.Steps.list
+
   module Do (State : State.S) = struct
     module Make = Make(Phase)(State)
     type found =
@@ -88,23 +90,18 @@ module Of (Phase : Phase.S) = struct
       | Steps.Ask a :: rest ->
           if input_ok a then FoundInput (a, rest)
           else seek rest
-      | Steps.Branch (cond, ls) :: rest ->
-          if output_ok cond then FoundOutput (cond, ls)
-          else seek rest
       | Steps.Do a :: rest ->
           if output_ok a then FoundOutput (a, rest)
           else seek rest
-      | Steps.Either (a, b) :: rest ->
-          if output_ok a then FoundOutput (a, rest)
-          else seek ((Steps.Do b) :: rest)
+      | Steps.Go ls :: _ -> seek ls
+      | Steps.GoIf (cond, ls) :: rest ->
+          if output_ok cond then FoundOutput (cond, ls)
+          else seek rest
 
     let next steps =
       match seek steps with
       | FoundInput (step, rest) -> Some (Input (input_of step), rest)
       | FoundOutput (step, rest) -> Some (Output (output_of step), rest)
       | End -> None
-
-    let first () =
-      next Phase.Steps.list
   end
 end

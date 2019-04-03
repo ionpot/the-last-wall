@@ -1,4 +1,38 @@
+module Steps = Steps.Phase2
+
+module Input = struct
+  module Steps = Steps.Input
+
+  type event =
+    | Build of Input.Build.t
+    | Mercs of Input.Mercs.t
+    | Nations of Input.Nations.t
+
+  module type Cond = Phase.Cond with type t := event
+  module type Direct = Phase.Direct with type t := event
+
+  let direct : Steps.direct -> (module Direct) = function
+    | Steps.Build ->
+        (module struct module Event = Input.Build let make x = Build x end)
+    | Steps.Nations ->
+        (module struct module Event = Input.Nations let make x = Nations x end)
+
+  let cond : Steps.cond -> (module Cond) = function
+    | Steps.Mercs ->
+        (module struct module Event = Input.Mercs let make x = Mercs x end)
+
+  module Apply (State : State.S) = struct
+    module Apply = Phase.Apply(State)
+    let event = function
+      | Build x -> Apply.value x (module Input.Build)
+      | Mercs x -> Apply.value x (module Input.Mercs)
+      | Nations x -> Apply.value x (module Input.Nations)
+  end
+end
+
 module Output = struct
+  module Steps = Steps.Output
+
   type event =
     | Blessing of Direct.Blessing.t
     | BuildManp of Direct.BuildManp.t
@@ -14,83 +48,52 @@ module Output = struct
     | Turn of Direct.Turn.t
     | Upkeep of Direct.Upkeep.t
 
-  type input =
-    | Build of Input.Build.t
-    | Mercs of Input.Mercs.t
-    | Nations of Input.Nations.t
+  module type Cond = Phase.Cond with type t := event
+  module type Direct = Phase.Direct with type t := event
+  module type Notify = Phase.Notify with type t := event
 
-  type notify = unit
+  let cond : Steps.cond -> (module Cond) = function
+    | Steps.Cavalry ->
+        (module struct module Event = Cond.Cavalry
+          let make x = Cavalry x end)
+    | Steps.Defeat ->
+        (module struct module Event = Cond.Defeat
+          let make x = Defeat x end)
+    | Steps.LeaderNew ->
+        (module struct module Event = Cond.LeaderNew
+          let make x = LeaderNew x end)
+    | Steps.Market ->
+        (module struct module Event = Cond.Market
+          let make x = Market x end)
+    | Steps.Starvation ->
+        (module struct module Event = Cond.Starvation
+          let make x = Starvation x end)
 
-  module Apply (State : State.S) = struct
-    module Apply = Event.Apply(State)
+  let direct : Steps.direct -> (module Direct) = function
+    | Steps.Blessing ->
+        (module struct module Event = Direct.Blessing
+          let make x = Blessing x end)
+    | Steps.BuildManp ->
+        (module struct module Event = Direct.BuildManp
+          let make x = BuildManp x end)
+    | Steps.BuildStatus ->
+        (module struct module Event = Direct.BuildStatus
+          let make x = BuildStatus x end)
+    | Steps.BuildSupply ->
+        (module struct module Event = Direct.BuildSupply
+          let make x = BuildSupply x end)
+    | Steps.Enemies ->
+        (module struct module Event = Direct.Enemies
+          let make x = Enemies x end)
+    | Steps.Support ->
+        (module struct module Event = Direct.Support
+          let make x = Support x end)
+    | Steps.Turn ->
+        (module struct module Event = Direct.Turn
+          let make x = Turn x end)
+    | Steps.Upkeep ->
+        (module struct module Event = Direct.Upkeep
+          let make x = Upkeep x end)
 
-    let event = function
-      | Blessing x -> Apply.value x (module Direct.Blessing)
-      | BuildManp x -> Apply.value x (module Direct.BuildManp)
-      | BuildStatus x -> Apply.value x (module Direct.BuildStatus)
-      | BuildSupply x -> Apply.value x (module Direct.BuildSupply)
-      | Cavalry x -> Apply.value x (module Cond.Cavalry)
-      | Defeat x -> Apply.value x (module Cond.Defeat)
-      | Enemies x -> Apply.value x (module Direct.Enemies)
-      | LeaderNew x -> Apply.value x (module Cond.LeaderNew)
-      | Market x -> Apply.value x (module Cond.Market)
-      | Starvation x -> Apply.value x (module Cond.Starvation)
-      | Support x -> Apply.value x (module Direct.Support)
-      | Turn x -> Apply.value x (module Direct.Turn)
-      | Upkeep x -> Apply.value x (module Direct.Upkeep)
-
-    let input = function
-      | Build x -> Apply.value x (module Input.Build)
-      | Mercs x -> Apply.value x (module Input.Mercs)
-      | Nations x -> Apply.value x (module Input.Nations)
-  end
-end
-
-module S = struct
-  module Output = Output
-  module Steps = Steps.Phase2
-
-  open Output
-
-  module Make = struct
-    let cond = function
-      | Steps.Cavalry ->
-          Phase.event (module Cond.Cavalry) (fun x -> Cavalry x)
-      | Steps.Defeat ->
-          Phase.event (module Cond.Defeat) (fun x -> Defeat x)
-      | Steps.LeaderNew ->
-          Phase.event (module Cond.LeaderNew) (fun x -> LeaderNew x)
-      | Steps.Market ->
-          Phase.event (module Cond.Market) (fun x -> Market x)
-      | Steps.Starvation ->
-          Phase.event (module Cond.Starvation) (fun x -> Starvation x)
-
-    let direct = function
-      | Steps.Blessing ->
-          Phase.event (module Cond.Blessing) (fun x -> Blessing x)
-      | Steps.BuildManp ->
-          Phase.event (module Cond.BuildManp) (fun x -> BuildManp x)
-      | Steps.BuildStatus ->
-          Phase.event (module Cond.BuildStatus) (fun x -> BuildStatus x)
-      | Steps.BuildSupply ->
-          Phase.event (module Cond.BuildSupply) (fun x -> BuildSupply x)
-      | Steps.Enemies ->
-          Phase.event (module Cond.Enemies) (fun x -> Enemies x)
-      | Steps.Support ->
-          Phase.event (module Cond.Support) (fun x -> Support x)
-      | Steps.Turn ->
-          Phase.event (module Cond.Turn) (fun x -> Turn x)
-      | Steps.Upkeep ->
-          Phase.event (module Cond.Upkeep) (fun x -> Upkeep x)
-
-    let input = function
-      | Steps.Build ->
-          Phase.input (module Input.Build) (fun x -> Build x)
-      | Steps.Mercs ->
-          Phase.input (module Input.Mercs) (fun x -> Mercs x)
-      | Steps.Nations ->
-          Phase.input (module Input.Nations) (fun x -> Nations x)
-
-    let notify = Phase.no_notify
-  end
+  let notify () = failwith "no phase2 notify"
 end

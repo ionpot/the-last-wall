@@ -9,9 +9,9 @@ type ('c, 'd, 'n) output =
 
 type ('i, 'o) step =
   | Ask of 'i
-  | Branch of ('o * ('i, 'o) step list)
   | Do of 'o
-  | Either of ('o * 'o)
+  | Go of ('i, 'o) step list
+  | GoIf of ('o * ('i, 'o) step list)
 
 module type Input = sig
   type cond and direct
@@ -55,58 +55,75 @@ module Phase1 = struct
     ]
 end
 
-(*module Phase2 = struct
-  type cond = Cavalry | Defeat | LeaderNew | Market | Starvation
-  type direct = Blessing | BuildManp | BuildStatus | BuildSupply | Enemies | Support | Turn | Upkeep
-  type input = Build | Mercs | Nations
-  type notify = unit
-
-  type event = (cond, direct, input, notify) etype
-  type t = event step list
-
-  let list =
-    [ Do (Direct Turn);
-      Do (Direct BuildManp);
-      Do (Direct BuildStatus);
-      Do (Cond LeaderNew);
-      Do (Direct Upkeep);
-      Do (Cond Starvation);
-      Do (Cond Defeat);
-      Do (Direct Enemies);
-      Do (Direct Blessing);
-      Do (Cond Market);
-      Do (Input Nations);
-      Do (Direct Support);
-      Do (Input Build);
-      Do (Direct BuildSupply);
-      Do (Cond Cavalry);
-      Do (Input Mercs)
+module Phase2 = struct
+  module Input = struct
+    type cond = Mercs
+    type direct = Build | Nations
+    type t = (cond, direct) input
+  end
+  module Output = struct
+    type cond = Cavalry | Defeat | LeaderNew | Market | Starvation
+    type direct = Blessing | BuildManp | BuildStatus | BuildSupply | Enemies | Support | Turn | Upkeep
+    type notify = unit
+    type t = (cond, direct, notify) output
+  end
+  type t = (Input.t, Output.t) step
+  let list : t list =
+    [ Do (Direct Output.Turn);
+      Do (Direct Output.BuildManp);
+      Do (Direct Output.BuildStatus);
+      Do (Cond Output.LeaderNew);
+      Do (Direct Output.Upkeep);
+      Do (Cond Output.Starvation);
+      Do (Cond Output.Defeat);
+      Do (Direct Output.Enemies);
+      Do (Direct Output.Blessing);
+      Do (Cond Output.Market);
+      Ask (Direct Input.Nations);
+      Do (Direct Output.Support);
+      Ask (Direct Input.Build);
+      Do (Direct Output.BuildSupply);
+      Do (Cond Output.Cavalry);
+      Ask (Cond Input.Mercs)
     ]
 end
 
 module Phase3 = struct
-  type cond = Barraged | Casualty | Defeat | Fort | LeaderDied | LeaderLvUp | Smite
-  type direct = Victory
-  type input = Barrage | Scout
-  type notify = Attack | NoAttack
-
-  type event = (cond, direct, input, notify) etype
-  type t = event step list
-
-  let attack =
-    [ Do (Cond Smite);
-      Do (Input Barrage);
-      Do (Cond Barraged);
-      Do (Cond Casualty);
-      Do (Cond Fort);
-      Either (Cond Defeat, Direct Victory);
-      Either (Cond LeaderDied, Cond LeaderLvUp);
-      Do (Input Scout)
+  module Input = struct
+    type cond = Barrage
+    type direct = Scout
+    type t = (cond, direct) input
+  end
+  module Output = struct
+    type cond = Barraged | Casualty | Defeat | Fort | LeaderDied | LeaderLvUp | Smite
+    type direct = Victory
+    type notify = Attack | NoAttack | NoEnemies
+    type t = (cond, direct, notify) output
+  end
+  type t = (Input.t, Output.t) step
+  let scout : t = Ask (Direct Input.Scout)
+  let victory : t list =
+    [ Do (Direct Output.Victory);
+      Do (Cond Output.LeaderLvUp);
+      scout
     ]
-
-  let list =
-    [ Branch (Notify Attack, attack);
-      Do (Notify NoAttack);
-      Do (Input Scout)
+  let check_enemies : t =
+    GoIf (Notify Output.NoEnemies, victory)
+  let attack : t list =
+    [ Do (Cond Output.Smite);
+      check_enemies;
+      Ask (Cond Input.Barrage);
+      Do (Cond Output.Barraged);
+      check_enemies;
+      Do (Cond Output.Casualty);
+      Do (Cond Output.Fort);
+      Do (Cond Output.Defeat);
+      Do (Cond Output.LeaderDied);
+      Go victory
     ]
-end*)
+  let list : t list =
+    [ GoIf (Notify Output.Attack, attack);
+      Do (Notify Output.NoAttack);
+      scout
+    ]
+end

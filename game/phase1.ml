@@ -2,14 +2,17 @@ module Steps = Steps.Phase1
 
 module Input = struct
   module Steps = Steps.Input
+
   type event =
     | Build of Input.Build.t
     | Deity of Input.Deity.t
     | Leader of Input.Leader.t
     | Nations of Input.Nations.t
     | Scout of Input.Scout.t
+
   module type Cond = Phase.Cond with type t := event
   module type Direct = Phase.Direct with type t := event
+
   let direct : Steps.direct -> (module Direct) = function
     | Steps.Build ->
         (module struct module Event = Input.Build let make x = Build x end)
@@ -21,7 +24,9 @@ module Input = struct
         (module struct module Event = Input.Nations let make x = Nations x end)
     | Steps.Scout ->
         (module struct module Event = Input.Scout let make x = Scout x end)
+
   let cond () = failwith "no phase1 input cond"
+
   module Apply (State : State.S) = struct
     module Apply = Phase.Apply(State)
     let event = function
@@ -35,14 +40,18 @@ end
 
 module Output = struct
   module Steps = Steps.Output
+
   type event =
     | BuildSupply of Direct.BuildSupply.t
     | Starting of Direct.Starting.t
     | Support of Direct.Support.t
-  let cond () = failwith "no phase1 output cond"
+
   module type Cond = Phase.Cond with type t := event
   module type Direct = Phase.Direct with type t := event
   module type Notify = Phase.Notify with type t := event
+
+  let cond () = failwith "no phase1 output cond"
+
   let direct : Steps.direct -> (module Direct) = function
     | Steps.BuildSupply ->
         (module struct module Event = Direct.BuildSupply
@@ -53,5 +62,6 @@ module Output = struct
     | Steps.Support ->
         (module struct module Event = Direct.Support
           let make x = Support x end)
+
   let notify () = failwith "no phase1 output notify"
 end

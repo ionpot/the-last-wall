@@ -5,7 +5,7 @@ val strength : manpower
 val too_many : manpower -> manpower -> bool
 
 module Check : State.S -> sig
-  val value : manpower option
+  val value : bool
 end
 
 module Make : State.S -> sig
