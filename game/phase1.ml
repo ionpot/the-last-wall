@@ -1,67 +1,66 @@
 module Steps = Steps.Phase1
 
 module Input = struct
-  module Steps = Steps.Input
-
+  module Event = Input
   type event =
-    | Build of Input.Build.t
-    | Deity of Input.Deity.t
-    | Leader of Input.Leader.t
-    | Nations of Input.Nations.t
-    | Scout of Input.Scout.t
-
-  module type Cond = Phase.Cond with type t := event
-  module type Direct = Phase.Direct with type t := event
-
-  let direct : Steps.direct -> (module Direct) = function
-    | Steps.Build ->
-        (module struct module Event = Input.Build let make x = Build x end)
-    | Steps.Deity ->
-        (module struct module Event = Input.Deity let make x = Deity x end)
-    | Steps.Leader ->
-        (module struct module Event = Input.Leader let make x = Leader x end)
-    | Steps.Nations ->
-        (module struct module Event = Input.Nations let make x = Nations x end)
-    | Steps.Scout ->
-        (module struct module Event = Input.Scout let make x = Scout x end)
-
-  let cond () = failwith "no phase1 input cond"
-
+    | Build of Event.Build.t
+    | Deity of Event.Deity.t
+    | Leader of Event.Leader.t
+    | Nations of Event.Nations.t
+    | Scout of Event.Scout.t
   module Apply (State : State.S) = struct
     module Apply = Phase.Apply(State)
     let event = function
-      | Build x -> Apply.value x (module Input.Build)
-      | Deity x -> Apply.value x (module Input.Deity)
-      | Leader x -> Apply.value x (module Input.Leader)
-      | Nations x -> Apply.value x (module Input.Nations)
-      | Scout x -> Apply.value x (module Input.Scout)
+      | Build x -> Apply.value x (module Event.Build)
+      | Deity x -> Apply.value x (module Event.Deity)
+      | Leader x -> Apply.value x (module Event.Leader)
+      | Nations x -> Apply.value x (module Event.Nations)
+      | Scout x -> Apply.value x (module Event.Scout)
   end
 end
 
 module Output = struct
-  module Steps = Steps.Output
-
   type event =
     | BuildSupply of Direct.BuildSupply.t
     | Starting of Direct.Starting.t
     | Support of Direct.Support.t
+end
 
-  module type Cond = Phase.Cond with type t := event
-  module type Direct = Phase.Direct with type t := event
-  module type Notify = Phase.Notify with type t := event
+module Convert = struct
+  module Input = struct
+    module Event = Input.Event
+    module Steps = Steps.Input
+    module Convert = Phase.Convert.Input(Steps)(Input)
 
-  let cond () = failwith "no phase1 output cond"
+    let cond () = failwith "no phase1 input cond"
 
-  let direct : Steps.direct -> (module Direct) = function
-    | Steps.BuildSupply ->
-        (module struct module Event = Direct.BuildSupply
-          let make x = BuildSupply x end)
-    | Steps.Starting ->
-        (module struct module Event = Direct.Starting
-          let make x = Starting x end)
-    | Steps.Support ->
-        (module struct module Event = Direct.Support
-          let make x = Support x end)
+    let direct : Convert.direct = function
+      | Steps.Build -> (module struct module Event = Event.Build
+          let make x = Input.Build x end)
+      | Steps.Deity -> (module struct module Event = Event.Deity
+          let make x = Input.Deity x end)
+      | Steps.Leader -> (module struct module Event = Event.Leader
+          let make x = Input.Leader x end)
+      | Steps.Nations -> (module struct module Event = Event.Nations
+          let make x = Input.Nations x end)
+      | Steps.Scout -> (module struct module Event = Event.Scout
+          let make x = Input.Scout x end)
+  end
 
-  let notify () = failwith "no phase1 output notify"
+  module Output = struct
+    module Steps = Steps.Output
+    module Convert = Phase.Convert.Output(Steps)(Output)
+
+    let cond () = failwith "no phase1 output cond"
+
+    let direct : Convert.direct = function
+      | Steps.BuildSupply -> (module struct module Event = Direct.BuildSupply
+          let make x = Output.BuildSupply x end)
+      | Steps.Starting -> (module struct module Event = Direct.Starting
+          let make x = Output.Starting x end)
+      | Steps.Support -> (module struct module Event = Direct.Support
+          let make x = Output.Support x end)
+
+    let notify () = failwith "no phase1 output notify"
+  end
 end

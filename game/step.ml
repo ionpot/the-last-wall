@@ -1,44 +1,68 @@
-module Make (Phase : Phase.S) (State : State.S) = struct
+module Make (P : Phase.S) (State : State.S) = struct
   let check_event (module Event : Event.CanCheck) =
     let module Result = Event.Check(State) in
     Result.value
 
   module Input = struct
-    let check (module M : Phase.Input.Cond) =
+    module Convert = Phase.Convert.Input(P.Steps.Input)(P.Input)
+
+    let check (module M : Convert.Cond) =
       check_event (module M.Event)
 
-    let cond (module M : Phase.Input.Cond) =
+    let cond (module M : Convert.Cond) =
       let module Made = M.Event.Make(State) in
       M.make Made.value
 
-    let direct (module M : Phase.Input.Direct) =
+    let direct (module M : Convert.Direct) =
       let module Made = M.Event.Make(State) in
       M.make Made.value
   end
 
   module Output = struct
-    let cond_ok (module M : Phase.Output.Cond) =
+    module Convert = Phase.Convert.Output(P.Steps.Output)(P.Output)
+
+    let cond_ok (module M : Convert.Cond) =
       check_event (module M.Event)
 
-    let notify_ok (module M : Phase.Output.Notify) =
+    let notify_ok (module M : Convert.Notify) =
       check_event (module M.Event)
 
-    let cond (module M : Phase.Output.Cond) =
+    let cond (module M : Convert.Cond) =
       let module Made = M.Event.Make(State) in
       let module Apply = M.Event.Apply(State) in
       let apply () = Apply.value Made.value in
       M.make Made.value, apply
 
-    let direct (module M : Phase.Output.Direct) =
+    let direct (module M : Convert.Direct) =
       let module Made = M.Event.Make(State) in
       let module Apply = M.Event.Apply(State) in
       let apply () = Apply.value Made.value in
       M.make Made.value, apply
 
-    let notify (module M : Phase.Output.Notify) =
+    let notify (module M : Convert.Notify) =
       let module Made = M.Event.Make(State) in
       let apply () = () in
       M.make Made.value, apply
+  end
+end
+
+module Convert (Phase : Phase.S) (State : State.S) = struct
+  module Make = Make(Phase)(State)
+  module Input = struct
+    module Convert = Phase.Convert.Input
+    module Make = Make.Input
+    let check step = Make.check (Convert.cond step)
+    let cond step = Make.cond (Convert.cond step)
+    let direct step = Make.direct (Convert.direct step)
+  end
+  module Output = struct
+    module Convert = Phase.Convert.Output
+    module Make = Make.Output
+    let check_cond step = Make.cond_ok (Convert.cond step)
+    let check_notify step = Make.notify_ok (Convert.notify step)
+    let cond step = Make.cond (Convert.cond step)
+    let direct step = Make.direct (Convert.direct step)
+    let notify step = Make.notify (Convert.notify step)
   end
 end
 
@@ -57,7 +81,8 @@ module Of (Phase : Phase.S) = struct
   let first = Phase.Steps.list
 
   module Do (State : State.S) = struct
-    module Make = Make(Phase)(State)
+    module Convert = Convert(Phase)(State)
+
     type found =
       | FoundInput of (Phase.Steps.Input.t * steps)
       | FoundOutput of (Phase.Steps.Output.t * steps)
@@ -68,22 +93,22 @@ module Of (Phase : Phase.S) = struct
       | Output (_, apply) -> apply ()
 
     let input_of : Phase.Steps.Input.t -> Input.event = function
-      | Steps.Cond x -> Make.Input.cond (Input.cond x)
-      | Steps.Direct x -> Make.Input.direct (Input.direct x)
+      | Steps.Cond step -> Convert.Input.cond step
+      | Steps.Direct step -> Convert.Input.direct step
 
     let output_of : Phase.Steps.Output.t -> output = function
-      | Steps.Cond x -> Make.Output.cond (Output.cond x)
-      | Steps.Direct x -> Make.Output.direct (Output.direct x)
-      | Steps.Notify x -> Make.Output.notify (Output.notify x)
+      | Steps.Cond step -> Convert.Output.cond step
+      | Steps.Direct step -> Convert.Output.direct step
+      | Steps.Notify step -> Convert.Output.notify step
 
     let input_ok : Phase.Steps.Input.t -> bool = function
-      | Steps.Cond x -> Make.Input.check (Input.cond x)
+      | Steps.Cond step -> Convert.Input.check step
       | Steps.Direct _ -> true
 
     let output_ok : Phase.Steps.Output.t -> bool = function
-      | Steps.Cond x -> Make.Output.cond_ok (Output.cond x)
+      | Steps.Cond step -> Convert.Output.check_cond step
       | Steps.Direct _ -> true
-      | Steps.Notify x -> Make.Output.notify_ok (Output.notify x)
+      | Steps.Notify step -> Convert.Output.check_notify step
 
     let rec seek = function
       | [] -> End
