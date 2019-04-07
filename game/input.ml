@@ -54,9 +54,9 @@ end
 module Scout = struct
   type t = bool
   module Apply (S : State.S) = struct
-    let value = S.set_scouting
+    let value = S.Scout.set
   end
   module Make (S : State.S) = struct
-    let value = S.is_scouting ()
+    let value = S.Scout.get ()
   end
 end

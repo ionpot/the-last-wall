@@ -3,16 +3,16 @@ type t = One | Two | Three
 module type Definitions = sig type event end
 
 module Convert = struct
+  module type Check = sig
+    module Check : Event.Check
+    type t val value : t
+  end
   module type Cond = sig
     module Event : Event.Conditional
     type t val make : Event.t -> t
   end
   module type Direct = sig
     module Event : Event.Direct
-    type t val make : Event.t -> t
-  end
-  module type Notify = sig
-    module Event : Event.Notify
     type t val make : Event.t -> t
   end
   module Input (Steps : Steps.Input) (Input : Definitions) = struct
@@ -22,12 +22,12 @@ module Convert = struct
     type direct = Steps.direct -> (module Direct)
   end
   module Output (Steps : Steps.Output) (Output : Definitions) = struct
+    module type Check = Check with type t := Output.event
     module type Cond = Cond with type t := Output.event
     module type Direct = Direct with type t := Output.event
-    module type Notify = Notify with type t := Output.event
+    type check = Steps.check -> (module Check)
     type cond = Steps.cond -> (module Cond)
     type direct = Steps.direct -> (module Direct)
-    type notify = Steps.notify -> (module Notify)
   end
 end
 
@@ -51,9 +51,9 @@ module type S = sig
       val direct : Convert.Input(Steps.Input)(Input).direct
     end
     module Output : sig
+      val check : Convert.Output(Steps.Output)(Output).check
       val cond : Convert.Output(Steps.Output)(Output).cond
       val direct : Convert.Output(Steps.Output)(Output).direct
-      val notify : Convert.Output(Steps.Output)(Output).notify
     end
   end
 end

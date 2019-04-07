@@ -1,78 +1,76 @@
-module Output = struct
+module Steps = Steps.Phase3
+
+module Input = struct
+  module Event = Input
   type event =
-    | BuildSupply of Cond.BuildSupply.t
-    | Starting of Direct.Starting.t
-    | Support of Direct.Support.t
-
-  type input =
-    | Build of Input.Build.t
-    | Nations of Input.Nations.t
-    | Scout of Input.Scout.t
-
-  type notify = unit
-
-  let is_end () = false
+    | Barrage of Event.Barrage.t
+    | Scout of Event.Scout.t
 
   module Apply (State : State.S) = struct
+    module Apply = Phase.Apply(State)
     let event = function
-      | BuildSupply x -> State.bld_supp x
-      | Starting x -> State.add_res x
-      | Support x -> State.add_res (Nation.total_of x)
-
-    let input = function
-      | Build x -> State.build x
-      | Nations x -> State.set_nats x
-      | Scout x -> State.set_scouting x
+      | Barrage x -> Apply.value x (module Event.Barrage)
+      | Scout x -> Apply.value x (module Event.Scout)
   end
 end
 
-module Steps = Steps.Phase1
+module Output = struct
+  type event =
+    | Attack
+    | Barraged of Cond.Barraged.t
+    | Combat of Direct.Combat.t
+    | Defeat
+    | LevelUp of Cond.LevelUp.t
+    | NoAttack
+    | NoEnemies
+    | Smite of Cond.Smite.t
+    | Victory
+end
 
-module type S = Phase.S with
-  type Output.event = Output.event and
-  type Output.input = Output.input and
-  type Output.notify = Output.notify and
-  type Steps.cond = Steps.cond and
-  type Steps.direct = Steps.direct and
-  type Steps.input = Steps.input and
-  type Steps.notify = Steps.notify
+module Convert = struct
+  module Input = struct
+    module Steps = Steps.Input
+    module Convert = Phase.Convert.Input(Steps)(Input)
 
-module S : S = struct
-  module Output = Output
-  module Steps = Steps
+    let cond : Convert.cond = function
+      | Steps.Barrage -> (module struct module Event = Event.Barrage
+          let make x = Input.Barrage x end)
 
-  open Steps
-
-  module Check = struct
-    let cond : cond -> (module Event.Check) = function
-      | BuildSupply -> (module Cond.BuildSupply.Check)
-
-    let input : input -> (module Event.Check) = function
-      | Build -> (module Input.Build.Check)
-      | Nations -> (module Input.Nations.Check)
-      | Scout -> (module Input.Scout.Check)
-
-    let notify : notify -> (module Event.Check) =
-      fun () -> (module Event.Never)
+    let direct : Convert.direct = function
+      | Steps.Scout -> (module struct module Event = Event.Scout
+          let make x = Input.Scout x end)
   end
 
-  module Make (S : State.S) = struct
-    let cond = let open Cond in function
-      | BuildSupply ->
-          let module M = BuildSupply.Make(S) in Output.BuildSupply M.value
+  module Output = struct
+    module Steps = Steps.Output
+    module Convert = Phase.Convert.Output(Steps)(Output)
 
-    let direct = let open Direct in function
-      | Starting -> let module M = Starting.Make(S) in Output.Starting M.value
-      | Support -> let module M = Support.Make(S) in Output.Support M.value
+    let check : Convert.check = function
+      | Steps.Attack -> (module struct module Check = Check.HasEnemies
+          let value = Output.Attack end)
+      | Steps.NoAttack -> (module struct module Check = Check.NoEnemies
+          let value = Output.NoAttack end)
+      | Steps.NoEnemies -> (module struct module Check = Check.NoEnemies
+          let value = Output.NoEnemies end)
 
-    let input = let open Input in function
-      | Build -> let module M = Build.Make(S) in Output.Build M.value
-      | Nations -> let module M = Nations.Make(S) in Output.Nations M.value
-      | Scout -> let module M = Scout.Make(S) in Output.Scout M.value
+    let cond : Convert.cond = function
+      | Steps.Barraged -> (module struct module Event = Cond.Barraged
+          let make x = Output.Barraged x end)
+      | Steps.Defeat -> (module struct module Event = Cond.Defeat
+          let make () = Output.Defeat end)
+      | Steps.LevelUp -> (module struct module Event = Cond.LevelUp
+          let make x = Output.LevelUp x end)
+      | Steps.Smite -> (module struct module Event = Cond.Smite
+          let make x = Output.Smite x end)
 
-    let notify () = ()
+    let direct : Convert.direct = function
+      | Steps.Combat -> (module struct module Event = Direct.Combat
+          let make x = Output.Combat x end)
+      | Steps.Victory -> (module struct module Event = Direct.Victory
+          let make () = Output.Victory end)
   end
 end
+
 (*module CL = Check_leader
 
 type event =

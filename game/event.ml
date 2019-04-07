@@ -1,5 +1,7 @@
+module type Check = State.S -> sig val value : bool end
+
 module type CanCheck = sig
-  module Check : State.S -> sig val value : bool end
+  module Check : Check
 end
 
 module type CanMake = sig
@@ -25,13 +27,6 @@ module type Conditional = sig
 end
 
 type 'a cond = (module Conditional with type t = 'a)
-
-module type Notify = sig
-  include CanMake
-  include CanCheck
-end
-
-type 'a notify = (module Notify with type t = 'a)
 
 module Always (_ : State.S) = struct let value = true end
 module Never (_ : State.S) = struct let value = false end

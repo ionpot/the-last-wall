@@ -42,14 +42,22 @@ module BuildSupply = struct
   end
 end
 
+module Combat = struct
+  type t = (module Combat.Outcome)
+  module Apply = Combat.Apply
+  module Make = Combat.Make
+end
+
 module Enemies = struct
-  type t = Enemy.party list * Enemy.report
+  type t = Enemy.t * Enemy.report
   module Apply (S : State.S) = struct
-    let value (enemies, _) = S.set_enemies enemies
+    let value (enemies, _) = S.Enemy.set enemies
   end
   module Make (S : State.S) = struct
-    let enemies = S.Turn.return Enemy.spawn
-    let report = Enemy.to_report enemies (S.is_scouting ())
+    let arriving = S.Turn.return Enemy.spawn
+    let enemies = S.Enemy.return (Enemy.combine arriving)
+    let scout = S.Scout.return Enemy.to_report
+    let report = S.Enemy.return scout
     let value = enemies, report
   end
 end
@@ -69,7 +77,13 @@ module Support = struct
   module Apply (S : State.S) = struct
     let value nats = S.add_res (Nation.total_of nats)
   end
-  module Make = Check_support.Make
+  module Make (S : State.S) = struct
+    let bonus = S.Leader.return Leader.res_bonus_of
+    let nats = S.get_nats ()
+    let value =
+      Nation.support_of_list nats
+      |> Nation.apply_bonus bonus
+  end
 end
 
 module Turn = struct
@@ -88,4 +102,11 @@ module Upkeep = struct
     let value = S.sub_supp
   end
   module Make = Upkeep.Make
+end
+
+module Victory = struct
+  include Event.NoValue
+  module Apply (S : State.S) = struct
+    let value () = S.Leader.map Leader.won
+  end
 end

@@ -57,6 +57,9 @@ let can_respawn turn t =
   t.died > 0 && t.died + respawn_time <= turn
 let is_alive t = t.died = 0
 
+let has_died t =
+  if is_alive t then Dice.chance 0.05 else false
+
 let cha_mod_of t =
   t |> cha_of |> mod_of
 

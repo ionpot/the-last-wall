@@ -2,10 +2,10 @@ type ('c, 'd) input =
   | Cond of 'c
   | Direct of 'd
 
-type ('c, 'd, 'n) output =
-  | Cond of 'c
+type ('ch, 'co, 'd) output =
+  | Check of 'ch
+  | Cond of 'co
   | Direct of 'd
-  | Notify of 'n
 
 type ('i, 'o) step =
   | Ask of 'i
@@ -19,8 +19,8 @@ module type Input = sig
 end
 
 module type Output = sig
-  type cond and direct and notify
-  type t = (cond, direct, notify) output
+  type check and cond and direct
+  type t = (check, cond, direct) output
 end
 
 module type S = sig
@@ -37,10 +37,10 @@ module Phase1 = struct
     type t = (cond, direct) input
   end
   module Output = struct
+    type check = unit
     type cond = unit
     type direct = BuildSupply | Starting | Support
-    type notify = unit
-    type t = (cond, direct, notify) output
+    type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
   let list : t list =
@@ -62,10 +62,10 @@ module Phase2 = struct
     type t = (cond, direct) input
   end
   module Output = struct
+    type check = unit
     type cond = Cavalry | Defeat | LeaderNew | Market | Starvation
     type direct = Blessing | BuildManp | BuildStatus | BuildSupply | Enemies | Support | Turn | Upkeep
-    type notify = unit
-    type t = (cond, direct, notify) output
+    type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
   let list : t list =
@@ -95,35 +95,33 @@ module Phase3 = struct
     type t = (cond, direct) input
   end
   module Output = struct
-    type cond = Barraged | Casualty | Defeat | Fort | LeaderDied | LeaderLvUp | Smite
-    type direct = Victory
-    type notify = Attack | NoAttack | NoEnemies
-    type t = (cond, direct, notify) output
+    type check = Attack | NoAttack | NoEnemies
+    type cond = Barraged | Defeat | LevelUp | Smite
+    type direct = Combat | Victory
+    type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
   let scout : t = Ask (Direct Input.Scout)
   let victory : t list =
     [ Do (Direct Output.Victory);
-      Do (Cond Output.LeaderLvUp);
+      Do (Cond Output.LevelUp);
       scout
     ]
   let check_enemies : t =
-    GoIf (Notify Output.NoEnemies, victory)
+    GoIf (Check Output.NoEnemies, victory)
   let attack : t list =
     [ Do (Cond Output.Smite);
       check_enemies;
       Ask (Cond Input.Barrage);
       Do (Cond Output.Barraged);
       check_enemies;
-      Do (Cond Output.Casualty);
-      Do (Cond Output.Fort);
+      Do (Direct Output.Combat);
       Do (Cond Output.Defeat);
-      Do (Cond Output.LeaderDied);
       Go victory
     ]
   let list : t list =
-    [ GoIf (Notify Output.Attack, attack);
-      Do (Notify Output.NoAttack);
+    [ GoIf (Check Output.Attack, attack);
+      Do (Check Output.NoAttack);
       scout
     ]
 end

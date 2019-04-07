@@ -51,6 +51,7 @@ module Convert = struct
     module Steps = Steps.Output
     module Convert = Phase.Convert.Output(Steps)(Output)
 
+    let check () = failwith "no phase1 output check"
     let cond () = failwith "no phase1 output cond"
 
     let direct : Convert.direct = function
@@ -60,7 +61,5 @@ module Convert = struct
           let make x = Output.Starting x end)
       | Steps.Support -> (module struct module Event = Direct.Support
           let make x = Output.Support x end)
-
-    let notify () = failwith "no phase1 output notify"
   end
 end

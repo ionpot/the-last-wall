@@ -55,6 +55,8 @@ module Convert = struct
     module Steps = Steps.Output
     module Convert = Phase.Convert.Output(Steps)(Output)
 
+    let check () = failwith "no phase2 check"
+
     let cond : Convert.cond = function
       | Steps.Cavalry -> (module struct module Event = Cond.Cavalry
           let make x = Output.Cavalry x end)
@@ -84,7 +86,5 @@ module Convert = struct
           let make x = Output.Turn x end)
       | Steps.Upkeep -> (module struct module Event = Direct.Upkeep
           let make x = Output.Upkeep x end)
-
-    let notify () = failwith "no phase2 notify"
   end
 end

@@ -1,7 +1,10 @@
 module Make (P : Phase.S) (State : State.S) = struct
-  let check_event (module Event : Event.CanCheck) =
-    let module Result = Event.Check(State) in
+  let do_check (module Check : Event.Check) =
+    let module Result = Check(State) in
     Result.value
+
+  let check_event (module Event : Event.CanCheck) =
+    do_check (module Event.Check)
 
   module Input = struct
     module Convert = Phase.Convert.Input(P.Steps.Input)(P.Input)
@@ -21,11 +24,15 @@ module Make (P : Phase.S) (State : State.S) = struct
   module Output = struct
     module Convert = Phase.Convert.Output(P.Steps.Output)(P.Output)
 
+    let check_ok (module M : Convert.Check) =
+      do_check (module M.Check)
+
     let cond_ok (module M : Convert.Cond) =
       check_event (module M.Event)
 
-    let notify_ok (module M : Convert.Notify) =
-      check_event (module M.Event)
+    let check (module M : Convert.Check) =
+      let apply () = () in
+      M.value, apply
 
     let cond (module M : Convert.Cond) =
       let module Made = M.Event.Make(State) in
@@ -37,11 +44,6 @@ module Make (P : Phase.S) (State : State.S) = struct
       let module Made = M.Event.Make(State) in
       let module Apply = M.Event.Apply(State) in
       let apply () = Apply.value Made.value in
-      M.make Made.value, apply
-
-    let notify (module M : Convert.Notify) =
-      let module Made = M.Event.Make(State) in
-      let apply () = () in
       M.make Made.value, apply
   end
 end
@@ -58,11 +60,11 @@ module Convert (Phase : Phase.S) (State : State.S) = struct
   module Output = struct
     module Convert = Phase.Convert.Output
     module Make = Make.Output
+    let check_ok step = Make.check_ok (Convert.check step)
     let check_cond step = Make.cond_ok (Convert.cond step)
-    let check_notify step = Make.notify_ok (Convert.notify step)
+    let check step = Make.check (Convert.check step)
     let cond step = Make.cond (Convert.cond step)
     let direct step = Make.direct (Convert.direct step)
-    let notify step = Make.notify (Convert.notify step)
   end
 end
 
@@ -97,18 +99,18 @@ module Of (Phase : Phase.S) = struct
       | Steps.Direct step -> Convert.Input.direct step
 
     let output_of : Phase.Steps.Output.t -> output = function
+      | Steps.Check step -> Convert.Output.check step
       | Steps.Cond step -> Convert.Output.cond step
       | Steps.Direct step -> Convert.Output.direct step
-      | Steps.Notify step -> Convert.Output.notify step
 
     let input_ok : Phase.Steps.Input.t -> bool = function
       | Steps.Cond step -> Convert.Input.check step
       | Steps.Direct _ -> true
 
     let output_ok : Phase.Steps.Output.t -> bool = function
+      | Steps.Check step -> Convert.Output.check_ok step
       | Steps.Cond step -> Convert.Output.check_cond step
       | Steps.Direct _ -> true
-      | Steps.Notify step -> Convert.Output.check_notify step
 
     let rec seek = function
       | [] -> End

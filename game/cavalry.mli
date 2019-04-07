@@ -1,8 +1,9 @@
 open Defs
 
-val strength : manpower
+val strength : float
 
-val too_many : manpower -> manpower -> bool
+val too_many : count -> count -> bool
+val dr : count -> count -> float
 
 module Check : State.S -> sig
   val value : bool
@@ -10,8 +11,4 @@ end
 
 module Make : State.S -> sig
   val value : count
-end
-
-module Dr (M: State.S) : sig
-  val value : float
 end

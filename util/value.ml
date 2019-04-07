@@ -10,6 +10,7 @@ module type S = sig
   type t
   val check : (t -> bool) -> bool
   val get : unit -> t
+  val is : t -> bool
   val map : (t -> t) -> unit
   val peek : (t -> unit) -> unit
   val return : (t -> 'a) -> 'a
@@ -19,6 +20,7 @@ end
 module type Bit = sig
   include S with type t = bool
   val clr : unit -> unit
+  val either : 'a -> 'a -> 'a
   val flip : unit -> unit
   val set : unit -> unit
   val set_to : t -> unit
@@ -41,6 +43,7 @@ module From (M : From) : S with type t = M.t = struct
   type t = M.t
   let x = ref M.empty
   let get () = !x
+  let is t = t = !x
   let peek f = f !x
   let check f = f !x
   let return f = f !x
@@ -51,6 +54,7 @@ end
 module Bit (M : FromBit) : Bit = struct
   include From(M)
   let clr () = set false
+  let either a b = if get () then a else b
   let flip () = map not
   let set_to x = set x
   let set () = set true
