@@ -99,7 +99,7 @@ end
 module Upkeep = struct
   type t = Defs.supply
   module Apply (S : State.S) = struct
-    let value = S.sub_supp
+    let value = S.Supply.sub
   end
   module Make = Upkeep.Make
 end

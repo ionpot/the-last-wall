@@ -1,9 +1,9 @@
 open Defs
 
-module Make (M: State.S) : sig
-  val value : manpower
+module Make : State.S -> sig
+  val value : supply
 end
 
-module Starvation (M: State.S) : sig
-  val value : manpower * manpower
+module Starvation : State.S -> sig
+  val value : count * count
 end
