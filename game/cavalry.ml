@@ -12,16 +12,19 @@ let dr men cav =
   then dr_penalty
   else float cav *. dr_per_cav
 
-module Check (M : State.S) = struct
-  let cap = per_stable * M.bld_count Building.Stable
+module Check (S : State.S) = struct
+  let cap = per_stable * S.bld_count Building.Stable
   let value = cap > 0
-    && M.Cavalry.get () < cap
-    && M.has_manp ()
-    && M.has_supp ()
+    && S.Cavalry.get () < cap
+    && S.Men.ptv ()
+    && S.Supply.ptv ()
 end
 
-module Make (M : State.S) = struct
-  let cap = per_stable * M.bld_count Building.Stable
-  let need = cap - M.Cavalry.get ()
-  let value = Listx.min_of [M.get_manp (); M.get_supp (); need]
+module Make (S : State.S) = struct
+  let cap = per_stable * S.bld_count Building.Stable
+  let need = cap - S.Cavalry.get ()
+  let value =
+    S.Men.get ()
+    |> min (S.Supply.get ())
+    |> min need
 end

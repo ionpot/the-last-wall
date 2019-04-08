@@ -1,13 +1,13 @@
-type kind = Skeleton | Orc | Demon
-type expr = (Defs.count * kind)
-type report =
-  | Accurate of t
-  | Vague of (Defs.count * kind list)
 type t =
   { skel : Defs.count;
     orc : Defs.count;
     demon : Defs.count
   }
+type kind = Skeleton | Orc | Demon
+type expr = (Defs.count * kind)
+type report =
+  | Accurate of t
+  | Vague of (Defs.count * kind list)
 
 let empty =
   { skel = 0;
@@ -46,6 +46,9 @@ let set_count t x = function
   | Orc -> { t with orc = x }
   | Demon -> { t with demon = x }
 
+let to_count kind t =
+  count_of t kind
+
 let has_kind t kind =
   count_of t kind > 0
 
@@ -81,7 +84,8 @@ let pick power t =
 
 let discard power t =
   if power > damage t then empty
-  else sub t (pick power t)
+  else if power > 0. then sub t (pick power t)
+  else t
 
 let find (count, kind) t =
   let x = count_of t kind in
@@ -127,6 +131,6 @@ let get_count turn kind =
   Dice.deviate x (x / 4)
 
 let spawn turn =
-  let set t = set_count t (get_count turn) in
+  let set t kind = set_count t (get_count turn kind) kind in
   List.filter (can_spawn turn) kinds
   |> List.fold_left set empty

@@ -1,11 +1,11 @@
 Check_casualty
 Check_leader
 Check_support
-Barrage
 Building
 Building_queue
 Buildings
 Cavalry
+Combat
 Cond
 Defs
 Deity
@@ -16,6 +16,7 @@ Leader
 Main
 Nation
 Phase
+Phases
 Phase1
 Phase2
 Phase3

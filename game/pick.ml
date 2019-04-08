@@ -4,22 +4,38 @@ let invalid ls =
   |> Printf.sprintf "invalid list [%s]"
   |> failwith
 
-let probs_of powers =
-  let sum = List.fold_left (+.) 0. powers in
-  let ratio = 1. /. sum in
-  List.map (( *.) ratio) powers
+let roll count cap =
+  let x = min count cap in
+  let y = if x < 1. then x else Random.float x in
+  max 0. y
 
-let pick probs =
-  let rec next input cap =
-    if cap <= 0. then input
-    else 
-  in next
+let move_nth i cap ls =
+  let ic, oc = List.nth ls i in
+  let x = roll ic cap in
+  let new_ls = Listx.swap_nth i (ic -. x, oc +. x) ls in
+  cap -. x, new_ls
 
-let units cap ls =
-  let counts, powers = List.split ls in
-  let probs = probs_of powers in
-  let input = List.map2 (fun c p -> float c *. p, 0.) counts powers in
-  pick probs input cap
-  |> List.map snd
-  |> List.map2 (fun p c -> c /. p) powers
-  |> List.map truncate
+let map cap ls =
+  let len = List.length ls in
+  let rec next cap ls =
+    if cap <= 0. then ls
+    else
+      let i = Random.int len in
+      let new_cap, new_ls = move_nth i cap ls in
+      next new_cap new_ls
+  in next cap ls
+
+let pick cap pairs =
+  let counts, powers = List.split pairs in
+  let ls = List.map2 Defs.to_power counts powers in
+  if (Listx.sumf ls) <= cap then counts
+  else
+    List.map (fun x -> x, 0.) ls
+    |> map cap
+    |> List.map snd
+    |> List.map2 (fun p c -> c /. p) powers
+    |> List.map truncate
+
+let units cap pairs =
+  if cap > 0. then pick cap pairs
+  else List.map (fun _ -> 0) pairs

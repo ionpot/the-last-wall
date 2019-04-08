@@ -9,10 +9,10 @@ val empty : t
 val kinds : kind list
 
 val combine : t -> t -> t
-val count_of : kind -> t -> Defs.count
 val damage : t -> Defs.power
 val discard : Defs.power -> t -> t
 val find : expr -> t -> expr
 val reduce : expr -> t -> t
 val spawn : Defs.turn -> t
+val to_count : kind -> t -> Defs.count
 val to_report : Defs.scouting -> t -> report

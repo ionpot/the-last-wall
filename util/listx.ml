@@ -34,7 +34,12 @@ let rec slice_from f = function
   | [] -> []
   | x :: xs as ls -> if f x then ls else slice_from f xs
 
-(* partially applied functions cannot be generalised *)
+let sumf ls =
+  List.fold_left (+.) 0. ls
+
+let swap_nth i x ls =
+  List.mapi (fun j y -> if i = j then x else y) ls
+
 let undupe ls =
   let f acc x =
     if List.mem x acc
