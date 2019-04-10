@@ -6,8 +6,8 @@ let invalid ls =
 
 let roll count cap =
   let x = min count cap in
-  let y = if x < 1. then x else Random.float x in
-  max 0. y
+  if x < 1. then max 0. x
+  else Random.float (x -. 1.) +. 1.
 
 let move_nth i cap ls =
   let ic, oc = List.nth ls i in
