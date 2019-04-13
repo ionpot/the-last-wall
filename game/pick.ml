@@ -36,6 +36,6 @@ let pick cap pairs =
     |> List.map2 (fun p c -> c /. p) powers
     |> List.map truncate
 
-let units cap pairs =
+let random cap pairs =
   if cap > 0. then pick cap pairs
   else List.map (fun _ -> 0) pairs

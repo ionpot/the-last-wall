@@ -47,10 +47,10 @@ module Units (S : State.S) = struct
   let cav_too_many = S.Cavalry.return (Cavalry.too_many men)
   let power = Defs.to_power men men_str +. Defs.to_power cav cav_str
   let fled () =
-    to_ls men cav |> Pick.units fort_cap |> picked
+    to_ls men cav |> Pick.random fort_cap |> picked
   let fought () = power -- fort_cap
   let lost dmg =
-    to_ls men cav |> Pick.units dmg |> picked
+    to_ls men cav |> Pick.random dmg |> picked
 end
 
 module Make (S : State.S) = struct

@@ -47,3 +47,35 @@ let undupe ls =
     else x :: acc
   in
   build f ls
+
+let unfold x f =
+  let rec next = function
+    | None -> []
+    | Some (a, b) -> b :: next (f a)
+  in
+  next (f x)
+
+let unfold_with x f =
+  let rec next a = function
+    | None -> a, []
+    | Some (a, b) ->
+        let a', ls = next a (f a) in
+        a', b :: ls
+  in
+  next x (f x)
+
+let fn_unfold_list f (acc, ls) =
+  match ls with
+  | [] -> None
+  | x :: xs ->
+    let a, b = f acc x in
+    Some ((a, xs), b)
+
+let map_with f init ls =
+  let f' = fn_unfold_list f in
+  unfold (init, ls) f'
+
+let fold_map f init ls =
+  let f' = fn_unfold_list f in
+  let (final, _), ls' = unfold_with (init, ls) f' in
+  final, ls'
