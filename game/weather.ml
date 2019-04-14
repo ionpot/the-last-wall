@@ -9,6 +9,10 @@ type t =
 
 let empty = Sunny
 
+let is_bad = function
+  | Wind | Rain Heavy | Snow Heavy -> true
+  | _ -> false
+
 let possible =
   let open Month in
   function

@@ -17,6 +17,7 @@ end
 module Output = struct
   type event =
     | Attack
+    | BadWeather of Cond.BadWeather.t
     | Barraged of Cond.Barraged.t
     | Combat of Direct.Combat.t
     | Defeat
@@ -54,6 +55,8 @@ module Convert = struct
           let value = Output.NoEnemies end)
 
     let cond : Convert.cond = function
+      | Steps.BadWeather -> (module struct module Event = Cond.BadWeather
+          let make x = Output.BadWeather x end)
       | Steps.Barraged -> (module struct module Event = Cond.Barraged
           let make x = Output.Barraged x end)
       | Steps.Defeat -> (module struct module Event = Cond.Defeat

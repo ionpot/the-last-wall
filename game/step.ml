@@ -124,6 +124,9 @@ module Of (Phase : Phase.S) = struct
       | Steps.GoIf (cond, ls) :: rest ->
           if output_ok cond then FoundOutput (cond, ls)
           else seek rest
+      | Steps.TryAsk (cond, input) :: rest ->
+          if output_ok cond then FoundOutput (cond, rest)
+          else seek (Ask input :: rest)
 
     let next steps =
       match seek steps with

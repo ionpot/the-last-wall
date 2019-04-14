@@ -12,6 +12,7 @@ type ('i, 'o) step =
   | Do of 'o
   | Go of ('i, 'o) step list
   | GoIf of ('o * ('i, 'o) step list)
+  | TryAsk of ('o * 'i)
 
 module type Input = sig
   type cond and direct
@@ -96,7 +97,7 @@ module Phase3 = struct
   end
   module Output = struct
     type check = Attack | NoAttack | NoEnemies
-    type cond = Barraged | Defeat | LevelUp | Smite
+    type cond = BadWeather | Barraged | Defeat | LevelUp | Smite
     type direct = Combat | Victory
     type t = (check, cond, direct) output
   end
@@ -112,7 +113,7 @@ module Phase3 = struct
   let attack : t list =
     [ Do (Cond Output.Smite);
       check_enemies;
-      Ask (Cond Input.Barrage);
+      TryAsk (Cond Output.BadWeather, Cond Input.Barrage);
       Do (Cond Output.Barraged);
       check_enemies;
       Do (Direct Output.Combat);

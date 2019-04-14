@@ -1,3 +1,16 @@
+module BadWeather = struct
+  type t = Weather.t
+  module Apply (S : State.S) = struct
+    let value _ = S.Barraging.clear ()
+  end
+  module Check (S : State.S) = struct
+    let value = S.Weather.check Weather.is_bad
+  end
+  module Make (S : State.S) = struct
+    let value = S.Weather.get ()
+  end
+end
+
 module Barraged = struct
   type t = Defs.count
   module Apply (S : State.S) = struct
