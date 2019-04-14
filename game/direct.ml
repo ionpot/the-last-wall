@@ -67,12 +67,16 @@ module Enemies = struct
 end
 
 module Starting = struct
-  type t = Resource.t
+  type t = Month.t * Resource.t
   module Apply (S : State.S) = struct
-    let value = S.add_res
+    let value (m, r) =
+      S.Month.set m;
+      S.add_res r
   end
   module Make (S : State.S) = struct
-    let value = S.Deity.return Deity.starting
+    let value =
+      Month.pick (),
+      S.Deity.return Deity.starting
   end
 end
 
@@ -90,12 +94,18 @@ module Support = struct
 end
 
 module Turn = struct
-  type t = Defs.turn
+  type t = Defs.turn * Month.t * Weather.t
   module Apply (S : State.S) = struct
-    let value = S.Turn.set
+    let value (t, m, w) =
+      S.Turn.set t;
+      S.Month.set m;
+      S.Weather.set w
   end
   module Make (S : State.S) = struct
-    let value = S.Turn.next ()
+    let value =
+      S.Turn.next (),
+      S.Month.return Month.next,
+      S.Month.return Weather.pick
   end
 end
 
