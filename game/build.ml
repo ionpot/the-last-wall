@@ -3,15 +3,27 @@ type kind = Fort | Market | Stable | Tavern | Temple
 type queued = kind * cost
 type status = kind list * kind list * queued list
 type t =
-  { built : kind list;
+  { avlb : kind list;
+    built : kind list;
     queue : queued list;
     ready : kind list
   }
 
+let order = [Fort; Market; Stable; Tavern; Temple]
+let already = [Tavern]
+
+let multiple kind =
+  kind = Stable
+
+let to_avlb built =
+  Listx.discard multiple built
+  |> Listx.rm_from order
+
 let empty =
-  { built = [];
+  { avlb = to_avlb already;
+    built = [];
     queue = [];
-    ready = [Tavern]
+    ready = already
   }
 
 let cost_pair_of =
@@ -27,7 +39,7 @@ let cost_of kind =
   let a, b = cost_pair_of kind in
   Resource.(empty <+ a <+ b)
 
-let multiple kind = kind = Stable
+let available t = t.avlb
 
 let count kind t =
   Listx.count kind t.ready
@@ -70,14 +82,17 @@ let manp m t =
   map_queue f m t
 
 let raze kind t =
-  { t with ready = Listx.rm kind t.ready }
+  let ready = Listx.rm kind t.ready in
+  { t with avlb = to_avlb ready; ready }
 
-let start ls t =
+let start kinds t =
+  let ls = Listx.in_both kinds t.avlb in
   let f kind = kind, cost_of kind in
-  { t with queue = List.rev_map f ls @ t.queue }
+  { t with avlb = to_avlb (t.ready @ ls);
+    queue = List.rev_map f ls @ t.queue }
 
 let supp s t =
   map_queue Resource.take_supp s t
 
 let update (ready, built, queue) t =
-  { built; queue; ready = ready @ t.ready }
+  { t with built; queue; ready = ready @ t.ready }

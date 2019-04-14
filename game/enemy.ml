@@ -6,7 +6,7 @@ type t =
 type kind = Skeleton | Orc | Demon
 type expr = (Defs.count * kind)
 type report =
-  | Accurate of t
+  | Accurate of expr list
   | Vague of (Defs.count * kind list)
 
 let empty =
@@ -79,7 +79,7 @@ let pick power t =
   let a = List.map (count_of t) kinds in
   let b = List.map power_of kinds in
   List.combine a b
-  |> Pick.units power
+  |> Pick.random power
   |> t_from_ls
 
 let discard power t =
@@ -87,20 +87,18 @@ let discard power t =
   else if power > 0. then sub t (pick power t)
   else t
 
-let find (count, kind) t =
+let find count kind t =
   let x = count_of t kind in
-  min x count, kind
+  min x count
 
-let reduce (count, kind) t =
+let reduce count kind t =
   let x = count_of t kind in
   let y = Number.sub x count in
   set_count t y kind
 
 let report_of t =
-  { skel = try_round t.skel;
-    orc = try_round t.orc;
-    demon = try_round t.demon
-  }
+  [t.skel, Skeleton; t.orc, Orc; t.demon, Demon]
+  |> List.map (fun (x, k) -> try_round x, k)
 
 let which t =
   List.filter (has_kind t) kinds

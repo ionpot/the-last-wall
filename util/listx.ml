@@ -33,6 +33,9 @@ let pick_from ls =
 let rm x ls =
   List.filter ((<>) x) ls
 
+let rm_from ls xs =
+  List.fold_left (fun ls' x -> rm x ls') ls xs
+
 let rec slice_from f = function
   | [] -> []
   | x :: xs as ls -> if f x then ls else slice_from f xs

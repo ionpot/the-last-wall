@@ -9,6 +9,7 @@ val min_of : int list -> int
 val pick_first : int -> 'a list -> 'a list
 val pick_from : 'a list -> 'a
 val rm : 'a -> 'a list -> 'a list
+val rm_from : 'a list -> 'a list -> 'a list
 val slice_from : ('a -> bool) -> 'a list -> 'a list
 val sumf : float list -> float
 val swap_nth : int -> 'a -> 'a list -> 'a list

@@ -37,7 +37,7 @@ end
 module BuildSupply = struct
   type t = Defs.supply
   module Apply (S : State.S) = struct
-    let value need = S.bld_supp
+    let value need =
       let avlb = S.Supply.get () in
       S.Build.map (Build.supp (min need avlb))
   end

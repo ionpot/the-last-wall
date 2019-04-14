@@ -4,7 +4,7 @@ module Build = struct
     let value ls = S.Build.map (Build.start ls)
   end
   module Make (S : State.S) = struct
-    let value = []
+    let value = S.Build.return Build.available
   end
 end
 

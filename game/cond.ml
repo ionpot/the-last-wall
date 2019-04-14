@@ -1,7 +1,7 @@
 module Barraged = struct
-  type t = Enemy.party
+  type t = Defs.count
   module Apply (S : State.S) = struct
-    let value party = S.Enemy.map (Enemy.reduce party)
+    let value count = S.Enemy.map (Enemy.reduce count Orc)
   end
   module Check (S : State.S) = struct
     let value = S.Barraging.get ()
@@ -88,9 +88,9 @@ module Starvation = struct
 end
 
 module Smite = struct
-  type t = Enemy.party
+  type t = Defs.count
   module Apply (S : State.S) = struct
-    let value party = S.Enemy.map (Enemy.reduce party)
+    let value count = S.Enemy.map (Enemy.reduce count Skeleton)
   end
   module Check (S : State.S) = struct
     let value = S.Deity.is Deity.Lerota

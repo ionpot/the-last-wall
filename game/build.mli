@@ -11,6 +11,7 @@ val empty : t
 val cost_of : kind -> cost
 val multiple : kind -> bool
 
+val available : t -> kind list
 val count : kind -> t -> count
 val need_manp : t -> manpower
 val need_supp : t -> supply

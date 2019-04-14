@@ -12,17 +12,22 @@ let dr men cav =
   then dr_penalty
   else float cav *. dr_per_cav
 
+module Count (S : State.S) = struct
+  let count = S.Build.return Build.(count Stable)
+  let cap = count * per_stable
+end
+
 module Check (S : State.S) = struct
-  let cap = per_stable * S.bld_count Building.Stable
-  let value = cap > 0
-    && S.Cavalry.get () < cap
+  module C = Count(S)
+  let value = C.cap > 0
+    && S.Cavalry.get () < C.cap
     && S.Men.ptv ()
     && S.Supply.ptv ()
 end
 
 module Make (S : State.S) = struct
-  let cap = per_stable * S.bld_count Building.Stable
-  let need = cap - S.Cavalry.get ()
+  module C = Count(S)
+  let need = C.cap - S.Cavalry.get ()
   let value =
     S.Men.get ()
     |> min (S.Supply.get ())
