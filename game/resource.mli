@@ -25,6 +25,9 @@ val map_supp : (supply -> supply) -> t -> t
 val deduce_manp : manpower -> t -> manpower * t
 val deduce_supp : supply -> t -> supply * t
 
+val take_manp : manpower -> t -> manpower * t
+val take_supp : supply -> t -> supply * t
+
 val manp2supp : t -> t
 val supp2manp : t -> t
 

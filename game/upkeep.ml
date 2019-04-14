@@ -1,13 +1,13 @@
-module Check (M : State.S) = struct
-  let men = M.get_manp ()
-  let cav = M.Cavalry.get ()
-  let scouts = if M.is_scouting () then 10 else 0
-  let total = men + cav + scouts
+module Make (S : State.S) = struct
+  let men = S.Men.get ()
+  let cav = S.Cavalry.get ()
+  let scouts = S.Scout.either 10 0
+  let value = men + cav + scouts
 end
 
-module Starvation (M : State.S) = struct
-  let cost = -(min 0 @@ M.get_supp ())
-  let sup, men = Number.take cost (M.get_manp ())
-  let cav = min sup (M.Cavalry.get ())
-  let value = if cost > 0 then Some (men, cav) else None
+module Starvation (S : State.S) = struct
+  let cost = -S.Supply.get ()
+  let sup, men = S.Men.return (Number.take cost)
+  let cav = min sup (S.Cavalry.get ())
+  let value = men, cav
 end

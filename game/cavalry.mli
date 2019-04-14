@@ -1,13 +1,14 @@
 open Defs
 
-val strength : manpower
+val strength : float
 
-val too_many : manpower -> manpower -> bool
+val too_many : count -> count -> bool
+val dr : count -> count -> float
 
-module Check (M: State.S) : sig
-  val value : manpower option
+module Check : State.S -> sig
+  val value : bool
 end
 
-module Dr (M: State.S) : sig
-  val value : float
+module Make : State.S -> sig
+  val value : count
 end

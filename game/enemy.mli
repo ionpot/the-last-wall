@@ -1,22 +1,20 @@
 open Defs
 
-type t = Skeleton | Orc | Demon
-type count = int
-type party
-type report = party list
-type sum_report = (count * t list)
+type t
+type kind = Skeleton | Orc | Demon
+type expr = (count * kind)
+type report =
+  | Accurate of expr list
+  | Vague of (count * kind list)
 
-val t_list : t list
+val empty : t
+val kinds : kind list
 
-val count_of : party -> count
-val type_of : party -> t
-
-val report_of : party list -> report
-val sum_report_of : party list -> sum_report
-
-val make : (count * t) list -> party list
-val damage : party list -> float
-val spawn : turn -> party list
-
-val find : count -> t -> party list -> party option
-val reduce : party -> party list -> party list
+val combine : t -> t -> t
+val damage : t -> power
+val discard : power -> t -> t
+val find : count -> kind -> t -> count
+val reduce : count -> kind -> t -> t
+val spawn : turn -> t
+val to_count : kind -> t -> count
+val to_report : scouting -> t -> report
