@@ -26,16 +26,29 @@ module Apply (S : State.S) = struct
 end
 
 let barrage_dr = 0.05
-let cav_str = Cavalry.strength
+let cav_unit_dr = 0.002
+let cav_dr_penalty = 0.05
+let cav_men_ratio = 0.4
+let cav_str = 2.
 let fort_cap = 20.
 let men_str = 1.
 
-let to_ls men cav =
-  [men, men_str; cav, cav_str]
+let to_power = Defs.to_power
+
+let cav_dr cav too_many snow =
+  if too_many then -.cav_dr_penalty
+  else if snow then 0.
+  else to_power cav cav_unit_dr
 
 let picked = function
   | [men; cav] -> men, cav
   | ls -> Pick.invalid ls
+
+let to_ls men cav =
+  [men, men_str; cav, cav_str]
+
+let too_many cav men =
+  float cav > to_power men cav_men_ratio
 
 let (--) a b =
   if a < b then 0. else a -. b
@@ -43,9 +56,10 @@ let (--) a b =
 module Units (S : State.S) = struct
   let cav = S.Cavalry.get ()
   let men = S.Men.get ()
-  let cav_dr = S.Cavalry.return (Cavalry.dr men)
-  let cav_too_many = S.Cavalry.return (Cavalry.too_many men)
-  let power = Defs.to_power men men_str +. Defs.to_power cav cav_str
+  let snow = S.Weather.is Weather.(Snow Heavy)
+  let cav_too_many = too_many cav men
+  let cav_dr = cav_dr cav cav_too_many snow
+  let power = to_power men men_str +. to_power cav cav_str
   let fled () =
     to_ls men cav |> Pick.random fort_cap |> picked
   let fought () = power -- fort_cap
