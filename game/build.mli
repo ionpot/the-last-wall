@@ -18,8 +18,8 @@ val present : kind -> t -> bool
 val ready : kind -> t -> bool
 val status : t -> status
 
-val build : kind list -> t -> t
 val manp : manpower -> t -> t
 val raze : kind -> t -> t
+val start : kind list -> t -> t
 val supp : supply -> t -> t
 val update : status -> t -> t

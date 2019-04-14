@@ -1,7 +1,7 @@
 module Build = struct
-  type t = Building.t list
+  type t = Build.kind list
   module Apply (S : State.S) = struct
-    let value = S.build
+    let value ls = S.Build.map (Build.start ls)
   end
   module Make (S : State.S) = struct
     let value = []
@@ -31,7 +31,9 @@ end
 module Mercs = struct
   type t = Defs.manpower
   module Apply (S : State.S) = struct
-    let value = S.supp2manp
+    let value men =
+      S.Supply.sub men;
+      S.Men.add men
   end
   module Check (S : State.S) = struct
     let value = Dice.chance 0.8
@@ -42,19 +44,19 @@ module Mercs = struct
 end
 
 module Nations = struct
-  type t = Nation.t list
+  type t = Nation.kind list
   module Apply (S : State.S) = struct
-    let value = S.set_nats
+    let value ls = S.Nation.set (Nation.from ls)
   end
   module Make (S : State.S) = struct
-    let value = S.get_nats ()
+    let value = S.Nation.return Nation.which
   end
 end
 
 module Scout = struct
   type t = bool
   module Apply (S : State.S) = struct
-    let value = S.Scout.set
+    let value = S.Scout.set_to
   end
   module Make (S : State.S) = struct
     let value = S.Scout.get ()

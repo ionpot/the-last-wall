@@ -53,10 +53,6 @@ let status t =
   let built, ongoing = List.partition f t.queue in
   t.built, List.map fst built, ongoing
 
-let build ls t =
-  let f kind = kind, cost_of kind in
-  { t with queue = List.rev_map f ls @ t.queue }
-
 let map_queue f x t =
   let f' acc (kind, cost) =
     let acc', cost' = f acc cost in
@@ -75,6 +71,10 @@ let manp m t =
 
 let raze kind t =
   { t with ready = Listx.rm kind t.ready }
+
+let start ls t =
+  let f kind = kind, cost_of kind in
+  { t with queue = List.rev_map f ls @ t.queue }
 
 let supp s t =
   map_queue Resource.take_supp s t

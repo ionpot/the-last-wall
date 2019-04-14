@@ -5,7 +5,7 @@ module Blessing = struct
   end
   module Make (S : State.S) = struct
     let bless =
-      if S.bld_ready Building.Temple
+      if S.Build.check Build.(ready Temple)
       then Deity.boosted_of
       else Deity.blessing_of
     let value = S.Deity.return bless
@@ -15,30 +15,34 @@ end
 module BuildManp = struct
   type t = Defs.manpower
   module Apply (S : State.S) = struct
-    let value = S.bld_manp
+    let value need =
+      let avlb = S.Men.get () in
+      S.Build.map (Build.manp (min need avlb))
   end
   module Make (S : State.S) = struct
-    let value = S.bld_manp_cost ()
+    let value = S.Build.return Build.need_manp
   end
 end
 
 module BuildStatus = struct
-  type t = Buildings.status
+  type t = Build.status
   module Apply (S : State.S) = struct
-    let value = S.bld_update
+    let value status = S.Build.map (Build.update status)
   end
   module Make (S : State.S) = struct
-    let value = S.bld_status ()
+    let value = S.Build.return Build.status
   end
 end
 
 module BuildSupply = struct
   type t = Defs.supply
   module Apply (S : State.S) = struct
-    let value = S.bld_supp
+    let value need = S.bld_supp
+      let avlb = S.Supply.get () in
+      S.Build.map (Build.supp (min need avlb))
   end
   module Make (S : State.S) = struct
-    let value = S.bld_supp_cost ()
+    let value = S.Build.return Build.need_supp
   end
 end
 
@@ -75,14 +79,13 @@ end
 module Support = struct
   type t = Nation.support list
   module Apply (S : State.S) = struct
-    let value nats = S.add_res (Nation.total_of nats)
+    let value ls = S.add_res (Nation.sum ls)
   end
   module Make (S : State.S) = struct
     let bonus = S.Leader.return Leader.res_bonus_of
-    let nats = S.get_nats ()
     let value =
-      Nation.support_of_list nats
-      |> Nation.apply_bonus bonus
+      S.Nation.return Nation.support
+      |> Nation.add bonus
   end
 end
 

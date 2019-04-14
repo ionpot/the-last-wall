@@ -3,6 +3,7 @@ val build : ('a list -> 'a -> 'a list) -> 'a list -> 'a list
 val count : 'a -> 'a list -> int
 val discard : ('a -> bool) -> 'a list -> 'a list
 val fold_map : ('a -> 'b -> 'a * 'b) -> 'a -> 'b list -> 'a * 'b list
+val in_both : 'a list -> 'a list -> 'a list
 val map_with : ('a -> 'b -> 'a * 'b) -> 'a -> 'b list -> 'b list
 val min_of : int list -> int
 val pick_first : int -> 'a list -> 'a list

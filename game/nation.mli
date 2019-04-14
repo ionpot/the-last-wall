@@ -1,10 +1,14 @@
-type t = Tulron | Sodistan | Hekatium | Numendor | Clan
-type support = (t * Resource.t option)
+type kind = Tulron | Sodistan | Hekatium | Numendor | Clan
+type support = (kind * Resource.t)
+type t
 
-val t_list : t list
+val empty : t
+val kinds : kind list
+val max_allowed : int
 
-val filter : t list -> t list
-val support_of : t -> support
-val support_of_list : t list -> support list
-val total_of : support list -> Resource.t
-val apply_bonus : Resource.t -> support list -> support list
+val from : kind list -> t
+
+val add : Resource.t -> support list -> support list
+val sum : support list -> Resource.t
+val support : t -> support list
+val which : t -> kind list

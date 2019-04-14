@@ -11,6 +11,9 @@ let count x xs =
 let discard f ls =
   List.filter (fun x -> not (f x)) ls
 
+let in_both a b =
+  List.filter (fun x -> List.mem x a) b
+
 let rec min_of = function
   | [] -> 0
   | x :: [] -> x

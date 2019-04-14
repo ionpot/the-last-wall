@@ -15,7 +15,7 @@ module Apply (S : State.S) = struct
     if O.retreat then begin
       S.Men.set men;
       S.Cavalry.set cav;
-      S.bld_raze Building.Fort
+      S.Build.map Build.(raze Fort)
     end else begin
       S.Men.sub men;
       S.Cavalry.sub cav
@@ -66,7 +66,7 @@ module Make (S : State.S) = struct
     let defense = Units.cav_dr +. ldr_dr -. barrage_dr
     let damage = attack -. attack *. defense
     let defeat = damage > Units.power
-    let retreat = defeat && S.bld_ready Building.Fort
+    let retreat = defeat && S.Build.check Build.(ready Fort)
     let power = if retreat then Units.fought () else Units.power
     let units = if retreat then Units.fled () else Units.lost damage
     let remaining = S.Enemy.return (Enemy.discard power)

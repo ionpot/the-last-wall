@@ -7,7 +7,7 @@ module Barraged = struct
     let value = S.Barraging.get ()
   end
   module Make (S : State.S) = struct
-    let count = S.get_manp () / 20
+    let count = S.Men.get () / 20
     let value = S.Enemy.return Enemy.(find count Orc)
   end
 end
@@ -16,7 +16,7 @@ module Cavalry = struct
   type t = Defs.count
   module Apply (S : State.S) = struct
     let value =
-      Listx.apply_to [S.Cavalry.add; S.sub_manp; S.sub_supp]
+      Listx.apply_to [S.Cavalry.add; S.Men.sub; S.Supply.sub]
   end
   module Check = Cavalry.Check
   module Make = Cavalry.Make
@@ -29,7 +29,7 @@ module Defeat = struct
   end
   module Check (S : State.S) = struct
     let value =
-      S.no_manp () && S.Cavalry.is_zero ()
+      S.Men.zero () && S.Cavalry.zero ()
   end
 end
 
@@ -63,10 +63,10 @@ end
 module Market = struct
   type t = Defs.supply
   module Apply (S : State.S) = struct
-    let value = S.add_supp
+    let value = S.Supply.add
   end
   module Check (S : State.S) = struct
-    let value = S.bld_ready Building.Market
+    let value = S.Build.check Build.(ready Market)
   end
   module Make (S : State.S) = struct
     let value = Dice.between 15 45
@@ -77,12 +77,12 @@ module Starvation = struct
   type t = Defs.manpower * Defs.manpower
   module Apply (S : State.S) = struct
     let value (men, cav) =
-      S.sub_manp men;
+      S.Men.sub men;
       S.Cavalry.sub cav;
-      S.clr_supp ()
+      S.Supply.clear ()
   end
   module Check (S : State.S) = struct
-    let value = S.get_supp () < 0
+    let value = S.Supply.ngv ()
   end
   module Make = Upkeep.Starvation
 end
@@ -96,7 +96,7 @@ module Smite = struct
     let value = S.Deity.is Deity.Lerota
   end
   module Make (S : State.S) = struct
-    let boost = if S.bld_ready Building.Temple then 15 else 0
+    let boost = if S.Build.check Build.(ready Temple) then 15 else 0
     let count = Dice.between 15 35 + boost
     let value = S.Enemy.return Enemy.(find count Skeleton)
   end
