@@ -30,7 +30,7 @@ let cost_pair_of =
   let open Resource in
   function
   | Fort -> Manpwr 124, Supply 136
-  | Market -> Manpwr 48, Supply 53
+  | Market -> Manpwr 44, Supply 65
   | Stable -> Manpwr 49, Supply 54
   | Tavern -> Manpwr 0, Supply 0
   | Temple -> Manpwr 29, Supply 28
