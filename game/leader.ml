@@ -3,21 +3,23 @@ type level = int
 type charisma = int
 
 type t =
-  { ltype : ltype;
-    level : level;
-    cha_base : charisma;
+  { cha_base : charisma;
     cha_extra : charisma;
-    xp : int;
-    died : Defs.turn
+    died : Defs.turn;
+    level : level;
+    ltype : ltype;
+    noble : bool;
+    xp : int
   }
 
 let empty =
-  { ltype = Aristocrat;
-    level = 0;
-    cha_base = 0;
+  { cha_base = 0;
     cha_extra = 0;
-    xp = 0;
-    died = 0
+    died = 0;
+    level = 0;
+    ltype = Aristocrat;
+    noble = true;
+    xp = 0
   }
 
 let ltypes = [Aristocrat; Expert; Warrior]
@@ -36,14 +38,20 @@ let resource_of cha = function
   | Expert -> Resource.of_supp (2 * cha)
   | Warrior -> Resource.empty
 
+let roll_noble = function
+  | Warrior -> Dice.chance 0.2
+  | Aristocrat -> true
+  | Expert -> Dice.chance 0.4
+
 let make ltype =
   let lv = Dice.between 3 5 in
-  { ltype;
-    level = lv;
-    cha_base = Dice.between 10 15;
+  { cha_base = Dice.between 10 15;
     cha_extra = (lv / 4);
-    xp = 0;
-    died = 0
+    died = 0;
+    level = lv;
+    ltype;
+    noble = roll_noble ltype;
+    xp = 0
   }
 
 let random () =
@@ -55,6 +63,7 @@ let cha_of t = t.cha_base + t.cha_extra
 let can_lvup t = t.xp > 1
 let is_alive t = t.died = 0
 let is_dead t = t.died > 0
+let is_noble t = t.noble
 let can_respawn turn t =
   is_dead t && t.died + respawn_time <= turn
 
