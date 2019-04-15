@@ -120,6 +120,6 @@ end
 module Victory = struct
   include Event.NoValue
   module Apply (S : State.S) = struct
-    let value () = S.Leader.map Leader.won
+    let value _ = S.Leader.map Leader.won
   end
 end
