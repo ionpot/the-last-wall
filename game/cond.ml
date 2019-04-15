@@ -1,16 +1,3 @@
-module BadWeather = struct
-  type t = Weather.t
-  module Apply (S : State.S) = struct
-    let value _ = S.Barraging.clear ()
-  end
-  module Check (S : State.S) = struct
-    let value = S.Weather.check Weather.is_bad
-  end
-  module Make (S : State.S) = struct
-    let value = S.Weather.get ()
-  end
-end
-
 module Barraged = struct
   type t = Defs.count
   module Apply (S : State.S) = struct
@@ -22,6 +9,17 @@ module Barraged = struct
   module Make (S : State.S) = struct
     let count = S.Men.get () / 20
     let value = S.Enemy.return Enemy.(find count Orc)
+  end
+end
+
+module CantBarrage = struct
+  include Event.NoValue
+  module Apply (S : State.S) = struct
+    let value _ = S.Barraging.clear ()
+  end
+  module Check (S : State.S) = struct
+    let value = S.Leader.check Leader.is_dead
+      || S.Weather.check Weather.is_bad
   end
 end
 
@@ -107,6 +105,7 @@ module Smite = struct
   end
   module Check (S : State.S) = struct
     let value = S.Deity.is Deity.Lerota
+      && S.Enemy.check Enemy.(has Skeleton)
   end
   module Make (S : State.S) = struct
     let boost = if S.Build.check Build.(ready Temple) then 15 else 0

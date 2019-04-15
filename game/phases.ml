@@ -1,7 +1,7 @@
 type event =
   | Ph1 of Step.Of(Phase1).t
   | Ph2 of Step.Of(Phase2).t
-  | Ph3 of Step.Of(Phase1).t
+  | Ph3 of Step.Of(Phase3).t
 
 type step =
   | Next of event
@@ -34,7 +34,7 @@ module Handle (State : State.S) = struct
         let module Step = Step(Phase2) in
         Step.first_of phase (fun event -> Ph2 event)
     | Phase.Three ->
-        let module Step = Step(Phase1) in
+        let module Step = Step(Phase3) in
         Step.first_of phase (fun event -> Ph3 event)
 
   let next_of = function
@@ -45,11 +45,11 @@ module Handle (State : State.S) = struct
         let module Step = Step(Phase2) in
         Step.next_of event Phase.Two (fun event -> Ph2 event)
     | Ph3 event ->
-        let module Step = Step(Phase1) in
+        let module Step = Step(Phase3) in
         Step.next_of event Phase.Three (fun event -> Ph3 event)
 
   let apply = function
     | Ph1 event -> let module Step = Step(Phase1) in Step.apply event
     | Ph2 event -> let module Step = Step(Phase2) in Step.apply event
-    | Ph3 event -> let module Step = Step(Phase1) in Step.apply event
+    | Ph3 event -> let module Step = Step(Phase3) in Step.apply event
 end

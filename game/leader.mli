@@ -15,6 +15,7 @@ val cha_of : t -> charisma
 val defense_of : t -> float
 val has_died : t -> bool
 val is_alive : t -> bool
+val is_dead : t -> bool
 val level_of : t -> level
 val res_bonus_of : t -> Resource.t
 val type_of : t -> ltype

@@ -91,6 +91,9 @@ let find count kind t =
   let x = count_of t kind in
   min x count
 
+let has kind t =
+  count_of t kind > 0
+
 let reduce count kind t =
   let x = count_of t kind in
   let y = Number.sub x count in

@@ -9,6 +9,7 @@ module type FromNum = From with type t = int
 module type S = sig
   type t
   val check : (t -> bool) -> bool
+  val empty : unit -> bool
   val get : unit -> t
   val is : t -> bool
   val map : (t -> t) -> unit
@@ -44,6 +45,7 @@ module From (M : From) : S with type t = M.t = struct
   type t = M.t
   let x = ref M.empty
   let check f = f !x
+  let empty () = !x = M.empty
   let get () = !x
   let is t = t = !x
   let peek f = f !x

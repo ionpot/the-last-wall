@@ -1,7 +1,7 @@
 type event =
   | Ph1 of Step.Of(Phase1).t
   | Ph2 of Step.Of(Phase2).t
-  | Ph3 of Step.Of(Phase1).t
+  | Ph3 of Step.Of(Phase3).t
 
 type step =
   | Next of event

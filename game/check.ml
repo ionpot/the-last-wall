@@ -3,8 +3,8 @@ module Not (Check : Event.Check) (State : State.S) = struct
   let value = not Result.value
 end
 
-module HasEnemies (State : State.S) = struct
-  let value = State.has_enemies ()
+module NoEnemies (State : State.S) = struct
+  let value = State.Enemy.empty ()
 end
 
-module NoEnemies = Not(HasEnemies)
+module HasEnemies = Not(NoEnemies)

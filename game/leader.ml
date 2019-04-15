@@ -53,9 +53,10 @@ let type_of t = t.ltype
 let level_of t = t.level
 let cha_of t = t.cha_base + t.cha_extra
 let can_lvup t = t.xp > 1
-let can_respawn turn t =
-  t.died > 0 && t.died + respawn_time <= turn
 let is_alive t = t.died = 0
+let is_dead t = t.died > 0
+let can_respawn turn t =
+  is_dead t && t.died + respawn_time <= turn
 
 let has_died t =
   if is_alive t then Dice.chance 0.05 else false

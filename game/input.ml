@@ -1,3 +1,13 @@
+module Barrage = struct
+  type t = bool
+  module Apply (S : State.S) = struct
+    let value = S.Barraging.set_to
+  end
+  module Make (S : State.S) = struct
+    let value = S.Barraging.get ()
+  end
+end
+
 module Build = struct
   type t = Build.kind list
   module Apply (S : State.S) = struct
