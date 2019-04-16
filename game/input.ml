@@ -37,7 +37,7 @@ module Leader = struct
     let value kind = S.Leader.set (Leader.make kind)
   end
   module Make (S : State.S) = struct
-    let value = Leader.Aristocrat
+    let value = Leader.(kind_of empty)
   end
 end
 
