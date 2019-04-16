@@ -12,17 +12,6 @@ module Barraged = struct
   end
 end
 
-module CantBarrage = struct
-  include Event.NoValue
-  module Apply (S : State.S) = struct
-    let value _ = S.Barraging.clear ()
-  end
-  module Check (S : State.S) = struct
-    let value = S.Leader.check Leader.is_dead
-      || S.Weather.check Weather.is_bad
-  end
-end
-
 module Cavalry = struct
   type t = Defs.count
   module Apply (S : State.S) = struct

@@ -18,7 +18,7 @@ module Output = struct
   type event =
     | Attack
     | Barraged of Cond.Barraged.t
-    | CantBarrage of Cond.CantBarrage.t
+    | CanBarrage of Direct.CanBarrage.t
     | Combat of Direct.Combat.t
     | Defeat
     | LevelUp of Cond.LevelUp.t
@@ -34,11 +34,11 @@ module Convert = struct
     module Event = Input.Event
     module Convert = Phase.Convert.Input(Steps)(Input)
 
-    let cond () = failwith "no phase3 cond input"
-
-    let direct : Convert.direct = function
+    let cond : Convert.cond = function
       | Steps.Barrage -> (module struct module Event = Event.Barrage
           let make x = Input.Barrage x end)
+
+    let direct : Convert.direct = function
       | Steps.Scout -> (module struct module Event = Event.Scout
           let make x = Input.Scout x end)
   end
@@ -58,8 +58,6 @@ module Convert = struct
     let cond : Convert.cond = function
       | Steps.Barraged -> (module struct module Event = Cond.Barraged
           let make x = Output.Barraged x end)
-      | Steps.CantBarrage -> (module struct module Event = Cond.CantBarrage
-          let make x = Output.CantBarrage x end)
       | Steps.Defeat -> (module struct module Event = Cond.Defeat
           let make () = Output.Defeat end)
       | Steps.LevelUp -> (module struct module Event = Cond.LevelUp
@@ -68,6 +66,8 @@ module Convert = struct
           let make x = Output.Smite x end)
 
     let direct : Convert.direct = function
+      | Steps.CanBarrage -> (module struct module Event = Direct.CanBarrage
+          let make x = Output.CanBarrage x end)
       | Steps.Combat -> (module struct module Event = Direct.Combat
           let make x = Output.Combat x end)
       | Steps.Victory -> (module struct module Event = Direct.Victory

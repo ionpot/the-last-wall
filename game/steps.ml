@@ -91,14 +91,14 @@ end
 
 module Phase3 = struct
   module Input = struct
-    type cond = unit
-    type direct = Barrage | Scout
+    type cond = Barrage
+    type direct = Scout
     type t = (cond, direct) input
   end
   module Output = struct
     type check = Attack | NoAttack | NoEnemies
-    type cond = Barraged | CantBarrage | Defeat | LevelUp | Smite
-    type direct = Combat | Victory
+    type cond = Barraged | Defeat | LevelUp | Smite
+    type direct = CanBarrage | Combat | Victory
     type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
@@ -113,7 +113,8 @@ module Phase3 = struct
   let attack : t list =
     [ Do (Cond Output.Smite);
       check_enemies;
-      TryAsk (Cond Output.CantBarrage, Direct Input.Barrage);
+      Do (Direct Output.CanBarrage);
+      Ask (Cond Input.Barrage);
       Do (Cond Output.Barraged);
       check_enemies;
       Do (Direct Output.Combat);

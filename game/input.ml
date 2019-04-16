@@ -3,6 +3,9 @@ module Barrage = struct
   module Apply (S : State.S) = struct
     let value = S.Barraging.set_to
   end
+  module Check (S : State.S) = struct
+    let value = S.Barraging.get ()
+  end
   module Make (S : State.S) = struct
     let value = S.Barraging.get ()
   end
