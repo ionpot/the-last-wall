@@ -29,9 +29,9 @@ module Deity = struct
 end
 
 module Leader = struct
-  type t = Leader.ltype
+  type t = Leader.kind
   module Apply (S : State.S) = struct
-    let value ltype = S.Leader.set (Leader.make ltype)
+    let value kind = S.Leader.set (Leader.make kind)
   end
   module Make (S : State.S) = struct
     let value = Leader.Aristocrat

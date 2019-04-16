@@ -1,12 +1,12 @@
-type t
-type ltype = Aristocrat | Expert | Warrior
+type kind = Aristocrat | Expert | Warrior
 type level = int
 type charisma = int
+type t
 
 val empty : t
-val ltypes : ltype list
+val kinds : kind list
 
-val make : ltype -> t
+val make : kind -> t
 val random : unit -> t
 
 val can_lvup : t -> bool
@@ -19,7 +19,7 @@ val is_dead : t -> bool
 val is_noble : t -> bool
 val level_of : t -> level
 val res_bonus_of : t -> Resource.t
-val type_of : t -> ltype
+val type_of : t -> kind
 
 val died : Defs.turn -> t -> t
 val lvup : t -> t

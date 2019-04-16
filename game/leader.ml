@@ -1,4 +1,4 @@
-type ltype = Aristocrat | Expert | Warrior
+type kind = Aristocrat | Expert | Warrior
 type level = int
 type charisma = int
 
@@ -7,7 +7,7 @@ type t =
     cha_extra : charisma;
     died : Defs.turn;
     level : level;
-    ltype : ltype;
+    kind : kind;
     noble : bool;
     xp : int
   }
@@ -17,21 +17,21 @@ let empty =
     cha_extra = 0;
     died = 0;
     level = 0;
-    ltype = Aristocrat;
+    kind = Aristocrat;
     noble = true;
     xp = 0
   }
 
-let ltypes = [Aristocrat; Expert; Warrior]
+let kinds = [Aristocrat; Expert; Warrior]
 let respawn_time = 2 (* turns *)
 
 let mod_of cha =
   (cha - 10) / 2
 
 let def_bonus_of cha = function
-  | Warrior -> 0.01 *. float cha
   | Aristocrat
   | Expert -> 0.0
+  | Warrior -> 0.01 *. float cha
 
 let resource_of cha = function
   | Aristocrat -> Resource.of_manp (2 * cha)
@@ -39,25 +39,25 @@ let resource_of cha = function
   | Warrior -> Resource.empty
 
 let roll_noble = function
-  | Warrior -> Dice.chance 0.2
   | Aristocrat -> true
   | Expert -> Dice.chance 0.4
+  | Warrior -> Dice.chance 0.2
 
-let make ltype =
+let make kind =
   let lv = Dice.between 3 5 in
   { cha_base = Dice.between 10 15;
     cha_extra = (lv / 4);
     died = 0;
     level = lv;
-    ltype;
-    noble = roll_noble ltype;
+    kind;
+    noble = roll_noble kind;
     xp = 0
   }
 
 let random () =
-  make (Listx.pick_from ltypes)
+  make (Listx.pick_from kinds)
 
-let type_of t = t.ltype
+let type_of t = t.kind
 let level_of t = t.level
 let cha_of t = t.cha_base + t.cha_extra
 let can_lvup t = t.xp > 1
