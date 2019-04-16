@@ -1,13 +1,13 @@
+type charisma = int
 type kind = Aristocrat | Expert | Warrior
 type level = int
-type charisma = int
 
 type t =
   { cha_base : charisma;
     cha_extra : charisma;
     died : Defs.turn;
-    level : level;
     kind : kind;
+    level : level;
     noble : bool;
     xp : int
   }
@@ -16,8 +16,8 @@ let empty =
   { cha_base = 0;
     cha_extra = 0;
     died = 0;
-    level = 0;
     kind = Aristocrat;
+    level = 0;
     noble = true;
     xp = 0
   }
@@ -25,13 +25,13 @@ let empty =
 let kinds = [Aristocrat; Expert; Warrior]
 let respawn_time = 2 (* turns *)
 
-let mod_of cha =
-  (cha - 10) / 2
-
 let def_bonus_of cha = function
   | Aristocrat
   | Expert -> 0.0
   | Warrior -> 0.01 *. float cha
+
+let mod_of cha =
+  (cha - 10) / 2
 
 let resource_of cha = function
   | Aristocrat -> Resource.of_manp (2 * cha)
@@ -44,12 +44,12 @@ let roll_noble = function
   | Warrior -> Dice.chance 0.2
 
 let make kind =
-  let lv = Dice.between 3 5 in
+  let level = Dice.between 3 5 in
   { cha_base = Dice.between 10 15;
-    cha_extra = (lv / 4);
+    cha_extra = (level / 4);
     died = 0;
-    level = lv;
     kind;
+    level;
     noble = roll_noble kind;
     xp = 0
   }
@@ -57,21 +57,16 @@ let make kind =
 let random () =
   make (Listx.pick_from kinds)
 
-let type_of t = t.kind
-let level_of t = t.level
-let cha_of t = t.cha_base + t.cha_extra
 let can_lvup t = t.xp > 1
+let cha_of t = t.cha_base + t.cha_extra
+let cha_mod_of t = t |> cha_of |> mod_of
 let is_alive t = t.died = 0
 let is_dead t = t.died > 0
-let is_noble t = t.noble
 let can_respawn turn t =
   is_dead t && t.died + respawn_time <= turn
-
-let has_died t =
-  if is_alive t then Dice.chance 0.05 else false
-
-let cha_mod_of t =
-  t |> cha_of |> mod_of
+let is_noble t = t.noble
+let kind_of t = t.kind
+let level_of t = t.level
 
 let base_defense t =
   let lv = level_of t in
@@ -80,22 +75,25 @@ let base_defense t =
 let defense_of t =
   let base = base_defense t in
   let cha = cha_mod_of t in
-  let bonus = type_of t |> def_bonus_of cha in
+  let bonus = kind_of t |> def_bonus_of cha in
   base +. bonus
 
 let res_bonus_of t =
   let cha = cha_mod_of t in
-  let typ = type_of t in
-  resource_of cha typ
+  let kind = kind_of t in
+  resource_of cha kind
+
+let roll_death t =
+  if is_alive t then Dice.chance 0.05 else false
 
 let died turn t =
   { t with died = turn }
 
 let lvup t =
-  let lv = t.level + (t.xp / 2) in
+  let level = t.level + (t.xp / 2) in
   { t with
-    level = lv;
-    cha_extra = lv / 4;
+    cha_extra = level / 4;
+    level;
     xp = t.xp mod 2
   }
 

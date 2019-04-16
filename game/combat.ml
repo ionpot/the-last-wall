@@ -86,6 +86,6 @@ module Make (S : State.S) = struct
     let remaining = S.Enemy.return (Enemy.discard power)
     let ldr_died =
       if retreat then false
-      else S.Leader.return Leader.has_died
+      else S.Leader.check Leader.roll_death
   end : Outcome)
 end
