@@ -33,19 +33,6 @@ module Defeat = struct
   end
 end
 
-module LevelUp = struct
-  type t = Leader.t
-  module Apply (S : State.S) = struct
-    let value = S.Leader.set
-  end
-  module Check (S : State.S) = struct
-    let value = S.Leader.check Leader.can_lvup
-  end
-  module Make (S : State.S) = struct
-    let value = S.Leader.return Leader.lvup
-  end
-end
-
 module LeaderNew = struct
   type t = Leader.t
   module Apply (S : State.S) = struct

@@ -21,7 +21,7 @@ module Output = struct
     | CanBarrage of Direct.CanBarrage.t
     | Combat of Direct.Combat.t
     | Defeat
-    | LevelUp of Cond.LevelUp.t
+    | LevelUp
     | NoAttack
     | NoEnemies
     | Smite of Cond.Smite.t
@@ -50,6 +50,8 @@ module Convert = struct
     let check : Convert.check = function
       | Steps.Attack -> (module struct module Check = Check.HasEnemies
           let value = Output.Attack end)
+      | Steps.LevelUp -> (module struct module Check = Check.LevelUp
+          let value = Output.LevelUp end)
       | Steps.NoAttack -> (module struct module Check = Check.NoEnemies
           let value = Output.NoAttack end)
       | Steps.NoEnemies -> (module struct module Check = Check.NoEnemies
@@ -60,8 +62,6 @@ module Convert = struct
           let make x = Output.Barraged x end)
       | Steps.Defeat -> (module struct module Event = Cond.Defeat
           let make () = Output.Defeat end)
-      | Steps.LevelUp -> (module struct module Event = Cond.LevelUp
-          let make x = Output.LevelUp x end)
       | Steps.Smite -> (module struct module Event = Cond.Smite
           let make x = Output.Smite x end)
 

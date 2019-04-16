@@ -96,8 +96,8 @@ module Phase3 = struct
     type t = (cond, direct) input
   end
   module Output = struct
-    type check = Attack | NoAttack | NoEnemies
-    type cond = Barraged | Defeat | LevelUp | Smite
+    type check = Attack | LevelUp | NoAttack | NoEnemies
+    type cond = Barraged | Defeat | Smite
     type direct = CanBarrage | Combat | Victory
     type t = (check, cond, direct) output
   end
@@ -105,7 +105,7 @@ module Phase3 = struct
   let scout : t = Ask (Direct Input.Scout)
   let victory : t list =
     [ Do (Direct Output.Victory);
-      Do (Cond Output.LevelUp);
+      Do (Check Output.LevelUp);
       scout
     ]
   let check_enemies : t =

@@ -1,20 +1,18 @@
-type charisma = int
+type charisma = Defs.count
 type kind = Aristocrat | Expert | Warrior
-type level = int
+type level = Defs.count
 
 type t =
-  { cha_base : charisma;
-    cha_extra : charisma;
+  { cha : charisma;
     died : Defs.turn;
     kind : kind;
     level : level;
     noble : bool;
-    xp : int
+    xp : Defs.count
   }
 
 let empty =
-  { cha_base = 0;
-    cha_extra = 0;
+  { cha = 0;
     died = 0;
     kind = Aristocrat;
     level = 0;
@@ -43,30 +41,28 @@ let roll_noble = function
   | Expert -> Dice.chance 0.4
   | Warrior -> Dice.chance 0.2
 
-let set_lv level t =
-  { t with cha_extra = (level / 4); level }
-
 let make kind =
   { empty with
-    cha_base = Dice.between 10 15;
+    cha = Dice.between 10 15;
     kind;
+    level = Dice.between 3 5;
     noble = roll_noble kind
   }
-  |> set_lv (Dice.between 3 5)
 
 let random () =
   make (Listx.pick_from kinds)
 
-let can_lvup t = t.xp > 1
-let cha_of t = t.cha_base + t.cha_extra
-let cha_mod_of t = t |> cha_of |> mod_of
 let is_alive t = t.died = 0
 let is_dead t = t.died > 0
 let can_respawn turn t =
   is_dead t && t.died + respawn_time <= turn
 let is_noble t = t.noble
 let kind_of t = t.kind
-let level_of t = t.level
+let level_of t = t.level + t.xp / 2
+let cha_of t = t.cha + level_of t / 4
+let cha_mod_of t = t |> cha_of |> mod_of
+let lvup t = t.xp mod 2 = 0
+let victories t = t.xp
 
 let base_defense t =
   let lv = level_of t in
@@ -88,10 +84,6 @@ let roll_death t =
 
 let died turn t =
   { t with died = turn }
-
-let lvup t =
-  { t with xp = t.xp mod 2 }
-  |> set_lv (t.level + (t.xp / 2))
 
 let won t =
   { t with xp = t.xp + 1 }
