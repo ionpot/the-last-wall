@@ -43,16 +43,16 @@ let roll_noble = function
   | Expert -> Dice.chance 0.4
   | Warrior -> Dice.chance 0.2
 
+let set_lv level t =
+  { t with cha_extra = (level / 4); level }
+
 let make kind =
-  let level = Dice.between 3 5 in
-  { cha_base = Dice.between 10 15;
-    cha_extra = (level / 4);
-    died = 0;
+  { empty with
+    cha_base = Dice.between 10 15;
     kind;
-    level;
-    noble = roll_noble kind;
-    xp = 0
+    noble = roll_noble kind
   }
+  |> set_lv (Dice.between 3 5)
 
 let random () =
   make (Listx.pick_from kinds)
@@ -90,12 +90,8 @@ let died turn t =
   { t with died = turn }
 
 let lvup t =
-  let level = t.level + (t.xp / 2) in
-  { t with
-    cha_extra = level / 4;
-    level;
-    xp = t.xp mod 2
-  }
+  { t with xp = t.xp mod 2 }
+  |> set_lv (t.level + (t.xp / 2))
 
 let won t =
   { t with xp = t.xp + 1 }
