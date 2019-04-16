@@ -9,21 +9,22 @@ type t =
     ready : kind list
   }
 
-let order = [Fort; Market; Stable; Tavern; Temple]
-let already = [Tavern]
-
 let multiple kind =
   kind = Stable
 
-let to_avlb built =
-  Listx.discard multiple built
-  |> Listx.rm_from order
+let to_avlb kind ls =
+  if multiple kind then ls
+  else kind :: ls
+
+let rm_ls kinds ls =
+  Listx.discard multiple kinds
+  |> Listx.rm_from ls
 
 let empty =
-  { avlb = to_avlb already;
+  { avlb = [Fort; Market; Stable; Temple];
     built = [];
     queue = [];
-    ready = already
+    ready = [Tavern]
   }
 
 let cost_pair_of =
@@ -82,13 +83,14 @@ let manp m t =
   map_queue f m t
 
 let raze kind t =
-  let ready = Listx.rm kind t.ready in
-  { t with avlb = to_avlb ready; ready }
+  { t with
+    avlb = to_avlb kind t.avlb;
+    ready = Listx.rm kind t.ready }
 
 let start kinds t =
   let ls = Listx.in_both kinds t.avlb in
   let f kind = kind, cost_of kind in
-  { t with avlb = to_avlb (t.ready @ ls);
+  { t with avlb = rm_ls ls t.avlb;
     queue = List.rev_map f ls @ t.queue }
 
 let supp s t =
