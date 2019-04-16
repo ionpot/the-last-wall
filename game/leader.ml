@@ -1,10 +1,12 @@
 type charisma = Defs.count
+type gender = Female | Male
 type kind = Aristocrat | Expert | Warrior
 type level = Defs.count
 
 type t =
   { cha : charisma;
     died : Defs.turn;
+    gender : gender;
     kind : kind;
     level : level;
     noble : bool;
@@ -14,6 +16,7 @@ type t =
 let empty =
   { cha = 0;
     died = 0;
+    gender = Female;
     kind = Aristocrat;
     level = 0;
     noble = true;
@@ -36,6 +39,9 @@ let resource_of cha = function
   | Expert -> Resource.of_supp (2 * cha)
   | Warrior -> Resource.empty
 
+let roll_gender () =
+  if Random.bool () then Male else Female
+
 let roll_noble = function
   | Aristocrat -> true
   | Expert -> Dice.chance 0.4
@@ -44,6 +50,7 @@ let roll_noble = function
 let make kind =
   { empty with
     cha = Dice.between 10 15;
+    gender = roll_gender ();
     kind;
     level = Dice.between 3 5;
     noble = roll_noble kind
@@ -52,6 +59,7 @@ let make kind =
 let random () =
   make (Listx.pick_from kinds)
 
+let gender_of t = t.gender
 let is_alive t = t.died = 0
 let is_dead t = t.died > 0
 let can_respawn turn t =
