@@ -82,16 +82,19 @@ let manp m t =
   in
   map_queue f m t
 
+let enqueue kinds t =
+  let f kind = kind, cost_of kind in
+  let ls = List.rev_map f kinds in
+  { t with queue = ls @ t.queue }
+
 let raze kind t =
-  { t with
-    avlb = to_avlb kind t.avlb;
+  { t with avlb = to_avlb kind t.avlb;
     ready = Listx.rm kind t.ready }
 
 let start kinds t =
   let ls = Listx.in_both kinds t.avlb in
-  let f kind = kind, cost_of kind in
-  { t with avlb = rm_ls ls t.avlb;
-    queue = List.rev_map f ls @ t.queue }
+  { t with avlb = rm_ls ls t.avlb }
+  |> enqueue ls
 
 let supp s t =
   map_queue Resource.take_supp s t
