@@ -1,5 +1,5 @@
 type cost = Resource.t
-type kind = Fort | Market | Stable | Tavern | Temple
+type kind = Fort | Market | Mausoleum of Leader.t | Stable | Tavern | Temple
 type queued = kind * cost
 type status = kind list * kind list * queued list
 type t =
@@ -11,10 +11,6 @@ type t =
 
 let multiple kind =
   kind = Stable
-
-let to_avlb kind ls =
-  if multiple kind then ls
-  else kind :: ls
 
 let rm_ls kinds ls =
   Listx.discard multiple kinds
@@ -32,6 +28,7 @@ let cost_pair_of =
   function
   | Fort -> Manpwr 124, Supply 136
   | Market -> Manpwr 44, Supply 65
+  | Mausoleum _ -> Manpwr 14, Supply 14
   | Stable -> Manpwr 49, Supply 54
   | Tavern -> Manpwr 0, Supply 0
   | Temple -> Manpwr 29, Supply 28
@@ -44,6 +41,11 @@ let available t = t.avlb
 
 let count kind t =
   Listx.count kind t.ready
+
+let mausoleums t =
+  t.ready
+  |> List.filter (function Mausoleum _ -> true | _ -> false)
+  |> List.length
 
 let need_manp t =
   let f acc (_, res) = acc + Resource.manp_of res in
@@ -82,14 +84,25 @@ let manp m t =
   in
   map_queue f m t
 
+let to_avlb kind t =
+  let ls = t.avlb in
+  let avlb =
+    if multiple kind then ls
+    else kind :: ls
+  in
+  { t with avlb }
+
+let died ldr t =
+  to_avlb (Mausoleum ldr) t
+
 let enqueue kinds t =
   let f kind = kind, cost_of kind in
   let ls = List.rev_map f kinds in
   { t with queue = ls @ t.queue }
 
 let raze kind t =
-  { t with avlb = to_avlb kind t.avlb;
-    ready = Listx.rm kind t.ready }
+  { t with ready = Listx.rm kind t.ready }
+  |> to_avlb kind
 
 let start kinds t =
   let ls = Listx.in_both kinds t.avlb in

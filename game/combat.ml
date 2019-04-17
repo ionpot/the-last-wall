@@ -21,8 +21,10 @@ module Apply (S : State.S) = struct
       S.Cavalry.sub cav
     end;
     S.Enemy.set O.remaining;
-    if O.ldr_died
-    then S.Leader.map (S.Turn.return Leader.died)
+    if O.ldr_died then begin
+      S.Leader.map (S.Turn.return Leader.died);
+      S.Build.map (S.Leader.return Build.died)
+    end
 end
 
 let barrage_dr = 0.05
@@ -31,6 +33,7 @@ let cav_dr_penalty = 0.05
 let cav_men_ratio = 0.4
 let cav_str = 2.
 let fort_cap = 20.
+let mausoleum_dr = 0.01
 let men_str = 1.
 
 let to_power = Defs.to_power
@@ -73,11 +76,13 @@ module Make (S : State.S) = struct
   let ldr_dr = S.Leader.return Leader.defense_of
   let barrage_dr =
     if ldr_alive then S.Barraging.either barrage_dr 0. else 0.
+  let mausoleums = S.Build.return Build.mausoleums
+  let mausoleum_dr = to_power mausoleums mausoleum_dr
 
   let value = (module struct
     let cav_too_many = Units.cav_too_many
     let attack = S.Enemy.return Enemy.damage
-    let defense = Units.cav_dr +. ldr_dr -. barrage_dr
+    let defense = Units.cav_dr +. ldr_dr -. barrage_dr +. mausoleum_dr
     let damage = attack -. attack *. defense
     let defeat = damage > Units.power
     let retreat = defeat && S.Build.check Build.(ready Fort)
