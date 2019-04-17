@@ -1,4 +1,7 @@
 open Defs
 
 val invalid : count list -> 'a
-val random : power -> (count * power) list -> count list
+
+module With : Dice.S -> sig
+  val random : power -> (count * power) list -> count list
+end

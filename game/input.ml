@@ -34,7 +34,8 @@ end
 module Leader = struct
   type t = Leader.kind
   module Apply (S : State.S) = struct
-    let value kind = S.Leader.set (Leader.make kind)
+    module Roll = Leader.Roll(S.Dice)
+    let value kind = S.Leader.set (Roll.from kind)
   end
   module Make (S : State.S) = struct
     let value = Leader.(kind_of empty)
@@ -49,10 +50,10 @@ module Mercs = struct
       S.Men.add men
   end
   module Check (S : State.S) = struct
-    let value = Dice.chance 0.8
+    let value = S.Dice.chance 0.8
   end
   module Make (S : State.S) = struct
-    let value = Dice.between 10 30
+    let value = S.Dice.between 10 30
   end
 end
 

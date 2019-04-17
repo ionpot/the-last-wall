@@ -43,7 +43,8 @@ module LeaderNew = struct
     let value = S.Leader.check can_respawn
   end
   module Make (S : State.S) = struct
-    let value = Leader.random ()
+    module Roll = Leader.Roll(S.Dice)
+    let value = Roll.random ()
   end
 end
 
@@ -56,7 +57,7 @@ module Market = struct
     let value = S.Build.check Build.(ready Market)
   end
   module Make (S : State.S) = struct
-    let value = Dice.between 15 45
+    let value = S.Dice.between 15 45
   end
 end
 
@@ -85,7 +86,7 @@ module Smite = struct
   end
   module Make (S : State.S) = struct
     let boost = if S.Build.check Build.(ready Temple) then 15 else 0
-    let count = Dice.between 15 35 + boost
+    let count = S.Dice.between 15 35 + boost
     let value = S.Enemy.return Enemy.(find count Skeleton)
   end
 end

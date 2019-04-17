@@ -57,6 +57,7 @@ let (--) a b =
   if a < b then 0. else a -. b
 
 module Units (S : State.S) = struct
+  module Pick = Pick.With(S.Dice)
   let cav = S.Cavalry.get ()
   let men = S.Men.get ()
   let snow = S.Weather.is Weather.(Snow Heavy)
@@ -71,6 +72,10 @@ module Units (S : State.S) = struct
 end
 
 module Make (S : State.S) = struct
+  module Roll = struct
+    module Enemy = Enemy.Roll(S.Dice)
+    module Leader = Leader.Roll(S.Dice)
+  end
   module Units = Units(S)
   let ldr_alive = S.Leader.check Leader.is_alive
   let ldr_dr = S.Leader.return Leader.defense_of
@@ -90,9 +95,9 @@ module Make (S : State.S) = struct
     let retreat = defeat && S.Build.check Build.(ready Fort)
     let power = if retreat then Units.fought () else Units.power
     let units = if retreat then Units.fled () else Units.lost damage
-    let remaining = S.Enemy.return (Enemy.discard power)
+    let remaining = S.Enemy.return (Roll.Enemy.loss power)
     let ldr_died =
       if retreat then false
-      else S.Leader.check Leader.roll_death
+      else S.Leader.check Roll.Leader.death
   end : Outcome)
 end

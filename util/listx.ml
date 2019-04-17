@@ -27,9 +27,6 @@ let pick_first i =
   in
   build f
 
-let pick_from ls =
-  List.length ls |> Random.int |> List.nth ls
-
 let rm x ls =
   List.filter ((<>) x) ls
 

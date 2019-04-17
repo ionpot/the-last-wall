@@ -10,4 +10,7 @@ type t =
 val empty : t
 
 val is_bad : t -> bool
-val pick : Month.t -> t
+
+module Roll : Dice.S -> sig
+  val random : Month.t -> t
+end

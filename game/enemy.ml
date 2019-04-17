@@ -1,13 +1,14 @@
-type t =
-  { skel : Defs.count;
-    orc : Defs.count;
-    demon : Defs.count
-  }
 type kind = Skeleton | Orc | Demon
 type expr = (Defs.count * kind)
 type report =
   | Accurate of expr list
   | Vague of (Defs.count * kind list)
+
+type t =
+  { skel : Defs.count;
+    orc : Defs.count;
+    demon : Defs.count
+  }
 
 let empty =
   { skel = 0;
@@ -17,9 +18,6 @@ let empty =
 
 let kinds =
   [Skeleton; Orc; Demon]
-
-let try_round x =
-  if x > 10 then Dice.round x else x
 
 let abundance_of = function
   | Skeleton -> 1.25
@@ -65,27 +63,11 @@ let sub a b =
   }
 
 let to_power t kind =
-  power_of kind *. float (count_of t kind)
+  Defs.to_power (count_of t kind) (power_of kind)
 
 let damage t =
   List.map (to_power t) kinds
   |> List.fold_left (+.) 0.
-
-let t_from_ls = function
-  | [skel; orc; demon] -> { skel; orc; demon }
-  | ls -> Pick.invalid ls
-
-let pick power t =
-  let a = List.map (count_of t) kinds in
-  let b = List.map power_of kinds in
-  List.combine a b
-  |> Pick.random power
-  |> t_from_ls
-
-let discard power t =
-  if power > damage t then empty
-  else if power > 0. then sub t (pick power t)
-  else t
 
 let find count kind t =
   let x = count_of t kind in
@@ -99,39 +81,62 @@ let reduce count kind t =
   let y = Number.sub x count in
   set_count t y kind
 
-let report_of t =
-  [t.skel, Skeleton; t.orc, Orc; t.demon, Demon]
-  |> List.map (fun (x, k) -> try_round x, k)
-
 let which t =
   List.filter (has_kind t) kinds
 
-let sum_report_of t =
-  let total = t.skel + t.orc + t.demon in
-  let seen = which t in
-  try_round total, seen
+let t_from_ls = function
+  | [skel; orc; demon] -> { skel; orc; demon }
+  | ls -> Pick.invalid ls
 
-let to_report scouting t =
-  if scouting
-  then Accurate (report_of t)
-  else Vague (sum_report_of t)
+module Roll (Dice : Dice.S) = struct
+  module Pick = Pick.With(Dice)
 
-let can_spawn turn kind =
-  let a = 0.1 *. float (Number.sub turn 1) in
-  let b = chance_of kind in
-  Dice.chance (a +. b)
+  let can_spawn turn kind =
+    let a = 0.1 *. float (Number.sub turn 1) in
+    let b = chance_of kind in
+    Dice.chance (a +. b)
 
-let get_count turn kind =
-  let abundance = abundance_of kind in
-  let minimum = 10. *. abundance in
-  let amount =
-    let x = 1.3 *. float (turn + 3) in
-    abundance *. x *. log x
-  in
-  let x = ceil (minimum +. amount) |> truncate in
-  Dice.deviate x (x / 4)
+  let get_count turn kind =
+    let abundance = abundance_of kind in
+    let minimum = 10. *. abundance in
+    let amount =
+      let x = 1.3 *. float (turn + 3) in
+      abundance *. x *. log x
+    in
+    let x = ceil (minimum +. amount) |> truncate in
+    Dice.deviate x (x / 4)
 
-let spawn turn =
-  let set t kind = set_count t (get_count turn kind) kind in
-  List.filter (can_spawn turn) kinds
-  |> List.fold_left set empty
+  let attack turn =
+    let set t kind = set_count t (get_count turn kind) kind in
+    List.filter (can_spawn turn) kinds
+    |> List.fold_left set empty
+
+  let pick power t =
+    let a = List.map (count_of t) kinds in
+    let b = List.map power_of kinds in
+    List.combine a b
+    |> Pick.random power
+    |> t_from_ls
+
+  let loss power t =
+    if power > damage t then empty
+    else if power > 0. then sub t (pick power t)
+    else t
+
+  let try_round x =
+    if x > 10 then 10 * Dice.round (0.1 *. float x) else x
+
+  let report_of t =
+    [t.skel, Skeleton; t.orc, Orc; t.demon, Demon]
+    |> List.map (fun (x, k) -> try_round x, k)
+
+  let sum_report_of t =
+    let total = t.skel + t.orc + t.demon in
+    let seen = which t in
+    try_round total, seen
+
+  let report scouting t =
+    if scouting
+    then Accurate (report_of t)
+    else Vague (sum_report_of t)
+end

@@ -34,19 +34,21 @@ let sum ls =
   in
   List.fold_left f Resource.empty ls
 
-let support t =
-  let roll (a, b) = Dice.between a b in
-  let to_res kind =
-    let (a, b) = ranges_of kind in
-    let m = roll a in
-    let s = roll b in
-    Resource.(of_manp m <+ Supply s)
-  in
-  let chance kind =
-    if Dice.chance 0.8
-    then to_res kind
-    else Resource.empty
-  in
-  List.map (fun kind -> kind, chance kind) t
-
 let which t = t
+
+module Roll (Dice : Dice.S) = struct
+  let support t =
+    let roll (a, b) = Dice.between a b in
+    let to_res kind =
+      let (a, b) = ranges_of kind in
+      let m = roll a in
+      let s = roll b in
+      Resource.(of_manp m <+ Supply s)
+    in
+    let chance kind =
+      if Dice.chance 0.8
+      then to_res kind
+      else Resource.empty
+    in
+    List.map (fun kind -> kind, chance kind) t
+end

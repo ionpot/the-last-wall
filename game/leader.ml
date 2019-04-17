@@ -39,26 +39,6 @@ let resource_of cha = function
   | Expert -> Resource.of_supp (2 * cha)
   | Warrior -> Resource.empty
 
-let roll_gender () =
-  if Random.bool () then Male else Female
-
-let roll_noble = function
-  | Aristocrat -> true
-  | Expert -> Dice.chance 0.4
-  | Warrior -> Dice.chance 0.2
-
-let make kind =
-  { empty with
-    cha = Dice.between 10 15;
-    gender = roll_gender ();
-    kind;
-    level = Dice.between 3 5;
-    noble = roll_noble kind
-  }
-
-let random () =
-  make (Listx.pick_from kinds)
-
 let gender_of t = t.gender
 let is_alive t = t.died = 0
 let is_dead t = t.died > 0
@@ -87,11 +67,30 @@ let res_bonus_of t =
   let kind = kind_of t in
   resource_of cha kind
 
-let roll_death t =
-  if is_alive t then Dice.chance 0.05 else false
-
 let died turn t =
   { t with died = turn }
 
 let won t =
   { t with xp = t.xp + 1 }
+
+module Roll (Dice : Dice.S) = struct
+  let death t =
+    if is_alive t then Dice.chance 0.05 else false
+
+  let noble = function
+    | Aristocrat -> true
+    | Expert -> Dice.chance 0.4
+    | Warrior -> Dice.chance 0.2
+
+  let from kind =
+    { empty with
+      cha = Dice.between 10 15;
+      gender = if Dice.yes () then Male else Female;
+      kind;
+      level = Dice.between 3 5;
+      noble = noble kind
+    }
+
+  let random () =
+    from (Dice.pick kinds)
+end

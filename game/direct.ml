@@ -4,10 +4,11 @@ module Blessing = struct
     let value = S.add_res
   end
   module Make (S : State.S) = struct
+    module Roll = Deity.Roll(S.Dice)
     let bless =
       if S.Build.check Build.(ready Temple)
-      then Deity.boosted_of
-      else Deity.blessing_of
+      then Roll.boosted
+      else Roll.blessing
     let value = S.Deity.return bless
   end
 end
@@ -72,9 +73,10 @@ module Enemies = struct
     let value (enemies, _) = S.Enemy.set enemies
   end
   module Make (S : State.S) = struct
-    let arriving = S.Turn.return Enemy.spawn
+    module Roll = Enemy.Roll(S.Dice)
+    let arriving = S.Turn.return Roll.attack
     let enemies = S.Enemy.return (Enemy.combine arriving)
-    let scout = S.Scout.return Enemy.to_report
+    let scout = S.Scout.return Roll.report
     let report = S.Enemy.return scout
     let value = enemies, report
   end
@@ -88,8 +90,10 @@ module Starting = struct
       S.add_res r
   end
   module Make (S : State.S) = struct
+    module Deity = Deity.Roll(S.Dice)
+    module Month = Month.Roll(S.Dice)
     let value =
-      Month.pick (),
+      Month.random (),
       S.Deity.return Deity.starting
   end
 end
@@ -100,9 +104,10 @@ module Support = struct
     let value ls = S.add_res (Nation.sum ls)
   end
   module Make (S : State.S) = struct
+    module Roll = Nation.Roll(S.Dice)
     let bonus = S.Leader.return Leader.res_bonus_of
     let value =
-      S.Nation.return Nation.support
+      S.Nation.return Roll.support
       |> Nation.add bonus
   end
 end
@@ -116,10 +121,11 @@ module Turn = struct
       S.Weather.set w
   end
   module Make (S : State.S) = struct
+    module Weather = Weather.Roll(S.Dice)
     let value =
       S.Turn.next (),
       S.Month.return Month.next,
-      S.Month.return Weather.pick
+      S.Month.return Weather.random
   end
 end
 

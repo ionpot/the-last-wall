@@ -18,5 +18,6 @@ let next = function
   | Nov -> Dec
   | Dec -> Jan
 
-let pick () =
-  Listx.pick_from ls
+module Roll (Dice : Dice.S) = struct
+  let random () = Dice.pick ls
+end

@@ -21,5 +21,6 @@ let possible =
     | Sep | Oct | Nov -> [Cloudy; Rain Light; Rain Heavy; Wind]
     | Dec | Jan | Feb -> [Cloudy; Rain Heavy; Snow Light; Snow Heavy]
 
-let pick month =
-  Listx.pick_from (possible month)
+module Roll (Dice : Dice.S) = struct
+  let random month = Dice.pick (possible month)
+end

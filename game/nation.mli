@@ -10,5 +10,8 @@ val from : kind list -> t
 
 val add : Resource.t -> support list -> support list
 val sum : support list -> Resource.t
-val support : t -> support list
 val which : t -> kind list
+
+module Roll : Dice.S -> sig
+  val support : t -> support list
+end
