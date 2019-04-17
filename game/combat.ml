@@ -77,7 +77,9 @@ module Make (S : State.S) = struct
   let barrage_dr =
     if ldr_alive then S.Barraging.either barrage_dr 0. else 0.
   let mausoleums = S.Build.return Build.mausoleums
-  let mausoleum_dr = to_power mausoleums mausoleum_dr
+  let mausoleum_dr =
+    let bonus = if S.Deity.is Deity.Lerota then 2 else 1 in
+    to_power (mausoleums * bonus) mausoleum_dr
 
   let value = (module struct
     let cav_too_many = Units.cav_too_many
