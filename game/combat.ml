@@ -16,7 +16,7 @@ module Apply (S : State.S) = struct
       S.Build.map Build.(raze Fort)
     end
     else S.Units.map (Units.reduce O.units);
-    S.Enemy.set O.enemies;
+    S.Enemy.map (Units.reduce O.enemies);
     if O.ldr_died then begin
       S.Leader.map (S.Turn.return Leader.died);
       S.Build.map (S.Leader.return Build.died)
