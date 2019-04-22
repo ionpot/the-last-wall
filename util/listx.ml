@@ -37,6 +37,9 @@ let rec slice_from f = function
   | [] -> []
   | x :: xs as ls -> if f x then ls else slice_from f xs
 
+let sum ls =
+  List.fold_left (+) 0 ls
+
 let sumf ls =
   List.fold_left (+.) 0. ls
 

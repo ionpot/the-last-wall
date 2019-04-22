@@ -48,3 +48,9 @@ module Apply (State : State.S) = struct
     let module Apply = Event.Apply(State) in
     Apply.value x
 end
+
+module AddRes (S : State.S) = struct
+  let value res =
+    S.Supply.add (Resource.supp_of res);
+    S.Units.map Units.(add (Resource.manp_of res) Men)
+end

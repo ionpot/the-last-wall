@@ -1,22 +1,24 @@
 module Barraged = struct
   type t = Defs.count
   module Apply (S : State.S) = struct
-    let value count = S.Enemy.map (Enemy.reduce count Orc)
+    let value n = S.Enemy.map Units.(sub n Orc)
   end
   module Check (S : State.S) = struct
     let value = S.Barraging.get ()
   end
   module Make (S : State.S) = struct
-    let count = S.Men.get () / 20
-    let value = S.Enemy.return Enemy.(find count Orc)
+    let n = S.Units.return Units.(count Men) / 20
+    let value = S.Enemy.return Units.(find n Orc)
   end
 end
 
 module Cavalry = struct
   type t = Defs.count
   module Apply (S : State.S) = struct
-    let value =
-      Listx.apply_to [S.Cavalry.add; S.Men.sub; S.Supply.sub]
+    let value n =
+      S.Units.map Units.(add n Cavalry);
+      S.Units.map Units.(sub n Men);
+      S.Supply.sub n
   end
   module Check = Cavalry.Check
   module Make = Cavalry.Make
@@ -28,8 +30,7 @@ module Defeat = struct
     let value = S.Ended.set
   end
   module Check (S : State.S) = struct
-    let value =
-      S.Men.zero () && S.Cavalry.zero ()
+    let value = not (S.Units.empty ())
   end
 end
 
@@ -62,31 +63,33 @@ module Market = struct
 end
 
 module Starvation = struct
-  type t = Defs.manpower * Defs.manpower
+  type t = Units.t
   module Apply (S : State.S) = struct
-    let value (men, cav) =
-      S.Men.sub men;
-      S.Cavalry.sub cav;
+    let value units =
+      S.Units.map Units.(reduce units);
       S.Supply.clear ()
   end
   module Check (S : State.S) = struct
     let value = S.Supply.ngv ()
   end
-  module Make = Upkeep.Starvation
+  module Make (S : State.S) = struct
+    let cost = -S.Supply.get ()
+    let value = S.Units.return (Units.starve cost)
+  end
 end
 
 module Smite = struct
   type t = Defs.count
   module Apply (S : State.S) = struct
-    let value count = S.Enemy.map (Enemy.reduce count Skeleton)
+    let value n = S.Enemy.map Units.(sub n Skeleton)
   end
   module Check (S : State.S) = struct
     let value = S.Deity.is Deity.Lerota
-      && S.Enemy.check Enemy.(has Skeleton)
+      && S.Enemy.check Units.(has Skeleton)
   end
   module Make (S : State.S) = struct
     let boost = if S.Build.check Build.(ready Temple) then 15 else 0
-    let count = S.Dice.between 15 35 + boost
-    let value = S.Enemy.return Enemy.(find count Skeleton)
+    let n = S.Dice.between 15 35 + boost
+    let value = S.Enemy.return Units.(find n Skeleton)
   end
 end

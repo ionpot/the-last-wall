@@ -43,11 +43,11 @@ module Leader = struct
 end
 
 module Mercs = struct
-  type t = Defs.manpower
+  type t = Defs.count
   module Apply (S : State.S) = struct
-    let value men =
-      S.Supply.sub men;
-      S.Men.add men
+    let value count =
+      let count' = S.Supply.take count in
+      S.Units.map Units.(add count' Men)
   end
   module Check (S : State.S) = struct
     let value = S.Dice.chance 0.8

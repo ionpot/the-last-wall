@@ -1,8 +1,6 @@
 module Blessing = struct
   type t = Resource.t
-  module Apply (S : State.S) = struct
-    let value = S.add_res
-  end
+  module Apply = Event.AddRes
   module Make (S : State.S) = struct
     module Roll = Deity.Roll(S.Dice)
     let bless =
@@ -17,7 +15,7 @@ module BuildManp = struct
   type t = Defs.manpower
   module Apply (S : State.S) = struct
     let value need =
-      let avlb = S.Men.get () in
+      let avlb = S.Units.return Units.(count Men) in
       S.Build.map (Build.manp (min need avlb))
   end
   module Make (S : State.S) = struct
@@ -68,14 +66,14 @@ module Combat = struct
 end
 
 module Enemies = struct
-  type t = Enemy.t * Enemy.report
+  type t = Units.t * Enemy.report
   module Apply (S : State.S) = struct
     let value (enemies, _) = S.Enemy.set enemies
   end
   module Make (S : State.S) = struct
     module Roll = Enemy.Roll(S.Dice)
     let arriving = S.Turn.return Roll.attack
-    let enemies = S.Enemy.return (Enemy.combine arriving)
+    let enemies = S.Enemy.return (Units.combine arriving)
     let scout = S.Scout.return Roll.report
     let report = S.Enemy.return scout
     let value = enemies, report
@@ -85,9 +83,10 @@ end
 module Starting = struct
   type t = Month.t * Resource.t
   module Apply (S : State.S) = struct
+    module AddRes = Event.AddRes(S)
     let value (m, r) =
       S.Month.set m;
-      S.add_res r
+      AddRes.value r
   end
   module Make (S : State.S) = struct
     module Deity = Deity.Roll(S.Dice)
@@ -101,7 +100,8 @@ end
 module Support = struct
   type t = Nation.support list
   module Apply (S : State.S) = struct
-    let value ls = S.add_res (Nation.sum ls)
+    module AddRes = Event.AddRes(S)
+    let value ls = AddRes.value (Nation.sum ls)
   end
   module Make (S : State.S) = struct
     module Roll = Nation.Roll(S.Dice)
@@ -134,7 +134,11 @@ module Upkeep = struct
   module Apply (S : State.S) = struct
     let value = S.Supply.sub
   end
-  module Make = Upkeep.Make
+  module Make (S : State.S) = struct
+    let cost = S.Units.return Units.upkeep
+    let scouts = S.Scout.either 10 0
+    let value = cost + scouts
+  end
 end
 
 module Victory = struct
