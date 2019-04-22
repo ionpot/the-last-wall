@@ -2,6 +2,23 @@ type kind = Cavalry | Demon | Men | Orc | Skeleton
 type report = (Defs.count * kind) list
 type sum_report = (Defs.count * kind list)
 
+let attacks = [Skeleton; Orc; Demon]
+let defends = [Men; Cavalry]
+
+let abundance_of = function
+  | Cavalry -> 0.
+  | Demon -> 0.3
+  | Men -> 0.
+  | Orc -> 0.6
+  | Skeleton -> 1.25
+
+let chance_of = function
+  | Cavalry -> 0.
+  | Demon -> 0.4
+  | Men -> 0.
+  | Orc -> 0.6
+  | Skeleton -> 0.8
+
 let cost_of = function
   | Cavalry -> 1
   | Demon -> 0
@@ -86,11 +103,10 @@ let ratio kind1 kind2 t =
   float a /. float b
 
 let starve supply t =
-  let kinds = [Men; Cavalry] in
   let ns =
-    List.map (fun k -> count k t) kinds
+    List.map (fun k -> count k t) defends
     |> Listx.map_with Number.take supply
-  in List.map2 Expr.make ns kinds
+  in List.map2 Expr.make ns defends
   |> Ls.clean
 
 let upkeep t =
