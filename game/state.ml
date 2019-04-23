@@ -1,6 +1,7 @@
 module type S = sig
   module Barraging : Value.Bit
   module Build : Value.S with type t = Build.t
+  module Casualty : Value.S with type t = Units.t
   module Deity : Value.S with type t = Deity.t
   module Dice : Dice.S
   module Ended : Value.Bit
@@ -18,6 +19,7 @@ end
 module Make (D : Dice.From) : S = struct
   module Barraging = Value.Bit(Value.False)
   module Build = Value.From(Build)
+  module Casualty = Value.From(Units)
   module Deity = Value.From(Deity)
   module Dice = Dice.From(D)
   module Ended = Value.Bit(Value.False)

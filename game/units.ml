@@ -23,7 +23,7 @@ let cost_of = function
   | Men -> 1
   | _ -> 0
 
-let power_of = function
+let base_power = function
   | Cavalry | Demon -> 2.
   | Dervish | Men | Orc -> 1.
   | Skeleton -> 0.5
@@ -39,7 +39,7 @@ module Expr = struct
   let kind = snd
   let make n k = (n, k)
   let map_count f (n, k) = f n, k
-  let power (n, k) = Defs.to_power n (power_of k)
+  let power (n, k) = Defs.to_power n (base_power k)
   let set_count n (_, k) = n, k
   let sub (n, k) (n', k') =
     if k = k' then Number.sub n' n, k else (n', k')
@@ -91,6 +91,9 @@ let kinds_of t =
 let power t =
   List.map Expr.power t
   |> Listx.sumf
+
+let power_of kind t =
+  Ls.filter kind t |> power
 
 let ratio kind1 kind2 t =
   let a = count kind1 t in

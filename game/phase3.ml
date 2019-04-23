@@ -24,6 +24,7 @@ module Output = struct
     | LevelUp
     | NoAttack
     | NoEnemies
+    | Revive of Cond.Revive.t
     | Smite of Cond.Smite.t
     | Victory
 end
@@ -62,6 +63,8 @@ module Convert = struct
           let make x = Output.Barraged x end)
       | Steps.Defeat -> (module struct module Event = Cond.Defeat
           let make () = Output.Defeat end)
+      | Steps.Revive -> (module struct module Event = Cond.Revive
+          let make x = Output.Revive x end)
       | Steps.Smite -> (module struct module Event = Cond.Smite
           let make x = Output.Smite x end)
 

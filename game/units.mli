@@ -20,6 +20,7 @@ val find : Defs.count -> kind -> t -> Defs.count
 val has : kind -> t -> bool
 val kinds_of : t -> kind list
 val power : t -> Defs.power
+val power_of : kind -> t -> Defs.power
 val ratio : kind -> kind -> t -> float
 val starve : Defs.supply -> t -> t
 val upkeep : t -> Defs.supply

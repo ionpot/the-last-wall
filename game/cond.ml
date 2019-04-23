@@ -62,6 +62,21 @@ module Market = struct
   end
 end
 
+module Revive = struct
+  type t = Units.t
+  module Apply (S : State.S) = struct
+    let value revived = S.Units.map (Units.combine revived)
+  end
+  module Check (S : State.S) = struct
+    let value = S.Units.check Units.(has Dervish)
+  end
+  module Make (S : State.S) = struct
+    module Roll = Units.Roll(S.Dice)
+    let pwr = S.Units.return Units.(power_of Dervish)
+    let value = S.Casualty.return (Roll.pick pwr)
+  end
+end
+
 module Starvation = struct
   type t = Units.t
   module Apply (S : State.S) = struct
