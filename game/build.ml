@@ -1,5 +1,5 @@
 type cost = Resource.t
-type kind = Fort | Market | Mausoleum of Leader.t | Stable | Tavern | Temple
+type kind = Fort | Market | Mausoleum of Leader.t | Observatory | Stable | Tavern | Temple
 type queued = kind * cost
 type status = kind list * kind list * queued list
 type t =
@@ -8,6 +8,11 @@ type t =
     queue : queued list;
     ready : kind list
   }
+
+let enables built avlb =
+  if List.mem Temple built
+  then Observatory :: avlb
+  else avlb
 
 let multiple kind =
   kind = Stable
@@ -29,6 +34,7 @@ let cost_pair_of =
   | Fort -> Manpwr 124, Supply 136
   | Market -> Manpwr 44, Supply 65
   | Mausoleum _ -> Manpwr 14, Supply 14
+  | Observatory -> Manpwr 15, Supply 14
   | Stable -> Manpwr 49, Supply 54
   | Tavern -> Manpwr 0, Supply 0
   | Temple -> Manpwr 29, Supply 28
@@ -113,4 +119,8 @@ let supp s t =
   map_queue Resource.take_supp s t
 
 let update (ready, built, queue) t =
-  { t with built; queue; ready = ready @ t.ready }
+  { avlb = enables built t.avlb;
+    built;
+    queue;
+    ready = ready @ t.ready
+  }

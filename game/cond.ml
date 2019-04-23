@@ -103,7 +103,7 @@ module Smite = struct
       && S.Enemy.check Units.(has Skeleton)
   end
   module Make (S : State.S) = struct
-    let boost = if S.Build.check Build.(ready Temple) then 15 else 0
+    let boost = if S.Build.check Build.(ready Observatory) then 15 else 0
     let n = S.Dice.between 15 35 + boost
     let value = S.Enemy.return Units.(find n Skeleton)
   end
