@@ -1,3 +1,18 @@
+module Attack = struct
+  type t = Units.t * Attack.report
+  module Apply (S : State.S) = struct
+    let value (enemies, _) = S.Enemy.set enemies
+  end
+  module Make (S : State.S) = struct
+    module Roll = Attack.Roll(S.Dice)
+    let arriving = S.Turn.return Roll.attack
+    let enemies = S.Enemy.return (Units.combine arriving)
+    let scout = S.Scout.return Roll.report
+    let report = S.Enemy.return scout
+    let value = enemies, report
+  end
+end
+
 module Blessing = struct
   type t = Resource.t
   module Apply = Event.AddRes
@@ -63,21 +78,6 @@ module Combat = struct
   type t = (module Combat.Outcome)
   module Apply = Combat.Apply
   module Make = Combat.Make
-end
-
-module Enemies = struct
-  type t = Units.t * Enemy.report
-  module Apply (S : State.S) = struct
-    let value (enemies, _) = S.Enemy.set enemies
-  end
-  module Make (S : State.S) = struct
-    module Roll = Enemy.Roll(S.Dice)
-    let arriving = S.Turn.return Roll.attack
-    let enemies = S.Enemy.return (Units.combine arriving)
-    let scout = S.Scout.return Roll.report
-    let report = S.Enemy.return scout
-    let value = enemies, report
-  end
 end
 
 module Starting = struct

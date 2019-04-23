@@ -19,13 +19,13 @@ end
 
 module Output = struct
   type event =
+    | Attack of Direct.Attack.t
     | Blessing of Direct.Blessing.t
     | BuildManp of Direct.BuildManp.t
     | BuildStatus of Direct.BuildStatus.t
     | BuildSupply of Direct.BuildSupply.t
     | Cavalry of Cond.Cavalry.t
     | Defeat of Cond.Defeat.t
-    | Enemies of Direct.Enemies.t
     | LeaderNew of Cond.LeaderNew.t
     | Market of Cond.Market.t
     | Starvation of Cond.Starvation.t
@@ -70,6 +70,8 @@ module Convert = struct
           let make x = Output.Starvation x end)
 
     let direct : Convert.direct = function
+      | Steps.Attack -> (module struct module Event = Direct.Attack
+          let make x = Output.Attack x end)
       | Steps.Blessing -> (module struct module Event = Direct.Blessing
           let make x = Output.Blessing x end)
       | Steps.BuildManp -> (module struct module Event = Direct.BuildManp
@@ -78,8 +80,6 @@ module Convert = struct
           let make x = Output.BuildStatus x end)
       | Steps.BuildSupply -> (module struct module Event = Direct.BuildSupply
           let make x = Output.BuildSupply x end)
-      | Steps.Enemies -> (module struct module Event = Direct.Enemies
-          let make x = Output.Enemies x end)
       | Steps.Support -> (module struct module Event = Direct.Support
           let make x = Output.Support x end)
       | Steps.Turn -> (module struct module Event = Direct.Turn
