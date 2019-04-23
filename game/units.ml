@@ -1,12 +1,13 @@
-type kind = Cavalry | Demon | Dervish | Men | Orc | Skeleton
+type kind = Cavalry | Demon | Dervish | Harpy | Men | Orc | Skeleton
 type report = (Defs.count * kind) list
 type sum_report = (Defs.count * kind list)
 
-let attacks = [Skeleton; Orc; Demon]
+let attacks = [Skeleton; Orc; Demon; Harpy]
 let defends = [Men; Cavalry; Dervish]
 
 let abundance_of = function
   | Demon -> 0.3
+  | Harpy -> 0.2
   | Orc -> 0.6
   | Skeleton -> 1.25
   | _ -> 0.
@@ -24,6 +25,7 @@ let cost_of = function
   | _ -> 0
 
 let base_power = function
+  | Harpy -> 4.
   | Cavalry | Demon -> 2.
   | Dervish | Men | Orc -> 1.
   | Skeleton -> 0.5

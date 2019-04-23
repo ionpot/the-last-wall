@@ -6,6 +6,7 @@ module type S = sig
   module Dice : Dice.S
   module Ended : Value.Bit
   module Enemy : Value.S with type t = Units.t
+  module Harpy : Value.Float
   module Leader : Value.S with type t = Leader.t
   module Month : Value.S with type t = Month.t
   module Nation : Value.S with type t = Nation.t
@@ -24,6 +25,7 @@ module Make (D : Dice.From) : S = struct
   module Dice = Dice.From(D)
   module Ended = Value.Bit(Value.False)
   module Enemy = Value.From(Units)
+  module Harpy = Value.Float(Value.ZeroF)
   module Leader = Value.From(Leader)
   module Month = Value.From(Month)
   module Nation = Value.From(Nation)

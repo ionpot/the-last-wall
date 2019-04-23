@@ -1,13 +1,17 @@
 module Attack = struct
   type t = Units.t * Attack.report
   module Apply (S : State.S) = struct
-    let value (enemies, _) = S.Enemy.set enemies
+    let value (enemies, _) =
+      S.Enemy.set enemies;
+      if Units.(has Harpy enemies)
+      then S.Harpy.clear ()
+      else S.Harpy.add 0.1
   end
   module Make (S : State.S) = struct
-    module Roll = Attack.Roll(S.Dice)
-    let arriving = S.Turn.return Roll.attack
+    module Attack = Attack.Make(S)
+    let arriving = S.Turn.return Attack.roll
     let enemies = S.Enemy.return (Units.combine arriving)
-    let scout = S.Scout.return Roll.report
+    let scout = S.Scout.return Attack.report
     let report = S.Enemy.return scout
     let value = enemies, report
   end

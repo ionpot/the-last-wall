@@ -2,13 +2,18 @@ type report =
   | Accurate of Units.report
   | Vague of Units.sum_report
 
-module Roll (Dice : Dice.S) = struct
-  module Roll = Units.Roll(Dice)
+module Make (S : State.S) = struct
+  module Roll = Units.Roll(S.Dice)
 
-  let can_spawn turn kind =
+  let can_regular turn kind =
     let a = 0.1 *. float (Number.sub turn 1) in
     let b = Units.chance_of kind in
-    Dice.chance (a +. b)
+    S.Dice.chance (a +. b)
+
+  let can_spawn turn kind =
+    if kind = Units.Harpy
+    then S.Harpy.check S.Dice.chance
+    else can_regular turn kind
 
   let roll_count turn kind =
     let abundance = Units.abundance_of kind in
@@ -18,9 +23,9 @@ module Roll (Dice : Dice.S) = struct
       abundance *. x *. log x
     in
     let x = ceil (minimum +. amount) |> truncate in
-    Dice.deviate x (x / 4)
+    S.Dice.deviate x (x / 4)
 
-  let attack turn =
+  let roll turn =
     let add t kind = Units.add (roll_count turn kind) kind t in
     List.filter (can_spawn turn) Units.attacks
     |> List.fold_left add Units.empty

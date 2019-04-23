@@ -4,6 +4,7 @@ module type From = sig
 end
 
 module type FromBit = From with type t = bool
+module type FromFloat = From with type t = float
 module type FromNum = From with type t = int
 
 module type S = sig
@@ -25,6 +26,12 @@ module type Bit = sig
   val flip : unit -> unit
   val set : unit -> unit
   val set_to : t -> unit
+end
+
+module type Float = sig
+  include S with type t = float
+  val add : t -> unit
+  val clear : unit -> unit
 end
 
 module type Num = sig
@@ -63,6 +70,12 @@ module Bit (M : FromBit) : Bit = struct
   let set () = set true
 end
 
+module Float (M : FromFloat) : Float = struct
+  include From(M)
+  let add x = map ((+.) x)
+  let clear () = set 0.
+end
+
 module Num (M : FromNum) : Num = struct
   include From(M)
   let add i = map ((+) i)
@@ -87,6 +100,7 @@ module True = struct type t = bool let empty = true end
 module False = struct type t = bool let empty = false end
 
 module Zero = struct type t = int let empty = 0 end
+module ZeroF = struct type t = float let empty = 0. end
 
 let of_num x =
   (module Num(struct
