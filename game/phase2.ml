@@ -4,14 +4,14 @@ module Input = struct
   module Event = Input
 
   type event =
-    | Build of Event.Build.t
+    | Build of Event.BuildAvlb.t
     | Mercs of Event.Mercs.t
     | Nations of Event.Nations.t
 
   module Apply (State : State.S) = struct
     module Apply = Phase.Apply(State)
     let event = function
-      | Build x -> Apply.value x (module Event.Build)
+      | Build x -> Apply.value x (module Event.BuildAvlb)
       | Mercs x -> Apply.value x (module Event.Mercs)
       | Nations x -> Apply.value x (module Event.Nations)
   end
@@ -41,7 +41,7 @@ module Convert = struct
     module Convert = Phase.Convert.Input(Steps)(Input)
 
     let direct : Convert.direct = function
-      | Steps.Build -> (module struct module Event = Event.Build
+      | Steps.Build -> (module struct module Event = Event.BuildAvlb
           let make x = Input.Build x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)

@@ -3,7 +3,7 @@ module Steps = Steps.Phase1
 module Input = struct
   module Event = Input
   type event =
-    | Build of Event.Build.t
+    | Build of Event.BuildAvlb.t
     | Deity of Event.Deity.t
     | Leader of Event.Leader.t
     | Nations of Event.Nations.t
@@ -11,7 +11,7 @@ module Input = struct
   module Apply (State : State.S) = struct
     module Apply = Phase.Apply(State)
     let event = function
-      | Build x -> Apply.value x (module Event.Build)
+      | Build x -> Apply.value x (module Event.BuildAvlb)
       | Deity x -> Apply.value x (module Event.Deity)
       | Leader x -> Apply.value x (module Event.Leader)
       | Nations x -> Apply.value x (module Event.Nations)
@@ -35,7 +35,7 @@ module Convert = struct
     let cond () = failwith "no phase1 input cond"
 
     let direct : Convert.direct = function
-      | Steps.Build -> (module struct module Event = Event.Build
+      | Steps.Build -> (module struct module Event = Event.BuildAvlb
           let make x = Input.Build x end)
       | Steps.Deity -> (module struct module Event = Event.Deity
           let make x = Input.Deity x end)

@@ -11,7 +11,7 @@ module Barrage = struct
   end
 end
 
-module Build = struct
+module BuildAvlb = struct
   type t = Build.kind list
   module Apply (S : State.S) = struct
     let value ls = S.Build.map (Build.start ls)
