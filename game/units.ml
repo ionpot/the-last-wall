@@ -1,36 +1,31 @@
-type kind = Cavalry | Demon | Men | Orc | Skeleton
+type kind = Cavalry | Demon | Dervish | Men | Orc | Skeleton
 type report = (Defs.count * kind) list
 type sum_report = (Defs.count * kind list)
 
 let attacks = [Skeleton; Orc; Demon]
-let defends = [Men; Cavalry]
+let defends = [Men; Cavalry; Dervish]
 
 let abundance_of = function
-  | Cavalry -> 0.
   | Demon -> 0.3
-  | Men -> 0.
   | Orc -> 0.6
   | Skeleton -> 1.25
+  | _ -> 0.
 
 let chance_of = function
-  | Cavalry -> 0.
   | Demon -> 0.4
-  | Men -> 0.
   | Orc -> 0.6
   | Skeleton -> 0.8
+  | _ -> 0.
 
 let cost_of = function
-  | Cavalry -> 1
-  | Demon -> 0
+  | Cavalry
+  | Dervish
   | Men -> 1
-  | Orc
-  | Skeleton -> 0
+  | _ -> 0
 
 let power_of = function
-  | Cavalry
-  | Demon -> 2.
-  | Men
-  | Orc -> 1.
+  | Cavalry | Demon -> 2.
+  | Dervish | Men | Orc -> 1.
   | Skeleton -> 0.5
 
 module Expr = struct

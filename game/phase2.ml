@@ -5,6 +5,7 @@ module Input = struct
 
   type event =
     | Build of Event.BuildAvlb.t
+    | Dervish of Event.Dervish.t
     | Mercs of Event.Mercs.t
     | Nations of Event.Nations.t
 
@@ -12,6 +13,7 @@ module Input = struct
     module Apply = Phase.Apply(State)
     let event = function
       | Build x -> Apply.value x (module Event.BuildAvlb)
+      | Dervish x -> Apply.value x (module Event.Dervish)
       | Mercs x -> Apply.value x (module Event.Mercs)
       | Nations x -> Apply.value x (module Event.Nations)
   end
@@ -47,6 +49,8 @@ module Convert = struct
           let make x = Input.Nations x end)
 
     let cond : Convert.cond = function
+      | Steps.Dervish -> (module struct module Event = Event.Dervish
+          let make x = Input.Dervish x end)
       | Steps.Mercs -> (module struct module Event = Event.Mercs
           let make x = Input.Mercs x end)
   end

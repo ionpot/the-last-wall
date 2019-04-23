@@ -31,6 +31,25 @@ module Deity = struct
   end
 end
 
+module Dervish = struct
+  type t = Defs.count
+  let cap = 10
+  module Apply (S : State.S) = struct
+    let value n =
+      S.Supply.sub n;
+      S.Units.map Units.(add n Dervish)
+  end
+  module Check (S : State.S) = struct
+    let temple = S.Build.check Build.(ready Temple)
+    let count = S.Units.return Units.(count Dervish)
+    let value = temple && count < cap
+  end
+  module Make (S : State.S) = struct
+    let n = S.Dice.roll 4
+    let value = S.Supply.return (min n)
+  end
+end
+
 module Leader = struct
   type t = Leader.kind
   module Apply (S : State.S) = struct
