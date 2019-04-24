@@ -1,5 +1,5 @@
 type cost = Resource.t
-type kind = Fort | Market | Mausoleum of Leader.t | Observatory | Stable | Tavern | Temple
+type kind = Engrs | Fort | Market | Mausoleum of Leader.t | Observatory | Stable | Tavern | Temple
 type queued = kind * cost
 type status = kind list * kind list * queued list
 type t =
@@ -22,15 +22,16 @@ let rm_ls kinds ls =
   |> Listx.rm_from ls
 
 let empty =
-  { avlb = [Fort; Market; Stable; Temple];
+  { avlb = [Engrs; Fort; Market; Stable; Temple];
     built = [];
     queue = [];
     ready = [Tavern]
   }
 
-let cost_pair_of =
+let base_cost =
   let open Resource in
   function
+  | Engrs -> Manpwr 66, Supply 67
   | Fort -> Manpwr 124, Supply 136
   | Market -> Manpwr 44, Supply 65
   | Mausoleum _ -> Manpwr 14, Supply 14
@@ -39,8 +40,8 @@ let cost_pair_of =
   | Tavern -> Manpwr 0, Supply 0
   | Temple -> Manpwr 54, Supply 56
 
-let cost_of kind =
-  let a, b = cost_pair_of kind in
+let base_cost_of kind =
+  let a, b = base_cost kind in
   Resource.(empty <+ a <+ b)
 
 let available t = t.avlb
@@ -63,6 +64,11 @@ let need_supp t =
 
 let ready kind t =
   List.mem kind t.ready
+
+let cost_of kind t =
+  let res = base_cost_of kind in
+  let ratio = if ready Engrs t then 0.1 else 0. in
+  Resource.reduce_supp ratio res
 
 let present kind t =
   ready kind t
@@ -102,7 +108,7 @@ let died ldr t =
   to_avlb (Mausoleum ldr) t
 
 let enqueue kinds t =
-  let f kind = kind, cost_of kind in
+  let f kind = kind, cost_of kind t in
   let ls = List.rev_map f kinds in
   { t with queue = ls @ t.queue }
 
