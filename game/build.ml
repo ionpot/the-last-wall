@@ -37,7 +37,7 @@ let cost_pair_of =
   | Observatory -> Manpwr 15, Supply 14
   | Stable -> Manpwr 49, Supply 54
   | Tavern -> Manpwr 0, Supply 0
-  | Temple -> Manpwr 29, Supply 28
+  | Temple -> Manpwr 54, Supply 56
 
 let cost_of kind =
   let a, b = cost_pair_of kind in
