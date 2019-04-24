@@ -79,7 +79,7 @@ end
 module Nations = struct
   type t = Nation.kind list
   module Apply (S : State.S) = struct
-    let value ls = S.Nation.set (Nation.from ls)
+    let value ls = S.Nation.map (Nation.chosen ls)
   end
   module Make (S : State.S) = struct
     let value = S.Nation.return Nation.which
@@ -93,5 +93,21 @@ module Scout = struct
   end
   module Make (S : State.S) = struct
     let value = S.Scout.get ()
+  end
+end
+
+module Trade = struct
+  type kind = Boost | Certain
+  type t = (kind * Nation.kind)
+  module Apply (S : State.S) = struct
+    let value (kind, nation) =
+      let f = if kind = Boost then Nation.boost else Nation.certain in
+      S.Nation.map (f nation)
+  end
+  module Check (S : State.S) = struct
+    let value = S.Build.check Build.(built Trade)
+  end
+  module Make (S : State.S) = struct
+    let value = Boost, Nation.Clan
   end
 end

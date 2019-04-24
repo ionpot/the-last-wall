@@ -8,6 +8,7 @@ module Input = struct
     | Dervish of Event.Dervish.t
     | Mercs of Event.Mercs.t
     | Nations of Event.Nations.t
+    | Trade of Event.Trade.t
 
   module Apply (State : State.S) = struct
     module Apply = Phase.Apply(State)
@@ -16,6 +17,7 @@ module Input = struct
       | Dervish x -> Apply.value x (module Event.Dervish)
       | Mercs x -> Apply.value x (module Event.Mercs)
       | Nations x -> Apply.value x (module Event.Nations)
+      | Trade x -> Apply.value x (module Event.Trade)
   end
 end
 
@@ -53,6 +55,8 @@ module Convert = struct
           let make x = Input.Dervish x end)
       | Steps.Mercs -> (module struct module Event = Event.Mercs
           let make x = Input.Mercs x end)
+      | Steps.Trade -> (module struct module Event = Event.Trade
+          let make x = Input.Trade x end)
   end
 
   module Output = struct
