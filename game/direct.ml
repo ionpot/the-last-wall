@@ -102,7 +102,7 @@ module Starting = struct
 end
 
 module Support = struct
-  type t = Nation.support list
+  type t = Nation.support
   module Apply (S : State.S) = struct
     module AddRes = Event.AddRes(S)
     let value ls = AddRes.value (Nation.sum ls)

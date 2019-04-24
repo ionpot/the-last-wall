@@ -1,5 +1,5 @@
 type kind = Tulron | Sodistan | Hekatium | Numendor | Clan
-type support = (kind * Resource.t)
+type support = (kind * Resource.t) list
 type t
 
 val empty : t
@@ -8,10 +8,10 @@ val max_allowed : int
 
 val from : kind list -> t
 
-val add : Resource.t -> support list -> support list
-val sum : support list -> Resource.t
+val add : Resource.t -> support -> support
+val sum : support -> Resource.t
 val which : t -> kind list
 
 module Roll : Dice.S -> sig
-  val support : t -> support list
+  val support : t -> support
 end

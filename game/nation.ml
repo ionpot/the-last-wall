@@ -1,5 +1,5 @@
 type kind = Tulron | Sodistan | Hekatium | Numendor | Clan
-type support = (kind * Resource.t)
+type support = (kind * Resource.t) list
 type t = kind list
 
 let empty = []
