@@ -16,7 +16,6 @@ val count : kind -> t -> count
 val mausoleums : t -> count
 val need_manp : t -> manpower
 val need_supp : t -> supply
-val present : kind -> t -> bool
 val ready : kind -> t -> bool
 val status : t -> status
 

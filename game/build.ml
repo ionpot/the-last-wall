@@ -70,11 +70,6 @@ let cost_of kind t =
   let ratio = if ready Engrs t then 0.1 else 0. in
   Resource.reduce_supp ratio res
 
-let present kind t =
-  ready kind t
-  || List.mem kind t.built
-  || List.exists (fun (k, _) -> k = kind) t.queue
-
 let status t =
   let f (_, cost) = cost = Resource.empty in
   let built, ongoing = List.partition f t.queue in
