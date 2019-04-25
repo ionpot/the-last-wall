@@ -41,10 +41,7 @@ let certain kind t =
   { t with trade = Certain kind }
 
 let chosen ls t =
-  { t with chosen =
-    Listx.in_both ls kinds
-    |> Listx.pick_first max_allowed
-  }
+  { t with chosen = Listx.pick_first max_allowed ls }
 
 let trading trading t =
   { t with trading }
