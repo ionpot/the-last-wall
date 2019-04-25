@@ -1,13 +1,12 @@
 type degree = Light | Heavy
 type t =
-  | Sunny
   | Clear
   | Cloudy
   | Wind
   | Rain of degree
   | Snow of degree
 
-let empty = Sunny
+let empty = Clear
 
 let is_bad = function
   | Wind | Rain Heavy | Snow Heavy -> true
@@ -17,7 +16,7 @@ let possible =
   let open Month in
   function
     | Mar | Apr | May -> [Clear; Cloudy; Rain Light; Rain Heavy]
-    | Jun | Jul | Aug -> [Clear; Cloudy; Rain Light; Sunny]
+    | Jun | Jul | Aug -> [Clear; Clear; Cloudy; Rain Light]
     | Sep | Oct | Nov -> [Cloudy; Rain Light; Rain Heavy; Wind]
     | Dec | Jan | Feb -> [Cloudy; Rain Heavy; Snow Light; Snow Heavy]
 

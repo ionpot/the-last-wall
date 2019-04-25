@@ -1,6 +1,5 @@
 type degree = Light | Heavy
 type t =
-  | Sunny
   | Clear
   | Cloudy
   | Wind
