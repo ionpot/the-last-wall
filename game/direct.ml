@@ -45,7 +45,10 @@ end
 module BuildStatus = struct
   type t = Build.status
   module Apply (S : State.S) = struct
-    let value status = S.Build.map (Build.update status)
+    let value status =
+      S.Build.map (Build.update status);
+      let begun = S.Build.check Build.(ready Trade) in
+      S.Nation.map (Nation.trading begun)
   end
   module Make (S : State.S) = struct
     let value = S.Build.return Build.status
