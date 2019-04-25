@@ -28,7 +28,8 @@ module From (M : From) : S = struct
     x + roll d
 
   let chance fl =
-    M.float 1.0 < fl
+    if fl >= 1. then true
+    else M.float 1.0 < fl
 
   let deviate x y =
     let a = x - y in
