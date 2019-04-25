@@ -47,19 +47,23 @@ let trading trading t =
   { t with trading }
 
 module Roll (Dice : Dice.S) = struct
+  let check t trade =
+    t.trading && t.trade = trade
+
+  let roll (a, b) = Dice.between a b
+
+  let roll_res kind t =
+    let (a, b) = ranges_of kind in
+    let m = roll a in
+    let s = roll b in
+    let s' = if check t (Boost kind) then 10 else 0 in
+    Resource.(of_manp m <+ Supply (s + s'))
+
+  let to_res kind t =
+    if check t (Certain kind) || Dice.chance 0.8
+    then roll_res kind t
+    else Resource.empty
+
   let support t =
-    let roll (a, b) = Dice.between a b in
-    let to_res kind =
-      let (a, b) = ranges_of kind in
-      let m = roll a in
-      let s = roll b in
-      let s' = if t.trading && t.trade = Boost kind then 10 else 0 in
-      Resource.(of_manp m <+ Supply (s + s'))
-    in
-    let chance kind =
-      if t.trading && t.trade = Certain kind || Dice.chance 0.8
-      then to_res kind
-      else Resource.empty
-    in
-    List.map (fun kind -> kind, chance kind) t.chosen
+    List.map (fun kind -> kind, to_res kind t) t.chosen
 end
