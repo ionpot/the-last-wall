@@ -24,6 +24,14 @@ module Make (P : Phase.S) (State : State.S) = struct
   module Output = struct
     module Convert = Phase.Convert.Output(P.Steps.Output)(P.Output)
 
+    module Make (Event : Event.Direct) = struct
+      module Made = Event.Make(State)
+      let value = Made.value
+      let apply () =
+        let module Apply = Event.Apply(State) in
+        Apply.value value
+    end
+
     let check_ok (module M : Convert.Check) =
       do_check (module M.Check)
 
@@ -35,16 +43,12 @@ module Make (P : Phase.S) (State : State.S) = struct
       M.value, apply
 
     let cond (module M : Convert.Cond) =
-      let module Made = M.Event.Make(State) in
-      let module Apply = M.Event.Apply(State) in
-      let apply () = Apply.value Made.value in
-      M.make Made.value, apply
+      let module Made = Make(M.Event) in
+      M.make Made.value, Made.apply
 
     let direct (module M : Convert.Direct) =
-      let module Made = M.Event.Make(State) in
-      let module Apply = M.Event.Apply(State) in
-      let apply () = Apply.value Made.value in
-      M.make Made.value, apply
+      let module Made = Make(M.Event) in
+      M.make Made.value, Made.apply
   end
 end
 
