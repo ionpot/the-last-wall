@@ -33,8 +33,8 @@ end
 module BuildManp = struct
   type t = Defs.manpower
   module Apply (S : State.S) = struct
+    let avlb = S.Units.return Units.(count Men)
     let value need =
-      let avlb = S.Units.return Units.(count Men) in
       S.Build.map (Build.manp (min need avlb))
   end
   module Make (S : State.S) = struct
@@ -45,9 +45,9 @@ end
 module BuildStatus = struct
   type t = Build.status
   module Apply (S : State.S) = struct
+    let begun = S.Build.check Build.(ready Trade)
     let value status =
       S.Build.map (Build.update status);
-      let begun = S.Build.check Build.(ready Trade) in
       S.Nation.map (Nation.trading begun)
   end
   module Make (S : State.S) = struct
@@ -58,8 +58,8 @@ end
 module BuildSupply = struct
   type t = Defs.supply
   module Apply (S : State.S) = struct
+    let avlb = S.Supply.get ()
     let value need =
-      let avlb = S.Supply.get () in
       S.Build.map (Build.supp (min need avlb))
   end
   module Make (S : State.S) = struct
