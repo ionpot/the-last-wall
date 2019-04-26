@@ -17,6 +17,7 @@ val is_noble : t -> bool
 val kind_of : t -> kind
 val level_of : t -> level
 val lvup : t -> bool
+val name_of : t -> Name.t
 val res_bonus_of : t -> Resource.t
 val victories : t -> Defs.count
 

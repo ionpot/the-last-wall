@@ -9,6 +9,7 @@ type t =
     gender : gender;
     kind : kind;
     level : level;
+    name : Name.t;
     noble : bool;
     xp : Defs.count
   }
@@ -19,6 +20,7 @@ let empty =
     gender = Female;
     kind = Aristocrat;
     level = 0;
+    name = Name.empty;
     noble = true;
     xp = 0
   }
@@ -47,6 +49,7 @@ let can_respawn turn t =
 let is_noble t = t.noble
 let kind_of t = t.kind
 let level_of t = t.level + t.xp / 2
+let name_of t = t.name
 let cha_of t = t.cha + level_of t / 4
 let cha_mod_of t = t |> cha_of |> mod_of
 let lvup t = t.xp mod 2 = 0
@@ -74,8 +77,15 @@ let won t =
   { t with xp = t.xp + 1 }
 
 module Roll (Dice : Dice.S) = struct
+  module Name = Name.Roll(Dice)
+
   let death t =
     if is_alive t then Dice.chance 0.05 else false
+
+  let name t =
+    let first = Names.(if t.gender = Female then female else male) in
+    let house = if t.noble then Names.house else [] in
+    { t with name = Name.from first house Names.title t.name }
 
   let noble = function
     | Aristocrat -> true
@@ -89,7 +99,7 @@ module Roll (Dice : Dice.S) = struct
       kind;
       level = Dice.between 3 5;
       noble = noble kind
-    }
+    } |> name
 
   let random () =
     from (Dice.pick kinds)
