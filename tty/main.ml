@@ -6,13 +6,15 @@ module M = Main.Make(S)
 module type Steps = sig
   module Phase : Game.Phase.S
   module Handler : sig
-    val input : Phase.Input.event -> Phase.Input.event
-    val output : Phase.Output.event -> unit
+    module Make : Game.State.S -> sig
+      val input : Phase.Input.event -> Phase.Input.event
+      val output : Phase.Output.event -> unit
+    end
   end
 end
 
 module Step (Steps : Steps) = struct
-  module Handle = Steps.Handler
+  module Handle = Steps.Handler.Make(S)
   module Step = Game.Step.Of(Steps.Phase)
 
   let map = function

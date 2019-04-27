@@ -1,5 +1,9 @@
-let input x = x
-let output _ = ()
+module Phase = Game.Phase1
+
+module Make (S : Game.State.S) = struct
+  let input x = x
+  let output _ = ()
+end
 
 (*
 let phase1 evt update =
