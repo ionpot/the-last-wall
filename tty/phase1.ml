@@ -1,0 +1,26 @@
+let input x = x
+let output _ = ()
+
+(*
+let phase1 evt update =
+  let open Game.Phase1 in
+  match evt with
+  | Build _ ->
+      let bs = S.with_bld Prompt.build in
+      Print.bld_chosen bs;
+      update (Build bs)
+  | BuildSupply x -> Print.bld_supp x
+  | End -> ()
+  | Nations x ->
+      let ns = Prompt.nations x in
+      Print.nations_chosen ns;
+      update (Nations ns)
+  | SendScouts _ ->
+      let s = Prompt.scouting () in
+      Print.scouting_chosen s;
+      update (SendScouts s)
+  | Starting res ->
+      Tty.pairln "starting" (res2str res)
+  | Support ls ->
+      Print.support ls
+      *)
