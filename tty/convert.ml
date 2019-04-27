@@ -20,6 +20,7 @@ let str2char = function
 let char2bool ch =
   ch = 'y'
 
+  (*
 let manp2str mp =
   sprintf "%d mnp" mp
 
@@ -180,3 +181,4 @@ let defense2str men cav ldr =
   match ldr with
   | Some x -> sprintf "%s, with %s" str (leader2str x)
   | None -> str
+  *)

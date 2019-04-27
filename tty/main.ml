@@ -54,12 +54,11 @@ let map = function
 
 let rec check = function
   | Main.Event evt -> Main.Event (map evt) |> M.next |> after
-  | Main.End -> ()
-  (*| Main.End -> Tty.fin ()*)
+  | Main.End -> Tty.fin ()
 
 and after evt =
   (*status ();*)
-  (*Tty.flush ();*)
+  Tty.flush ();
   check evt
 
 let () =
