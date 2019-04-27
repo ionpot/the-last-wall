@@ -1,0 +1,15 @@
+type degree = Light | Heavy
+type t =
+  | Clear
+  | Cloudy
+  | Wind
+  | Rain of degree
+  | Snow of degree
+
+val empty : t
+
+val is_bad : t -> bool
+
+module Roll : Dice.S -> sig
+  val random : Month.t -> t
+end

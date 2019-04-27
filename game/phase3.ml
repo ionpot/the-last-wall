@@ -1,95 +1,79 @@
-module CL = Check_leader
+module Steps = Steps.Phase3
 
-type event =
-  | Attack of Enemy.party list
-  | Barrage of bool
-  | Barraged of Enemy.party
-  | Casualty of Defs.manpower * Defs.manpower
-  | Defeat
-  | End
-  | Fort of Defs.manpower * Defs.manpower
-  | Leader of CL.event
-  | SendScouts of bool
-  | Smite of Enemy.party
-  | Victory
+module Input = struct
+  module Event = Input
+  type event =
+    | Barrage of Event.Barrage.t
+    | Scout of Event.Scout.t
 
-module type S = Phase.S with type event_def := event
+  module Apply (State : State.S) = struct
+    module Apply = Phase.Apply(State)
+    let event = function
+      | Barrage x -> Apply.value x (module Event.Barrage)
+      | Scout x -> Apply.value x (module Event.Scout)
+  end
+end
 
-module Make (M : State.S) : S = struct
-  module Casualty = Check_casualty.Make(M)
-  module Ldr = CL.Make(M)
-
-  let ask_scouting () =
-    SendScouts (M.is_scouting ())
-
-  let first () =
-    match M.get_enemies () with
-    | [] -> ask_scouting ()
-    | ls -> Attack ls
-
-  let leader_won = function
-    | Some ldr -> Leader.won ldr
-    | None -> ()
-
-  let apply = function
-    | Attack enemies -> ()
-    | Barrage x -> M.Barraging.set_to x
-    | Barraged party -> M.map_enemies (Enemy.reduce party)
-    | Casualty (men, cav) ->
-        M.sub_manp men;
-        M.Cavalry.sub cav
+module Output = struct
+  type event =
+    | Attack
+    | Barraged of Cond.Barraged.t
+    | CanBarrage of Direct.CanBarrage.t
+    | Combat of Direct.Combat.t
     | Defeat
-    | End -> ()
-    | Fort (men, cav) ->
-        M.bld_raze Building.Fort;
-        M.set_manp men;
-        M.Cavalry.set cav
-    | Leader CL.Died _ -> M.ldr_died ()
-    | Leader CL.LvUp ldr -> M.set_ldr ldr
-    | SendScouts yes -> M.set_scouting yes
-    | Smite party -> M.map_enemies (Enemy.reduce party)
-    | Victory -> leader_won (M.get_ldr ())
+    | LevelUp
+    | NoAttack
+    | NoEnemies
+    | Revive of Cond.Revive.t
+    | Smite of Cond.Smite.t
+    | Victory
+end
 
-  let check_casualty () =
-    let module C = Check_casualty in
-    match M.with_enemies Casualty.check with
-    | C.Loss (men, cav) -> Casualty (men, cav)
-    | C.Fort (men, cav) -> Fort (men, cav)
-    | C.Ok -> ask_scouting ()
+module Convert = struct
+  module Input = struct
+    module Steps = Steps.Input
+    module Event = Input.Event
+    module Convert = Phase.Convert.Input(Steps)(Input)
 
-  let check_barrage () =
-    match M.get_ldr () with
-    | Some _ -> Barrage (M.Barraging.get ())
-    | None -> check_casualty ()
+    let cond : Convert.cond = function
+      | Steps.Barrage -> (module struct module Event = Event.Barrage
+          let make x = Input.Barrage x end)
 
-  let check_barraged () =
-    let module B = Barrage.Check(M) in
-    match B.value with
-    | Some party -> Barraged party
-    | None -> check_casualty ()
+    let direct : Convert.direct = function
+      | Steps.Scout -> (module struct module Event = Event.Scout
+          let make x = Input.Scout x end)
+  end
 
-  let check_smite () =
-    let module S = Smite.Check(M) in
-    match S.value with
-    | Some party -> Smite party
-    | None -> check_barrage ()
+  module Output = struct
+    module Steps = Steps.Output
+    module Convert = Phase.Convert.Output(Steps)(Output)
 
-  let check_ldr () =
-    match Ldr.check () with
-    | Some x -> Leader x
-    | None -> ask_scouting ()
+    let check : Convert.check = function
+      | Steps.Attack -> (module struct module Check = Check.HasEnemies
+          let value = Output.Attack end)
+      | Steps.LevelUp -> (module struct module Check = Check.LevelUp
+          let value = Output.LevelUp end)
+      | Steps.NoAttack -> (module struct module Check = Check.NoEnemies
+          let value = Output.NoAttack end)
+      | Steps.NoEnemies -> (module struct module Check = Check.NoEnemies
+          let value = Output.NoEnemies end)
 
-  let next = function
-    | Attack _ -> check_smite ()
-    | Smite _ -> check_barrage ()
-    | Barrage _ -> check_barraged ()
-    | Barraged _ -> check_casualty ()
-    | Casualty _ ->
-        if Casualty.is_victory () then Victory else Defeat
-    | Fort _ -> Victory
-    | Victory -> check_ldr ()
-    | Leader _ -> ask_scouting ()
-    | SendScouts _
-    | Defeat
-    | End -> End
+    let cond : Convert.cond = function
+      | Steps.Barraged -> (module struct module Event = Cond.Barraged
+          let make x = Output.Barraged x end)
+      | Steps.Defeat -> (module struct module Event = Cond.Defeat
+          let make () = Output.Defeat end)
+      | Steps.Revive -> (module struct module Event = Cond.Revive
+          let make x = Output.Revive x end)
+      | Steps.Smite -> (module struct module Event = Cond.Smite
+          let make x = Output.Smite x end)
+
+    let direct : Convert.direct = function
+      | Steps.CanBarrage -> (module struct module Event = Direct.CanBarrage
+          let make x = Output.CanBarrage x end)
+      | Steps.Combat -> (module struct module Event = Direct.Combat
+          let make x = Output.Combat x end)
+      | Steps.Victory -> (module struct module Event = Direct.Victory
+          let make () = Output.Victory end)
+  end
 end

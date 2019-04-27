@@ -1,0 +1,7 @@
+let female = ["Aril"; "Beren"; "Derya"; "Didan"; "Edrin"; "Eriyel"; "Hekna"; "Hurem"; "Jaklin"; "Joysi"; "Kater"; "Kazerin"; "Kelen"; "Maika"; "Meriyis"; "Mihrimah"; "Neray"; "Sahra"; "Sarine"; "Sena"; "Seval"; "Turay"; "Yana"; "Yodis"; "Zeyna"] 
+
+let house = ["Almezir"; "Alnadar"; "Alvalid"; "Andard"; "Atman"; "Benahem"; "Benalid"; "Berdiktius"; "Dagman"; "Demarra"; "Denderid"; "Desirian"; "Domitius"; "Doranna"; "Fariyen"; "Folzade"; "Gald"; "Galin"; "Kehrizade"; "Knut"; "Korok"; "Kunman"; "Lavini"; "Leviet"; "Levour"; "Medriki"; "Meran"; "Nurak"; "Onok"; "Tahen"; "Tayral"; "Temurkan"; "Turikan"; "Vikard"]
+
+let male = ["Alrik"; "Andera"; "Aram"; "Ayefrus"; "Bahit"; "Baldun"; "Borevard"; "Butay"; "Dormun"; "Edvon"; "Einar"; "Erednu"; "Gilyon"; "Habakkum"; "Haknat"; "Haktor"; "Halmar"; "Hvaldan"; "Javin"; "Kalit"; "Kenemer"; "Korar"; "Kutal"; "Kutyan"; "Lahmaren"; "Laknar"; "Laronath"; "Laryus"; "Miran"; "Nabhar"; "Odmerit"; "Osmund"; "Pars"; "Raahum"; "Ralund"; "Rayan"; "Ruvil"; "Tefres"; "Tugul"; "Tuman"; "Vahan"; "Valtum"; "Vannor"; "Vityus"; "Yerhan"; "Zantor"]
+
+let title = ["of Abnubab"; "of Atnis"; "of Ebrerim"; "of Gefre"; "of Manay"; "of Nannur"; "of Radalvar"; "of Simiri"; "of Tulron"; "of Verbon"; "the Brave"; "the Champion"; "the Cruel"; "the Dark"; "the Fearless"; "the Heroic"; "the Honest"; "the Just"; "the Lefthanded"; "the Lion"; "the Poet"; "the Red"; "the Ruthless"; "the Swift"; "the Tall"]

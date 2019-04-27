@@ -1,62 +1,59 @@
-type ltype = Aristocrat | Expert | Warrior
-type level = int
-type charisma = int
+type charisma = Defs.count
+type gender = Female | Male
+type kind = Aristocrat | Expert | Warrior
+type level = Defs.count
 
 type t =
-  { ltype : ltype;
+  { cha : charisma;
+    died : Defs.turn;
+    gender : gender;
+    kind : kind;
     level : level;
-    cha_base : charisma;
-    cha_extra : charisma;
-    xp : int ref
+    name : Name.t;
+    noble : bool;
+    xp : Defs.count
   }
 
-let ltypes = [Aristocrat; Expert; Warrior]
+let empty =
+  { cha = 0;
+    died = 0;
+    gender = Female;
+    kind = Aristocrat;
+    level = 0;
+    name = Name.empty;
+    noble = true;
+    xp = 0
+  }
+
+let kinds = [Aristocrat; Expert; Warrior]
+let respawn_time = 2 (* turns *)
+
+let def_bonus_of cha = function
+  | Aristocrat
+  | Expert -> 0.0
+  | Warrior -> 0.01 *. float cha
 
 let mod_of cha =
   (cha - 10) / 2
-
-let def_bonus_of cha = function
-  | Warrior -> 0.01 *. float cha
-  | Aristocrat
-  | Expert -> 0.0
 
 let resource_of cha = function
   | Aristocrat -> Resource.of_manp (2 * cha)
   | Expert -> Resource.of_supp (2 * cha)
   | Warrior -> Resource.empty
 
-let make ltype =
-  let lv = Dice.between 3 5 in
-  { ltype;
-    level = lv;
-    cha_base = Dice.between 10 15;
-    cha_extra = (lv / 4);
-    xp = ref 0
-  }
-
-let random () =
-  make (Listx.pick_from ltypes)
-
-let lives () =
-  Dice.chance 0.95
-
-let won t = incr t.xp
-let type_of t = t.ltype
-let level_of t = t.level
-let cha_of t = t.cha_base + t.cha_extra
-let can_lvup t = !(t.xp) > 1
-
-let lvup t =
-  let xp = !(t.xp) in
-  let lv = t.level + (xp / 2) in
-  { t with
-    level = lv;
-    cha_extra = lv / 4;
-    xp = ref (xp mod 2)
-  }
-
-let cha_mod_of t =
-  t |> cha_of |> mod_of
+let gender_of t = t.gender
+let is_alive t = t.died = 0
+let is_dead t = t.died > 0
+let can_respawn turn t =
+  is_dead t && t.died + respawn_time <= turn
+let is_noble t = t.noble
+let kind_of t = t.kind
+let level_of t = t.level + t.xp / 2
+let name_of t = t.name
+let cha_of t = t.cha + level_of t / 4
+let cha_mod_of t = t |> cha_of |> mod_of
+let lvup t = t.xp mod 2 = 0
+let victories t = t.xp
 
 let base_defense t =
   let lv = level_of t in
@@ -65,10 +62,45 @@ let base_defense t =
 let defense_of t =
   let base = base_defense t in
   let cha = cha_mod_of t in
-  let bonus = type_of t |> def_bonus_of cha in
+  let bonus = kind_of t |> def_bonus_of cha in
   base +. bonus
 
 let res_bonus_of t =
   let cha = cha_mod_of t in
-  let typ = type_of t in
-  resource_of cha typ
+  let kind = kind_of t in
+  resource_of cha kind
+
+let died turn t =
+  { t with died = turn }
+
+let won t =
+  { t with xp = t.xp + 1 }
+
+module Roll (Dice : Dice.S) = struct
+  module Name = Name.Roll(Dice)
+
+  let death t =
+    if is_alive t then Dice.chance 0.05 else false
+
+  let name t =
+    let first = Names.(if t.gender = Female then female else male) in
+    let house = if t.noble then Names.house else [] in
+    { t with name = Name.from first house Names.title t.name }
+
+  let noble = function
+    | Aristocrat -> true
+    | Expert -> Dice.chance 0.4
+    | Warrior -> Dice.chance 0.2
+
+  let from kind =
+    { empty with
+      cha = Dice.between 10 15;
+      gender = if Dice.yes () then Male else Female;
+      kind;
+      level = Dice.between 3 5;
+      noble = noble kind
+    } |> name
+
+  let random () =
+    from (Dice.pick kinds)
+end

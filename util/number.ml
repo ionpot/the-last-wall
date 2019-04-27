@@ -1,3 +1,6 @@
+let reduce_by ratio x =
+  truncate (Float.reduce (float x) ratio)
+
 let sub a b =
   max 0 (a - b)
 
