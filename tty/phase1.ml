@@ -1,7 +1,15 @@
 module Phase = Game.Phase1
 
 module Make (S : Game.State.S) = struct
-  let input x = x
+  let input =
+    let open Phase.Input in
+    function
+      | Build avlb -> Build (S.Build.return (Prompt.build avlb))
+      | Deity _ -> Deity (Prompt.deity ())
+      | Leader _ -> Leader (Prompt.leader ())
+      | Nations chosen -> Nations (Prompt.nations chosen)
+      | Scout _ -> Scout (Prompt.scout ())
+
   let output _ = ()
 end
 

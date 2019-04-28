@@ -12,9 +12,10 @@ let writeln str =
   Log.writeln log str;
   print_endline str
 
+let writelns = List.iter writeln
+
 let pairln s1 s2 =
-  let str = s1 ^ ": " ^ s2 in
-  writeln str
+  writeln (s1 ^ ": " ^ s2)
 
 let lnwrite str =
   ln (); write str
@@ -28,21 +29,14 @@ let readln () =
   line
 
 let prompt str =
-  let s = str ^ " " in
-  write s;
+  write (str ^ "> ");
   readln ()
 
 let lnprompt str =
   ln (); prompt str
 
-let prompt_char str =
-  prompt str |> Convert.str2char
-
-let lnprompt_char str =
-  ln (); prompt_char str
-
 let prompt_yn str =
-  prompt_char str |> Convert.char2bool
+  prompt str = "y"
 
 let flush () =
   Log.flush log

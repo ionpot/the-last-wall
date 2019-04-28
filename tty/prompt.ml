@@ -1,96 +1,90 @@
 open Convert
-open Game
 open Printf
 
-let ch_cmp (a, _) (b, _) = Char.compare a b
+let sort_by_str to_str ls =
+  List.sort (fun a b -> String.compare (to_str a) (to_str b)) ls
+
+let print_chosen str =
+  Tty.pairln "chosen" str
+
+let echo_ls to_str ls =
+  if ls <> [] then List.map to_str ls |> commas |> print_chosen;
+  ls
+
+let echo_one to_str chosen =
+  print_chosen (to_str chosen);
+  chosen
+
+let choose_from avlb str =
+  Listx.filteri (fun i _ -> String.contains str (int2ichar i)) avlb
+
+let choose_one avlb other str =
+  match choose_from avlb str with
+  | [] -> other
+  | x :: _ -> x
+
+let swap_empty ls = function
+  | [] -> ls
+  | ls -> ls
+
+let indent = List.map (fun str -> "  " ^ str)
+let indices = List.mapi (fun i str -> sprintf "%c) %s" (int2ichar i) str)
+
+let highlight chosen to_str x =
+  let str = to_str x in
+  if List.mem x chosen
+  then brackets str
+  else str
+
+let horizontal prefix = function
+  | [] -> ()
+  | ls -> Tty.pairln prefix (indices ls |> spaces)
+
+let vertical prefix ls =
+  Tty.writeln (prefix ^ ":");
+  indices ls |> indent |> Tty.writelns
 
 let barrage () =
-  Tty.prompt_yn "arrow barrage? y/n>"
+  Tty.prompt_yn "arrow barrage? y/n"
 
-let bld_chars =
-  List.map bld2char Building.tlist
-
-let bld_list =
-  Building.tlist
-  |> List.map (fun b -> bld2char b, b)
-  |> List.sort ch_cmp
-
-let find_bld ch =
-  List.find (fun (c, _) -> c = ch) bld_list
-  |> snd
-
-let pick_blds bs str =
-  chars_of str
-  |> List.filter (fun ch -> List.mem ch bld_chars)
-  |> List.map find_bld
-  |> Listx.discard (fun b -> Buildings.is_ignored b bs)
-  |> Listx.build (fun ls b ->
-      if not (Building.multiple b) && List.mem b ls
-      then ls else b :: ls)
-  |> List.rev
-
-let build bs =
-  Tty.writeln "buildings:";
-  let to_str (ch, b) =
-    let s =
-      if Buildings.is_ignored b bs then "  " else sprintf "%c)" ch
-    in
-    sprintf "  %s %s %s" s (bld2str b) (bstat2str b bs)
-  in
-  List.map to_str bld_list
-  |> List.iter Tty.writeln;
-  Tty.prompt "build?>" |> pick_blds bs
+let build avlb t =
+  let avlb' = sort_by_str bld2str avlb in
+  List.map (fun kind ->
+    let cost = Game.Build.cost_of kind t in
+    sprintf "%s [%s]" (bld2str kind) (res2str cost)) avlb'
+  |> vertical "buildings available";
+  Tty.prompt "build?"
+  |> choose_from avlb'
+  |> echo_ls bld2str
 
 let deity () =
-  Tty.write "deities:";
-  Deity.t_list
-  |> List.map (fun d -> (deity2char d, deity2str d))
-  |> List.sort ch_cmp
-  |> List.map (fun (c, s) -> sprintf " %c) %s" c s)
-  |> List.iter Tty.write;
-  Tty.lnprompt_char "choose>" |> char2deity
+  let ls = Game.Deity.list in
+  List.map deity2str ls |> horizontal "deities";
+  Tty.prompt "choose"
+  |> choose_one ls Game.Deity.empty
+  |> echo_one deity2str
 
 let leader () =
-  Tty.write "leaders:";
-  Leader.ltypes
-  |> List.map (fun d -> (ltype2char d, ltype2str d))
-  |> List.sort ch_cmp
-  |> List.map (fun (c, s) -> sprintf " %c) %s" c s)
-  |> List.iter Tty.write;
-  Tty.lnprompt_char "choose>" |> char2ltype
-
-let nat_list =
-  Nation.t_list
-  |> List.map (fun n -> nation2char n, n)
-  |> List.sort ch_cmp
-
-let nat_str n chosen =
-  let str = nation2str n in
-  if List.mem n chosen
-  then sprintf "[%s]" str
-  else sprintf "%s" str
-
-let filter_nats str =
-  nat_list
-  |> List.filter (fun (c, _) -> String.contains str c)
-
-let new_nats chosen str =
-  if str = "" then chosen else
-    match filter_nats str with
-    | [] -> chosen
-    | ls -> List.map snd ls
-
-let nations chosen =
-  Tty.write "nations:";
-  nat_list
-  |> List.map (fun (c, n) -> c, nat_str n chosen)
-  |> List.map (fun (c, s) -> sprintf " %c) %s" c s)
-  |> List.iter Tty.write;
-  Tty.lnprompt "choose>" |> new_nats chosen
+  let ls = Game.Leader.kinds in
+  let to_str = Leader.kind2str in
+  List.map to_str ls |> horizontal "leaders";
+  Tty.prompt "choose"
+  |> choose_one ls Game.Leader.(kind_of empty)
+  |> echo_one to_str
 
 let mercs x =
   Tty.writeln (sprintf "%d mercenaries available" x);
-  Tty.prompt_yn "accept? y/n>"
+  Tty.prompt_yn "accept? y/n"
 
-let scouting () =
-  Tty.prompt_yn "send scouts? y/n>"
+let nations chosen =
+  let ls = Game.Nation.kinds in
+  List.map (highlight chosen nation2str) ls
+  |> horizontal "nations";
+  Tty.prompt "choose"
+  |> choose_from ls
+  |> Listx.pick_first Game.Nation.max_allowed
+  |> swap_empty chosen
+  |> echo_ls nation2str
+
+let scout () =
+  Tty.prompt_yn "send scouts? y/n"
