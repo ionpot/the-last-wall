@@ -4,6 +4,8 @@ type t = Arnerula | Elanis | Lerota | Sekrefir | Sitera
 
 let empty = Arnerula
 
+let list = [Arnerula; Elanis; Lerota; Sekrefir; Sitera]
+
 module Roll (Dice : Dice.S) = struct
   let roll = Dice.between
 

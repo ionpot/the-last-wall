@@ -11,6 +11,17 @@ let count x xs =
 let discard f ls =
   List.filter (fun x -> not (f x)) ls
 
+let filteri f ls =
+  let rec next i = function
+    | [] -> []
+    | x :: rest ->
+        let j = succ i in
+        if f i x
+        then x :: next j rest
+        else next j rest
+  in
+  next 0 ls
+
 let in_both a b =
   List.filter (fun x -> List.mem x a) b
 
@@ -20,12 +31,7 @@ let rec min_of = function
   | x :: xs -> min x (min_of xs)
 
 let pick_first i =
-  let f ls n =
-    if List.length ls < i
-    then n :: ls
-    else ls
-  in
-  build f
+  filteri (fun j _ -> j < i)
 
 let rm x ls =
   List.filter ((<>) x) ls

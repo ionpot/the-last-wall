@@ -1,6 +1,7 @@
 type t = Arnerula | Elanis | Lerota | Sekrefir | Sitera
 
 val empty : t
+val list : t list
 
 module Roll : Dice.S -> sig
   val blessing : t -> Resource.t
