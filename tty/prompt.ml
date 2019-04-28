@@ -4,15 +4,12 @@ open Printf
 let sort_by_str to_str ls =
   List.sort (fun a b -> String.compare (to_str a) (to_str b)) ls
 
-let print_chosen str =
-  Tty.pairln "chosen" str
-
-let echo_ls to_str ls =
-  if ls <> [] then List.map to_str ls |> commas |> print_chosen;
+let echo_ls prefix to_str ls =
+  if ls <> [] then List.map to_str ls |> commas |> Tty.pairln prefix;
   ls
 
-let echo_one to_str chosen =
-  print_chosen (to_str chosen);
+let echo_one prefix to_str chosen =
+  Tty.pairln prefix (to_str chosen);
   chosen
 
 let choose_from avlb str =
@@ -55,14 +52,14 @@ let build avlb t =
   |> vertical "buildings available";
   Tty.prompt "build?"
   |> choose_from avlb'
-  |> echo_ls bld2str
+  |> echo_ls "building" bld2str
 
 let deity () =
   let ls = Game.Deity.list in
   List.map deity2str ls |> horizontal "deities";
   Tty.prompt "choose"
   |> choose_one ls Game.Deity.empty
-  |> echo_one deity2str
+  |> echo_one "deity is" deity2str
 
 let leader () =
   let ls = Game.Leader.kinds in
@@ -83,7 +80,6 @@ let nations chosen =
   |> choose_from ls
   |> Listx.pick_first Game.Nation.max_allowed
   |> swap_empty chosen
-  |> echo_ls nation2str
 
 let scout () =
   Tty.prompt_yn "send scouts? y/n"
