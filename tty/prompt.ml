@@ -70,7 +70,6 @@ let leader () =
   List.map to_str ls |> horizontal "leaders";
   Tty.prompt "choose"
   |> choose_one ls Game.Leader.(kind_of empty)
-  |> echo_one to_str
 
 let mercs x =
   Tty.writeln (sprintf "%d mercenaries available" x);
