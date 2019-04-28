@@ -8,6 +8,11 @@ let first t = t.chosen.first
 let house t = t.chosen.house
 let title t = t.chosen.title
 
+let full t =
+  [first t; house t; title t]
+  |> List.filter ((<>) "")
+  |> String.concat " "
+
 module Roll (Dice : Dice.S) = struct
   let new_prev t =
     if t.chosen = empty_name then t.prev else t.chosen :: t.prev
