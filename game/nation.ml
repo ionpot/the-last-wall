@@ -1,9 +1,9 @@
 type kind = Clan | Hekatium | Numendor | Sodistan | Tulron
 type support = (kind * Resource.t) list
 type trade = Boost of kind | Certain of kind | NoTrade
-type t = { chosen : kind list; trade : trade; trading : bool }
+type t = kind list
 
-let empty = { chosen = []; trade = NoTrade; trading = false }
+let empty = []
 let kinds = [Tulron; Sodistan; Hekatium; Numendor; Clan]
 let max_allowed = 3
 
@@ -31,39 +31,26 @@ let sum ls =
   in
   List.fold_left f Resource.empty ls
 
-let trade t = t.trade
-let which t = t.chosen
-
-let boost kind t =
-  { t with trade = Boost kind }
-
-let certain kind t =
-  { t with trade = Certain kind }
+let which t = t
 
 let chosen ls t =
-  { t with chosen = Listx.pick_first max_allowed ls }
-
-let trading trading t =
-  { t with trading }
+  Listx.pick_first max_allowed t
 
 module Roll (Dice : Dice.S) = struct
-  let check t trade =
-    t.trading && t.trade = trade
-
   let roll (a, b) = Dice.between a b
 
-  let roll_res kind t =
+  let roll_res kind trade =
     let (a, b) = ranges_of kind in
     let m = roll a in
     let s = roll b in
-    let s' = if check t (Boost kind) then 10 else 0 in
+    let s' = if trade = Boost kind then 10 else 0 in
     Resource.(of_manp m <+ Supply (s + s'))
 
-  let to_res kind t =
-    if check t (Certain kind) || Dice.chance 0.8
-    then roll_res kind t
+  let to_res kind trade =
+    if trade = Certain kind || Dice.chance 0.8
+    then roll_res kind trade
     else Resource.empty
 
-  let support t =
-    List.map (fun kind -> kind, to_res kind t) t.chosen
+  let support trade t =
+    List.map (fun kind -> kind, to_res kind trade) t
 end

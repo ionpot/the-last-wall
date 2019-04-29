@@ -1,5 +1,5 @@
 type cost = Resource.t
-type kind = Engrs | Fort | Market | Mausoleum of Leader.t | Observatory | Stable | Tavern | Temple | Trade
+type kind = Engrs | Fort | Market | Mausoleum of Leader.t | Observatory | Stable | Tavern | Temple | Trade of Nation.trade
 type queued = kind * cost
 type status = kind list * kind list * queued list
 type t =
@@ -22,7 +22,7 @@ let rm_ls kinds ls =
   |> Listx.rm_from ls
 
 let empty =
-  { avlb = [Engrs; Fort; Market; Stable; Temple; Trade];
+  { avlb = [Engrs; Fort; Market; Stable; Temple; Trade Nation.NoTrade];
     built = [];
     queue = [];
     ready = [Tavern]
@@ -39,7 +39,7 @@ let base_cost =
   | Stable -> Manpwr 49, Supply 54
   | Tavern -> Manpwr 0, Supply 0
   | Temple -> Manpwr 54, Supply 56
-  | Trade -> Manpwr 51, Supply 49
+  | Trade _ -> Manpwr 51, Supply 49
 
 let base_cost_of kind =
   let a, b = base_cost kind in
@@ -79,6 +79,10 @@ let status t =
   let built, ongoing = List.partition f t.queue in
   t.built, List.map fst built, ongoing
 
+let trade t =
+  let f x = function Trade x -> x | _ -> x in
+  List.fold_left f Nation.NoTrade t.ready
+
 let map_queue f x t =
   let f' acc (kind, cost) =
     let acc', cost' = f acc cost in
@@ -114,6 +118,10 @@ let enqueue kinds t =
 let raze kind t =
   { t with ready = Listx.rm kind t.ready }
   |> to_avlb kind
+
+let set_trade trade t =
+  let f = List.map (function Trade _ -> Trade trade | x -> x) in
+  { t with built = f t.built; ready = f t.ready }
 
 let start kinds t =
   let ls = Listx.in_both kinds t.avlb in

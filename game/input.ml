@@ -97,17 +97,16 @@ module Scout = struct
 end
 
 module Trade = struct
-  type kind = Boost | Certain
-  type t = (kind * Nation.kind)
+  type t = Nation.trade
+  let none = Nation.NoTrade
   module Apply (S : State.S) = struct
-    let value (kind, nation) =
-      let f = if kind = Boost then Nation.boost else Nation.certain in
-      S.Nation.map (f nation)
+    let value trade =
+      S.Build.map (Build.set_trade trade)
   end
   module Check (S : State.S) = struct
-    let value = S.Build.check Build.(built Trade)
+    let value = S.Build.check Build.(built (Trade none))
   end
   module Make (S : State.S) = struct
-    let value = Boost, Nation.Clan
+    let value = none
   end
 end
