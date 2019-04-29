@@ -17,6 +17,9 @@ let writelns = List.iter writeln
 let pairln s1 s2 =
   writeln (s1 ^ ": " ^ s2)
 
+let spln s1 s2 =
+  writeln (s1 ^ " " ^ s2)
+
 let lnwrite str =
   ln (); write str
 

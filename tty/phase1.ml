@@ -10,29 +10,12 @@ module Make (S : Game.State.S) = struct
       | Nations chosen -> Nations (Prompt.nations chosen)
       | Scout _ -> Scout (Prompt.scout ())
 
-  let output _ = ()
+  let output =
+    let open Phase.Output in
+    function
+      | BuildSupply s -> Print.Build.supply s
+      | Starting (ldr, _, res) ->
+          Tty.pairln "leader" (Convert.ldr2full ldr);
+          Tty.pairln "starting" (Convert.res2str res)
+      | Support s -> Print.support s
 end
-
-(*
-let phase1 evt update =
-  let open Game.Phase1 in
-  match evt with
-  | Build _ ->
-      let bs = S.with_bld Prompt.build in
-      Print.bld_chosen bs;
-      update (Build bs)
-  | BuildSupply x -> Print.bld_supp x
-  | End -> ()
-  | Nations x ->
-      let ns = Prompt.nations x in
-      Print.nations_chosen ns;
-      update (Nations ns)
-  | SendScouts _ ->
-      let s = Prompt.scouting () in
-      Print.scouting_chosen s;
-      update (SendScouts s)
-  | Starting res ->
-      Tty.pairln "starting" (res2str res)
-  | Support ls ->
-      Print.support ls
-      *)

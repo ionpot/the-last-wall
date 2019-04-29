@@ -18,6 +18,24 @@ let res2str res =
   let m, s = Resource.(manp_of res, supp_of res) in
   sprintf "%s, %s" (manp2str m) (sup2str s)
 
+let ldr2kind = function
+  | Leader.Aristocrat -> "aristocrat"
+  | Leader.Expert -> "expert"
+  | Leader.Warrior -> "warrior"
+
+let ldr2name ldr = Leader.name_of ldr |> Name.full
+
+let ldr2status ldr =
+  let level = Leader.level_of ldr in
+  let kind = Leader.kind_of ldr |> ldr2kind in
+  let cha = Leader.cha_of ldr in
+  sprintf "level %d %s (cha %d)" level kind cha
+
+let ldr2full ldr =
+  let name = ldr2name ldr in
+  let status = ldr2status ldr in
+  sprintf "%s, %s" name status
+
 let nation2str = function
   | Nation.Clan -> "clan"
   | Nation.Hekatium -> "hekatium"
@@ -40,7 +58,7 @@ let bld2str = function
   | Build.Fort -> "fort"
   | Build.Market -> "market"
   | Build.Mausoleum ldr ->
-      "mausoleum for " ^ (Leader.name_of ldr |> Name.full)
+      "mausoleum for " ^ ldr2name ldr
   | Build.Observatory -> "observatory"
   | Build.Stable -> "stable"
   | Build.Tavern -> "tavern"
@@ -54,13 +72,6 @@ let deity2str = function
   | Deity.Lerota -> "lerota"
   | Deity.Sitera -> "sitera"
   | Deity.Sekrefir -> "sekrefir"
-
-module Leader = struct
-  let kind2str = function
-    | Leader.Aristocrat -> "aristocrat"
-    | Leader.Expert -> "expert"
-    | Leader.Warrior -> "warrior"
-end
 
   (*
 let bstat2str b bs =

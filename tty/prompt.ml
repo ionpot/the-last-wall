@@ -4,13 +4,7 @@ open Printf
 let sort_by_str to_str ls =
   List.sort (fun a b -> String.compare (to_str a) (to_str b)) ls
 
-let echo_ls prefix to_str ls =
-  if ls <> [] then List.map to_str ls |> commas |> Tty.pairln prefix;
-  ls
-
-let echo_one prefix to_str chosen =
-  Tty.pairln prefix (to_str chosen);
-  chosen
+let echo f x = f x; x
 
 let choose_from avlb str =
   Listx.filteri (fun i _ -> String.contains str (int2ichar i)) avlb
@@ -52,19 +46,19 @@ let build avlb t =
   |> vertical "buildings available";
   Tty.prompt "build?"
   |> choose_from avlb'
-  |> echo_ls "building" bld2str
+  |> echo (fun ls -> if ls <> []
+    then List.map bld2str ls |> commas |> Tty.pairln "building")
 
 let deity () =
   let ls = Game.Deity.list in
   List.map deity2str ls |> horizontal "deities";
   Tty.prompt "choose"
   |> choose_one ls Game.Deity.empty
-  |> echo_one "deity is" deity2str
+  |> echo (fun d -> Tty.spln (deity2str d) "chosen")
 
 let leader () =
   let ls = Game.Leader.kinds in
-  let to_str = Leader.kind2str in
-  List.map to_str ls |> horizontal "leaders";
+  List.map ldr2kind ls |> horizontal "leaders";
   Tty.prompt "choose"
   |> choose_one ls Game.Leader.(kind_of empty)
 
@@ -83,3 +77,4 @@ let nations chosen =
 
 let scout () =
   Tty.prompt_yn "send scouts? y/n"
+  |> echo (fun x -> if x then Tty.writeln "scouts sent")
