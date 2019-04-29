@@ -45,10 +45,8 @@ end
 module BuildStatus = struct
   type t = Build.status
   module Apply (S : State.S) = struct
-    let begun = S.Build.check Build.(ready Trade)
     let value status =
-      S.Build.map (Build.update status);
-      S.Nation.map (Nation.trading begun)
+      S.Build.map (Build.update status)
   end
   module Make (S : State.S) = struct
     let value = S.Build.return Build.status
@@ -114,8 +112,10 @@ module Support = struct
   module Make (S : State.S) = struct
     module Roll = Nation.Roll(S.Dice)
     let bonus = S.Leader.return Leader.res_bonus_of
+    let trade = S.Build.return Build.trade
     let value =
-      S.Nation.return Roll.support
+      Roll.support trade
+      |> S.Nation.return
       |> Nation.add bonus
   end
 end
