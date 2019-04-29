@@ -18,6 +18,23 @@ let res2str res =
   let m, s = Resource.(manp_of res, supp_of res) in
   sprintf "%s, %s" (manp2str m) (sup2str s)
 
+let nation2str = function
+  | Nation.Clan -> "clan"
+  | Nation.Hekatium -> "hekatium"
+  | Nation.Numendor -> "numendor"
+  | Nation.Sodistan -> "sodistan"
+  | Nation.Tulron -> "tulron"
+
+let trade2str = function
+  | Nation.Boost kind -> "extra with " ^ nation2str kind
+  | Nation.Certain kind -> "certain with " ^ nation2str kind
+  | Nation.NoTrade -> ""
+
+let trade_suffix trade =
+  let str = trade2str trade in
+  if str = "" then str
+  else sprintf " (%s)" str
+
 let bld2str = function
   | Build.Engrs -> "engineers guild"
   | Build.Fort -> "fort"
@@ -28,7 +45,8 @@ let bld2str = function
   | Build.Stable -> "stable"
   | Build.Tavern -> "tavern"
   | Build.Temple -> "temple"
-  | Build.Trade -> "trade guild"
+  | Build.Trade trade ->
+      sprintf "trade guild%s" (trade_suffix trade)
 
 let deity2str = function
   | Deity.Arnerula -> "arnerula"
@@ -43,13 +61,6 @@ module Leader = struct
     | Leader.Expert -> "expert"
     | Leader.Warrior -> "warrior"
 end
-
-let nation2str = function
-  | Nation.Clan -> "clan"
-  | Nation.Hekatium -> "hekatium"
-  | Nation.Numendor -> "numendor"
-  | Nation.Sodistan -> "sodistan"
-  | Nation.Tulron -> "tulron"
 
   (*
 let bstat2str b bs =
