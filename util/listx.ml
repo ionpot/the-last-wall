@@ -22,6 +22,15 @@ let filteri f ls =
   in
   next 0 ls
 
+let group ls =
+  let one x = (1, x) in
+  let bump (n, x) = succ n, x in
+  let is x (_, y) = x = y in
+  build (fun out mem ->
+    let found, rest = List.partition (is mem) out in
+    if found = [] then one mem :: rest
+    else List.map bump found @ rest) ls
+
 let in_both a b =
   List.filter (fun x -> List.mem x a) b
 

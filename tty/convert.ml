@@ -4,6 +4,7 @@ open Printf
 let brackets = sprintf "[%s]"
 let commas = String.concat ", "
 let spaces = String.concat " "
+let sort_str = List.sort String.compare
 
 let int2ichar i =
   char_of_int (48 + i)
@@ -65,6 +66,24 @@ let bld2str = function
   | Build.Temple -> "temple"
   | Build.Trade trade ->
       sprintf "trade guild%s" (trade_suffix trade)
+
+let bld_n2str (n, kind) =
+  let str = bld2str kind in
+  if n < 1 then ""
+  else if n = 1 then str
+  else sprintf "%s (%d)" str n
+
+let bld_ls2str ls =
+  Listx.group ls
+  |> List.map bld_n2str
+  |> sort_str
+  |> commas
+
+let bld_q2str ls =
+  ls
+  |> List.rev_map (fun (kind, cost) ->
+      sprintf "%s (%s)" (bld2str kind) (res2str cost))
+  |> commas
 
 let deity2str = function
   | Deity.Arnerula -> "arnerula"
