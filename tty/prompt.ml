@@ -1,6 +1,9 @@
 open Convert
 open Printf
 
+let either a b x =
+  if x then a else b
+
 let sort_by_str to_str ls =
   List.sort (fun a b -> String.compare (to_str a) (to_str b)) ls
 
@@ -56,15 +59,21 @@ let deity () =
   |> choose_one ls Game.Deity.empty
   |> echo (fun d -> Tty.spln (deity2str d) "chosen")
 
+let dervish cap =
+  Tty.writeln (sprintf "%d dervish available" cap);
+  Tty.prompt_yn "accept? y/n"
+  |> either cap 0
+
 let leader () =
   let ls = Game.Leader.kinds in
   List.map ldr2kind ls |> horizontal "leaders";
   Tty.prompt "choose"
   |> choose_one ls Game.Leader.(kind_of empty)
 
-let mercs x =
-  Tty.writeln (sprintf "%d mercenaries available" x);
+let mercs cap =
+  Tty.writeln (sprintf "%d mercenaries available" cap);
   Tty.prompt_yn "accept? y/n"
+  |> either cap 0
 
 let nations chosen =
   let ls = Game.Nation.kinds in
@@ -78,3 +87,18 @@ let nations chosen =
 let scout () =
   Tty.prompt_yn "send scouts? y/n"
   |> echo (fun x -> if x then Tty.writeln "scouts sent")
+
+let trade_nation () =
+  let ls = Game.Nation.kinds in
+  List.map nation2str ls
+  |> horizontal "trade guild nation";
+  Tty.prompt "choose"
+  |> choose_one ls (List.hd ls)
+
+let trade () =
+  let nation = trade_nation () in
+  ["boost support"; "certain support"]
+  |> horizontal "trade type";
+  if Tty.prompt_int "choose" = 2
+  then Game.Nation.Certain nation
+  else Game.Nation.Boost nation

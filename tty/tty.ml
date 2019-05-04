@@ -17,6 +17,9 @@ let writelns = List.iter writeln
 let pairln s1 s2 =
   writeln (s1 ^ ": " ^ s2)
 
+let ifpairln s1 s2 =
+  if s2 <> "" then pairln s1 s2
+
 let spln s1 s2 =
   writeln (s1 ^ " " ^ s2)
 
@@ -37,6 +40,10 @@ let prompt str =
 
 let lnprompt str =
   ln (); prompt str
+
+let prompt_int str =
+  try int_of_string (prompt str)
+  with Failure _ -> 0
 
 let prompt_yn str =
   prompt str = "y"

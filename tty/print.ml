@@ -3,6 +3,12 @@ open Game
 open Printf
 
 module Build = struct
+  let all t =
+    let ready, built, queued = Game.Build.status t in
+    Tty.ifpairln "built" (bld_ls2str ready);
+    Tty.ifpairln "finished" (bld_ls2str built);
+    Tty.ifpairln "queued" (bld_q2str queued)
+
   let supply s =
     Tty.spln "construction costs" (sup2str s)
 end

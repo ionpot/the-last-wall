@@ -1,7 +1,17 @@
 module Phase = Game.Phase2
 
 module Make (S : Game.State.S) = struct
-  let input x = x
+  let input =
+    let open Phase.Input in
+    function
+      | Build avlb ->
+          S.Build.return Print.Build.all;
+          Build (S.Build.return (Prompt.build avlb))
+      | Dervish count -> Dervish (Prompt.dervish count)
+      | Mercs count -> Mercs (Prompt.mercs count)
+      | Nations chosen -> Nations (Prompt.nations chosen)
+      | Trade _ -> Trade (Prompt.trade ())
+
   let output _ = ()
 end
 
