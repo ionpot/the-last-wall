@@ -12,39 +12,21 @@ module Make (S : Game.State.S) = struct
       | Nations chosen -> Nations (Prompt.nations chosen)
       | Trade _ -> Trade (Prompt.trade ())
 
-  let output _ = ()
+  let output =
+    let open Convert in
+    let open Phase.Output in
+    function
+      | Attack (_, rp) -> Tty.pairln "seen" (report2str rp)
+      | Blessing res -> Tty.pairln "blessing" (res2str res)
+      | BuildManp m -> Print.Build.manp m
+      | BuildStatus s -> Print.Build.status s
+      | BuildSupply s -> Print.Build.supply s
+      | Cavalry c -> Tty.pairln "cavalry" (string_of_int c)
+      | Defeat _ -> Tty.writeln "defeat"
+      | LeaderNew ldr -> Tty.pairln "new leader" (ldr2full ldr)
+      | Market sup -> Tty.pairln "market" (sup2str sup)
+      | Starvation units -> Tty.pairln "starvation" (units2str units)
+      | Support s -> Print.support s
+      | Turn t -> Tty.lnwriteln (turn2str t)
+      | Upkeep sup -> Tty.pairln "upkeep" (sup2str sup)
 end
-
-(*
-let phase2 evt update =
-  let open Game.Phase2 in
-  match evt with
-  | Blessing res -> Tty.pairln "blessing" (res2str res)
-  | Build _ ->
-      let bs = S.with_bld Prompt.build in
-      Print.bld_chosen bs;
-      update (Build bs)
-  | BuildManpower m -> Tty.pairln "construction" (manp2str m)
-  | BuildSupply s -> Tty.pairln "construction" (sup2str s)
-  | BuildTick -> ()
-  | Built bs -> Tty.pairln "built" (buildings2str bs)
-  | Cavalry x -> Tty.pairln "cavalry" (string_of_int x)
-  | Defeat
-  | End -> ()
-  | LeaderNew ldr -> Tty.pairln "new leader" (leader2str ldr)
-  | Market sup -> Tty.pairln "market" (sup2str sup)
-  | Mercs (x, _) ->
-      let ok = Prompt.mercs x in
-      update (Mercs (x, ok))
-  | Nations ls ->
-      let ns = Prompt.nations ls in
-      Print.nations_chosen ns;
-      update (Nations ns)
-  | Needs q -> Print.queued q
-  | Report ls -> Tty.pairln "seen" (report2str ls)
-  | ReportSum x -> Tty.pairln "seen" (sum2str x)
-  | Starvation (men, cav) -> Tty.pairln "starvation" (units2str men cav)
-  | Support ls -> Print.support ls
-  | Turn x -> Tty.lnwriteln ("turn " ^ string_of_int x)
-  | Upkeep sup -> Tty.pairln "upkeep" (sup2str sup)
-  *)

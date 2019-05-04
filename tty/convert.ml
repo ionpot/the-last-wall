@@ -3,6 +3,7 @@ open Printf
 
 let brackets = sprintf "[%s]"
 let commas = String.concat ", "
+let map_commas f ls = List.map f ls |> commas
 let spaces = String.concat " "
 let sort_str = List.sort String.compare
 
@@ -92,6 +93,67 @@ let deity2str = function
   | Deity.Sitera -> "sitera"
   | Deity.Sekrefir -> "sekrefir"
 
+let unit2str = function
+  | Units.Cavalry -> "cavalry"
+  | Units.Demon -> "demon"
+  | Units.Dervish -> "dervish"
+  | Units.Harpy -> "harpy"
+  | Units.Men -> "men"
+  | Units.Orc -> "orc"
+  | Units.Skeleton -> "skeleton"
+
+let unit_ls2str kinds =
+  map_commas unit2str kinds
+
+let party2str (n, kind) =
+  if n > 0
+  then sprintf "%d %s" n (unit2str kind)
+  else ""
+
+let units2str t =
+  Units.kinds_of t
+  |> List.map (fun k -> Units.count k t, k)
+  |> map_commas party2str
+
+let report_type2str = function
+  | Attack.Accurate ls -> map_commas party2str ls
+  | Attack.Vague (count, kinds) ->
+      if count > 0
+      then sprintf "about %d (%s)" count (unit_ls2str kinds)
+      else ""
+
+let report2str rp =
+  let str = report_type2str rp in
+  if str = "" then "no enemies" else str
+
+let month2str = function
+  | Month.Jan -> "january"
+  | Month.Feb -> "february"
+  | Month.Mar -> "march"
+  | Month.Apr -> "april"
+  | Month.May -> "may"
+  | Month.Jun -> "june"
+  | Month.Jul -> "july"
+  | Month.Aug -> "august"
+  | Month.Sep -> "september"
+  | Month.Oct -> "october"
+  | Month.Nov -> "november"
+  | Month.Dec -> "december"
+
+let degree2str = function
+  | Weather.Light -> "light"
+  | Weather.Heavy -> "heavy"
+
+let weather2str = function
+  | Weather.Clear -> "clear sky"
+  | Weather.Cloudy -> "cloudy"
+  | Weather.Wind -> "strong winds"
+  | Weather.Rain d -> sprintf "%s rain" (degree2str d)
+  | Weather.Snow d -> sprintf "%s snow" (degree2str d)
+
+let turn2str (turn, m, w) =
+  sprintf "%d (%s, %s)" turn (month2str m) (weather2str w)
+
   (*
 let bstat2str b bs =
   let module B = Buildings in
@@ -145,21 +207,11 @@ let enemies2str ls =
   List.map party2str ls
   |> commas
 
-let report2str ls =
-  let str = List.map party2str ls |> commas in
-  if str = "" then "no enemies" else str
-
 let status2str (mnp, sup, cav) =
   (if cav > 0 then [cav2str cav] else [])
   |> List.cons (sup2str sup)
   |> List.cons (manp2str mnp)
   |> commas
-
-let sum2str (count, enemies) =
-  let str = List.map enemy2str enemies |> commas in
-  if count > 0
-  then sprintf "about %d (%s)" count str
-  else "no enemies"
 
 let units2str men cav =
   let ls = [men, "men"; cav, "cavalry"] in
