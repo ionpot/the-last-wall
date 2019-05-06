@@ -22,6 +22,7 @@ val kinds_of : t -> kind list
 val power : t -> Defs.power
 val power_of : kind -> t -> Defs.power
 val ratio : kind -> kind -> t -> float
+val report : t -> report
 val starve : Defs.supply -> t -> t
 val upkeep : t -> Defs.supply
 
