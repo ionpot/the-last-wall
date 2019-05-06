@@ -22,7 +22,7 @@ module Make (S : Game.State.S) = struct
       | BuildStatus s -> Print.Build.status s
       | BuildSupply s -> Print.Build.supply s
       | Cavalry c -> Tty.pairln "cavalry" (string_of_int c)
-      | Defeat _ -> Tty.writeln "defeat"
+      | Defeat -> Tty.writeln "defeat"
       | LeaderNew ldr -> Tty.pairln "new leader" (ldr2full ldr)
       | Market sup -> Tty.pairln "market" (sup2str sup)
       | Starvation units -> Tty.pairln "starvation" (units2str units)
