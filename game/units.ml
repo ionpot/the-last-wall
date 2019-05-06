@@ -102,6 +102,8 @@ let ratio kind1 kind2 t =
   let b = count kind2 t in
   float a /. float b
 
+let report t = t
+
 let starve supply t =
   let ns =
     List.map (fun k -> count k t) defends
