@@ -7,6 +7,12 @@ let map_commas f ls = List.map f ls |> commas
 let spaces = String.concat " "
 let sort_str = List.sort String.compare
 
+let percent2str x =
+  sprintf "%.2f%%" (x *. 100.)
+
+let power2str x =
+  sprintf "%.3f" x
+
 let int2ichar i =
   char_of_int (48 + i)
 
@@ -25,6 +31,7 @@ let ldr2kind = function
   | Leader.Expert -> "expert"
   | Leader.Warrior -> "warrior"
 
+let ldr2first ldr = Leader.name_of ldr |> Name.first
 let ldr2name ldr = Leader.name_of ldr |> Name.full
 
 let ldr2status ldr =
@@ -125,6 +132,12 @@ let report_type2str = function
 let report2str rp =
   let str = report_type2str rp in
   if str = "" then "no enemies" else str
+
+let barrage2str x =
+  units2str Units.(make x Orc)
+
+let smite2str x =
+  units2str Units.(make x Skeleton)
 
 let month2str = function
   | Month.Jan -> "january"
