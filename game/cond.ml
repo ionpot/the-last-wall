@@ -30,7 +30,7 @@ module Defeat = struct
     let value = S.Ended.set
   end
   module Check (S : State.S) = struct
-    let value = not (S.Units.empty ())
+    let value = S.Units.empty ()
   end
 end
 

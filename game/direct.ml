@@ -58,7 +58,9 @@ module BuildSupply = struct
   module Apply (S : State.S) = struct
     let avlb = S.Supply.get ()
     let value need =
-      S.Build.map (Build.supp (min need avlb))
+      let sup = min need avlb in
+      S.Build.map (Build.supp sup);
+      S.Supply.sub sup
   end
   module Make (S : State.S) = struct
     let value = S.Build.return Build.need_supp
