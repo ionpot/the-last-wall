@@ -118,8 +118,7 @@ let party2str (n, kind) =
   else ""
 
 let units2str t =
-  Units.kinds_of t
-  |> List.map (fun k -> Units.count k t, k)
+  Units.report t
   |> map_commas party2str
 
 let report_type2str = function
