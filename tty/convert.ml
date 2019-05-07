@@ -2,8 +2,9 @@ open Game
 open Printf
 
 let brackets = sprintf "[%s]"
+let clean = List.filter (fun str -> str <> "")
 let commas = String.concat ", "
-let map_commas f ls = List.map f ls |> commas
+let map_commas f ls = List.map f ls |> clean |> commas
 let spaces = String.concat " "
 let sort_str = List.sort String.compare
 
