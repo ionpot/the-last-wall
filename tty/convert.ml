@@ -15,7 +15,7 @@ let power2str x =
   sprintf "%.3f" x
 
 let int2ichar i =
-  char_of_int (48 + i)
+  char_of_int (48 + i + 1)
 
 let manp2str mp =
   sprintf "%d mnp" mp
