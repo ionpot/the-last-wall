@@ -37,17 +37,19 @@ module Phase3 = Step(struct
   module Handler = Phase3
 end)
 
-(*
 let status =
-  let get () = S.Supply.get (), S.Units.get () in
+  let open Convert in
+  let open Printf in
+  let get () = S.Supply.get (), S.Units.return Game.Units.report in
+  let ustr () = S.Units.return units2str in
+  let str (s, _) = sprintf "%s, %s" (sup2str s) (ustr ()) in
   let x = ref (get ()) in
   fun () ->
     let y = get () in
     if !x <> y then begin
       x := y;
-      Tty.pairln "status" (status2str y)
+      Tty.pairln "status" (str y)
     end
-*)
 
 let map = function
   | Phases.Ph1 (evt, steps) -> Phases.Ph1 (Phase1.map evt, steps)
@@ -59,7 +61,7 @@ let rec check = function
   | Main.End -> Tty.fin ()
 
 and after evt =
-  (*status ();*)
+  status ();
   Tty.flush ();
   check evt
 
