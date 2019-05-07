@@ -34,7 +34,7 @@ let sum ls =
 let which t = t
 
 let chosen ls t =
-  Listx.pick_first max_allowed t
+  Listx.pick_first max_allowed ls
 
 module Roll (Dice : Dice.S) = struct
   let roll (a, b) = Dice.between a b
