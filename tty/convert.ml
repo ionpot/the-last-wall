@@ -18,14 +18,14 @@ let int2ichar i =
   char_of_int (48 + i + 1)
 
 let manp2str mp =
-  sprintf "%d mnp" mp
+  sprintf "%d men" mp
 
 let sup2str sp =
   sprintf "%d sup" sp
 
 let res2str res =
   let m, s = Resource.(manp_of res, supp_of res) in
-  sprintf "%s, %s" (manp2str m) (sup2str s)
+  sprintf "%s, %s" (sup2str s) (manp2str m)
 
 let ldr2kind = function
   | Leader.Aristocrat -> "aristocrat"
