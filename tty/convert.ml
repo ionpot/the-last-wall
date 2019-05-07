@@ -165,4 +165,4 @@ let weather2str = function
   | Weather.Snow d -> sprintf "%s snow" (degree2str d)
 
 let turn2str (turn, m, w) =
-  sprintf "%d (%s, %s)" turn (month2str m) (weather2str w)
+  sprintf "turn %d (%s, %s)" turn (month2str m) (weather2str w)
