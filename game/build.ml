@@ -95,7 +95,7 @@ let manp m t =
   let f mp cost =
     if Resource.has_supp cost
     then mp, cost
-    else Resource.take_manp mp cost
+    else Resource.deduce_manp mp cost
   in
   map_queue f m t
 
@@ -129,7 +129,7 @@ let start kinds t =
   |> enqueue ls
 
 let supp s t =
-  map_queue Resource.take_supp s t
+  map_queue Resource.deduce_supp s t
 
 let update (ready, built, queue) t =
   { avlb = enables built t.avlb;
