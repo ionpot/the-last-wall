@@ -31,6 +31,19 @@ let group ls =
     if found = [] then one mem :: rest
     else List.map bump found @ rest) ls
 
+let index_of a ls =
+  let rec f i = function
+    | [] -> -1
+    | x :: xs -> if a = x then i else f (succ i) xs
+  in f 0 ls
+
+let compare ls a b =
+  let i = index_of a ls in
+  let j = index_of b ls in
+  if i < j then -1
+  else if i > j then 1
+  else 0
+
 let in_both a b =
   List.filter (fun x -> List.mem x a) b
 

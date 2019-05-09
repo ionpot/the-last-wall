@@ -1,10 +1,12 @@
 val apply_to : ('a -> unit) list -> 'a -> unit
 val build : ('a list -> 'a -> 'a list) -> 'a list -> 'a list
+val compare : 'a list -> 'a -> 'a -> int
 val count : 'a -> 'a list -> int
 val discard : ('a -> bool) -> 'a list -> 'a list
 val filteri : (int -> 'a -> bool) -> 'a list -> 'a list
 val fold_map : ('a -> 'b -> 'a * 'b) -> 'a -> 'b list -> 'a * 'b list
 val group : 'a list -> (int * 'a) list
+val index_of : 'a -> 'a list -> int
 val in_both : 'a list -> 'a list -> 'a list
 val map_with : ('a -> 'b -> 'a * 'b) -> 'a -> 'b list -> 'b list
 val min_of : int list -> int

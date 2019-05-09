@@ -101,6 +101,9 @@ let deity2str = function
   | Deity.Sitera -> "sitera"
   | Deity.Sekrefir -> "sekrefir"
 
+let unit_order = Units.([Men; Cavalry; Dervish; Skeleton; Orc; Demon; Harpy])
+let unit_cmp = Listx.compare unit_order
+
 let unit2str = function
   | Units.Cavalry -> "cavalry"
   | Units.Demon -> "demon"
@@ -110,20 +113,24 @@ let unit2str = function
   | Units.Orc -> "orc"
   | Units.Skeleton -> "skeleton"
 
-let unit_ls2str kinds =
-  map_commas unit2str kinds
-
 let party2str (n, kind) =
   if n > 0
   then sprintf "%d %s" n (unit2str kind)
   else ""
 
-let units2str t =
-  Units.report t
+let unit_ls2str kinds =
+  List.sort unit_cmp kinds
+  |> map_commas unit2str
+
+let unit_pairs2str ls =
+  List.sort (fun (_, a) (_, b) -> unit_cmp a b) ls
   |> map_commas party2str
 
+let units2str t =
+  unit_pairs2str (Units.report t)
+
 let report_type2str = function
-  | Attack.Accurate ls -> map_commas party2str ls
+  | Attack.Accurate ls -> unit_pairs2str ls
   | Attack.Vague (count, kinds) ->
       if count > 0
       then sprintf "about %d (%s)" count (unit_ls2str kinds)
