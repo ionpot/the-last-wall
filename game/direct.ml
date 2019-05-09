@@ -12,8 +12,7 @@ module Attack = struct
     let arriving = S.Turn.return Attack.roll
     let enemies = S.Enemy.return (Units.combine arriving)
     let scout = S.Scout.return Attack.report
-    let report = S.Enemy.return scout
-    let value = enemies, report
+    let value = enemies, scout enemies
   end
 end
 
