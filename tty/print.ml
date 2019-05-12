@@ -30,6 +30,15 @@ module Leader = struct
     sprintf "%s has died, was %s" (ldr2full t) (ldr2status t)
     |> Tty.writeln
 
+  let to_full t =
+    if Leader.is_alive t then ldr2full t else ""
+
+  let to_fled t units =
+    let units = units2str units in
+    match to_full t with
+    | "" -> sprintf "%s has fled" units
+    | ldr -> sprintf "%s fled with %s" ldr units
+
   let lvup t =
     sprintf "%s is now %s" (ldr2first t) (ldr2status t)
     |> Tty.writeln
@@ -37,14 +46,13 @@ end
 
 module Combat = struct
   let stats atk def dmg =
-    let attack = sprintf "%s attack power" (power2str atk) in
-    let defense = sprintf "%s damage reduction" (percent2str def) in
+    let attack = sprintf "%s attack" (power2str atk) in
+    let defense = sprintf "%s dr" (percent2str def) in
     let damage = sprintf "%s damage" (power2str dmg) in
-    sprintf "%s - %s = %s" attack defense damage
+    sprintf "%s -> %s -> %s" attack defense damage
 
   let retreat ldr units enemies =
-    sprintf "%s fled with %s" (ldr2first ldr) (units2str units)
-    |> Tty.writeln;
+    Tty.writeln (Leader.to_fled ldr units);
     Tty.pairln "remaining enemies" (units2str enemies)
 
   let win ldr casualty died =
@@ -54,6 +62,7 @@ module Combat = struct
   let outcome (module O : Combat.Outcome) units enemies ldr =
     Tty.pairln "attacking" (units2str enemies);
     Tty.pairln "defending" (units2str units);
+    Tty.ifpairln "leader" (Leader.to_full ldr);
     if O.cav_too_many
     then Tty.writeln "too many cavalry, defense reduced";
     Tty.writeln (stats O.attack O.defense O.damage);
