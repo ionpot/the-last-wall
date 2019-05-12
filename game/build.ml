@@ -45,13 +45,15 @@ let base_cost_of kind =
   let a, b = base_cost kind in
   Resource.(empty <+ a <+ b)
 
-let available t = t.avlb
-
 let built kind t =
   List.mem kind t.built
 
 let count kind t =
   Listx.count kind t.ready
+
+let ls_avlb t = t.avlb
+let ls_built t = t.built
+let ls_ready t = t.ready
 
 let mausoleums t =
   t.ready

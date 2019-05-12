@@ -17,7 +17,7 @@ module BuildAvlb = struct
     let value ls = S.Build.map (Build.start ls)
   end
   module Make (S : State.S) = struct
-    let value = S.Build.return Build.available
+    let value = S.Build.return Build.ls_avlb
   end
 end
 

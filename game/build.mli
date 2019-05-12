@@ -10,10 +10,12 @@ val empty : t
 
 val multiple : kind -> bool
 
-val available : t -> kind list
 val built : kind -> t -> bool
 val cost_of : kind -> t -> cost
 val count : kind -> t -> count
+val ls_avlb : t -> kind list
+val ls_built : t -> kind list
+val ls_ready : t -> kind list
 val mausoleums : t -> count
 val need_manp : t -> manpower
 val need_supp : t -> supply

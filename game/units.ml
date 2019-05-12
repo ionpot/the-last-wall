@@ -42,6 +42,7 @@ module Expr = struct
   let make n k = (n, k)
   let map_count f (n, k) = f n, k
   let power (n, k) = Defs.to_power n (base_power k)
+  let power_base (_, k) = base_power k
   let set_count n (_, k) = n, k
   let sub (n, k) (n', k') =
     if k = k' then Number.sub n' n, k else (n', k')
@@ -139,7 +140,7 @@ module Roll (Dice : Dice.S) = struct
     List.map (Expr.map_count try_round) t
 
   let pick power t =
-    List.map (fun expr -> Expr.(count expr, power expr)) t
+    List.map (fun expr -> Expr.(count expr, power_base expr)) t
     |> Pick.random power
     |> List.map2 (fun expr n -> Expr.set_count n expr) t
 
