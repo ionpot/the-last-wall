@@ -34,7 +34,7 @@ module BuildManp = struct
   module Apply (S : State.S) = struct
     let avlb = S.Units.return Units.(count Men)
     let value need =
-      S.Build.map (Build.manp (min need avlb))
+      S.Build.map (Build.manp need avlb)
   end
   module Make (S : State.S) = struct
     let value = S.Build.return Build.need_manp
@@ -57,9 +57,8 @@ module BuildSupply = struct
   module Apply (S : State.S) = struct
     let avlb = S.Supply.get ()
     let value need =
-      let sup = min need avlb in
-      S.Build.map (Build.supp sup);
-      S.Supply.sub sup
+      S.Build.map (Build.supp need avlb);
+      S.Supply.set (Number.sub avlb need)
   end
   module Make (S : State.S) = struct
     let value = S.Build.return Build.need_supp
