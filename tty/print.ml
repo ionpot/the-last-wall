@@ -11,13 +11,18 @@ module Build = struct
   let all t =
     status Build.(ls_ready t, ls_built t, ls_queue t)
 
-  let manp m =
-    if m > 0 then
-    Tty.spln "construction used" (manp2str m)
+  let manp need units =
+    if need > 0 then
+    Units.(count Men units)
+    |> min need
+    |> manp2str
+    |> sprintf "%s worked in construction"
+    |> Tty.writeln
 
-  let supply s =
-    if s > 0 then
-    Tty.spln "construction costs" (sup2str s)
+  let supply need avlb =
+    if need > 0 then
+    sprintf "construction costs %s, have %s" (sup2str need) (sup2str avlb)
+    |> Tty.writeln
 end
 
 module Leader = struct

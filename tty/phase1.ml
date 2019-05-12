@@ -13,7 +13,7 @@ module Make (S : Game.State.S) = struct
   let output =
     let open Phase.Output in
     function
-      | BuildSupply s -> Print.Build.supply s
+      | BuildSupply s -> S.Supply.return (Print.Build.supply s)
       | Starting (ldr, _, res) ->
           Tty.pairln "leader" (Convert.ldr2full ldr);
           Tty.pairln "starting" (Convert.res2str res)
