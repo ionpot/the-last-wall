@@ -9,7 +9,7 @@ module Build = struct
     Tty.ifpairln "in queue" (bld_q2str queued)
 
   let all t =
-    status (Build.status t)
+    status Build.(ls_ready t, ls_built t, ls_queue t)
 
   let manp m =
     if m > 0 then
