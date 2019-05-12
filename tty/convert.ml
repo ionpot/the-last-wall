@@ -4,6 +4,7 @@ open Printf
 let brackets = sprintf "[%s]"
 let clean = List.filter (fun str -> str <> "")
 let commas = String.concat ", "
+let if_empty a b = if b = "" then a else b
 let map_commas f ls = List.map f ls |> clean |> commas
 let spaces = String.concat " "
 let sort_str = List.sort String.compare
@@ -128,6 +129,7 @@ let unit_pairs2str ls =
 
 let units2str t =
   unit_pairs2str (Units.report t)
+  |> if_empty "none"
 
 let report_type2str = function
   | Attack.Accurate ls -> unit_pairs2str ls
@@ -137,8 +139,8 @@ let report_type2str = function
       else ""
 
 let report2str rp =
-  let str = report_type2str rp in
-  if str = "" then "no enemies" else str
+  report_type2str rp
+  |> if_empty "no enemies"
 
 let barrage2str x =
   units2str Units.(make x Orc)
