@@ -29,6 +29,7 @@ module From (M : From) : S = struct
 
   let chance fl =
     if fl >= 1. then true
+    else if fl < 0.0001 then false
     else M.float 1.0 < fl
 
   let deviate x y =
