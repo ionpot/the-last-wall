@@ -53,6 +53,7 @@ let count kind t =
 
 let ls_avlb t = t.avlb
 let ls_built t = t.built
+let ls_queue t = t.queue
 let ls_ready t = t.ready
 
 let mausoleums t =

@@ -15,6 +15,7 @@ val cost_of : kind -> t -> cost
 val count : kind -> t -> count
 val ls_avlb : t -> kind list
 val ls_built : t -> kind list
+val ls_queue : t -> kind list
 val ls_ready : t -> kind list
 val mausoleums : t -> count
 val need_manp : t -> manpower
