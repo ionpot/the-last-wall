@@ -86,21 +86,22 @@ let trade t =
   let f x = function Trade x -> x | _ -> x in
   List.fold_left f Nation.NoTrade t.ready
 
-let map_queue f x t =
+let map_queue f need avlb t =
   let f' acc (kind, cost) =
     let acc', cost' = f acc cost in
     acc', (kind, cost')
   in
+  let x = Number.sub need avlb in
   let queue = Listx.map_with f' x t.queue in
   { t with queue }
 
-let manp m t =
+let manp need avlb t =
   let f mp cost =
     if Resource.has_supp cost
     then mp, cost
-    else Resource.deduce_manp mp cost
+    else Resource.take_manp mp cost
   in
-  map_queue f m t
+  map_queue f need avlb t
 
 let to_avlb kind t =
   let ls = t.avlb in
@@ -131,8 +132,8 @@ let start kinds t =
   { t with avlb = rm_ls ls t.avlb }
   |> enqueue ls
 
-let supp s t =
-  map_queue Resource.deduce_supp s t
+let supp need avlb t =
+  map_queue Resource.take_supp need avlb t
 
 let update (ready, built, queue) t =
   { avlb = enables built t.avlb;

@@ -25,9 +25,9 @@ val status : t -> status
 val trade : t -> Nation.trade
 
 val died : Leader.t -> t -> t
-val manp : manpower -> t -> t
+val manp : manpower -> manpower -> t -> t
 val raze : kind -> t -> t
 val set_trade : Nation.trade -> t -> t
 val start : kind list -> t -> t
-val supp : supply -> t -> t
+val supp : supply -> supply -> t -> t
 val update : status -> t -> t
