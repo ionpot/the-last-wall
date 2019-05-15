@@ -107,8 +107,9 @@ let trade_nation () =
 
 let trade () =
   let nation = trade_nation () in
-  ["boost support"; "certain support"]
+  let boost, certain = Game.Nation.(Boost nation, Certain nation) in
+  [boost; certain]
+  |> List.map trade2str
   |> horizontal "trade type";
-  if Tty.prompt_int "choose" = 2
-  then Game.Nation.Certain nation
-  else Game.Nation.Boost nation
+  if Tty.prompt_int "choose" = 2 then certain else boost
+  |> echo (fun x -> Tty.pairln "chosen" (trade2str x))
