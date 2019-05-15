@@ -27,15 +27,18 @@ end
 
 module Leader = struct
   let died t =
-    sprintf "%s has died, was %s" (ldr2full t) (ldr2status t)
+    sprintf "%s has died, was %s" (ldr2name t) (ldr2status t)
     |> Tty.writeln
 
-  let to_full t =
-    if Leader.is_alive t then ldr2full t else ""
+  let check f t =
+    if Leader.is_alive t then f t else ""
+
+  let to_full = check ldr2full
+  let to_name = check ldr2name
 
   let to_fled t units =
     let units = units2str units in
-    match to_full t with
+    match to_name t with
     | "" -> sprintf "%s has fled" units
     | ldr -> sprintf "%s fled with %s" ldr units
 
