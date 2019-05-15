@@ -58,6 +58,9 @@ module Ls = struct
   let clean t =
     List.filter Expr.has_count t
 
+  let discard kind t =
+    Listx.discard (Expr.is kind) t
+
   let filter kind t =
     List.filter (Expr.is kind) t
 
@@ -118,6 +121,8 @@ let upkeep t =
 
 let add n kind t =
   Ls.add (Expr.make n kind) t
+
+let rm = Ls.discard
 
 let sub n kind t =
   Ls.sub (Expr.make n kind) t

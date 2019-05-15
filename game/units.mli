@@ -27,6 +27,7 @@ val starve : Defs.supply -> t -> t
 val upkeep : t -> Defs.supply
 
 val add : Defs.count -> kind -> t -> t
+val rm : kind -> t -> t
 val sub : Defs.count -> kind -> t -> t
 
 val combine : t -> t -> t

@@ -73,7 +73,10 @@ module Revive = struct
   module Make (S : State.S) = struct
     module Roll = Units.Roll(S.Dice)
     let pwr = S.Units.return Units.(power_of Dervish)
-    let value = S.Casualty.return (Roll.pick pwr)
+    let value =
+      Units.(rm Cavalry)
+      |> S.Casualty.return
+      |> Roll.pick pwr
   end
 end
 
