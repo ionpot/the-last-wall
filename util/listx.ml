@@ -8,6 +8,17 @@ let count x xs =
   List.filter ((=) x) xs
   |> List.length
 
+let dedupe_if f ls =
+  let f acc x =
+    if f x && List.mem x acc
+    then acc
+    else x :: acc
+  in
+  build f ls
+
+let dedupe ls =
+  dedupe_if (fun _ -> true) ls
+
 let discard f ls =
   List.filter (fun x -> not (f x)) ls
 
@@ -73,14 +84,6 @@ let sumf ls =
 
 let swap_nth i x ls =
   List.mapi (fun j y -> if i = j then x else y) ls
-
-let undupe ls =
-  let f acc x =
-    if List.mem x acc
-    then acc
-    else x :: acc
-  in
-  build f ls
 
 let unfold x f =
   let rec next = function

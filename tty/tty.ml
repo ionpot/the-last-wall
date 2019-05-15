@@ -38,6 +38,9 @@ let prompt str =
   write (str ^ "> ");
   readln ()
 
+let prompt_chars str =
+  prompt str |> Convert.str2chars
+
 let lnprompt str =
   ln (); prompt str
 

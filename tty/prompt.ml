@@ -41,16 +41,26 @@ let vertical prefix ls =
 let barrage () =
   Tty.prompt_yn "arrow barrage? y/n"
 
-let build avlb t =
-  let avlb' = sort_by_str bld2str avlb in
-  List.map (fun kind ->
-    let cost = Game.Build.cost_of kind t in
-    sprintf "%s [%s]" (bld2str kind) (res2str cost)) avlb'
-  |> vertical "buildings available";
-  Tty.prompt "build?"
-  |> choose_from avlb'
-  |> echo (fun ls -> if ls <> []
-    then List.map bld2str ls |> commas |> Tty.pairln "building")
+module Build = struct
+  let add_from avlb ch out =
+    try List.nth avlb (ichar2int ch) :: out
+    with _ -> out
+
+  let choose avlb ls =
+    List.fold_right (add_from avlb) ls []
+    |> Listx.dedupe_if (fun k -> not (Game.Build.multiple k))
+
+  let from avlb t =
+    let avlb' = sort_by_str bld2str avlb in
+    List.map (fun kind ->
+      let cost = Game.Build.cost_of kind t in
+      sprintf "%s [%s]" (bld2str kind) (res2str cost)) avlb'
+    |> vertical "buildings available";
+    Tty.prompt_chars "build?"
+    |> choose avlb'
+    |> echo (fun ls -> if ls <> []
+      then List.map bld2str ls |> commas |> Tty.pairln "building")
+end
 
 let deity () =
   let ls = Game.Deity.list in

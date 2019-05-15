@@ -6,7 +6,7 @@ module Make (S : Game.State.S) = struct
     function
       | Build avlb ->
           S.Build.return Print.Build.all;
-          Build (S.Build.return (Prompt.build avlb))
+          Build (S.Build.return (Prompt.Build.from avlb))
       | Dervish count -> Dervish (Prompt.dervish count)
       | Mercs count -> Mercs (Prompt.mercs count)
       | Nations chosen -> Nations (Prompt.nations chosen)

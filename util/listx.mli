@@ -2,6 +2,8 @@ val apply_to : ('a -> unit) list -> 'a -> unit
 val build : ('a list -> 'a -> 'a list) -> 'a list -> 'a list
 val compare : 'a list -> 'a -> 'a -> int
 val count : 'a -> 'a list -> int
+val dedupe : 'a list -> 'a list
+val dedupe_if : ('a -> bool) -> 'a list -> 'a list
 val discard : ('a -> bool) -> 'a list -> 'a list
 val filteri : (int -> 'a -> bool) -> 'a list -> 'a list
 val fold_map : ('a -> 'b -> 'a * 'b) -> 'a -> 'b list -> 'a * 'b list
@@ -17,6 +19,5 @@ val slice_from : ('a -> bool) -> 'a list -> 'a list
 val sum : int list -> int
 val sumf : float list -> float
 val swap_nth : int -> 'a -> 'a list -> 'a list
-val undupe : 'a list -> 'a list
 val unfold : 'a -> ('a -> ('a * 'b) option) -> 'b list
 val unfold_with : 'a -> ('a -> ('a * 'b) option) -> 'a * 'b list

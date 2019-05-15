@@ -9,14 +9,24 @@ let map_commas f ls = List.map f ls |> clean |> commas
 let spaces = String.concat " "
 let sort_str = List.sort String.compare
 
+let str2chars str =
+  let rec next i ls =
+    let j = pred i in
+    if j < 0 then ls else next j (str.[j] :: ls)
+  in
+  next (String.length str) []
+
 let percent2str x =
   sprintf "%.2f%%" (x *. 100.)
 
 let power2str x =
   sprintf "%.3f" x
 
+let ichar2int ch =
+  int_of_char ch - 49
+
 let int2ichar i =
-  char_of_int (48 + i + 1)
+  char_of_int (49 + i)
 
 let manp2str mp =
   sprintf "%d men" mp
