@@ -35,8 +35,10 @@ let sup2str sp =
   sprintf "%d sup" sp
 
 let res2str res =
-  let m, s = Resource.(manp_of res, supp_of res) in
-  sprintf "%s, %s" (sup2str s) (manp2str m)
+  Resource.([supp_of res, sup2str; manp_of res, manp2str])
+  |> List.filter (fun (n, _) -> n > 0)
+  |> List.map (fun (n, f) -> f n)
+  |> commas
 
 let ldr2kind = function
   | Leader.Aristocrat -> "aristocrat"
