@@ -7,7 +7,7 @@ let defends = [Men; Cavalry; Dervish]
 
 let abundance_of = function
   | Demon -> 0.3
-  | Harpy -> 0.2
+  | Harpy -> 0.15
   | Orc -> 0.6
   | Skeleton -> 1.25
   | _ -> 0.
