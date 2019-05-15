@@ -128,7 +128,7 @@ let set_trade trade t =
   { t with built = f t.built; ready = f t.ready }
 
 let start kinds t =
-  let ls = Listx.in_both kinds t.avlb in
+  let ls = Listx.in_both t.avlb kinds in
   { t with avlb = rm_ls ls t.avlb }
   |> enqueue ls
 
