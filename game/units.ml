@@ -7,7 +7,7 @@ let defends = [Men; Cavalry; Dervish]
 
 let abundance_of = function
   | Demon -> 0.3
-  | Harpy -> 0.2
+  | Harpy -> 0.15
   | Orc -> 0.6
   | Skeleton -> 1.25
   | _ -> 0.
@@ -57,6 +57,9 @@ let make n kind = [n, kind]
 module Ls = struct
   let clean t =
     List.filter Expr.has_count t
+
+  let discard kind t =
+    Listx.discard (Expr.is kind) t
 
   let filter kind t =
     List.filter (Expr.is kind) t
@@ -118,6 +121,8 @@ let upkeep t =
 
 let add n kind t =
   Ls.add (Expr.make n kind) t
+
+let rm = Ls.discard
 
 let sub n kind t =
   Ls.sub (Expr.make n kind) t
