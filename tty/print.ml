@@ -33,12 +33,13 @@ module Leader = struct
   let check f t =
     if Leader.is_alive t then f t else ""
 
+  let to_first = check ldr2first
   let to_full = check ldr2full
   let to_name = check ldr2name
 
   let to_fled t units =
     let units = units2str units in
-    match to_name t with
+    match to_first t with
     | "" -> sprintf "%s has fled" units
     | ldr -> sprintf "%s fled with %s" ldr units
 
