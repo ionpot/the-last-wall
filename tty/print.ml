@@ -77,7 +77,7 @@ end
 let can_barrage w =
   let open Direct.CanBarrage in
   function
-    | No Leader -> ()
+    | No Leader -> Tty.writeln "no leader to lead arrow barrage"
     | No Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
     | Yes -> ()
 
