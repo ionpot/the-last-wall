@@ -67,7 +67,8 @@ module Make (S : State.S) = struct
   end
   module Units = Units(S)
   let ldr_alive = S.Leader.check Leader.is_alive
-  let ldr_dr = S.Leader.return Leader.defense_of
+  let ldr_dr =
+    if ldr_alive then S.Leader.return Leader.defense_of else 0.
   let barrage_dr =
     if ldr_alive then S.Barraging.either barrage_dr 0. else 0.
   let harpy_dr = floor_harpy_dr (to_power Units.harpies harpy_dr)
