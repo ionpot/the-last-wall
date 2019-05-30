@@ -144,7 +144,7 @@ module Ops (Num : Pick.Num) (Dice : Dice.S) = struct
 end
 
 module Roll = struct
-  module Float (Dice : Dice.S) = struct
+  module Dist (Dice : Dice.S) = struct
     module Pick = Pick.With(struct
       include Ops(Pick.Float)(Dice)
       let damage (k, n) = n
@@ -160,7 +160,7 @@ module Roll = struct
           Expr.make n' k)
   end
 
-  module Int (Dice : Dice.S) = struct
+  module Fill (Dice : Dice.S) = struct
     module Pick = Pick.With(struct
       include Ops(Pick.Int)(Dice)
       let damage (k, n) = Expr.(make n k |> power)

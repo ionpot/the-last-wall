@@ -34,10 +34,10 @@ val combine : t -> t -> t
 val reduce : t -> t -> t
 
 module Roll : sig
-  module Float : Dice.S -> sig
+  module Dist : Dice.S -> sig
     val from : Defs.power -> t -> t
   end
-  module Int : Dice.S -> sig
+  module Fill : Dice.S -> sig
     val from : Defs.power -> t -> t
   end
   module Report : Dice.S -> sig
