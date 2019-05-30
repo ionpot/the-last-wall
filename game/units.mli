@@ -33,15 +33,15 @@ val sub : Defs.count -> kind -> t -> t
 val combine : t -> t -> t
 val reduce : t -> t -> t
 
-module Roll : sig
-  module Dist : Dice.S -> sig
-    val from : Defs.power -> t -> t
-  end
-  module Fill : Dice.S -> sig
-    val from : Defs.power -> t -> t
-  end
-  module Report : Dice.S -> sig
-    val from : t -> report
-    val sum_from : t -> sum_report
-  end
+module Dist : Dice.S -> sig
+  val from : Defs.power -> t -> t
+end
+
+module Fill : Dice.S -> sig
+  val from : Defs.power -> t -> t
+end
+
+module Report : Dice.S -> sig
+  val from : t -> report
+  val sum_from : t -> sum_report
 end
