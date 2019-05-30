@@ -18,7 +18,7 @@ end
 
 module From (M : From) : S = struct
   let roll i =
-    M.int i + 1
+    if i > 0 then M.int i + 1 else 0
 
   let rollf fl =
     M.float (fl -. 1.) +. 1.

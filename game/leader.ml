@@ -52,7 +52,7 @@ let level_of t = t.level + t.xp / 2
 let name_of t = t.name
 let cha_of t = t.cha + level_of t / 4
 let cha_mod_of t = t |> cha_of |> mod_of
-let lvup t = t.xp mod 2 = 0
+let lvup t = is_alive t && t.xp mod 2 = 0
 let victories t = t.xp
 
 let base_defense t =
