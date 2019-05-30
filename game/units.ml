@@ -129,10 +129,10 @@ let sub n kind t =
   |> Ls.clean
 
 let combine t t' =
-  List.fold_left (fun t'' e -> Ls.add e t'') t t'
+  List.fold_left (Fn.flip Ls.add) t t'
 
 let reduce t t' =
-  List.fold_left (fun t'' e -> Ls.sub e t'') t' t
+  List.fold_left (Fn.flip Ls.sub) t' t
   |> Ls.clean
 
 module Ops (Num : Pick.Num) (Dice : Dice.S) = struct
