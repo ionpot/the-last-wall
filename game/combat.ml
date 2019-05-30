@@ -44,7 +44,8 @@ let cav_dr cav too_many snow =
   else to_power cav cav_unit_dr
 
 module Units (S : State.S) = struct
-  module Roll = Units.Roll(S.Dice)
+  module Dist = Units.Dist(S.Dice)
+  module Fill = Units.Fill(S.Dice)
   let attack = S.Enemy.return Units.power
   let harpies = S.Enemy.return Units.(count Harpy)
   let cavs = S.Units.return Units.(count Cavalry)
@@ -54,10 +55,10 @@ module Units (S : State.S) = struct
   let cav_too_many = ratio > cav_men_ratio +. ratio_bonus
   let cav_dr = cav_dr cavs cav_too_many snow
   let power = S.Units.return Units.power
-  let fled () = S.Units.return (Roll.pick fort_cap)
+  let fled () = S.Units.return (Fill.from fort_cap)
   let fought () = Float.sub power fort_cap
-  let lost dmg = S.Units.return (Roll.pick dmg)
-  let enemy_loss dmg = S.Enemy.return (Roll.pick dmg)
+  let lost dmg = S.Units.return (Dist.from dmg)
+  let enemy_loss dmg = S.Enemy.return (Dist.from dmg)
 end
 
 module Make (S : State.S) = struct
