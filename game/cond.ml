@@ -71,12 +71,12 @@ module Revive = struct
     let value = S.Units.check Units.(has Dervish)
   end
   module Make (S : State.S) = struct
-    module Roll = Units.Roll(S.Dice)
+    module Fill = Units.Fill(S.Dice)
     let pwr = S.Units.return Units.(power_of Dervish)
     let value =
       Units.(rm Cavalry)
       |> S.Casualty.return
-      |> Roll.pick pwr
+      |> Fill.from pwr
   end
 end
 

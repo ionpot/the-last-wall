@@ -135,20 +135,53 @@ let reduce t t' =
   List.fold_left (fun t'' e -> Ls.sub e t'') t' t
   |> Ls.clean
 
-module Roll (Dice : Dice.S) = struct
-  module Pick = Pick.With(Dice)
+module Ops (Num : Pick.Num) (Dice : Dice.S) = struct
+  module Num = Num
+  type key = kind
+  type pair = key * Num.t
+  let choose pairs =
+    List.length pairs |> Dice.index |> List.nth pairs
+end
 
+module Dist (Dice : Dice.S) = struct
+  module Pick = Pick.With(struct
+    include Ops(Pick.Float)(Dice)
+    let damage (k, n) = n
+    let roll cap (k, n) = Dice.rollf n
+    let trim cap (k, n) = min cap n
+  end)
+
+  let from power t =
+    List.map (fun expr -> Expr.(kind expr, power expr)) t
+    |> Pick.from power
+    |> List.map (fun (k, n) ->
+        let n' = truncate (n /. base_power k) in
+        Expr.make n' k)
+end
+
+module Fill (Dice : Dice.S) = struct
+  module Pick = Pick.With(struct
+    include Ops(Pick.Int)(Dice)
+    let damage (k, n) = Expr.(make n k |> power)
+    let roll cap (k, n) = Dice.roll n
+    let trim cap (k, n) =
+      let power = base_power k in
+      min n (if power > 0. then truncate (cap /. power) else n)
+  end)
+
+  let from power t =
+    List.map (fun expr -> Expr.(kind expr, count expr)) t
+    |> Pick.from power
+    |> List.map (fun (k, n) -> Expr.make n k)
+end
+
+module Report (Dice : Dice.S) = struct
   let try_round x =
     if x > 10 then 10 * Dice.round (0.1 *. float x) else x
 
-  let report t =
+  let from t =
     List.map (Expr.map_count try_round) t
 
-  let pick power t =
-    List.map (fun expr -> Expr.(count expr, power_base expr)) t
-    |> Pick.random power
-    |> List.map2 (fun expr n -> Expr.set_count n expr) t
-
-  let sum_report t =
+  let sum_from t =
     try_round (count_all t), (kinds_of t)
 end

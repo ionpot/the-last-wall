@@ -4,40 +4,70 @@ let invalid ls =
   |> Printf.sprintf "invalid list [%s]"
   |> failwith
 
-module With (Dice : Dice.S) = struct
-  let roll count cap =
-    let x = min count cap in
-    if x < 1. then max 0. x
-    else Dice.rollf x
+module type Num = sig
+  type t
+  val zero : t
+  val add : t -> t -> t
+  val sub : t -> t -> t
+end
 
-  let move_nth i cap ls =
-    let ic, oc = List.nth ls i in
-    let x = roll ic cap in
-    let new_ls = Listx.swap_nth i (ic -. x, oc +. x) ls in
-    cap -. x, new_ls
+module Int = struct
+  type t = int let zero = 0 let add = (+) let sub = (-)
+end
 
-  let map cap ls =
-    let len = List.length ls in
-    let rec next cap ls =
-      if cap <= 0. then ls
-      else
-        let i = Dice.index len in
-        let new_cap, new_ls = move_nth i cap ls in
-        next new_cap new_ls
-    in next cap ls
+module Float = struct
+  type t = float let zero = 0. let add = (+.) let sub = (-.)
+end
 
-  let pick cap pairs =
-    let counts, powers = List.split pairs in
-    let ls = List.map2 Defs.to_power counts powers in
-    if (Listx.sumf ls) <= cap then counts
-    else
-      List.map (fun x -> x, 0.) ls
-      |> map cap
-      |> List.map snd
-      |> List.map2 (fun p c -> c /. p) powers
-      |> List.map truncate
+module type Ops = sig
+  module Num : Num
+  type key
+  type pair = key * Num.t
+  val choose : pair list -> pair
+  val damage : pair -> Defs.power
+  val roll : Defs.power -> pair -> Num.t
+  val trim : Defs.power -> pair -> Num.t
+end
 
-  let random cap pairs =
-    if cap > 0. then pick cap pairs
-    else List.map (fun _ -> 0) pairs
+module With (S : Ops) = struct
+  let zero = S.Num.zero
+
+  let add (a, x) (b, y) =
+    if a = b then (a, S.Num.add x y) else (b, y)
+
+  let sub (a, x) (b, y) =
+    if a = b then (a, S.Num.sub y x) else (b, y)
+
+  let picked pair pairs output =
+    List.map (sub pair) pairs, (pair :: output)
+
+  let pick cap pairs output =
+    let pair = S.choose pairs in
+    let count = S.roll cap pair in
+    let pair' = fst pair, count in
+    let damage = S.damage pair' in
+    let pairs', output' =
+      if count = zero then pairs, output
+      else picked pair' pairs output
+    in cap -. damage, pairs', output'
+
+  let sort pairs output =
+    let sum pair =
+      List.fold_left (Fn.flip add) (fst pair, zero) output
+    in
+    List.map sum pairs
+
+  let trim pairs cap =
+    pairs
+    |> List.map (fun pair -> fst pair, S.trim cap pair)
+    |> List.filter (fun (_, x) -> x > zero)
+
+  let rec start (cap, pairs, output) =
+    match trim pairs cap with
+    | [] -> output
+    | pairs' -> start (pick cap pairs' output)
+
+  let from cap pairs =
+    start (cap, pairs, [])
+    |> sort pairs
 end

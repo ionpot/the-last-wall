@@ -3,7 +3,7 @@ type report =
   | Vague of Units.sum_report
 
 module Make (S : State.S) = struct
-  module Roll = Units.Roll(S.Dice)
+  module Report = Units.Report(S.Dice)
 
   let can_regular turn kind =
     let a = 0.1 *. float (Number.sub turn 1) in
@@ -32,6 +32,6 @@ module Make (S : State.S) = struct
 
   let report scouting t =
     if scouting
-    then Accurate (Roll.report t)
-    else Vague (Roll.sum_report t)
+    then Accurate (Report.from t)
+    else Vague (Report.sum_from t)
 end
