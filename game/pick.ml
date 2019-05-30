@@ -24,8 +24,9 @@ module type Ops = sig
   type key
   type pair = key * Num.t
   val choose : pair list -> pair
-  val roll : Num.t -> pair -> Num.t
-  val trim : Num.t -> pair -> Num.t
+  val damage : pair -> Defs.power
+  val roll : Defs.power -> pair -> Num.t
+  val trim : Defs.power -> pair -> Num.t
 end
 
 module With (S : Ops) = struct
@@ -43,12 +44,14 @@ module With (S : Ops) = struct
   let pick cap pairs output =
     let pair = S.choose pairs in
     let count = S.roll cap pair in
+    let pair' = fst pair, count in
+    let damage = S.damage pair' in
     let pairs', output' =
       if count = zero then pairs, output
-      else picked (fst pair, count) pairs output
-    in S.Num.sub cap count, pairs', output'
+      else picked pair' pairs output
+    in cap -. damage, pairs', output'
 
-  let sort output pairs =
+  let sort pairs output =
     let sum pair =
       List.fold_left (Fn.flip add) (fst pair, zero) output
     in
@@ -61,9 +64,10 @@ module With (S : Ops) = struct
 
   let rec start (cap, pairs, output) =
     match trim pairs cap with
-    | [] -> sort output pairs
+    | [] -> output
     | pairs' -> start (pick cap pairs' output)
 
   let from cap pairs =
     start (cap, pairs, [])
+    |> sort pairs
 end

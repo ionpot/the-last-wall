@@ -17,10 +17,11 @@ module type Ops = sig
   type key
   type pair = key * Num.t
   val choose : pair list -> pair
-  val roll : Num.t -> pair -> Num.t
-  val trim : Num.t -> pair -> Num.t
+  val damage : pair -> power
+  val roll : power -> pair -> Num.t
+  val trim : power -> pair -> Num.t
 end
 
 module With (S : Ops) : sig
-  val from : S.Num.t -> S.pair list -> S.pair list
+  val from : power -> S.pair list -> S.pair list
 end

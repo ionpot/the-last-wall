@@ -147,6 +147,7 @@ module Roll = struct
   module Float (Dice : Dice.S) = struct
     module Pick = Pick.With(struct
       include Ops(Pick.Float)(Dice)
+      let damage (k, n) = n
       let roll cap (k, n) = Dice.rollf n
       let trim cap (k, n) = min cap n
     end)
@@ -162,16 +163,16 @@ module Roll = struct
   module Int (Dice : Dice.S) = struct
     module Pick = Pick.With(struct
       include Ops(Pick.Int)(Dice)
+      let damage (k, n) = Expr.(make n k |> power)
       let roll cap (k, n) = Dice.roll n
       let trim cap (k, n) =
         let power = base_power k in
-        if power > 0. then truncate (float cap /. power) else n
-        |> min n
+        min n (if power > 0. then truncate (cap /. power) else n)
     end)
 
     let from power t =
       List.map (fun expr -> Expr.(kind expr, count expr)) t
-      |> Pick.from (truncate power)
+      |> Pick.from power
       |> List.map (fun (k, n) -> Expr.make n k)
   end
 
