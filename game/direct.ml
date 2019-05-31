@@ -130,10 +130,8 @@ module Turn = struct
   end
   module Make (S : State.S) = struct
     module Weather = Weather.Roll(S.Dice)
-    let value =
-      S.Turn.next (),
-      S.Month.return Month.next,
-      S.Month.return Weather.random
+    let month = S.Month.return Month.next
+    let value = S.Turn.next (), month, Weather.random month
   end
 end
 
