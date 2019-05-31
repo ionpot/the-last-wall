@@ -20,10 +20,10 @@ let ranges_of =
     | Clan -> (mid, f mid)
 
 let add res ls =
-  let f (kind, res') =
-    kind, Resource.(res ++ res')
+  let try_add a b =
+    if b = Resource.empty then b else Resource.(a ++ b)
   in
-  List.map f ls
+  List.map (fun (k, r) -> k, try_add res r) ls
 
 let sum ls =
   let f total (_, res) =
