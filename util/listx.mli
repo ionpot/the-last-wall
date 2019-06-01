@@ -7,6 +7,7 @@ val fold_map : ('a -> 'b -> 'a * 'b) -> 'a -> 'b list -> 'a * 'b list
 val in_both : 'a list -> 'a list -> 'a list
 val map_with : ('a -> 'b -> 'a * 'b) -> 'a -> 'b list -> 'b list
 val min_of : int list -> int
+val pick : float -> float list -> 'a list -> 'a
 val pick_first : int -> 'a list -> 'a list
 val rm : 'a -> 'a list -> 'a list
 val rm_from : 'a list -> 'a list -> 'a list

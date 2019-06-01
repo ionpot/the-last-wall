@@ -30,6 +30,10 @@ let base_power = function
   | Dervish | Men | Orc -> 1.
   | Skeleton -> 0.5
 
+let hit_chance = function
+  | Dervish -> 0.2
+  | _ -> 1.
+
 module Expr = struct
   type t = (Defs.count * kind)
   let add (n, k) (n', k') =
@@ -151,6 +155,9 @@ let check_pick fn pwr t =
 module Dist (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
     include Ops(Pick.Float)(Dice)
+    let choose pairs =
+      let probs = List.map (Pair.fst_to hit_chance) pairs in
+      Dice.pick_w probs pairs
     let damage (k, n) = n
     let roll cap (k, n) = Dice.rollf n
     let trim cap (k, n) = min cap n

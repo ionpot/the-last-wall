@@ -19,4 +19,7 @@ let (--) (x, y) (a, b) =
 let (<+>) x y =
   x ++ (y, y)
 
+let fst_to f (a, _) = f a
+let snd_to f (_, a) = f a
+
 let map (f, g) (a, b) = (f a, g b)

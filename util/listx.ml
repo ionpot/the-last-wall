@@ -30,6 +30,13 @@ let rec min_of = function
   | x :: [] -> x
   | x :: xs -> min x (min_of xs)
 
+let rec pick num probs = function
+  | [] -> assert false
+  | [x] -> x
+  | x :: xs ->
+      let num' = num -. List.hd probs in
+      if num' > 0. then pick num' (List.tl probs) xs else x
+
 let pick_first i =
   filteri (fun j _ -> j < i)
 
