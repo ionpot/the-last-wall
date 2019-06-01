@@ -25,6 +25,7 @@ val ratio : kind -> kind -> t -> float
 val report : t -> report
 val starve : Defs.supply -> t -> t
 val upkeep : t -> Defs.supply
+val workforce : t -> Defs.power
 
 val add : Defs.count -> kind -> t -> t
 val rm : kind -> t -> t

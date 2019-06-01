@@ -119,6 +119,9 @@ let upkeep t =
   List.map Expr.cost t
   |> Listx.sum
 
+let workforce t =
+  power_of Men t
+
 let add n kind t =
   Ls.add (Expr.make n kind) t
 
