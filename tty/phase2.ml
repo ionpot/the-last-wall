@@ -19,7 +19,7 @@ module Make (S : Game.State.S) = struct
       | Attack (_, rp) -> Tty.pairln "seen" (report2str rp)
       | Blessing res -> Tty.pairln "blessing" (res2str res)
       | BuildManp m -> S.Units.return (Print.Build.manp m)
-      | BuildStatus s -> Print.Build.status s
+      | BuildStatus s -> ()
       | BuildSupply s -> S.Supply.return (Print.Build.supply s)
       | Cavalry c -> Tty.pairln "cavalry" (string_of_int c)
       | Defeat -> Tty.writeln "defeat"

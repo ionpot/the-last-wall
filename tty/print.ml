@@ -4,9 +4,9 @@ open Printf
 
 module Build = struct
   let status (ready, built, queued) =
-    Tty.ifpairln "built" (bld_ls2str ready);
-    Tty.ifpairln "finished" (bld_ls2str built);
-    Tty.ifpairln "in queue" (bld_q2str queued)
+    Tty.ifpairln "buildings ready" (bld_ls2str ready);
+    Tty.ifpairln "build finished" (bld_ls2str built);
+    Tty.ifpairln "build queue" (bld_q2str queued)
 
   let all t =
     status Build.(ls_ready t, ls_built t, ls_queue t)
