@@ -23,16 +23,15 @@ val power : t -> Defs.power
 val power_of : kind -> t -> Defs.power
 val ratio : kind -> kind -> t -> float
 val report : t -> report
-val starve : Defs.supply -> t -> t
 val upkeep : t -> Defs.supply
 val workforce : t -> Defs.power
 
 val add : Defs.count -> kind -> t -> t
-val rm : kind -> t -> t
-val sub : Defs.count -> kind -> t -> t
-
 val combine : t -> t -> t
 val reduce : t -> t -> t
+val rm : kind -> t -> t
+val starve : Defs.supply -> t -> t
+val sub : Defs.count -> kind -> t -> t
 
 module Dist : Dice.S -> sig
   val from : Defs.power -> t -> t

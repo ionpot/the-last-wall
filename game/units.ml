@@ -108,13 +108,6 @@ let ratio kind1 kind2 t =
 
 let report t = t
 
-let starve supply t =
-  let ns =
-    List.map (fun k -> count k t) defends
-    |> Listx.map_with Number.take supply
-  in List.map2 Expr.make ns defends
-  |> Ls.clean
-
 let upkeep t =
   List.map Expr.cost t
   |> Listx.sum
@@ -125,17 +118,24 @@ let workforce t =
 let add n kind t =
   Ls.add (Expr.make n kind) t
 
-let rm = Ls.discard
-
-let sub n kind t =
-  Ls.sub (Expr.make n kind) t
-  |> Ls.clean
-
 let combine t t' =
   List.fold_left (Fn.flip Ls.add) t t'
 
 let reduce t t' =
   List.fold_left (Fn.flip Ls.sub) t' t
+  |> Ls.clean
+
+let rm = Ls.discard
+
+let starve supply t =
+  let ns =
+    List.map (fun k -> count k t) defends
+    |> Listx.map_with Number.take supply
+  in List.map2 Expr.make ns defends
+  |> Ls.clean
+
+let sub n kind t =
+  Ls.sub (Expr.make n kind) t
   |> Ls.clean
 
 module Ops (Num : Pick.Num) (Dice : Dice.S) = struct
