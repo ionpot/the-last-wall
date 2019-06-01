@@ -118,6 +118,7 @@ let upkeep t =
 
 let workforce t =
   power_of Men t
+  +. power_of Dervish t
 
 let add n kind t =
   Ls.add (Expr.make n kind) t
