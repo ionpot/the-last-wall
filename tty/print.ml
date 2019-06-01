@@ -13,10 +13,11 @@ module Build = struct
 
   let manp need units =
     if need > 0 then
-    Units.(count Men units)
+    Units.workforce units
+    |> truncate
     |> min need
     |> manp2str
-    |> sprintf "%s worked in construction"
+    |> sprintf "%s for construction"
     |> Tty.writeln
 
   let supply need avlb =
