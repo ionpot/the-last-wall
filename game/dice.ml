@@ -17,8 +17,10 @@ module type S = sig
 end
 
 module From (M : From) : S = struct
+  let index = M.int
+
   let roll i =
-    if i > 0 then M.int i + 1 else 0
+    if i > 0 then index i + 1 else 0
 
   let rollf fl =
     M.float (fl -. 1.) +. 1.
@@ -37,10 +39,8 @@ module From (M : From) : S = struct
     let b = x + y in
     between a b
 
-  let index = M.int
-
   let pick ls =
-    List.length ls |> M.int |> List.nth ls
+    List.length ls |> index |> List.nth ls
 
   let yes = M.bool
 
