@@ -10,6 +10,7 @@ module type S = sig
   val deviate : int -> int -> int
   val index : int -> int
   val pick : 'a list -> 'a
+  val pick_w : float list -> 'a list -> 'a
   val roll : int -> int
   val rollf : float -> float
   val round : float -> int
@@ -17,15 +18,17 @@ module type S = sig
 end
 
 module From (M : From) : S = struct
+  let index = M.int
+
   let roll i =
-    if i > 0 then M.int i + 1 else 0
+    if i > 0 then index i + 1 else 0
 
   let rollf fl =
     M.float (fl -. 1.) +. 1.
 
   let between x y =
     let d = y - x in
-    x + roll d
+    x + index (d + 1)
 
   let chance fl =
     if fl >= 1. then true
@@ -37,10 +40,12 @@ module From (M : From) : S = struct
     let b = x + y in
     between a b
 
-  let index = M.int
-
   let pick ls =
-    List.length ls |> M.int |> List.nth ls
+    List.length ls |> index |> List.nth ls
+
+  let pick_w probs ls =
+    let num = Listx.sumf probs |> M.float in
+    Listx.pick num probs ls
 
   let yes = M.bool
 

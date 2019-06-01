@@ -30,6 +30,10 @@ let base_power = function
   | Dervish | Men | Orc -> 1.
   | Skeleton -> 0.5
 
+let hit_chance = function
+  | Dervish -> 0.2
+  | _ -> 1.
+
 module Expr = struct
   type t = (Defs.count * kind)
   let add (n, k) (n', k') =
@@ -108,25 +112,15 @@ let ratio kind1 kind2 t =
 
 let report t = t
 
-let starve supply t =
-  let ns =
-    List.map (fun k -> count k t) defends
-    |> Listx.map_with Number.take supply
-  in List.map2 Expr.make ns defends
-  |> Ls.clean
-
 let upkeep t =
   List.map Expr.cost t
   |> Listx.sum
 
+let workforce t =
+  power_of Men t
+
 let add n kind t =
   Ls.add (Expr.make n kind) t
-
-let rm = Ls.discard
-
-let sub n kind t =
-  Ls.sub (Expr.make n kind) t
-  |> Ls.clean
 
 let combine t t' =
   List.fold_left (Fn.flip Ls.add) t t'
@@ -135,28 +129,48 @@ let reduce t t' =
   List.fold_left (Fn.flip Ls.sub) t' t
   |> Ls.clean
 
+let rm = Ls.discard
+
+let starve supply t =
+  let ns =
+    List.map (fun k -> count k t) defends
+    |> Listx.map_with Number.take supply
+  in List.map2 Expr.make ns defends
+  |> Ls.clean
+
+let sub n kind t =
+  Ls.sub (Expr.make n kind) t
+  |> Ls.clean
+
 module Ops (Num : Pick.Num) (Dice : Dice.S) = struct
   module Num = Num
   type key = kind
   type pair = key * Num.t
-  let choose pairs =
-    List.length pairs |> Dice.index |> List.nth pairs
+  let choose = Dice.pick
 end
+
+let check_pick fn pwr t =
+  if pwr > power t then t else fn pwr t
 
 module Dist (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
     include Ops(Pick.Float)(Dice)
+    let choose pairs =
+      let probs = List.map (Pair.fst_to hit_chance) pairs in
+      Dice.pick_w probs pairs
     let damage (k, n) = n
     let roll cap (k, n) = Dice.rollf n
     let trim cap (k, n) = min cap n
   end)
 
-  let from power t =
+  let fn power t =
     List.map (fun expr -> Expr.(kind expr, power expr)) t
     |> Pick.from power
     |> List.map (fun (k, n) ->
         let n' = truncate (n /. base_power k) in
         Expr.make n' k)
+
+  let from = check_pick fn
 end
 
 module Fill (Dice : Dice.S) = struct
@@ -169,10 +183,12 @@ module Fill (Dice : Dice.S) = struct
       min n (if power > 0. then truncate (cap /. power) else n)
   end)
 
-  let from power t =
+  let fn power t =
     List.map (fun expr -> Expr.(kind expr, count expr)) t
     |> Pick.from power
     |> List.map (fun (k, n) -> Expr.make n k)
+
+  let from = check_pick fn
 end
 
 module Report (Dice : Dice.S) = struct
