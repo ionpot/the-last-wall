@@ -9,12 +9,12 @@ let count x xs =
   |> List.length
 
 let dedupe_if f ls =
-  let f acc x =
+  let f x acc =
     if f x && List.mem x acc
     then acc
     else x :: acc
   in
-  build f ls
+  List.fold_right f ls []
 
 let dedupe ls =
   dedupe_if (fun _ -> true) ls
