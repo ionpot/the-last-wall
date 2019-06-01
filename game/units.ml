@@ -145,6 +145,9 @@ module Ops (Num : Pick.Num) (Dice : Dice.S) = struct
   let choose = Dice.pick
 end
 
+let check_pick fn pwr t =
+  if pwr > power t then t else fn pwr t
+
 module Dist (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
     include Ops(Pick.Float)(Dice)
@@ -153,12 +156,14 @@ module Dist (Dice : Dice.S) = struct
     let trim cap (k, n) = min cap n
   end)
 
-  let from power t =
+  let fn power t =
     List.map (fun expr -> Expr.(kind expr, power expr)) t
     |> Pick.from power
     |> List.map (fun (k, n) ->
         let n' = truncate (n /. base_power k) in
         Expr.make n' k)
+
+  let from = check_pick fn
 end
 
 module Fill (Dice : Dice.S) = struct
@@ -171,10 +176,12 @@ module Fill (Dice : Dice.S) = struct
       min n (if power > 0. then truncate (cap /. power) else n)
   end)
 
-  let from power t =
+  let fn power t =
     List.map (fun expr -> Expr.(kind expr, count expr)) t
     |> Pick.from power
     |> List.map (fun (k, n) -> Expr.make n k)
+
+  let from = check_pick fn
 end
 
 module Report (Dice : Dice.S) = struct
