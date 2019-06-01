@@ -21,3 +21,14 @@ module Make (S : Game.State.S) = struct
           Tty.pairln "starting" (Convert.res2str res)
       | Support s -> Print.support s
 end
+
+module After (S : Status.S) = struct
+  let input _ = ()
+
+  let output =
+    let open Phase.Output in
+    function
+      | BuildSupply _
+      | Support _ -> S.res ()
+      | Starting _ -> ()
+end

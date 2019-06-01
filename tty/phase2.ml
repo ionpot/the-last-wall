@@ -17,11 +17,11 @@ module Make (S : Game.State.S) = struct
     let open Phase.Output in
     function
       | Attack (_, rp) -> Tty.pairln "seen" (report2str rp)
-      | Blessing res -> Tty.pairln "blessing" (res2str res)
+      | Blessing res -> Tty.ifpairln "blessing" (res2str res)
       | BuildManp m -> S.Units.return (Print.Build.manp m)
       | BuildStatus s -> ()
       | BuildSupply s -> S.Supply.return (Print.Build.supply s)
-      | Cavalry c -> Tty.pairln "cavalry" (string_of_int c)
+      | Cavalry c -> ()
       | Defeat -> Tty.writeln "defeat"
       | LeaderNew ldr -> Tty.pairln "new leader" (ldr2full ldr)
       | Market sup -> Tty.pairln "market" (sup2str sup)
@@ -29,4 +29,25 @@ module Make (S : Game.State.S) = struct
       | Support s -> Print.support s
       | Turn t -> Tty.lnwriteln (turn2str t)
       | Upkeep sup -> Tty.pairln "upkeep" (sup2str sup)
+end
+
+module After (S : Status.S) = struct
+  let input =
+    let open Phase.Input in
+    function
+      | Dervish n -> if n > 0 then S.dervish ()
+      | Mercs n -> if n > 0 then S.res ()
+      | _ -> ()
+
+  let output =
+    let open Phase.Output in
+    function
+      | Blessing res -> if res <> Game.Resource.empty then S.res ()
+      | BuildSupply s -> if s > 0 then S.res ()
+      | Cavalry c -> S.cavalry c
+      | Market _
+      | Starvation _
+      | Support _
+      | Upkeep _ -> S.res ()
+      | _ -> ()
 end

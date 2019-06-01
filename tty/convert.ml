@@ -29,7 +29,7 @@ let int2ichar i =
   char_of_int (49 + i)
 
 let manp2str mp =
-  sprintf "%d men" mp
+  sprintf "%d mnp" mp
 
 let sup2str sp =
   sprintf "%d sup" sp

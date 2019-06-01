@@ -49,6 +49,12 @@ module Leader = struct
 end
 
 module Combat = struct
+  let begins units enemies ldr =
+    Tty.lnwriteln "combat phase";
+    Tty.pairln "attacking" (units2str enemies);
+    Tty.pairln "defending" (units2str units);
+    Tty.ifpairln "leader" (Leader.to_full ldr)
+
   let stats atk def dmg =
     let attack = sprintf "%s attack" (power2str atk) in
     let defense = sprintf "%s dr" (percent2str def) in
@@ -63,10 +69,8 @@ module Combat = struct
     Tty.pairln "casualty" (units2str casualty);
     if died then Leader.died ldr
 
-  let outcome (module O : Combat.Outcome) units enemies ldr =
-    Tty.pairln "attacking" (units2str enemies);
-    Tty.pairln "defending" (units2str units);
-    Tty.ifpairln "leader" (Leader.to_full ldr);
+  let outcome (module O : Combat.Outcome) ldr =
+    Tty.writeln "enemies attack";
     if O.cav_too_many
     then Tty.writeln "too many cavalry, defense reduced";
     Tty.writeln (stats O.attack O.defense O.damage);
