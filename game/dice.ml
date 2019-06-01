@@ -27,7 +27,7 @@ module From (M : From) : S = struct
 
   let between x y =
     let d = y - x in
-    x + roll d
+    x + index (d + 1)
 
   let chance fl =
     if fl >= 1. then true
