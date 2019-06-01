@@ -142,8 +142,7 @@ module Ops (Num : Pick.Num) (Dice : Dice.S) = struct
   module Num = Num
   type key = kind
   type pair = key * Num.t
-  let choose pairs =
-    List.length pairs |> Dice.index |> List.nth pairs
+  let choose = Dice.pick
 end
 
 module Dist (Dice : Dice.S) = struct
