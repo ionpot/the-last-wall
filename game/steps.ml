@@ -73,7 +73,6 @@ module Phase2 = struct
     [ Do (Direct Output.Turn);
       Do (Direct Output.BuildManp);
       Do (Direct Output.BuildStatus);
-      Ask (Cond Input.Trade);
       Do (Cond Output.LeaderNew);
       Do (Direct Output.Upkeep);
       Do (Cond Output.Starvation);
@@ -83,6 +82,7 @@ module Phase2 = struct
       Do (Cond Output.Market);
       Ask (Direct Input.Nations);
       Do (Direct Output.Support);
+      Ask (Cond Input.Trade);
       Ask (Direct Input.Build);
       Do (Direct Output.BuildSupply);
       Do (Cond Output.Cavalry);
