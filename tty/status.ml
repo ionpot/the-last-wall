@@ -32,9 +32,6 @@ module With (S : State.S) = struct
     |> Tty.pairln "status"
 
   let units () =
-    S.Units.return Units.power
-    |> truncate
-    |> Convert.manp2str
-    |> sprintf "%s -> %s" (S.Units.return Convert.units2str)
+    S.Units.return Convert.units2mnpstr
     |> Tty.pairln "status"
 end

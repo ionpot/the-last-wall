@@ -143,6 +143,12 @@ let units2str t =
   unit_pairs2str (Units.report t)
   |> if_empty "none"
 
+let units2mnpstr t =
+  Units.power t
+  |> truncate
+  |> manp2str
+  |> sprintf "%s -> %s" (units2str t)
+
 let report_type2str = function
   | Attack.Accurate ls -> unit_pairs2str ls
   | Attack.Vague (count, kinds) ->

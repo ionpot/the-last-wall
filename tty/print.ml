@@ -53,7 +53,7 @@ module Combat = struct
   let begins units enemies ldr =
     Tty.lnwriteln "combat phase";
     Tty.pairln "attacking" (units2str enemies);
-    Tty.pairln "defending" (units2str units);
+    Tty.pairln "defending" (units2mnpstr units);
     Tty.ifpairln "leader" (Leader.to_full ldr)
 
   let stats atk def dmg =
