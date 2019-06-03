@@ -33,7 +33,7 @@ end
 
 module Dervish = struct
   type t = Defs.count
-  let each = 4
+  let each = 6
   let cap = 10
   module Apply (S : State.S) = struct
     let value n =
