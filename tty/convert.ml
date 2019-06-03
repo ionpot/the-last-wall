@@ -8,6 +8,7 @@ let if_empty a b = if b = "" then a else b
 let map_commas f ls = List.map f ls |> clean |> commas
 let spaces = String.concat " "
 let sort_str = List.sort String.compare
+let str2none = if_empty "none"
 
 let str2chars str =
   let rec next i ls =
@@ -141,7 +142,7 @@ let unit_pairs2str ls =
 
 let units2str t =
   unit_pairs2str (Units.report t)
-  |> if_empty "none"
+  |> str2none
 
 let units2mnpstr t =
   Units.power t
