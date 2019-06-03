@@ -64,7 +64,9 @@ end
 
 let deity () =
   let ls = Game.Deity.list in
-  List.map deity2str ls |> horizontal "deities";
+  let fns = [deity2str; deity_text] in
+  List.map (fun d -> Listx.apply d fns |> commas) ls
+  |> vertical "deities";
   Tty.prompt "choose"
   |> choose_one ls Game.Deity.empty
   |> echo (fun d -> Tty.spln (deity2str d) "chosen")

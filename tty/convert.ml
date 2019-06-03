@@ -115,6 +115,13 @@ let deity2str = function
   | Deity.Sitera -> "sitera"
   | Deity.Sekrefir -> "sekrefir"
 
+let deity_text = function
+  | Deity.Arnerula -> "deity of sacred fire, ambition and rage"
+  | Deity.Elanis -> "lady of triumph, protector of humans"
+  | Deity.Lerota -> "lady of life and death, present leader of chaos"
+  | Deity.Sitera -> "mother earth, spring of all living"
+  | Deity.Sekrefir -> "leader of gods, envoy of order and justice"
+
 let unit_order = Units.([Men; Cavalry; Dervish; Skeleton; Orc; Demon; Harpy])
 let unit_cmp = Listx.compare unit_order
 

@@ -1,3 +1,4 @@
+val apply : 'a -> ('a -> 'b) list -> 'b list
 val apply_to : ('a -> unit) list -> 'a -> unit
 val build : ('a list -> 'a -> 'a list) -> 'a list -> 'a list
 val compare : 'a list -> 'a -> 'a -> int

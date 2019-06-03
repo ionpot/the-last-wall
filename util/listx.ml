@@ -1,3 +1,6 @@
+let apply x ls =
+  List.map (fun f -> f x) ls
+
 let apply_to ls x =
   List.iter (fun f -> f x) ls
 
