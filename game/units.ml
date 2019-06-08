@@ -159,8 +159,7 @@ module Dist (Dice : Dice.S) = struct
     let choose pairs =
       let probs = List.map (Pair.fst_to hit_chance) pairs in
       Dice.pick_w probs pairs
-    let damage (k, n) = n
-    let roll cap (k, n) = Dice.rollf n
+    let roll (k, n) = let n' = Dice.rollf n in n', n'
     let trim cap (k, n) = min cap n
   end)
 
@@ -177,8 +176,10 @@ end
 module Fill (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
     include Ops(Pick.Int)(Dice)
-    let damage (k, n) = Expr.(make n k |> power)
-    let roll cap (k, n) = Dice.roll n
+    let roll (k, n) =
+      let n' = Dice.roll n in
+      let pwr = Expr.(make n' k |> power) in
+      pwr, n'
     let trim cap (k, n) =
       let power = base_power k in
       min n (if power > 0. then truncate (cap /. power) else n)
