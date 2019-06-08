@@ -36,7 +36,7 @@ module After (S : Status.S) = struct
   let input =
     let open Phase.Input in
     function
-      | Dervish n -> if n > 0 then S.dervish ()
+      | Dervish n -> if n > 0 then begin S.dervish (); S.res () end
       | Mercs n -> if n > 0 then S.res ()
       | _ -> ()
 
@@ -45,7 +45,7 @@ module After (S : Status.S) = struct
     function
       | Blessing res -> if res <> Game.Resource.empty then S.res ()
       | BuildSupply s -> if s > 0 then S.res ()
-      | Cavalry c -> S.cavalry c
+      | Cavalry c -> S.cavalry c; S.res ()
       | Market _
       | Starvation _
       | Support _
