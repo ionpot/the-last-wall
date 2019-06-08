@@ -1,5 +1,10 @@
 open Defs
 
+module Bonus = struct
+  type kind = Mnp of float | Sup of float | Both of float
+  type t = Add of kind | Sub of kind
+end
+
 type t = (manpower * supply)
 
 type kind =
@@ -43,11 +48,20 @@ let map_manp f res =
 let map_supp f res =
   set_supp res (f (supp_of res))
 
-let reduce_manp ratio res =
-  map_manp (Number.reduce_by ratio) res
-
-let reduce_supp ratio res =
-  map_supp (Number.reduce_by ratio) res
+let bonus_to t =
+  let rec apply f kind t =
+    match kind with
+    | Bonus.Both ratio ->
+        apply f (Bonus.Mnp ratio) t
+        |> apply f (Bonus.Sup ratio)
+    | Bonus.Mnp ratio ->
+        map_manp (f ratio) t
+    | Bonus.Sup ratio ->
+        map_supp (f ratio) t
+  in
+  function
+  | Bonus.Add x -> apply Number.increase_by x t
+  | Bonus.Sub x -> apply Number.reduce_by x t
 
 let (<+) t = function
   | Empty -> t

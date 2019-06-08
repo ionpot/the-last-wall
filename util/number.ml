@@ -1,3 +1,6 @@
+let increase_by ratio x =
+  truncate (Float.increase (float x) ratio)
+
 let reduce_by ratio x =
   truncate (Float.reduce (float x) ratio)
 
