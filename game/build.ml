@@ -12,12 +12,10 @@ module Bonus = struct
       | (ToAll, _) -> true
   let filter kind = List.filter (is kind)
   let find kind ls = filter kind ls |> List.map snd
-  let make bonus res_bonus = bonus, res_bonus
 end
 
 type t =
   { avlb : kind list;
-    bonus : Bonus.t list;
     built : kind list;
     queue : queued list;
     ready : kind list
@@ -37,7 +35,6 @@ let rm_ls kinds ls =
 
 let empty =
   { avlb = [Engrs; Fort; Market; Stable; Temple; Trade Nation.NoTrade];
-    bonus = [];
     built = [];
     queue = [];
     ready = [Tavern]
@@ -87,8 +84,8 @@ let need_supp t =
 let ready kind t =
   List.mem kind t.ready
 
-let cost_of kind t =
-  Bonus.find kind t.bonus
+let cost_of kind bonuses =
+  Bonus.find kind bonuses
   |> Bonus.apply_to (base_cost_of kind)
 
 let status t =
@@ -99,9 +96,6 @@ let status t =
 let trade t =
   let f x = function Trade x -> x | _ -> x in
   List.fold_left f Nation.NoTrade t.ready
-
-let add_bonus bonus res_bonus t =
-  { t with bonus = Bonus.make bonus res_bonus :: t.bonus }
 
 let map_queue f need avlb t =
   let f' acc (kind, cost) =
@@ -131,8 +125,8 @@ let to_avlb kind t =
 let died ldr t =
   to_avlb (Mausoleum ldr) t
 
-let enqueue kinds t =
-  let f kind = kind, cost_of kind t in
+let enqueue kinds bonuses t =
+  let f kind = kind, cost_of kind bonuses in
   let ls = List.rev_map f kinds in
   { t with queue = ls @ t.queue }
 
@@ -144,23 +138,16 @@ let set_trade trade t =
   let f = List.map (function Trade _ -> Trade trade | x -> x) in
   { t with built = f t.built; ready = f t.ready }
 
-let start kinds t =
+let start kinds bonuses t =
   { t with avlb = rm_ls kinds t.avlb }
-  |> enqueue kinds
+  |> enqueue kinds bonuses
 
 let supp need avlb t =
   map_queue Resource.take_supp need avlb t
 
-let on_ready ls t =
-  if List.mem Engrs ls
-  then add_bonus ToAll Resource.Bonus.(Sub (Sup 0.1)) t
-  else t
-
 let update (ready, built, queue) t =
-  { t with
-    avlb = enables built t.avlb;
+  { avlb = enables built t.avlb;
     built;
     queue;
     ready = ready @ t.ready
   }
-  |> on_ready ready

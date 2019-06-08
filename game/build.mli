@@ -6,14 +6,18 @@ type bonus = To of kind | ToAll
 type queued = kind * cost
 type status = kind list * kind list * queued list
 
+module Bonus : sig
+  type t = bonus * Resource.Bonus.t
+end
+
 type t
 
 val empty : t
 
+val cost_of : kind -> Bonus.t list -> cost
 val multiple : kind -> bool
 
 val built : kind -> t -> bool
-val cost_of : kind -> t -> cost
 val count : kind -> t -> count
 val ls_avlb : t -> kind list
 val ls_built : t -> kind list
@@ -26,11 +30,10 @@ val ready : kind -> t -> bool
 val status : t -> status
 val trade : t -> Nation.trade
 
-val add_bonus : bonus -> Resource.Bonus.t -> t -> t
 val died : Leader.t -> t -> t
 val manp : manpower -> manpower -> t -> t
 val raze : kind -> t -> t
 val set_trade : Nation.trade -> t -> t
-val start : kind list -> t -> t
+val start : kind list -> Bonus.t list -> t -> t
 val supp : supply -> supply -> t -> t
 val update : status -> t -> t
