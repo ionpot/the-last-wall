@@ -1,6 +1,9 @@
 let floor_by ratio x =
   ratio *. floor (x *. 1. /. ratio)
 
+let increase x ratio =
+  x +. x *. ratio
+
 let reduce x ratio =
   x -. x *. ratio
 

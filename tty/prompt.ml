@@ -41,7 +41,9 @@ let vertical prefix ls =
 let barrage () =
   Tty.prompt_yn "arrow barrage? y/n"
 
-module Build = struct
+module Build (S : Game.State.S) = struct
+  module Bonus = Game.Build_bonus.From(S)
+
   let add_from avlb ch out =
     try List.nth avlb (ichar2int ch) :: out
     with _ -> out
@@ -53,7 +55,7 @@ module Build = struct
   let from avlb t =
     let avlb' = sort_by_str bld2str avlb in
     List.map (fun kind ->
-      let cost = Game.Build.cost_of kind t in
+      let cost = Game.Build.cost_of kind Bonus.value in
       sprintf "%s [%s]" (bld2str kind) (res2str cost)) avlb'
     |> vertical "buildings available";
     Tty.prompt_chars "build?"

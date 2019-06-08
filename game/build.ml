@@ -1,7 +1,19 @@
 type cost = Resource.t
 type kind = Engrs | Fort | Market | Mausoleum of Leader.t | Observatory | Stable | Tavern | Temple | Trade of Nation.trade
+type bonus = To of kind | ToAll
 type queued = kind * cost
 type status = kind list * kind list * queued list
+
+module Bonus = struct
+  type t = bonus * Resource.Bonus.t
+  let apply_to = List.fold_left Resource.bonus_to
+  let is kind = function
+      | (To k, _) -> k = kind
+      | (ToAll, _) -> true
+  let filter kind = List.filter (is kind)
+  let find kind ls = filter kind ls |> List.map snd
+end
+
 type t =
   { avlb : kind list;
     built : kind list;
@@ -72,10 +84,9 @@ let need_supp t =
 let ready kind t =
   List.mem kind t.ready
 
-let cost_of kind t =
-  let res = base_cost_of kind in
-  let ratio = if ready Engrs t then 0.1 else 0. in
-  Resource.reduce_supp ratio res
+let cost_of kind bonuses =
+  Bonus.find kind bonuses
+  |> Bonus.apply_to (base_cost_of kind)
 
 let status t =
   let f (_, cost) = cost = Resource.empty in
@@ -114,8 +125,8 @@ let to_avlb kind t =
 let died ldr t =
   to_avlb (Mausoleum ldr) t
 
-let enqueue kinds t =
-  let f kind = kind, cost_of kind t in
+let enqueue kinds bonuses t =
+  let f kind = kind, cost_of kind bonuses in
   let ls = List.rev_map f kinds in
   { t with queue = ls @ t.queue }
 
@@ -127,10 +138,9 @@ let set_trade trade t =
   let f = List.map (function Trade _ -> Trade trade | x -> x) in
   { t with built = f t.built; ready = f t.ready }
 
-let start kinds t =
-  let ls = Listx.in_both t.avlb kinds in
-  { t with avlb = rm_ls ls t.avlb }
-  |> enqueue ls
+let start kinds bonuses t =
+  { t with avlb = rm_ls kinds t.avlb }
+  |> enqueue kinds bonuses
 
 let supp need avlb t =
   map_queue Resource.take_supp need avlb t

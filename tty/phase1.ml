@@ -5,8 +5,9 @@ module Make (S : Game.State.S) = struct
     let open Phase.Input in
     function
       | Build avlb ->
+          let module Prompt = Prompt.Build(S) in
           S.Build.return Print.Build.all;
-          Build (S.Build.return (Prompt.Build.from avlb))
+          Build (S.Build.return (Prompt.from avlb))
       | Deity _ -> Deity (Prompt.deity ())
       | Leader _ -> Leader (Prompt.leader ())
       | Nations chosen -> Nations (Prompt.nations chosen)

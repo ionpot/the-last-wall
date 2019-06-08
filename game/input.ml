@@ -14,7 +14,8 @@ end
 module BuildAvlb = struct
   type t = Build.kind list
   module Apply (S : State.S) = struct
-    let value ls = S.Build.map (Build.start ls)
+    module Bonus = Build_bonus.From(S)
+    let value ls = S.Build.map (Build.start ls Bonus.value)
   end
   module Make (S : State.S) = struct
     let value = S.Build.return Build.ls_avlb
@@ -33,7 +34,7 @@ end
 
 module Dervish = struct
   type t = Defs.count
-  let each = 4
+  let each = 6
   let cap = 10
   module Apply (S : State.S) = struct
     let value n =
