@@ -1,5 +1,5 @@
 type cost = Resource.t
-type kind = Engrs | Fort | Market | Mausoleum of Leader.t | Observatory | Stable | Tavern | Temple | Trade of Nation.trade
+type kind = Engrs | Fort | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Stable | Tavern | Temple | Trade of Nation.trade
 type bonus = To of kind | ToAll
 type queued = kind * cost
 type status = kind list * kind list * queued list
@@ -23,7 +23,7 @@ type t =
 
 let enables built avlb =
   if List.mem Temple built
-  then Observatory :: avlb
+  then Guesthouse :: Observatory :: avlb
   else avlb
 
 let multiple kind =
@@ -45,6 +45,7 @@ let base_cost =
   function
   | Engrs -> Manpwr 66, Supply 67
   | Fort -> Manpwr 124, Supply 136
+  | Guesthouse -> Manpwr 21, Supply 23
   | Market -> Manpwr 44, Supply 65
   | Mausoleum _ -> Manpwr 14, Supply 14
   | Observatory -> Manpwr 15, Supply 14
@@ -92,6 +93,11 @@ let status t =
   let f (_, cost) = cost = Resource.empty in
   let built, ongoing = List.partition f t.queue in
   t.built, List.map fst built, ongoing
+
+let temple_cap t =
+  if ready Guesthouse t then 30
+  else if ready Temple t then 10
+  else 0
 
 let trade t =
   let f x = function Trade x -> x | _ -> x in
