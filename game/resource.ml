@@ -48,12 +48,6 @@ let map_manp f res =
 let map_supp f res =
   set_supp res (f (supp_of res))
 
-let reduce_manp ratio res =
-  map_manp (Number.reduce_by ratio) res
-
-let reduce_supp ratio res =
-  map_supp (Number.reduce_by ratio) res
-
 let bonus_to t =
   let rec apply f kind t =
     match kind with

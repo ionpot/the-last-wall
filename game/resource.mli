@@ -32,9 +32,6 @@ val map_supp : (supply -> supply) -> t -> t
 val deduce_manp : manpower -> t -> manpower * t
 val deduce_supp : supply -> t -> supply * t
 
-val reduce_manp : float -> t -> t
-val reduce_supp : float -> t -> t
-
 val take_manp : manpower -> t -> manpower * t
 val take_supp : supply -> t -> supply * t
 
