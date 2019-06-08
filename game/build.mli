@@ -2,7 +2,7 @@ open Defs
 
 type cost = Resource.t
 type kind = Engrs | Fort | Market | Mausoleum of Leader.t | Observatory | Stable | Tavern | Temple | Trade of Nation.trade
-type bonus = ToAll | ToOne of kind
+type bonus = To of kind | ToAll
 type queued = kind * cost
 type status = kind list * kind list * queued list
 
