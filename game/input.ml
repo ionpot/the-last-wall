@@ -35,18 +35,18 @@ end
 module Dervish = struct
   type t = Defs.count
   let each = 6
-  let cap = 10
   module Apply (S : State.S) = struct
     let value n =
       S.Supply.sub n;
       S.Units.map Units.(add n Dervish)
   end
   module Check (S : State.S) = struct
-    let temple = S.Build.check Build.(ready Temple)
+    let cap = S.Build.return Build.temple_cap
     let count = S.Units.return Units.(count Dervish)
-    let value = temple && count < cap
+    let value = count < cap
   end
   module Make (S : State.S) = struct
+    let cap = S.Build.return Build.temple_cap
     let count = S.Units.return Units.(count Dervish)
     let each' = min each (cap - count)
     let n = S.Dice.roll each'
