@@ -35,22 +35,19 @@ end
 module Dervish = struct
   type t = Defs.count
   let each = 6
+  let kind = Units.Dervish
   module Apply (S : State.S) = struct
-    let value n =
-      S.Supply.sub n;
-      S.Units.map Units.(add n Dervish)
+    module Temple = Temple.With(S)
+    let value = Temple.buy kind
   end
   module Check (S : State.S) = struct
-    let cap = S.Build.return Build.temple_cap
-    let count = S.Units.return Units.(count Dervish)
-    let value = count < cap
+    module Temple = Temple.With(S)
+    let value = Temple.cap_for kind > 0
   end
   module Make (S : State.S) = struct
-    let cap = S.Build.return Build.temple_cap
-    let count = S.Units.return Units.(count Dervish)
-    let each' = min each (cap - count)
-    let n = S.Dice.roll each'
-    let value = S.Supply.return (min n)
+    module Temple = Temple.With(S)
+    let cap = Temple.cap_for kind
+    let value = S.Dice.roll (min each cap)
   end
 end
 
