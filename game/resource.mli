@@ -1,5 +1,10 @@
 open Defs
 
+module Bonus : sig
+  type kind = Mnp of float | Sup of float | Both of float
+  type t = Add of kind | Sub of kind
+end
+
 type t
 type kind =
   | Empty
@@ -7,6 +12,8 @@ type kind =
   | Supply of supply
 
 val empty : t
+
+val bonus_to : t -> Bonus.t -> t
 
 val has_manp : t -> bool
 val of_manp : manpower -> t

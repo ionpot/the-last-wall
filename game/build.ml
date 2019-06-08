@@ -1,9 +1,23 @@
 type cost = Resource.t
 type kind = Engrs | Fort | Market | Mausoleum of Leader.t | Observatory | Stable | Tavern | Temple | Trade of Nation.trade
+type bonus = ToAll | ToOne of kind
 type queued = kind * cost
 type status = kind list * kind list * queued list
+
+module Bonus = struct
+  type t = bonus * Resource.Bonus.t
+  let apply_to = List.fold_left Resource.bonus_to
+  let is kind = function
+      | (ToAll, _) -> true
+      | (ToOne k, _) -> k = kind
+  let filter kind = List.filter (is kind)
+  let find kind ls = filter kind ls |> List.map snd
+  let make bonus res_bonus = bonus, res_bonus
+end
+
 type t =
   { avlb : kind list;
+    bonus : Bonus.t list;
     built : kind list;
     queue : queued list;
     ready : kind list
@@ -23,6 +37,7 @@ let rm_ls kinds ls =
 
 let empty =
   { avlb = [Engrs; Fort; Market; Stable; Temple; Trade Nation.NoTrade];
+    bonus = [];
     built = [];
     queue = [];
     ready = [Tavern]
@@ -73,9 +88,8 @@ let ready kind t =
   List.mem kind t.ready
 
 let cost_of kind t =
-  let res = base_cost_of kind in
-  let ratio = if ready Engrs t then 0.1 else 0. in
-  Resource.reduce_supp ratio res
+  Bonus.find kind t.bonus
+  |> Bonus.apply_to (base_cost_of kind)
 
 let status t =
   let f (_, cost) = cost = Resource.empty in
@@ -85,6 +99,9 @@ let status t =
 let trade t =
   let f x = function Trade x -> x | _ -> x in
   List.fold_left f Nation.NoTrade t.ready
+
+let add_bonus bonus res_bonus t =
+  { t with bonus = Bonus.make bonus res_bonus :: t.bonus }
 
 let map_queue f need avlb t =
   let f' acc (kind, cost) =
@@ -135,9 +152,16 @@ let start kinds t =
 let supp need avlb t =
   map_queue Resource.take_supp need avlb t
 
+let on_ready ls t =
+  if List.mem Engrs ls
+  then add_bonus ToAll Resource.Bonus.(Sub (Sup 0.1)) t
+  else t
+
 let update (ready, built, queue) t =
-  { avlb = enables built t.avlb;
+  { t with
+    avlb = enables built t.avlb;
     built;
     queue;
     ready = ready @ t.ready
   }
+  |> on_ready ready
