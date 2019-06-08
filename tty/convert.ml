@@ -80,6 +80,7 @@ let trade_suffix trade =
 let bld2str = function
   | Build.Engrs -> "engineers guild"
   | Build.Fort -> "fort"
+  | Build.Guesthouse -> "guesthouse"
   | Build.Market -> "market"
   | Build.Mausoleum ldr ->
       "mausoleum for " ^ ldr2name ldr
