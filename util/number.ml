@@ -2,7 +2,7 @@ let increase_by ratio x =
   truncate (Float.increase (float x) ratio)
 
 let reduce_by ratio x =
-  truncate (Float.reduce (float x) ratio)
+  truncate (Float.reduce (float x) ratio |> ceil)
 
 let sub a b =
   max 0 (a - b)
