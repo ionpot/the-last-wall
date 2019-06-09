@@ -7,7 +7,7 @@ module Barraged = struct
     let value = S.Barraging.get ()
   end
   module Make (S : State.S) = struct
-    let n = S.Units.return Units.(count Men) / 20
+    let n = S.Units.return Units.barrage_power |> truncate
     let value = S.Enemy.return Units.(find n Orc)
   end
 end

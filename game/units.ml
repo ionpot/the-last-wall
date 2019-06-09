@@ -110,6 +110,9 @@ let power t =
 let power_of kind t =
   Ls.filter kind t |> power
 
+let barrage_power t =
+  power_of Men t *. 0.05
+
 let ratio kind1 kind2 t =
   let a = count kind1 t in
   let b = count kind2 t in
