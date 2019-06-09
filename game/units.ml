@@ -6,6 +6,7 @@ let attacks = [Skeleton; Orc; Demon; Harpy]
 let defends = [Men; Cavalry; Ranger; Templar; Dervish]
 let barrage = [Men; Ranger]
 let temple = [Dervish; Ranger; Templar]
+let work = [Men; Dervish]
 
 let abundance_of = function
   | Demon -> 0.3
@@ -134,9 +135,7 @@ let upkeep t =
   List.map Expr.cost t
   |> Listx.sum
 
-let workforce t =
-  power_of Men t
-  +. power_of Dervish t
+let workforce = powers_of work
 
 let add n kind t =
   Ls.add (Expr.make n kind) t
