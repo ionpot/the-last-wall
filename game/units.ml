@@ -4,6 +4,7 @@ type sum_report = (Defs.count * kind list)
 
 let attacks = [Skeleton; Orc; Demon; Harpy]
 let defends = [Men; Cavalry; Dervish]
+let temple = [Dervish]
 
 let abundance_of = function
   | Demon -> 0.3
@@ -94,6 +95,10 @@ let find n kind t =
   min n found
 
 let has = Ls.has
+
+let in_temple t =
+  List.map (fun k -> count k t) temple
+  |> Listx.sum
 
 let kinds_of t =
   List.map Expr.kind t
