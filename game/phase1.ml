@@ -4,7 +4,7 @@ module Input = struct
   module Event = Input
   type event =
     | Build of Event.BuildAvlb.t
-    | Deity of Event.Deity.t
+    | Deity of Event.DeityChoice.t
     | Leader of Event.Leader.t
     | Nations of Event.Nations.t
     | Scout of Event.Scout.t
@@ -12,7 +12,7 @@ module Input = struct
     module Apply = Phase.Apply(State)
     let event = function
       | Build x -> Apply.value x (module Event.BuildAvlb)
-      | Deity x -> Apply.value x (module Event.Deity)
+      | Deity x -> Apply.value x (module Event.DeityChoice)
       | Leader x -> Apply.value x (module Event.Leader)
       | Nations x -> Apply.value x (module Event.Nations)
       | Scout x -> Apply.value x (module Event.Scout)
@@ -37,7 +37,7 @@ module Convert = struct
     let direct : Convert.direct = function
       | Steps.Build -> (module struct module Event = Event.BuildAvlb
           let make x = Input.Build x end)
-      | Steps.Deity -> (module struct module Event = Event.Deity
+      | Steps.Deity -> (module struct module Event = Event.DeityChoice
           let make x = Input.Deity x end)
       | Steps.Leader -> (module struct module Event = Event.Leader
           let make x = Input.Leader x end)

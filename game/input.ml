@@ -22,7 +22,7 @@ module BuildAvlb = struct
   end
 end
 
-module Deity = struct
+module DeityChoice = struct
   type t = Deity.t
   module Apply (S : State.S) = struct
     let value = S.Deity.set
