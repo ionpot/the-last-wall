@@ -12,6 +12,8 @@ module Make (S : Game.State.S) = struct
       | Dervish count -> Dervish (check Prompt.dervish count)
       | Mercs count -> Mercs (Prompt.mercs count)
       | Nations chosen -> Nations (Prompt.nations chosen)
+      | Ranger count -> Ranger (check Prompt.ranger count)
+      | Templar count -> Templar (check Prompt.templar count)
       | Trade _ -> Trade (Prompt.trade ())
 
   let output =
@@ -39,6 +41,8 @@ module After (S : Status.S) = struct
     function
       | Dervish n -> if n > 0 then begin S.dervish (); S.res () end
       | Mercs n -> if n > 0 then S.res ()
+      | Ranger n -> if n > 0 then begin S.ranger (); S.res () end
+      | Templar n -> if n > 0 then begin S.templar (); S.res () end
       | _ -> ()
 
   let output =

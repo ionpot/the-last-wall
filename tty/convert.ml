@@ -123,7 +123,7 @@ let deity_text = function
   | Deity.Sitera -> "mother earth, spring of all living"
   | Deity.Sekrefir -> "leader of gods, envoy of order and justice"
 
-let unit_order = Units.([Men; Cavalry; Dervish; Skeleton; Orc; Demon; Harpy])
+let unit_order = Units.([Men; Cavalry; Ranger; Templar; Dervish; Skeleton; Orc; Demon; Harpy])
 let unit_cmp = Listx.compare unit_order
 
 let unit2str = function
@@ -133,7 +133,9 @@ let unit2str = function
   | Units.Harpy -> "harpy"
   | Units.Men -> "men"
   | Units.Orc -> "orc"
+  | Units.Ranger -> "ranger"
   | Units.Skeleton -> "skeleton"
+  | Units.Templar -> "templar"
 
 let party2str (n, kind) =
   if n > 0

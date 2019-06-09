@@ -98,9 +98,17 @@ let nations chosen =
   |> Listx.pick_first Game.Nation.max_allowed
   |> swap_empty chosen
 
+let ranger cap =
+  Tty.writeln (sprintf "can promote %d dervish to ranger" cap);
+  Tty.prompt_amount cap
+
 let scout () =
   Tty.prompt_yn "send scouts? y/n"
   |> echo (fun x -> if x then Tty.writeln "scouts sent")
+
+let templar cap =
+  Tty.writeln (sprintf "can promote %d dervish to templar" cap);
+  Tty.prompt_amount cap
 
 let trade_nation () =
   let ls = Game.Nation.kinds in
