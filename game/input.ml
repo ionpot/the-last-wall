@@ -97,7 +97,7 @@ module Ranger = struct
   end
   module Make (S : State.S) = struct
     module Temple = Temple.With(S)
-    let value = Temple.promotable ()
+    let value = Temple.promotable kind
   end
 end
 
@@ -123,7 +123,7 @@ module Templar = struct
   end
   module Make (S : State.S) = struct
     module Temple = Temple.With(S)
-    let value = Temple.promotable ()
+    let value = Temple.promotable kind
   end
 end
 
