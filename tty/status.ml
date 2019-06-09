@@ -11,13 +11,16 @@ end
 module With (S : State.S) = struct
   open Printf
 
+  let count kind =
+    Units.count kind |> S.Units.return
+
   let cavalry n =
-    S.Units.return Units.(count Cavalry)
+    count Units.Cavalry
     |> sprintf "%d cavalry arrive, %d total" n
     |> Tty.writeln
 
   let dervish () =
-    S.Units.return Units.(count Dervish)
+    count Units.Dervish
     |> sprintf "%d dervish in total"
     |> Tty.writeln
 
