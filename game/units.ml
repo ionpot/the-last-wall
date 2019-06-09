@@ -22,6 +22,7 @@ let chance_of = function
   | _ -> 0.
 
 let cost_of = function
+  | Dervish
   | Ranger -> 1
   | Templar -> 2
   | _ -> 0
