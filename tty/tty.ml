@@ -48,6 +48,9 @@ let prompt_int str =
   try int_of_string (prompt str)
   with Failure _ -> 0
 
+let prompt_amount cap =
+  prompt_int "amount" |> max 0 |> min cap
+
 let prompt_yn str =
   prompt str = "y"
 

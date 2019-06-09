@@ -17,8 +17,7 @@ module type Ops = sig
   type key
   type pair = key * Num.t
   val choose : pair list -> pair
-  val damage : pair -> power
-  val roll : power -> pair -> Num.t
+  val roll : pair -> power * Num.t
   val trim : power -> pair -> Num.t
 end
 

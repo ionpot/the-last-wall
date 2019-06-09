@@ -22,7 +22,7 @@ module BuildAvlb = struct
   end
 end
 
-module Deity = struct
+module DeityChoice = struct
   type t = Deity.t
   module Apply (S : State.S) = struct
     let value = S.Deity.set
@@ -35,22 +35,17 @@ end
 module Dervish = struct
   type t = Defs.count
   let each = 6
+  let kind = Units.Dervish
   module Apply (S : State.S) = struct
+    module Temple = Temple.With(S)
     let value n =
-      S.Supply.sub n;
-      S.Units.map Units.(add n Dervish)
-  end
-  module Check (S : State.S) = struct
-    let cap = S.Build.return Build.temple_cap
-    let count = S.Units.return Units.(count Dervish)
-    let value = count < cap
+      Temple.buy kind n;
+      S.Dervish.set n
   end
   module Make (S : State.S) = struct
-    let cap = S.Build.return Build.temple_cap
-    let count = S.Units.return Units.(count Dervish)
-    let each' = min each (cap - count)
-    let n = S.Dice.roll each'
-    let value = S.Supply.return (min n)
+    module Temple = Temple.With(S)
+    let cap = Temple.cap_for kind
+    let value = S.Dice.roll (min each cap)
   end
 end
 
@@ -90,6 +85,22 @@ module Nations = struct
   end
 end
 
+module Ranger = struct
+  type t = Defs.count
+  let kind = Units.Ranger
+  module Apply (S : State.S) = struct
+    module Temple = Temple.With(S)
+    let value = Temple.promote kind
+  end
+  module Check (S : State.S) = struct
+    let value = S.Deity.is Deity.Sitera
+  end
+  module Make (S : State.S) = struct
+    module Temple = Temple.With(S)
+    let value = Temple.promotable ()
+  end
+end
+
 module Scout = struct
   type t = bool
   module Apply (S : State.S) = struct
@@ -97,6 +108,22 @@ module Scout = struct
   end
   module Make (S : State.S) = struct
     let value = S.Scout.get ()
+  end
+end
+
+module Templar = struct
+  type t = Defs.count
+  let kind = Units.Templar
+  module Apply (S : State.S) = struct
+    module Temple = Temple.With(S)
+    let value = Temple.promote kind
+  end
+  module Check (S : State.S) = struct
+    let value = not (S.Deity.is Deity.Sitera)
+  end
+  module Make (S : State.S) = struct
+    module Temple = Temple.With(S)
+    let value = Temple.promotable ()
   end
 end
 

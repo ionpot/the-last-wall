@@ -24,8 +24,7 @@ module type Ops = sig
   type key
   type pair = key * Num.t
   val choose : pair list -> pair
-  val damage : pair -> Defs.power
-  val roll : Defs.power -> pair -> Num.t
+  val roll : pair -> Defs.power * Num.t
   val trim : Defs.power -> pair -> Num.t
 end
 
@@ -43,13 +42,12 @@ module With (S : Ops) = struct
 
   let pick cap pairs output =
     let pair = S.choose pairs in
-    let count = S.roll cap pair in
-    let pair' = fst pair, count in
-    let damage = S.damage pair' in
+    let key = fst pair in
+    let pwr, num = S.roll pair in
     let pairs', output' =
-      if count = zero then pairs, output
-      else picked pair' pairs output
-    in cap -. damage, pairs', output'
+      if num = zero then pairs, output
+      else picked (key, num) pairs output
+    in cap -. pwr, pairs', output'
 
   let sort pairs output =
     let sum pair =

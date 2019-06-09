@@ -3,6 +3,7 @@ module type S = sig
   module Build : Value.S with type t = Build.t
   module Casualty : Value.S with type t = Units.t
   module Deity : Value.S with type t = Deity.t
+  module Dervish : Value.Num
   module Dice : Dice.S
   module Ended : Value.Bit
   module Enemy : Value.S with type t = Units.t
@@ -22,6 +23,7 @@ module Make (D : Dice.From) : S = struct
   module Build = Value.From(Build)
   module Casualty = Value.From(Units)
   module Deity = Value.From(Deity)
+  module Dervish = Value.Num(Value.Zero)
   module Dice = Dice.From(D)
   module Ended = Value.Bit(Value.False)
   module Enemy = Value.From(Units)
