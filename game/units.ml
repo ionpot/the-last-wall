@@ -22,12 +22,11 @@ let chance_of = function
   | _ -> 0.
 
 let cost_of = function
-  | Cavalry
-  | Dervish
-  | Men -> 1
-  | Ranger
+  | Ranger -> 1
   | Templar -> 2
   | _ -> 0
+
+let upkeep_of _ = 1
 
 let base_power = function
   | Harpy -> 4.
@@ -46,7 +45,7 @@ module Expr = struct
   let add (n, k) (n', k') =
     if k = k' then n + n', k else (n', k')
   let count = fst
-  let cost (n, k) = n * cost_of k
+  let cost (n, k) = n * upkeep_of k
   let has_count (n, _) = n > 0
   let is kind (_, k) = k = kind
   let kind = snd
