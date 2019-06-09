@@ -46,6 +46,11 @@ let ldr2kind = function
   | Leader.Expert -> "expert"
   | Leader.Warrior -> "warrior"
 
+let ldr2gender ldr =
+  match Leader.gender_of ldr with
+  | Leader.Male -> "♂"
+  | Leader.Female -> "♀"
+
 let ldr2first ldr = Leader.name_of ldr |> Name.first
 let ldr2name ldr = Leader.name_of ldr |> Name.full
 
@@ -56,9 +61,10 @@ let ldr2status ldr =
   sprintf "level %d %s (cha %d)" level kind cha
 
 let ldr2full ldr =
+  let gender = ldr2gender ldr in
   let name = ldr2name ldr in
   let status = ldr2status ldr in
-  sprintf "%s, %s" name status
+  sprintf "%s %s, %s" gender name status
 
 let nation2str = function
   | Nation.Clan -> "clan"
