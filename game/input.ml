@@ -38,7 +38,9 @@ module Dervish = struct
   let kind = Units.Dervish
   module Apply (S : State.S) = struct
     module Temple = Temple.With(S)
-    let value = Temple.buy kind
+    let value n =
+      Temple.buy kind n;
+      S.Dervish.set n
   end
   module Make (S : State.S) = struct
     module Temple = Temple.With(S)
@@ -83,6 +85,22 @@ module Nations = struct
   end
 end
 
+module Ranger = struct
+  type t = Defs.count
+  let kind = Units.Ranger
+  module Apply (S : State.S) = struct
+    module Temple = Temple.With(S)
+    let value = Temple.promote kind
+  end
+  module Check (S : State.S) = struct
+    let value = S.Deity.is Deity.Sitera
+  end
+  module Make (S : State.S) = struct
+    module Temple = Temple.With(S)
+    let value = Temple.promotable ()
+  end
+end
+
 module Scout = struct
   type t = bool
   module Apply (S : State.S) = struct
@@ -90,6 +108,22 @@ module Scout = struct
   end
   module Make (S : State.S) = struct
     let value = S.Scout.get ()
+  end
+end
+
+module Templar = struct
+  type t = Defs.count
+  let kind = Units.Templar
+  module Apply (S : State.S) = struct
+    module Temple = Temple.With(S)
+    let value = Temple.promote kind
+  end
+  module Check (S : State.S) = struct
+    let value = not (S.Deity.is Deity.Sitera)
+  end
+  module Make (S : State.S) = struct
+    module Temple = Temple.With(S)
+    let value = Temple.promotable ()
   end
 end
 

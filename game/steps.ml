@@ -58,7 +58,7 @@ end
 
 module Phase2 = struct
   module Input = struct
-    type cond = Mercs | Trade
+    type cond = Mercs | Ranger | Templar | Trade
     type direct = Build | Dervish | Nations
     type t = (cond, direct) input
   end
@@ -87,6 +87,8 @@ module Phase2 = struct
       Do (Direct Output.BuildSupply);
       Do (Cond Output.Cavalry);
       Ask (Direct Input.Dervish);
+      Ask (Cond Input.Templar);
+      Ask (Cond Input.Ranger);
       Ask (Cond Input.Mercs)
     ]
 end
