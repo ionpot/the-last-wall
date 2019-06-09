@@ -2,7 +2,7 @@ module With (S : State.S) = struct
   let cap_rem () =
     let cap = S.Build.return Build.temple_cap in
     let count = S.Units.return Units.(count Dervish) in
-    cap - count
+    max 0 (cap - count)
 
   let cap_for kind =
     let cap = cap_rem () in
