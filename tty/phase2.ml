@@ -3,12 +3,13 @@ module Phase = Game.Phase2
 module Make (S : Game.State.S) = struct
   let input =
     let open Phase.Input in
+    let check f x = if x > 0 then f x else x in
     function
       | Build avlb ->
           let module Prompt = Prompt.Build(S) in
           S.Build.return Print.Build.all;
           Build (S.Build.return (Prompt.from avlb))
-      | Dervish count -> Dervish (Prompt.dervish count)
+      | Dervish count -> Dervish (check Prompt.dervish count)
       | Mercs count -> Mercs (Prompt.mercs count)
       | Nations chosen -> Nations (Prompt.nations chosen)
       | Trade _ -> Trade (Prompt.trade ())
