@@ -47,12 +47,12 @@ module Convert = struct
     let direct : Convert.direct = function
       | Steps.Build -> (module struct module Event = Event.BuildAvlb
           let make x = Input.Build x end)
+      | Steps.Dervish -> (module struct module Event = Event.Dervish
+          let make x = Input.Dervish x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)
 
     let cond : Convert.cond = function
-      | Steps.Dervish -> (module struct module Event = Event.Dervish
-          let make x = Input.Dervish x end)
       | Steps.Mercs -> (module struct module Event = Event.Mercs
           let make x = Input.Mercs x end)
       | Steps.Trade -> (module struct module Event = Event.Trade

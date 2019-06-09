@@ -40,10 +40,6 @@ module Dervish = struct
     module Temple = Temple.With(S)
     let value = Temple.buy kind
   end
-  module Check (S : State.S) = struct
-    module Temple = Temple.With(S)
-    let value = Temple.cap_for kind > 0
-  end
   module Make (S : State.S) = struct
     module Temple = Temple.With(S)
     let cap = Temple.cap_for kind
