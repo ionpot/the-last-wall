@@ -8,6 +8,8 @@ module Input = struct
     | Dervish of Event.Dervish.t
     | Mercs of Event.Mercs.t
     | Nations of Event.Nations.t
+    | Ranger of Event.Ranger.t
+    | Templar of Event.Templar.t
     | Trade of Event.Trade.t
 
   module Apply (State : State.S) = struct
@@ -17,6 +19,8 @@ module Input = struct
       | Dervish x -> Apply.value x (module Event.Dervish)
       | Mercs x -> Apply.value x (module Event.Mercs)
       | Nations x -> Apply.value x (module Event.Nations)
+      | Ranger x -> Apply.value x (module Event.Ranger)
+      | Templar x -> Apply.value x (module Event.Templar)
       | Trade x -> Apply.value x (module Event.Trade)
   end
 end
@@ -47,14 +51,18 @@ module Convert = struct
     let direct : Convert.direct = function
       | Steps.Build -> (module struct module Event = Event.BuildAvlb
           let make x = Input.Build x end)
+      | Steps.Dervish -> (module struct module Event = Event.Dervish
+          let make x = Input.Dervish x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)
 
     let cond : Convert.cond = function
-      | Steps.Dervish -> (module struct module Event = Event.Dervish
-          let make x = Input.Dervish x end)
       | Steps.Mercs -> (module struct module Event = Event.Mercs
           let make x = Input.Mercs x end)
+      | Steps.Ranger -> (module struct module Event = Event.Ranger
+          let make x = Input.Ranger x end)
+      | Steps.Templar -> (module struct module Event = Event.Templar
+          let make x = Input.Templar x end)
       | Steps.Trade -> (module struct module Event = Event.Trade
           let make x = Input.Trade x end)
   end

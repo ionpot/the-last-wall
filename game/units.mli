@@ -1,4 +1,4 @@
-type kind = Cavalry | Demon | Dervish | Harpy | Men | Orc | Skeleton
+type kind = Cavalry | Demon | Dervish | Harpy | Men | Orc | Ranger | Skeleton | Templar
 type report = (Defs.count * kind) list
 type sum_report = (Defs.count * kind list)
 
@@ -7,6 +7,7 @@ val defends : kind list
 
 val abundance_of : kind -> float
 val chance_of : kind -> float
+val cost_of : kind -> Defs.supply
 
 type t
 
@@ -14,10 +15,12 @@ val empty : t
 
 val make : Defs.count -> kind -> t
 
+val barrage_power : t -> Defs.power
 val count : kind -> t -> Defs.count
 val count_all : t -> Defs.count
 val find : Defs.count -> kind -> t -> Defs.count
 val has : kind -> t -> bool
+val in_temple : t -> Defs.count
 val kinds_of : t -> kind list
 val power : t -> Defs.power
 val power_of : kind -> t -> Defs.power
