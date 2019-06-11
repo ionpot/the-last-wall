@@ -34,7 +34,6 @@ end
 
 module Dervish = struct
   type t = Defs.count
-  let each = 6
   let kind = Units.Dervish
   module Apply (S : State.S) = struct
     module Temple = Temple.With(S)
@@ -45,7 +44,8 @@ module Dervish = struct
   module Make (S : State.S) = struct
     module Temple = Temple.With(S)
     let cap = Temple.cap_for kind
-    let value = S.Dice.roll (min each cap)
+    let a, b = Temple.dervish_range ()
+    let value = S.Dice.between_try a (min b cap)
   end
 end
 

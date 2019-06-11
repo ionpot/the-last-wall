@@ -6,6 +6,7 @@ end
 
 module type S = sig
   val between : int -> int -> int
+  val between_try : int -> int -> int
   val chance : float -> bool
   val deviate : int -> int -> int
   val index : int -> int
@@ -29,6 +30,9 @@ module From (M : From) : S = struct
   let between x y =
     let d = y - x in
     x + index (d + 1)
+
+  let between_try x y =
+    if y > x then between x y else y
 
   let chance fl =
     if fl >= 1. then true

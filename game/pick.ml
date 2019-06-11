@@ -45,9 +45,11 @@ module With (S : Ops) = struct
     let key = fst pair in
     let pwr, num = S.roll pair in
     let pairs', output' =
-      if num = zero then pairs, output
-      else picked (key, num) pairs output
-    in cap -. pwr, pairs', output'
+      if num > zero
+      then picked (key, num) pairs output
+      else pairs, output
+    in
+    cap -. pwr, pairs', output'
 
   let sort pairs output =
     let sum pair =
