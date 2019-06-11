@@ -21,7 +21,12 @@ module Make (S : Game.State.S) = struct
     let open Phase.Output in
     function
       | Attack (_, rp) -> Tty.pairln "seen" (report2str rp)
-      | Blessing res -> Tty.pairln "blessing" (res2str res |> str2none)
+      | Blessing res ->
+          res2str res
+          |> (if S.Deity.is Game.Deity.Lerota
+              then (fun x -> x)
+              else str2none)
+          |> Tty.ifpairln "blessing"
       | BuildManp m -> S.Units.return (Print.Build.manp m)
       | BuildStatus s -> ()
       | BuildSupply s -> S.Supply.return (Print.Build.supply s)
