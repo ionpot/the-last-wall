@@ -6,6 +6,7 @@ end
 
 module type S = sig
   val between : int -> int -> int
+  val between_try : int -> int -> int
   val chance : float -> bool
   val deviate : int -> int -> int
   val index : int -> int

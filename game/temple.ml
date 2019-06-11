@@ -10,6 +10,10 @@ module With (S : State.S) = struct
     let supp = S.Supply.get () in
     if cost > 0 then min cap (supp / cost) else cap
 
+  let dervish_range () =
+    if S.Build.check Build.(ready Guesthouse)
+    then 2, 8 else 1, 6
+
   let promotable () =
     max 0 (S.Units.return Units.(count Dervish) - S.Dervish.get ())
 
