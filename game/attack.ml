@@ -13,7 +13,6 @@ module Make (S : State.S) = struct
   let can_spawn turn kind =
     if kind = Units.Harpy
     then S.Harpy.check S.Dice.chance
-    |> (fun x -> Printf.printf "harpy chance: %f -> %s\n" (S.Harpy.get ()) (if x then "yes" else "no"); x)
     else can_regular turn kind
 
   let roll_count turn kind =
