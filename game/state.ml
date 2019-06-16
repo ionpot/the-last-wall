@@ -1,4 +1,5 @@
 module type S = sig
+  module Ballista : Value.Num
   module Barraging : Value.Bit
   module Build : Value.S with type t = Build.t
   module Casualty : Value.S with type t = Units.t
@@ -19,6 +20,7 @@ module type S = sig
 end
 
 module Make (D : Dice.From) : S = struct
+  module Ballista = Value.Num(Value.Zero)
   module Barraging = Value.Bit(Value.False)
   module Build = Value.From(Build)
   module Casualty = Value.From(Units)
