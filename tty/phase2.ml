@@ -5,9 +5,8 @@ module Make (S : Game.State.S) = struct
     let open Phase.Input in
     let check f x = if x > 0 then f x else x in
     function
-      | Ballista avlb ->
-          let n = S.Units.return Game.Units.(count Ballista) in
-          Ballista (check (Prompt.ballista n) avlb)
+      | Ballista (avlb, have) ->
+          Ballista (check (Prompt.ballista have) avlb, have)
       | Build avlb ->
           let module Prompt = Prompt.Build(S) in
           S.Build.return Print.Build.all;
@@ -48,7 +47,7 @@ module After (S : Status.S) = struct
   let input =
     let open Phase.Input in
     function
-      | Ballista n -> if n > 0 then S.res ()
+      | Ballista (n, _) -> if n > 0 then S.res ()
       | Dervish n -> if n > 0 then begin S.dervish (); S.res () end
       | Mercs n -> if n > 0 then S.res ()
       | Ranger n -> if n > 0 then begin S.ranger (); S.res () end

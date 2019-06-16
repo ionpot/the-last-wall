@@ -5,6 +5,7 @@ type sum_report = (Defs.count * kind list)
 let attacks = [Skeleton; Orc; Demon; Harpy]
 let defends = [Men; Cavalry; Ranger; Templar; Dervish; Ballista]
 let barrage = [Men; Ranger]
+let revive = [Men; Ranger; Templar; Dervish]
 let temple = [Dervish; Ranger; Templar]
 let work = [Men; Dervish]
 
@@ -78,6 +79,10 @@ module Ls = struct
   let filter kind t =
     List.filter (Expr.is kind) t
 
+  let filter_ls kinds t =
+    List.map (fun k -> filter k t) kinds
+    |> List.concat
+
   let has kind t =
     List.exists (Expr.is kind) t
 
@@ -133,6 +138,9 @@ let ratio kind1 kind2 t =
   float a /. float b
 
 let report t = t
+
+let revivable t =
+  Ls.filter_ls revive t
 
 let upkeep t =
   List.map Expr.cost t
