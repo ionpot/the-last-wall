@@ -26,6 +26,7 @@ val power : t -> Defs.power
 val power_of : kind -> t -> Defs.power
 val ratio : kind -> kind -> t -> float
 val report : t -> report
+val revivable : t -> t
 val upkeep : t -> Defs.supply
 val workforce : t -> Defs.power
 

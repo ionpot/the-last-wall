@@ -74,7 +74,7 @@ module Revive = struct
     module Fill = Units.Fill(S.Dice)
     let pwr = S.Units.return Units.(power_of Dervish)
     let value =
-      Units.(rm Cavalry)
+      Units.revivable
       |> S.Casualty.return
       |> Fill.from pwr
   end
