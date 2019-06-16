@@ -41,7 +41,7 @@ module From (M : From) : S = struct
     if y > x then between x y else y
 
   let betweenf x y =
-    x +. M.float y
+    x +. M.float (y -. x)
 
   let betweenf_try x y =
     if y > x then betweenf x y else y
