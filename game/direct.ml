@@ -16,6 +16,22 @@ module Attack = struct
   end
 end
 
+module Ballista = struct
+  type t = Units.t
+  let min_power = 2.
+  let max_power = 5.
+  module Apply (S : State.S) = struct
+    let value enemies = S.Enemy.map (Units.reduce enemies)
+  end
+  module Make (S : State.S) = struct
+    module Roll = Units.Fill(S.Dice)
+    let count = S.Units.return Units.(count Ballista)
+    let count' = count - S.Ballista.get ()
+    let power = S.Dice.betweenf_times_try count' min_power max_power
+    let value = S.Enemy.return (Roll.from power)
+  end
+end
+
 module Blessing = struct
   type t = Resource.t
   module Apply = Event.AddRes

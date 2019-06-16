@@ -4,6 +4,7 @@ module Input = struct
   module Event = Input
 
   type event =
+    | Ballista of Event.Ballista.t
     | Build of Event.BuildAvlb.t
     | Dervish of Event.Dervish.t
     | Mercs of Event.Mercs.t
@@ -15,6 +16,7 @@ module Input = struct
   module Apply (State : State.S) = struct
     module Apply = Phase.Apply(State)
     let event = function
+      | Ballista x -> Apply.value x (module Event.Ballista)
       | Build x -> Apply.value x (module Event.BuildAvlb)
       | Dervish x -> Apply.value x (module Event.Dervish)
       | Mercs x -> Apply.value x (module Event.Mercs)
@@ -49,6 +51,8 @@ module Convert = struct
     module Convert = Phase.Convert.Input(Steps)(Input)
 
     let direct : Convert.direct = function
+      | Steps.Ballista -> (module struct module Event = Event.Ballista
+          let make x = Input.Ballista x end)
       | Steps.Build -> (module struct module Event = Event.BuildAvlb
           let make x = Input.Build x end)
       | Steps.Dervish -> (module struct module Event = Event.Dervish

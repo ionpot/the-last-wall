@@ -59,7 +59,7 @@ end
 module Phase2 = struct
   module Input = struct
     type cond = Mercs | Ranger | Templar | Trade
-    type direct = Build | Dervish | Nations
+    type direct = Ballista | Build | Dervish | Nations
     type t = (cond, direct) input
   end
   module Output = struct
@@ -85,6 +85,7 @@ module Phase2 = struct
       Ask (Cond Input.Trade);
       Ask (Direct Input.Build);
       Do (Direct Output.BuildSupply);
+      Ask (Direct Input.Ballista);
       Do (Cond Output.Cavalry);
       Ask (Direct Input.Dervish);
       Ask (Cond Input.Templar);
@@ -102,7 +103,7 @@ module Phase3 = struct
   module Output = struct
     type check = Attack | LevelUp | NoAttack | NoEnemies
     type cond = Barraged | Defeat | Revive | Smite
-    type direct = CanBarrage | Combat | Victory
+    type direct = Ballista | CanBarrage | Combat | Victory
     type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
@@ -116,6 +117,8 @@ module Phase3 = struct
     GoIf (Check Output.NoEnemies, victory)
   let attack : t list =
     [ Do (Cond Output.Smite);
+      check_enemies;
+      Do (Direct Output.Ballista);
       check_enemies;
       Do (Direct Output.CanBarrage);
       Ask (Cond Input.Barrage);

@@ -1,3 +1,22 @@
+module Ballista = struct
+  type t = Defs.count
+  let cost = 2
+  module Apply (S : State.S) = struct
+    let value n =
+      let cost' = cost * n in
+      S.Supply.sub cost';
+      S.Units.map Units.(sub cost' Men);
+      S.Units.map Units.(add n Ballista);
+      S.Ballista.set n
+  end
+  module Make (S : State.S) = struct
+    let guild = S.Build.check Build.(ready Engrs)
+    let men = S.Units.return Units.(count Men)
+    let sup = S.Supply.get ()
+    let value = if guild then min men sup / cost else 0
+  end
+end
+
 module Barrage = struct
   type t = bool
   module Apply (S : State.S) = struct
