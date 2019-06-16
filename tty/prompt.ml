@@ -38,6 +38,11 @@ let vertical prefix ls =
   Tty.writeln (prefix ^ ":");
   indices ls |> indent |> Tty.writelns
 
+let ballista n avlb =
+  sprintf "have %d ballista, build more? (max %d)" n avlb
+  |> Tty.writeln;
+  Tty.prompt_amount avlb
+
 let barrage () =
   Tty.prompt_yn "arrow barrage? y/n"
 
