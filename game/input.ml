@@ -1,12 +1,13 @@
 module Ballista = struct
   type t = Defs.count * Defs.count
   let cap = 5
-  let cost = 2
+  let mnp_cost = 2
+  let sup_cost = 12
   module Apply (S : State.S) = struct
     let value (n, _) =
-      let cost' = cost * n in
-      S.Supply.sub cost';
-      S.Units.map Units.(sub cost' Men);
+      S.Supply.sub (n * sup_cost);
+      let m = n * mnp_cost in
+      S.Units.map Units.(sub m Men);
       let n' = S.Ballista.get () in
       S.Units.map Units.(add n' Ballista);
       S.Ballista.set n
@@ -18,7 +19,7 @@ module Ballista = struct
     let have = S.Ballista.get () + bal
     let cap' = Number.sub cap have
     let sup = S.Supply.get ()
-    let avlb = min men sup / cost
+    let avlb = min (men / mnp_cost) (sup / sup_cost)
     let avlb' = if guild then min avlb cap' else 0
     let value = avlb', have
   end
