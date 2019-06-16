@@ -25,9 +25,8 @@ module Ballista = struct
   module Make (S : State.S) = struct
     module Roll = Units.Fill(S.Dice)
     let count = S.Units.return Units.(count Ballista)
-    let count' = count - S.Ballista.get ()
-    let power' = S.Dice.rangef_times_try count' power
-    let value = count', S.Enemy.return (Roll.from power')
+    let power' = S.Dice.rangef_times_try count power
+    let value = count, S.Enemy.return (Roll.from power')
   end
 end
 
