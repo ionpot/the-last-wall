@@ -32,6 +32,7 @@ module Make (S : Game.State.S) = struct
       | BuildSupply s -> S.Supply.return (Print.Build.supply s)
       | Cavalry c -> ()
       | Defeat -> Tty.writeln "defeat"
+      | Facilities ls -> Tty.ifpairln "facilities" (facs2str ls)
       | LeaderNew ldr -> Tty.pairln "new leader" (ldr2full ldr)
       | Market sup -> Tty.pairln "market" (sup2str sup)
       | Starvation units -> Tty.pairln "starvation" (units2str units)
@@ -56,6 +57,7 @@ module After (S : Status.S) = struct
       | Blessing res -> if res <> Game.Resource.empty then S.res ()
       | BuildSupply s -> if s > 0 then S.res ()
       | Cavalry c -> S.cavalry c; S.res ()
+      | Facilities _
       | Market _
       | Starvation _
       | Support _

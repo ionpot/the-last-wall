@@ -86,11 +86,13 @@ let trade_suffix trade =
 let bld2str = function
   | Build.Engrs -> "engineers guild"
   | Build.Fort -> "fort"
+  | Build.Foundry -> "iron foundry"
   | Build.Guesthouse -> "guesthouse"
   | Build.Market -> "market"
   | Build.Mausoleum ldr ->
       "mausoleum for " ^ ldr2name ldr
   | Build.Observatory -> "observatory"
+  | Build.Sawmill -> "sawmill"
   | Build.Stable -> "stable"
   | Build.Tavern -> "tavern"
   | Build.Temple -> "temple"
@@ -113,6 +115,11 @@ let bld_q2str ls =
   ls
   |> List.rev_map (fun (kind, cost) ->
       sprintf "%s (%s)" (bld2str kind) (res2str cost))
+  |> commas
+
+let facs2str ls =
+  ls
+  |> List.map (fun (k, s) -> sprintf "%s (%s)" (bld2str k) (sup2str s))
   |> commas
 
 let deity2str = function
