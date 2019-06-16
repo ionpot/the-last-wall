@@ -1,7 +1,7 @@
 open Defs
 
 type cost = Resource.t
-type kind = Engrs | Fort | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Stable | Tavern | Temple | Trade of Nation.trade
+type kind = Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.trade
 type bonus = To of kind | ToAll
 type queued = kind * cost
 type status = kind list * kind list * queued list
@@ -15,6 +15,7 @@ type t
 val empty : t
 
 val cost_of : kind -> Bonus.t list -> cost
+val supply_range : kind -> supply * supply
 val multiple : kind -> bool
 
 val built : kind -> t -> bool

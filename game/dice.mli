@@ -16,6 +16,7 @@ module type S = sig
   val index : int -> int
   val pick : 'a list -> 'a
   val pick_w : float list -> 'a list -> 'a
+  val range : int * int -> int
   val rangef_times_try : int -> float * float -> float
   val roll : int -> int
   val rollf : float -> float

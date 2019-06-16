@@ -36,6 +36,7 @@ module Output = struct
     | BuildSupply of Direct.BuildSupply.t
     | Cavalry of Cond.Cavalry.t
     | Defeat
+    | Facilities of Direct.Facilities.t
     | LeaderNew of Cond.LeaderNew.t
     | Market of Cond.Market.t
     | Starvation of Cond.Starvation.t
@@ -100,6 +101,8 @@ module Convert = struct
           let make x = Output.BuildStatus x end)
       | Steps.BuildSupply -> (module struct module Event = Direct.BuildSupply
           let make x = Output.BuildSupply x end)
+      | Steps.Facilities -> (module struct module Event = Direct.Facilities
+          let make x = Output.Facilities x end)
       | Steps.Support -> (module struct module Event = Direct.Support
           let make x = Output.Support x end)
       | Steps.Turn -> (module struct module Event = Direct.Turn

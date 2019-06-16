@@ -100,6 +100,22 @@ module Combat = struct
   module Make = Combat.Make
 end
 
+module Facilities = struct
+  type t = (Build.kind * Defs.supply) list
+  let kinds = Build.([Foundry; Sawmill])
+  module Apply (S : State.S) = struct
+    let value t = List.map snd t |> Listx.sum |> S.Supply.add
+  end
+  module Make (S : State.S) = struct
+    let is_ready kind = S.Build.check Build.(ready kind)
+    let kinds' = List.filter is_ready kinds
+    let value =
+      List.map Build.supply_range kinds'
+      |> List.map S.Dice.range
+      |> List.combine kinds'
+  end
+end
+
 module Starting = struct
   type t = Leader.t * Month.t * Resource.t
   module Apply (S : State.S) = struct

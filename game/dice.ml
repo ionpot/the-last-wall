@@ -16,6 +16,7 @@ module type S = sig
   val index : int -> int
   val pick : 'a list -> 'a
   val pick_w : float list -> 'a list -> 'a
+  val range : int * int -> int
   val rangef_times_try : int -> float * float -> float
   val roll : int -> int
   val rollf : float -> float
@@ -52,6 +53,9 @@ module From (M : From) : S = struct
   let betweenf_times_try n x y =
     let n' = float n in
     betweenf_try (x *. n') (y *. n')
+
+  let range (x, y) =
+    between x y
 
   let rangef_times_try n (x, y) =
     betweenf_times_try n x y
