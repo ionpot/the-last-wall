@@ -58,7 +58,7 @@ module Market = struct
     let value = S.Build.check Build.(ready Market)
   end
   module Make (S : State.S) = struct
-    let value = S.Dice.between 15 45
+    let value = Build.(supply_range Market) |> S.Dice.range
   end
 end
 

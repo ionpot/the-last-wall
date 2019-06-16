@@ -4,6 +4,7 @@ module Input = struct
   module Event = Input
 
   type event =
+    | Ballista of Event.Ballista.t
     | Build of Event.BuildAvlb.t
     | Dervish of Event.Dervish.t
     | Mercs of Event.Mercs.t
@@ -15,6 +16,7 @@ module Input = struct
   module Apply (State : State.S) = struct
     module Apply = Phase.Apply(State)
     let event = function
+      | Ballista x -> Apply.value x (module Event.Ballista)
       | Build x -> Apply.value x (module Event.BuildAvlb)
       | Dervish x -> Apply.value x (module Event.Dervish)
       | Mercs x -> Apply.value x (module Event.Mercs)
@@ -34,6 +36,7 @@ module Output = struct
     | BuildSupply of Direct.BuildSupply.t
     | Cavalry of Cond.Cavalry.t
     | Defeat
+    | Facilities of Direct.Facilities.t
     | LeaderNew of Cond.LeaderNew.t
     | Market of Cond.Market.t
     | Starvation of Cond.Starvation.t
@@ -49,6 +52,8 @@ module Convert = struct
     module Convert = Phase.Convert.Input(Steps)(Input)
 
     let direct : Convert.direct = function
+      | Steps.Ballista -> (module struct module Event = Event.Ballista
+          let make x = Input.Ballista x end)
       | Steps.Build -> (module struct module Event = Event.BuildAvlb
           let make x = Input.Build x end)
       | Steps.Dervish -> (module struct module Event = Event.Dervish
@@ -96,6 +101,8 @@ module Convert = struct
           let make x = Output.BuildStatus x end)
       | Steps.BuildSupply -> (module struct module Event = Direct.BuildSupply
           let make x = Output.BuildSupply x end)
+      | Steps.Facilities -> (module struct module Event = Direct.Facilities
+          let make x = Output.Facilities x end)
       | Steps.Support -> (module struct module Event = Direct.Support
           let make x = Output.Support x end)
       | Steps.Turn -> (module struct module Event = Direct.Turn

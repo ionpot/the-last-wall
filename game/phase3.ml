@@ -17,6 +17,7 @@ end
 module Output = struct
   type event =
     | Attack
+    | Ballista of Direct.Ballista.t
     | Barraged of Cond.Barraged.t
     | CanBarrage of Direct.CanBarrage.t
     | Combat of Direct.Combat.t
@@ -69,6 +70,8 @@ module Convert = struct
           let make x = Output.Smite x end)
 
     let direct : Convert.direct = function
+      | Steps.Ballista -> (module struct module Event = Direct.Ballista
+          let make x = Output.Ballista x end)
       | Steps.CanBarrage -> (module struct module Event = Direct.CanBarrage
           let make x = Output.CanBarrage x end)
       | Steps.Combat -> (module struct module Event = Direct.Combat

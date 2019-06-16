@@ -39,8 +39,9 @@ module With (S : State.S) = struct
     total Units.([Templar; Dervish])
 
   let enemies () =
-    S.Enemy.return Convert.units2str
-    |> Tty.pairln "enemies"
+    S.Enemy.return Units.report
+    |> Convert.unit_pairs2str
+    |> Tty.ifpairln "enemies"
 
   let res () =
     let m = S.Units.return Units.workforce |> truncate in

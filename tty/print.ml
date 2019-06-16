@@ -79,6 +79,11 @@ module Combat = struct
     else win ldr O.units O.ldr_died
 end
 
+let ballista (n, enemies) =
+  if n > 0 then
+  sprintf "%d ballista kills %s" n (units2str enemies)
+  |> Tty.writeln
+
 let can_barrage w =
   let open Direct.CanBarrage in
   function

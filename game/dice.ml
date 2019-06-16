@@ -6,12 +6,18 @@ end
 
 module type S = sig
   val between : int -> int -> int
+  val betweenf : float -> float -> float
   val between_try : int -> int -> int
+  val betweenf_try : float -> float -> float
+  val betweenf_times : int -> float -> float -> float
+  val betweenf_times_try : int -> float -> float -> float
   val chance : float -> bool
   val deviate : int -> int -> int
   val index : int -> int
   val pick : 'a list -> 'a
   val pick_w : float list -> 'a list -> 'a
+  val range : int * int -> int
+  val rangef_times_try : int -> float * float -> float
   val roll : int -> int
   val rollf : float -> float
   val round : float -> int
@@ -33,6 +39,26 @@ module From (M : From) : S = struct
 
   let between_try x y =
     if y > x then between x y else y
+
+  let betweenf x y =
+    x +. M.float y
+
+  let betweenf_try x y =
+    if y > x then betweenf x y else y
+
+  let betweenf_times n x y =
+    let n' = float n in
+    betweenf (x *. n') (y *. n')
+
+  let betweenf_times_try n x y =
+    let n' = float n in
+    betweenf_try (x *. n') (y *. n')
+
+  let range (x, y) =
+    between x y
+
+  let rangef_times_try n (x, y) =
+    betweenf_times_try n x y
 
   let chance fl =
     if fl >= 1. then true

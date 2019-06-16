@@ -16,6 +16,21 @@ module Attack = struct
   end
 end
 
+module Ballista = struct
+  type t = Defs.count * Units.t
+  let power = 2., 5.
+  module Apply (S : State.S) = struct
+    let value (_, enemies) = S.Enemy.map (Units.reduce enemies)
+  end
+  module Make (S : State.S) = struct
+    module Roll = Units.Fill(S.Dice)
+    let count = S.Units.return Units.(count Ballista)
+    let count' = count - S.Ballista.get ()
+    let power' = S.Dice.rangef_times_try count' power
+    let value = count', S.Enemy.return (Roll.from power')
+  end
+end
+
 module Blessing = struct
   type t = Resource.t
   module Apply = Event.AddRes
@@ -83,6 +98,22 @@ module Combat = struct
   type t = (module Combat.Outcome)
   module Apply = Combat.Apply
   module Make = Combat.Make
+end
+
+module Facilities = struct
+  type t = (Build.kind * Defs.supply) list
+  let kinds = Build.([Foundry; Sawmill])
+  module Apply (S : State.S) = struct
+    let value t = List.map snd t |> Listx.sum |> S.Supply.add
+  end
+  module Make (S : State.S) = struct
+    let is_ready kind = S.Build.check Build.(ready kind)
+    let kinds' = List.filter is_ready kinds
+    let value =
+      List.map Build.supply_range kinds'
+      |> List.map S.Dice.range
+      |> List.combine kinds'
+  end
 end
 
 module Starting = struct

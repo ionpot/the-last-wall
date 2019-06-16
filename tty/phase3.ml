@@ -16,6 +16,7 @@ module Make (S : Game.State.S) = struct
           |> S.Units.return
           |> S.Enemy.return
           |> S.Leader.return
+      | Ballista x -> Print.ballista x
       | Barraged x -> Tty.pairln "barraged" (barrage2str x)
       | CanBarrage x -> (S.Weather.return Print.can_barrage) x
       | Combat x ->
@@ -40,6 +41,7 @@ module After (S : Status.S) = struct
   let output =
     let open Phase.Output in
     function
+      | Ballista (n, _) -> if n > 0 then S.enemies ()
       | Smite _ -> S.enemies ()
       | Victory -> S.units ()
       | _ -> ()

@@ -1,4 +1,4 @@
-type kind = Cavalry | Demon | Dervish | Harpy | Men | Orc | Ranger | Skeleton | Templar
+type kind = Ballista | Cavalry | Demon | Dervish | Harpy | Men | Orc | Ranger | Skeleton | Templar
 type report = (Defs.count * kind) list
 type sum_report = (Defs.count * kind list)
 

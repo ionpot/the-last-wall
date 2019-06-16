@@ -1,9 +1,9 @@
-type kind = Cavalry | Demon | Dervish | Harpy | Men | Orc | Ranger | Skeleton | Templar
+type kind = Ballista | Cavalry | Demon | Dervish | Harpy | Men | Orc | Ranger | Skeleton | Templar
 type report = (Defs.count * kind) list
 type sum_report = (Defs.count * kind list)
 
 let attacks = [Skeleton; Orc; Demon; Harpy]
-let defends = [Men; Cavalry; Ranger; Templar; Dervish]
+let defends = [Men; Cavalry; Ranger; Templar; Dervish; Ballista]
 let barrage = [Men; Ranger]
 let temple = [Dervish; Ranger; Templar]
 let work = [Men; Dervish]
@@ -27,15 +27,18 @@ let cost_of = function
   | Templar -> 2
   | _ -> 0
 
-let upkeep_of _ = 1
+let upkeep_of = function
+  | Ballista -> 2
+  | _ -> 1
 
 let base_power = function
   | Harpy -> 4.
-  | Cavalry | Demon | Ranger | Templar -> 2.
+  | Ballista | Cavalry | Demon | Ranger | Templar -> 2.
   | Dervish | Men | Orc -> 1.
   | Skeleton -> 0.5
 
 let hit_chance = function
+  | Ballista -> 0.1
   | Dervish
   | Ranger -> 0.2
   | Templar -> 0.5
