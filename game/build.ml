@@ -62,6 +62,7 @@ let base_cost_of kind =
 
 let supply_range = function
   | Foundry -> (9, 15)
+  | Market -> (15, 45)
   | Sawmill -> (6, 12)
   | _ -> (0, 0)
 
