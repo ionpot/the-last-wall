@@ -7,16 +7,18 @@ module Ballista = struct
       let cost' = cost * n in
       S.Supply.sub cost';
       S.Units.map Units.(sub cost' Men);
-      S.Units.map Units.(add n Ballista);
+      let n' = S.Ballista.get () in
+      S.Units.map Units.(add n' Ballista);
       S.Ballista.set n
   end
   module Make (S : State.S) = struct
     let guild = S.Build.check Build.(ready Engrs)
     let men = S.Units.return Units.(count Men)
     let bal = S.Units.return Units.(count Ballista)
+    let bal' = S.Ballista.get () + bal
     let sup = S.Supply.get ()
     let avlb = min men sup / cost
-    let cap' = Number.sub cap bal
+    let cap' = Number.sub cap bal'
     let value = if guild then min avlb cap' else 0
   end
 end
