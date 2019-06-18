@@ -18,14 +18,14 @@ end
 
 module Ballista = struct
   type t = Defs.count * Units.t
-  let power = 2., 5.
+  let power = 2.
   module Apply (S : State.S) = struct
     let value (_, enemies) = S.Enemy.map (Units.reduce enemies)
   end
   module Make (S : State.S) = struct
     module Roll = Units.Fill(S.Dice)
     let count = S.Units.return Units.(count Ballista)
-    let power' = S.Dice.rangef_times_try count power
+    let power' = Defs.to_power count power
     let value = count, S.Enemy.return (Roll.from power')
   end
 end
