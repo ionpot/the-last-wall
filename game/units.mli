@@ -18,6 +18,7 @@ val make : Defs.count -> kind -> t
 val barrage_power : t -> Defs.power
 val count : kind -> t -> Defs.count
 val count_all : t -> Defs.count
+val count_infantry : t -> Defs.count
 val find : Defs.count -> kind -> t -> Defs.count
 val has : kind -> t -> bool
 val in_temple : t -> Defs.count

@@ -5,7 +5,8 @@ type sum_report = (Defs.count * kind list)
 let attacks = [Skeleton; Orc; Demon; Harpy]
 let defends = [Men; Cavalry; Ranger; Templar; Dervish; Ballista]
 let barrage = [Men; Ranger]
-let revive = [Men; Ranger; Templar; Dervish]
+let infantry = [Men; Ranger; Templar; Dervish]
+let revive = infantry
 let temple = [Dervish; Ranger; Templar]
 let work = [Men; Dervish]
 
@@ -102,6 +103,10 @@ let count kind t =
 
 let count_all t =
   List.map Expr.count t
+  |> Listx.sum
+
+let count_infantry t =
+  List.map (fun k -> count k t) infantry
   |> Listx.sum
 
 let find n kind t =
