@@ -41,7 +41,7 @@ let base_power = function
 
 let hit_chance = function
   | Ballista -> 0.1
-  | Dervish
+  | Dervish -> 0.3
   | Ranger -> 0.2
   | Templar -> 0.5
   | _ -> 1.
