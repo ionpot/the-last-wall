@@ -31,14 +31,14 @@ end
 module With (S : Ops) = struct
   let zero = S.Num.zero
 
-  let add (a, x) (b, y) =
-    if a = b then (a, S.Num.add x y) else (b, y)
+  let add = Pair.eq_map S.Num.add
+  let sub = Pair.eq_map (Fn.flip S.Num.sub)
 
-  let sub (a, x) (b, y) =
-    if a = b then (a, S.Num.sub y x) else (b, y)
+  let clean = List.filter (fun (_, x) -> x > zero)
 
   let picked pair pairs output =
-    List.map (sub pair) pairs, (pair :: output)
+    List.map (sub pair) pairs,
+    List.map (add pair) output
 
   let pick cap pairs output =
     let pair = S.choose pairs in
@@ -51,16 +51,10 @@ module With (S : Ops) = struct
     in
     cap -. pwr, pairs', output'
 
-  let sort pairs output =
-    let sum pair =
-      List.fold_left (Fn.flip add) (fst pair, zero) output
-    in
-    List.map sum pairs
-
   let trim pairs cap =
     pairs
     |> List.map (fun pair -> fst pair, S.trim cap pair)
-    |> List.filter (fun (_, x) -> x > zero)
+    |> clean
 
   let rec start (cap, pairs, output) =
     match trim pairs cap with
@@ -68,6 +62,7 @@ module With (S : Ops) = struct
     | pairs' -> start (pick cap pairs' output)
 
   let from cap pairs =
-    start (cap, pairs, [])
-    |> sort pairs
+    let output = List.map (Pair.snd_set zero) pairs in
+    start (cap, pairs, output)
+    |> clean
 end
