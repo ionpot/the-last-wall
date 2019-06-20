@@ -1,5 +1,5 @@
 type kind = Ballista | Cavalry | Demon | Dervish | Harpy | Men | Orc | Ranger | Skeleton | Templar
-type report = (Defs.count * kind) list
+type report = (kind * Defs.count) list
 type sum_report = (Defs.count * kind list)
 
 let attacks = [Skeleton; Orc; Demon; Harpy]
@@ -47,28 +47,26 @@ let hit_chance = function
   | _ -> 1.
 
 module Expr = struct
-  type t = (Defs.count * kind)
-  let add (n, k) (n', k') =
-    if k = k' then n + n', k else (n', k')
-  let count = fst
-  let cost (n, k) = n * upkeep_of k
-  let has_count (n, _) = n > 0
-  let is kind (_, k) = k = kind
-  let kind = snd
-  let make n k = (n, k)
-  let map_count f (n, k) = f n, k
-  let power (n, k) = Defs.to_power n (base_power k)
-  let power_base (_, k) = base_power k
-  let set_count n (_, k) = n, k
-  let sub (n, k) (n', k') =
-    if k = k' then Number.sub n' n, k else (n', k')
+  type t = kind * Defs.count
+  let add = Pair.eq_map (+)
+  let count = snd
+  let cost (k, n) = n * upkeep_of k
+  let has_count t = count t > 0
+  let is = Pair.fst_is
+  let kind = fst
+  let make n k = (k, n)
+  let map_count = Pair.snd_map
+  let power (k, n) = Defs.to_power n (base_power k)
+  let power_base (k, _) = base_power k
+  let set_count = Pair.snd_set
+  let sub = Fn.flip (-) |> Pair.eq_map
 end
 
 type t = Expr.t list
 
 let empty = []
 
-let make n kind = [n, kind]
+let make n kind = [Expr.make n kind]
 
 module Ls = struct
   let clean t =

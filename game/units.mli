@@ -1,5 +1,5 @@
 type kind = Ballista | Cavalry | Demon | Dervish | Harpy | Men | Orc | Ranger | Skeleton | Templar
-type report = (Defs.count * kind) list
+type report = (kind * Defs.count) list
 type sum_report = (Defs.count * kind list)
 
 val attacks : kind list

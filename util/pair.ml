@@ -19,6 +19,9 @@ let (--) (x, y) (a, b) =
 let (<+>) x y =
   x ++ (y, y)
 
+let fst_is x (a, _) = x = a
+
+let snd_map f (a, b) = a, f b
 let snd_set x (a, _) = a, x
 
 let fst_to f (a, _) = f a
