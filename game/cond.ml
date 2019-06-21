@@ -34,6 +34,34 @@ module Defeat = struct
   end
 end
 
+module Disease = struct
+  type leader_died = bool
+  type t = Units.t * leader_died
+  let chance = 0.05
+  let min_count = 50
+  let ratio = 0.1
+  module Apply (S : State.S) = struct
+    let value (units, died) =
+      S.Disease.set ratio;
+      S.Units.map Units.(reduce units);
+      if died then Leader.died |> S.Turn.return |> S.Leader.map
+  end
+  module Check (S : State.S) = struct
+    let _ = S.Disease.clear ()
+    let count = S.Units.return Units.count_all
+    let value = count >= min_count && S.Dice.chance chance
+  end
+  module Make (S : State.S) = struct
+    module Fill = Units.FillCount(S.Dice)
+    module Roll = Leader.Roll(S.Dice)
+    let count = S.Units.return Units.count_all
+    let loss = Number.portion ratio count
+    let value =
+      S.Units.return (Fill.from loss),
+      S.Leader.return Roll.death
+  end
+end
+
 module LeaderNew = struct
   type t = Leader.t
   module Apply (S : State.S) = struct
@@ -58,7 +86,10 @@ module Market = struct
     let value = S.Build.check Build.(ready Market)
   end
   module Make (S : State.S) = struct
-    let value = Build.(supply_range Market) |> S.Dice.range
+    let value =
+      Build.(supply_range Market)
+      |> S.Dice.range
+      |> S.Disease.return Number.reduce_by
   end
 end
 

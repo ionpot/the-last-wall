@@ -21,11 +21,12 @@ end
 
 module type Ops = sig
   module Num : Num
+  module Total : Num
   type key
   type pair = key * Num.t
   val choose : pair list -> pair
-  val roll : pair -> Defs.power * Num.t
-  val trim : Defs.power -> pair -> Num.t
+  val roll : pair -> Total.t * Num.t
+  val trim : Total.t -> pair -> Num.t
 end
 
 module With (S : Ops) = struct
@@ -49,7 +50,7 @@ module With (S : Ops) = struct
       then picked (key, num) pairs output
       else pairs, output
     in
-    cap -. pwr, pairs', output'
+    S.Total.sub cap pwr, pairs', output'
 
   let trim pairs cap =
     pairs

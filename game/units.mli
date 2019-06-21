@@ -46,6 +46,10 @@ module Fill : Dice.S -> sig
   val from : Defs.power -> t -> t
 end
 
+module FillCount : Dice.S -> sig
+  val from : Defs.count -> t -> t
+end
+
 module Report : Dice.S -> sig
   val from : t -> report
   val sum_from : t -> sum_report

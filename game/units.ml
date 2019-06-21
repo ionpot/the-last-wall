@@ -85,6 +85,9 @@ module Ls = struct
   let has kind t =
     List.exists (Expr.is kind) t
 
+  let map_count f t =
+    List.map (fun expr -> Expr.set_count (f Expr.count expr) expr) t
+
   let add expr t =
     if has (Expr.kind expr) t
     then List.map (Expr.add expr) t
@@ -174,8 +177,9 @@ let sub n kind t =
   Ls.sub (Expr.make n kind) t
   |> Ls.clean
 
-module Ops (Num : Pick.Num) (Dice : Dice.S) = struct
+module Ops (Total : Pick.Num) (Num : Pick.Num) (Dice : Dice.S) = struct
   module Num = Num
+  module Total = Total
   type key = kind
   type pair = key * Num.t
   let choose = Dice.pick
@@ -195,7 +199,7 @@ end
 
 module Dist (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
-    include Ops(Pick.Float)(Dice)
+    include Ops(Pick.Float)(Pick.Float)(Dice)
     let choose pairs =
       let probs = List.map (Pair.fst_to hit_chance) pairs in
       Dice.pick_w probs pairs
@@ -215,7 +219,7 @@ end
 
 module Fill (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
-    include Ops(Pick.Int)(Dice)
+    include Ops(Pick.Float)(Pick.Int)(Dice)
     let roll (k, n) =
       let n' = Dice.roll n in
       let pwr = Expr.(make n' k |> power) in
@@ -231,6 +235,22 @@ module Fill (Dice : Dice.S) = struct
     |> List.map (fun (k, n) -> Expr.make n k)
 
   let from = check_pick fn
+end
+
+module FillCount (Dice : Dice.S) = struct
+  module Pick = Pick.With(struct
+    include Ops(Pick.Int)(Pick.Int)(Dice)
+    let roll (k, n) = let n' = Dice.roll n in n', n'
+    let trim cap (k, n) = min cap n
+  end)
+
+  let fn total t =
+    List.map (fun expr -> Expr.(kind expr, count expr)) t
+    |> Pick.from total
+    |> List.map (fun (k, n) -> Expr.make n k)
+
+  let from total t =
+    if total > count_all t then t else fn total t
 end
 
 module Report (Dice : Dice.S) = struct

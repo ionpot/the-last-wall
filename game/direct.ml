@@ -111,6 +111,7 @@ module Facilities = struct
     let value =
       List.map Build.supply_range kinds'
       |> List.map S.Dice.range
+      |> List.map (S.Disease.return Number.reduce_by)
       |> List.combine kinds'
   end
 end
