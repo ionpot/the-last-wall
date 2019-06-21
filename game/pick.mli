@@ -1,7 +1,5 @@
 open Defs
 
-val invalid : count list -> 'a
-
 module type Num = sig
   type t
   val zero : t

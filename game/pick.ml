@@ -1,9 +1,3 @@
-let invalid ls =
-  List.map string_of_int ls
-  |> String.concat ", "
-  |> Printf.sprintf "invalid list [%s]"
-  |> failwith
-
 module type Num = sig
   type t
   val zero : t
