@@ -56,6 +56,7 @@ module Expr = struct
   let kind = fst
   let make n k = (k, n)
   let map_count = Pair.snd_map
+  let of_pair p = p
   let power (k, n) = Defs.to_power n (base_power k)
   let power_base (k, _) = base_power k
   let set_count = Pair.snd_set
@@ -232,7 +233,7 @@ module Fill (Dice : Dice.S) = struct
   let fn power t =
     List.map (fun expr -> Expr.(kind expr, count expr)) t
     |> Pick.from power
-    |> List.map (fun (k, n) -> Expr.make n k)
+    |> List.map Expr.of_pair
 
   let from = check_pick fn
 end
@@ -247,7 +248,7 @@ module FillCount (Dice : Dice.S) = struct
   let fn total t =
     List.map (fun expr -> Expr.(kind expr, count expr)) t
     |> Pick.from total
-    |> List.map (fun (k, n) -> Expr.make n k)
+    |> List.map Expr.of_pair
 
   let from total t =
     if total > count_all t then t else fn total t
