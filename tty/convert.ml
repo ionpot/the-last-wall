@@ -151,7 +151,7 @@ let unit2str = function
   | Units.Skeleton -> "skeleton"
   | Units.Templar -> "templar"
 
-let party2str (n, kind) =
+let party2str (kind, n) =
   if n > 0
   then sprintf "%d %s" n (unit2str kind)
   else ""
@@ -161,7 +161,7 @@ let unit_ls2str kinds =
   |> map_commas unit2str
 
 let unit_pairs2str ls =
-  List.sort (fun (_, a) (_, b) -> unit_cmp a b) ls
+  List.sort (fun (a, _) (b, _) -> unit_cmp a b) ls
   |> map_commas party2str
 
 let units2str t =
