@@ -1,11 +1,12 @@
 type kind = Ballista | Cavalry | Demon | Dervish | Harpy | Men | Orc | Ranger | Skeleton | Templar
-type report = (Defs.count * kind) list
+type report = (kind * Defs.count) list
 type sum_report = (Defs.count * kind list)
 
 let attacks = [Skeleton; Orc; Demon; Harpy]
 let defends = [Men; Cavalry; Ranger; Templar; Dervish; Ballista]
 let barrage = [Men; Ranger]
-let revive = [Men; Ranger; Templar; Dervish]
+let infantry = [Men; Ranger; Templar; Dervish]
+let revive = infantry
 let temple = [Dervish; Ranger; Templar]
 let work = [Men; Dervish]
 
@@ -40,34 +41,33 @@ let base_power = function
 
 let hit_chance = function
   | Ballista -> 0.1
-  | Dervish
+  | Dervish -> 0.3
   | Ranger -> 0.2
   | Templar -> 0.5
   | _ -> 1.
 
 module Expr = struct
-  type t = (Defs.count * kind)
-  let add (n, k) (n', k') =
-    if k = k' then n + n', k else (n', k')
-  let count = fst
-  let cost (n, k) = n * upkeep_of k
-  let has_count (n, _) = n > 0
-  let is kind (_, k) = k = kind
-  let kind = snd
-  let make n k = (n, k)
-  let map_count f (n, k) = f n, k
-  let power (n, k) = Defs.to_power n (base_power k)
-  let power_base (_, k) = base_power k
-  let set_count n (_, k) = n, k
-  let sub (n, k) (n', k') =
-    if k = k' then Number.sub n' n, k else (n', k')
+  type t = kind * Defs.count
+  let add = Pair.eq_map (+)
+  let count = snd
+  let cost (k, n) = n * upkeep_of k
+  let has_count t = count t > 0
+  let is = Pair.fst_is
+  let kind = fst
+  let make n k = (k, n)
+  let map_count = Pair.snd_map
+  let of_pair p = p
+  let power (k, n) = Defs.to_power n (base_power k)
+  let power_base (k, _) = base_power k
+  let set_count = Pair.snd_set
+  let sub = Fn.flip (-) |> Pair.eq_map
 end
 
 type t = Expr.t list
 
 let empty = []
 
-let make n kind = [n, kind]
+let make n kind = [Expr.make n kind]
 
 module Ls = struct
   let clean t =
@@ -86,6 +86,9 @@ module Ls = struct
   let has kind t =
     List.exists (Expr.is kind) t
 
+  let map_count f t =
+    List.map (fun expr -> Expr.set_count (f Expr.count expr) expr) t
+
   let add expr t =
     if has (Expr.kind expr) t
     then List.map (Expr.add expr) t
@@ -102,6 +105,10 @@ let count kind t =
 
 let count_all t =
   List.map Expr.count t
+  |> Listx.sum
+
+let count_infantry t =
+  List.map (fun k -> count k t) infantry
   |> Listx.sum
 
 let find n kind t =
@@ -171,8 +178,9 @@ let sub n kind t =
   Ls.sub (Expr.make n kind) t
   |> Ls.clean
 
-module Ops (Num : Pick.Num) (Dice : Dice.S) = struct
+module Ops (Total : Pick.Num) (Num : Pick.Num) (Dice : Dice.S) = struct
   module Num = Num
+  module Total = Total
   type key = kind
   type pair = key * Num.t
   let choose = Dice.pick
@@ -192,7 +200,7 @@ end
 
 module Dist (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
-    include Ops(Pick.Float)(Dice)
+    include Ops(Pick.Float)(Pick.Float)(Dice)
     let choose pairs =
       let probs = List.map (Pair.fst_to hit_chance) pairs in
       Dice.pick_w probs pairs
@@ -212,7 +220,7 @@ end
 
 module Fill (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
-    include Ops(Pick.Int)(Dice)
+    include Ops(Pick.Float)(Pick.Int)(Dice)
     let roll (k, n) =
       let n' = Dice.roll n in
       let pwr = Expr.(make n' k |> power) in
@@ -225,9 +233,25 @@ module Fill (Dice : Dice.S) = struct
   let fn power t =
     List.map (fun expr -> Expr.(kind expr, count expr)) t
     |> Pick.from power
-    |> List.map (fun (k, n) -> Expr.make n k)
+    |> List.map Expr.of_pair
 
   let from = check_pick fn
+end
+
+module FillCount (Dice : Dice.S) = struct
+  module Pick = Pick.With(struct
+    include Ops(Pick.Int)(Pick.Int)(Dice)
+    let roll (k, n) = let n' = Dice.roll n in n', n'
+    let trim cap (k, n) = min cap n
+  end)
+
+  let fn total t =
+    List.map (fun expr -> Expr.(kind expr, count expr)) t
+    |> Pick.from total
+    |> List.map Expr.of_pair
+
+  let from total t =
+    if total > count_all t then t else fn total t
 end
 
 module Report (Dice : Dice.S) = struct

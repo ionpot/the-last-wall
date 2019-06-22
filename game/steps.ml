@@ -64,7 +64,7 @@ module Phase2 = struct
   end
   module Output = struct
     type check = unit
-    type cond = Cavalry | Defeat | LeaderNew | Market | Starvation
+    type cond = Cavalry | Defeat | Disease | LeaderNew | Market | Starvation
     type direct = Attack | Blessing | BuildManp | BuildStatus | BuildSupply | Facilities | Support | Turn | Upkeep
     type t = (check, cond, direct) output
   end
@@ -77,6 +77,7 @@ module Phase2 = struct
       Do (Direct Output.Upkeep);
       Do (Cond Output.Starvation);
       Do (Cond Output.Defeat);
+      Do (Cond Output.Disease);
       Do (Direct Output.Attack);
       Do (Direct Output.Blessing);
       Do (Cond Output.Market);

@@ -1,9 +1,3 @@
-let invalid ls =
-  List.map string_of_int ls
-  |> String.concat ", "
-  |> Printf.sprintf "invalid list [%s]"
-  |> failwith
-
 module type Num = sig
   type t
   val zero : t
@@ -21,24 +15,25 @@ end
 
 module type Ops = sig
   module Num : Num
+  module Total : Num
   type key
   type pair = key * Num.t
   val choose : pair list -> pair
-  val roll : pair -> Defs.power * Num.t
-  val trim : Defs.power -> pair -> Num.t
+  val roll : pair -> Total.t * Num.t
+  val trim : Total.t -> pair -> Num.t
 end
 
 module With (S : Ops) = struct
   let zero = S.Num.zero
 
-  let add (a, x) (b, y) =
-    if a = b then (a, S.Num.add x y) else (b, y)
+  let add = Pair.eq_map S.Num.add
+  let sub = Pair.eq_map (Fn.flip S.Num.sub)
 
-  let sub (a, x) (b, y) =
-    if a = b then (a, S.Num.sub y x) else (b, y)
+  let clean = List.filter (fun (_, x) -> x > zero)
 
   let picked pair pairs output =
-    List.map (sub pair) pairs, (pair :: output)
+    List.map (sub pair) pairs,
+    List.map (add pair) output
 
   let pick cap pairs output =
     let pair = S.choose pairs in
@@ -49,18 +44,12 @@ module With (S : Ops) = struct
       then picked (key, num) pairs output
       else pairs, output
     in
-    cap -. pwr, pairs', output'
-
-  let sort pairs output =
-    let sum pair =
-      List.fold_left (Fn.flip add) (fst pair, zero) output
-    in
-    List.map sum pairs
+    S.Total.sub cap pwr, pairs', output'
 
   let trim pairs cap =
     pairs
     |> List.map (fun pair -> fst pair, S.trim cap pair)
-    |> List.filter (fun (_, x) -> x > zero)
+    |> clean
 
   let rec start (cap, pairs, output) =
     match trim pairs cap with
@@ -68,6 +57,7 @@ module With (S : Ops) = struct
     | pairs' -> start (pick cap pairs' output)
 
   let from cap pairs =
-    start (cap, pairs, [])
-    |> sort pairs
+    let output = List.map (Pair.snd_set zero) pairs in
+    start (cap, pairs, output)
+    |> clean
 end
