@@ -34,6 +34,7 @@ module Make (S : Game.State.S) = struct
       | BuildSupply s -> S.Supply.return (Print.Build.supply s)
       | Cavalry c -> ()
       | Defeat -> Tty.writeln "defeat"
+      | Disease x -> Print.disease x |> S.Leader.return
       | Facilities ls -> Tty.ifpairln "facilities" (facs2str ls)
       | LeaderNew ldr -> Tty.pairln "new leader" (ldr2full ldr)
       | Market sup -> Tty.pairln "market" (sup2str sup)
