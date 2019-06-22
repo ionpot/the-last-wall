@@ -91,6 +91,11 @@ let can_barrage w =
     | No Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
     | Yes -> ()
 
+let disease (units, died) ldr =
+  Tty.writeln "disease outbreak";
+  Tty.pairln "died" (units2str units);
+  if died then Leader.died ldr
+
 let support ls =
   let f res =
     if res = Resource.empty then "nothing"

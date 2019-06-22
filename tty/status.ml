@@ -28,7 +28,7 @@ module With (S : State.S) = struct
 
   let total kinds =
     kinds
-    |> List.map (fun k -> count k, k)
+    |> List.map (fun k -> k, count k)
     |> Convert.unit_pairs2str
     |> Tty.pairln "total"
 

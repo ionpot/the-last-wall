@@ -4,6 +4,12 @@ let increase_by ratio x =
 let reduce_by ratio x =
   truncate (Float.reduce (float x) ratio |> ceil)
 
+let portion ratio x =
+  truncate (float x *. ratio)
+
+let ratio a b =
+  float a /. float b
+
 let sub a b =
   max 0 (a - b)
 

@@ -1,5 +1,5 @@
 type kind = Ballista | Cavalry | Demon | Dervish | Harpy | Men | Orc | Ranger | Skeleton | Templar
-type report = (Defs.count * kind) list
+type report = (kind * Defs.count) list
 type sum_report = (Defs.count * kind list)
 
 val attacks : kind list
@@ -18,6 +18,7 @@ val make : Defs.count -> kind -> t
 val barrage_power : t -> Defs.power
 val count : kind -> t -> Defs.count
 val count_all : t -> Defs.count
+val count_infantry : t -> Defs.count
 val find : Defs.count -> kind -> t -> Defs.count
 val has : kind -> t -> bool
 val in_temple : t -> Defs.count
@@ -43,6 +44,10 @@ end
 
 module Fill : Dice.S -> sig
   val from : Defs.power -> t -> t
+end
+
+module FillCount : Dice.S -> sig
+  val from : Defs.count -> t -> t
 end
 
 module Report : Dice.S -> sig
