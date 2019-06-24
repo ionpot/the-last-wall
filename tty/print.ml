@@ -92,7 +92,7 @@ let can_barrage w =
     | Yes -> ()
 
 let disease (units, died) ldr =
-  Tty.writeln "disease outbreak";
+  Tty.writeln "!!! disease outbreak !!!";
   Tty.pairln "died" (units2str units);
   if died then Leader.died ldr
 
