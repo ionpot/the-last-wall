@@ -76,7 +76,7 @@ module Dervish = struct
   end
 end
 
-module Leader = struct
+module LeaderKind = struct
   type t = Leader.kind
   module Apply (S : State.S) = struct
     module Roll = Leader.Roll(S.Dice)
