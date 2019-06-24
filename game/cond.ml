@@ -40,6 +40,7 @@ module Disease = struct
   let chance = 0.05
   let min_count = 50
   let ratio = 0.1
+  let susceptible = Units.(rm Ballista)
   module Apply (S : State.S) = struct
     let value (units, died) =
       S.Disease.set ratio;
@@ -48,16 +49,16 @@ module Disease = struct
   end
   module Check (S : State.S) = struct
     let _ = S.Disease.clear ()
-    let count = S.Units.return Units.count_all
+    let count = S.Units.return susceptible |> Units.count_all
     let value = count >= min_count && S.Dice.chance chance
   end
   module Make (S : State.S) = struct
     module Fill = Units.FillCount(S.Dice)
     module Roll = Leader.Roll(S.Dice)
-    let count = S.Units.return Units.count_all
-    let loss = Number.portion ratio count
+    let units = S.Units.return susceptible
+    let loss = Units.count_all units |> Number.portion ratio
     let value =
-      S.Units.return (Fill.from loss),
+      Fill.from loss units,
       S.Leader.return Roll.death
   end
 end
