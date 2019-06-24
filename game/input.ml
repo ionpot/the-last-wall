@@ -87,6 +87,27 @@ module LeaderKind = struct
   end
 end
 
+module LeaderNew = struct
+  type t = Leader.t list
+  module Apply (S : State.S) = struct
+    let value = function
+      | [] -> ()
+      | ldr :: _ ->
+          let level = Leader.level_of ldr in
+          if S.Supply.has level then begin
+            S.Supply.sub level;
+            S.Leader.set ldr
+          end
+  end
+  module Check (S : State.S) = struct
+    let value = S.Turn.return Leader.can_respawn |> S.Leader.check
+  end
+  module Make (S : State.S) = struct
+    module Roll = Leader.Roll(S.Dice)
+    let value = Roll.random ()
+  end
+end
+
 module Mercs = struct
   type t = Defs.count
   module Apply (S : State.S) = struct

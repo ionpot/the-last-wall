@@ -58,13 +58,13 @@ end
 
 module Phase2 = struct
   module Input = struct
-    type cond = Mercs | Ranger | Templar | Trade
+    type cond = LeaderNew | Mercs | Ranger | Templar | Trade
     type direct = Ballista | Build | Dervish | Nations
     type t = (cond, direct) input
   end
   module Output = struct
     type check = unit
-    type cond = Cavalry | Defeat | Disease | LeaderNew | Market | Starvation
+    type cond = Cavalry | Defeat | Disease | Market | Starvation
     type direct = Attack | Blessing | BuildManp | BuildStatus | BuildSupply | Facilities | Support | Turn | Upkeep
     type t = (check, cond, direct) output
   end
@@ -73,7 +73,7 @@ module Phase2 = struct
     [ Do (Direct Output.Turn);
       Do (Direct Output.BuildManp);
       Do (Direct Output.BuildStatus);
-      Do (Cond Output.LeaderNew);
+      Ask (Cond Input.LeaderNew);
       Do (Direct Output.Upkeep);
       Do (Cond Output.Starvation);
       Do (Cond Output.Defeat);

@@ -40,6 +40,7 @@ module type Num = sig
   val clear : unit -> unit
   val deduce : t -> t
   val deduce_from : t -> t
+  val has : t -> bool
   val next : unit -> t
   val ngv : unit -> bool
   val ptv : unit -> bool
@@ -86,6 +87,7 @@ module Num (M : FromNum) : Num = struct
   let deduce_from i =
     let a, b = return (Number.deduce i) in
     set b; a
+  let has x = return ((<=) x)
   let next () = return ((+) 1)
   let ngv () = return ((>) 0)
   let ptv () = return ((<) 0)

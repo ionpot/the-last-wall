@@ -7,6 +7,7 @@ module Input = struct
     | Ballista of Event.Ballista.t
     | Build of Event.BuildAvlb.t
     | Dervish of Event.Dervish.t
+    | LeaderNew of Event.LeaderNew.t
     | Mercs of Event.Mercs.t
     | Nations of Event.Nations.t
     | Ranger of Event.Ranger.t
@@ -19,6 +20,7 @@ module Input = struct
       | Ballista x -> Apply.value x (module Event.Ballista)
       | Build x -> Apply.value x (module Event.BuildAvlb)
       | Dervish x -> Apply.value x (module Event.Dervish)
+      | LeaderNew x -> Apply.value x (module Event.LeaderNew)
       | Mercs x -> Apply.value x (module Event.Mercs)
       | Nations x -> Apply.value x (module Event.Nations)
       | Ranger x -> Apply.value x (module Event.Ranger)
@@ -38,7 +40,6 @@ module Output = struct
     | Defeat
     | Disease of Cond.Disease.t
     | Facilities of Direct.Facilities.t
-    | LeaderNew of Cond.LeaderNew.t
     | Market of Cond.Market.t
     | Starvation of Cond.Starvation.t
     | Support of Direct.Support.t
@@ -63,6 +64,8 @@ module Convert = struct
           let make x = Input.Nations x end)
 
     let cond : Convert.cond = function
+      | Steps.LeaderNew -> (module struct module Event = Event.LeaderNew
+          let make x = Input.LeaderNew x end)
       | Steps.Mercs -> (module struct module Event = Event.Mercs
           let make x = Input.Mercs x end)
       | Steps.Ranger -> (module struct module Event = Event.Ranger
@@ -86,8 +89,6 @@ module Convert = struct
           let make () = Output.Defeat end)
       | Steps.Disease -> (module struct module Event = Cond.Disease
           let make x = Output.Disease x end)
-      | Steps.LeaderNew -> (module struct module Event = Cond.LeaderNew
-          let make x = Output.LeaderNew x end)
       | Steps.Market -> (module struct module Event = Cond.Market
           let make x = Output.Market x end)
       | Steps.Starvation -> (module struct module Event = Cond.Starvation

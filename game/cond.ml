@@ -64,21 +64,6 @@ module Disease = struct
   end
 end
 
-module LeaderNew = struct
-  type t = Leader.t
-  module Apply (S : State.S) = struct
-    let value = S.Leader.set
-  end
-  module Check (S : State.S) = struct
-    let can_respawn = S.Turn.return Leader.can_respawn
-    let value = S.Leader.check can_respawn
-  end
-  module Make (S : State.S) = struct
-    module Roll = Leader.Roll(S.Dice)
-    let value = Roll.random ()
-  end
-end
-
 module Market = struct
   type t = Defs.supply
   module Apply (S : State.S) = struct
