@@ -25,16 +25,17 @@ module From (S : State.S) = struct
   let ldr_alive = S.Leader.check Leader.is_alive
   let ldr_dr =
     if ldr_alive then S.Leader.return Leader.defense_of else 0.
-  let barrage_dr =
-    if ldr_alive then S.Barraging.either barrage_dr 0. else 0.
-
-  let harpies = S.Enemy.return Units.(count Harpy)
-  let harpy_dr = floor_harpy_dr (to_power harpies harpy_dr)
 
   let mausoleums = S.Build.return Build.mausoleums
   let mausoleum_dr =
     let bonus = if S.Deity.is Deity.Lerota then 2 else 1 in
     to_power (mausoleums * bonus) mausoleum_dr
+
+  let barrage_dr =
+    if ldr_alive then S.Barraging.either barrage_dr 0. else 0.
+
+  let harpies = S.Enemy.return Units.(count Harpy)
+  let harpy_dr = floor_harpy_dr (to_power harpies harpy_dr)
 
   let value =
       cav_dr +. ldr_dr +. mausoleum_dr -. barrage_dr -. harpy_dr
