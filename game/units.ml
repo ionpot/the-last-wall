@@ -23,7 +23,7 @@ let chance_of = function
   | Skeleton -> 0.8
   | _ -> 0.
 
-let cost_of = function
+let supply_cost_of = function
   | Dervish
   | Ranger -> 1
   | Templar -> 2

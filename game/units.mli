@@ -7,7 +7,7 @@ val defends : kind list
 
 val abundance_of : kind -> float
 val chance_of : kind -> float
-val cost_of : kind -> Defs.supply
+val supply_cost_of : kind -> Defs.supply
 
 type t
 
