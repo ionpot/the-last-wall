@@ -27,6 +27,7 @@ let supply_cost_of = function
   | Dervish
   | Ranger -> 1
   | Templar -> 2
+  | Ballista -> 12
   | _ -> 0
 
 let upkeep_of = function
@@ -71,6 +72,7 @@ let empty = []
 let make n kind = [Expr.make n kind]
 
 let cost_of = function
+  | Ballista -> make 2 Men
   | Cavalry -> make 1 Men
   | Ranger | Templar -> make 1 Dervish
   | _ -> empty

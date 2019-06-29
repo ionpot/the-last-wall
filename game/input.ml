@@ -1,27 +1,21 @@
 module Ballista = struct
   type t = Defs.count * Defs.count
-  let cap = 5
-  let mnp_cost = 2
-  let sup_cost = 12
+  let kind = Units.Ballista
   module Apply (S : State.S) = struct
+    module Recruit = Recruit.With(S)
     let value (n, _) =
-      S.Supply.sub (n * sup_cost);
-      let m = n * mnp_cost in
-      S.Units.map Units.(sub m Men);
+      Recruit.sub_cost kind n;
       let n' = S.Ballista.get () in
-      S.Units.map Units.(add n' Ballista);
+      S.Units.map (Units.add n' kind);
       S.Ballista.set n
   end
   module Make (S : State.S) = struct
-    let guild = S.Build.check Build.(ready Engrs)
-    let men = S.Units.return Units.(count Men)
-    let bal = S.Units.return Units.(count Ballista)
+    module Recruit = Recruit.With(S)
+    let cap = Recruit.ballista_cap ()
+    let avlb = Recruit.affordable kind cap
+    let bal = S.Units.return (Units.count kind)
     let have = S.Ballista.get () + bal
-    let cap' = Number.sub cap have
-    let sup = S.Supply.get ()
-    let avlb = min (men / mnp_cost) (sup / sup_cost)
-    let avlb' = if guild then min avlb cap' else 0
-    let value = avlb', have
+    let value = avlb, have
   end
 end
 

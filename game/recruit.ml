@@ -3,6 +3,10 @@ module With (S : State.S) = struct
     if S.Build.check Build.(ready Guesthouse)
     then 3, 12 else 2, 8
 
+  let ballista_cap () =
+    if S.Build.check Build.(ready Engrs)
+    then 5 else 0
+
   let stable_cap () =
     Number.sub
     (S.Build.return Build.stable_cap)
