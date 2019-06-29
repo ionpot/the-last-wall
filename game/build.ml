@@ -97,6 +97,9 @@ let cost_of kind bonuses =
   Bonus.find kind bonuses
   |> Bonus.apply_to (base_cost_of kind)
 
+let stable_cap t =
+  count Stable t * 10
+
 let status t =
   let f (_, cost) = cost = Resource.empty in
   let built, ongoing = List.partition f t.queue in

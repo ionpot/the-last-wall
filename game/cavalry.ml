@@ -1,10 +1,7 @@
-let per_stable = 10
-
 module Count (S : State.S) = struct
   let cavs = S.Units.return Units.(count Cavalry)
   let men = S.Units.return Units.(count Men)
-  let stables = S.Build.return Build.(count Stable)
-  let cap = stables * per_stable
+  let cap = S.Build.return Build.stable_cap
 end
 
 module Check (S : State.S) = struct
