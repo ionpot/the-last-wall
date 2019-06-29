@@ -12,18 +12,6 @@ module Barraged = struct
   end
 end
 
-module Cavalry = struct
-  type t = Defs.count
-  module Apply (S : State.S) = struct
-    let value n =
-      S.Units.map Units.(add n Cavalry);
-      S.Units.map Units.(sub n Men);
-      S.Supply.sub n
-  end
-  module Check = Cavalry.Check
-  module Make = Cavalry.Make
-end
-
 module Defeat = struct
   include Event.NoValue
   module Apply (S : State.S) = struct
