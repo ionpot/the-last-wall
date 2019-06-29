@@ -7,14 +7,17 @@ val defends : kind list
 
 val abundance_of : kind -> float
 val chance_of : kind -> float
-val supply_cost_of : kind -> Defs.supply
 
 type t
 
 val empty : t
 
 val make : Defs.count -> kind -> t
-val make_cost : Defs.count -> kind -> t
+
+module Cost : sig
+  val from : Defs.count -> kind -> t
+  val supply : kind -> Defs.supply
+end
 
 val affordable : kind -> Defs.count -> t -> Defs.count
 val barrage_power : t -> Defs.power

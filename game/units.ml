@@ -23,17 +23,6 @@ let chance_of = function
   | Skeleton -> 0.8
   | _ -> 0.
 
-let supply_cost_of = function
-  | Dervish
-  | Ranger -> 1
-  | Templar -> 2
-  | Ballista -> 12
-  | _ -> 0
-
-let upkeep_of = function
-  | Ballista -> 2
-  | _ -> 1
-
 let base_power = function
   | Harpy -> 4.
   | Ballista | Cavalry | Demon | Ranger | Templar -> 2.
@@ -51,7 +40,6 @@ module Expr = struct
   type t = kind * Defs.count
   let add = Pair.eq_map (+)
   let count = snd
-  let cost (k, n) = n * upkeep_of k
   let has_count t = count t > 0
   let is = Pair.fst_is
   let kind = fst
@@ -71,15 +59,30 @@ let empty = []
 
 let make n kind = [Expr.make n kind]
 
-let cost_of = function
-  | Ballista -> make 2 Men
-  | Cavalry -> make 1 Men
-  | Ranger | Templar -> make 1 Dervish
-  | _ -> empty
+module Cost = struct
+  let of_kind = function
+    | Ballista -> make 2 Men
+    | Cavalry -> make 1 Men
+    | Ranger | Templar -> make 1 Dervish
+    | _ -> empty
 
-let make_cost n kind =
-  cost_of kind
-  |> List.map (Expr.mul n)
+  let from n kind =
+    of_kind kind |> List.map (Expr.mul n)
+
+  let supply = function
+    | Dervish
+    | Ranger -> 1
+    | Templar -> 2
+    | Ballista -> 12
+    | _ -> 0
+
+  let upkeep = function
+    | Ballista -> 2
+    | _ -> 1
+
+  let upkeep_of_expr e =
+    Expr.count e * upkeep (Expr.kind e)
+end
 
 module Ls = struct
   let clean t =
@@ -116,7 +119,7 @@ let count kind t =
   | expr :: _ -> Expr.count expr
 
 let affordable kind cap t =
-  match cost_of kind with
+  match Cost.of_kind kind with
   | [] -> cap
   | ls ->
       ls |> List.map (fun (k, n) -> n, count k t)
@@ -171,7 +174,7 @@ let revivable t =
   Ls.filter_ls revive t
 
 let upkeep t =
-  List.map Expr.cost t
+  List.map Cost.upkeep_of_expr t
   |> Listx.sum
 
 let workforce = powers_of work

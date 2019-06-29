@@ -18,7 +18,7 @@ module With (S : State.S) = struct
     (S.Units.return Units.count_holy)
 
   let supply_limit kind cap =
-    let cost = Units.supply_cost_of kind in
+    let cost = Units.Cost.supply kind in
     let supp = S.Supply.get () in
     min cap (Number.div supp cost)
 
@@ -36,8 +36,8 @@ module With (S : State.S) = struct
     (units_for kind |> Units.affordable kind cap)
 
   let sub_cost kind n =
-    S.Supply.sub (Units.supply_cost_of kind * n);
-    S.Units.map Units.(make_cost n kind |> reduce)
+    S.Supply.sub (Units.Cost.supply kind * n);
+    S.Units.map Units.(Cost.from n kind |> reduce)
 
   let promote kind n =
     sub_cost kind n;
