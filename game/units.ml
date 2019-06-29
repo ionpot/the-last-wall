@@ -87,7 +87,7 @@ module Ls = struct
     List.exists (Expr.is kind) t
 
   let map_count f t =
-    List.map (fun expr -> Expr.set_count (f Expr.count expr) expr) t
+    List.map (Expr.map_count f) t
 
   let add expr t =
     if has (Expr.kind expr) t
