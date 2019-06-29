@@ -31,11 +31,11 @@ module With (S : State.S) = struct
     min (supply_limit kind cap)
     (units_for kind |> Units.affordable kind cap)
 
-  let buy kind n =
+  let sub_cost kind n =
     S.Supply.sub (Units.supply_cost_of kind * n);
-    S.Units.map Units.(add n kind)
+    S.Units.map Units.(make_cost n kind |> reduce)
 
   let promote kind n =
-    buy kind n;
-    S.Units.map Units.(make_cost n kind |> reduce)
+    sub_cost kind n;
+    S.Units.map Units.(add n kind)
 end
