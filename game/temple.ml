@@ -1,7 +1,7 @@
 module With (S : State.S) = struct
   let cap_rem () =
     let cap = S.Build.return Build.temple_cap in
-    let count = S.Units.return Units.in_temple in
+    let count = S.Units.return Units.count_holy in
     max 0 (cap - count)
 
   let cap_for kind =
