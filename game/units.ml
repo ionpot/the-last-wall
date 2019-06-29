@@ -27,6 +27,7 @@ let supply_cost_of = function
   | Dervish
   | Ranger -> 1
   | Templar -> 2
+  | Ballista -> 12
   | _ -> 0
 
 let upkeep_of = function
@@ -56,6 +57,7 @@ module Expr = struct
   let kind = fst
   let make n k = (k, n)
   let map_count = Pair.snd_map
+  let mul n t = map_count (( * ) n) t
   let of_pair p = p
   let power (k, n) = Defs.to_power n (base_power k)
   let power_base (k, _) = base_power k
@@ -68,6 +70,16 @@ type t = Expr.t list
 let empty = []
 
 let make n kind = [Expr.make n kind]
+
+let cost_of = function
+  | Ballista -> make 2 Men
+  | Cavalry -> make 1 Men
+  | Ranger | Templar -> make 1 Dervish
+  | _ -> empty
+
+let make_cost n kind =
+  cost_of kind
+  |> List.map (Expr.mul n)
 
 module Ls = struct
   let clean t =
@@ -102,6 +114,15 @@ let count kind t =
   match Ls.filter kind t with
   | [] -> 0
   | expr :: _ -> Expr.count expr
+
+let affordable kind cap t =
+  match cost_of kind with
+  | [] -> cap
+  | ls ->
+      ls |> List.map (fun (k, n) -> n, count k t)
+      |> List.map (fun (n, total) -> Number.div total n)
+      |> Listx.min_of
+      |> min cap
 
 let count_all t =
   List.map Expr.count t

@@ -36,7 +36,7 @@ module Output = struct
     | BuildManp of Direct.BuildManp.t
     | BuildStatus of Direct.BuildStatus.t
     | BuildSupply of Direct.BuildSupply.t
-    | Cavalry of Cond.Cavalry.t
+    | Cavalry of Direct.Cavalry.t
     | Defeat
     | Disease of Cond.Disease.t
     | Facilities of Direct.Facilities.t
@@ -83,8 +83,6 @@ module Convert = struct
     let check () = failwith "no phase2 check"
 
     let cond : Convert.cond = function
-      | Steps.Cavalry -> (module struct module Event = Cond.Cavalry
-          let make x = Output.Cavalry x end)
       | Steps.Defeat -> (module struct module Event = Cond.Defeat
           let make () = Output.Defeat end)
       | Steps.Disease -> (module struct module Event = Cond.Disease
@@ -105,6 +103,8 @@ module Convert = struct
           let make x = Output.BuildStatus x end)
       | Steps.BuildSupply -> (module struct module Event = Direct.BuildSupply
           let make x = Output.BuildSupply x end)
+      | Steps.Cavalry -> (module struct module Event = Direct.Cavalry
+          let make x = Output.Cavalry x end)
       | Steps.Facilities -> (module struct module Event = Direct.Facilities
           let make x = Output.Facilities x end)
       | Steps.Support -> (module struct module Event = Direct.Support
