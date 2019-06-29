@@ -19,6 +19,11 @@ module Cost : sig
   val supply : kind -> Defs.supply
 end
 
+module Dr : sig
+  val cavalry : t -> Defs.power
+  val harpy : t -> Defs.power
+end
+
 val affordable : kind -> Defs.count -> t -> Defs.count
 val barrage_power : t -> Defs.power
 val count : kind -> t -> Defs.count

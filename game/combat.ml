@@ -35,6 +35,7 @@ module Units (S : State.S) = struct
   module Dist = Units.Dist(S.Dice)
   module Fill = Units.Fill(S.Dice)
   let attack = S.Enemy.return Units.power
+  let harpies = S.Enemy.return Units.(count Harpy)
   let units = S.Units.return Units.(rm Ballista)
   let power = Units.power units
   let fled () = Fill.from fort_cap units
@@ -48,7 +49,7 @@ module Make (S : State.S) = struct
   module LdrRoll = Leader.Roll(S.Dice)
   module Units = Units(S)
 
-  let harpy_weaken = to_power Dr.harpies (S.Barraging.either 1. 0.)
+  let harpy_weaken = to_power Units.harpies (S.Barraging.either 1. 0.)
 
   let value = (module struct
     let cav_too_many = Dr.cav_too_many

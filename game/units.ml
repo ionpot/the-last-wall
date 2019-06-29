@@ -139,6 +139,28 @@ let count_infantry t =
   List.map (fun k -> count k t) infantry
   |> Listx.sum
 
+module Dr = struct
+  let of_kind = function
+    | Cavalry | Harpy -> 0.002
+    | _ -> 0.
+
+  let from n kind =
+    Defs.to_power n (of_kind kind)
+
+  let of_expr e =
+    from (Expr.count e) (Expr.kind e)
+
+  let from_kind k t =
+    from (count k t) k
+
+  let cavalry t =
+    from_kind Cavalry t
+
+  let harpy t =
+    from_kind Harpy t
+    |> Float.floor_by 0.01
+end
+
 let find n kind t =
   let found = count kind t in
   min n found
