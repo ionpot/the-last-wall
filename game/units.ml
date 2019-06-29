@@ -120,7 +120,7 @@ let affordable kind cap t =
   | [] -> cap
   | ls ->
       ls |> List.map (fun (k, n) -> n, count k t)
-      |> List.map (fun (n, total) -> total / max n 1)
+      |> List.map (fun (n, total) -> Number.div total n)
       |> Listx.min_of
       |> min cap
 
