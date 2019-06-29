@@ -25,10 +25,9 @@ let filteri f ls =
 let in_both a b =
   List.filter (fun x -> List.mem x a) b
 
-let rec min_of = function
+let min_of = function
   | [] -> 0
-  | x :: [] -> x
-  | x :: xs -> min x (min_of xs)
+  | x :: xs -> List.fold_left min x xs
 
 let rec pick num probs = function
   | [] -> assert false
