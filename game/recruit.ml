@@ -20,7 +20,7 @@ module With (S : State.S) = struct
   let supply_limit kind cap =
     let cost = Units.supply_cost_of kind in
     let supp = S.Supply.get () in
-    if cost > 0 then min supp (cap * cost) else cap
+    min cap (supp / max cost 1)
 
   let exclude kind n =
     Units.sub n kind
