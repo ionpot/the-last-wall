@@ -57,15 +57,15 @@ module Dervish = struct
   type t = Defs.count
   let kind = Units.Dervish
   module Apply (S : State.S) = struct
-    module Temple = Temple.With(S)
+    module Recruit = Recruit.With(S)
     let value n =
-      Temple.buy kind n;
+      Recruit.promote kind n;
       S.Dervish.set n
   end
   module Make (S : State.S) = struct
-    module Temple = Temple.With(S)
-    let cap = Temple.cap_for kind
-    let a, b = Temple.dervish_range ()
+    module Recruit = Recruit.With(S)
+    let cap = Recruit.(temple_cap () |> affordable kind)
+    let a, b = Recruit.dervish_range ()
     let value = S.Dice.between_try a (min b cap)
   end
 end
@@ -131,15 +131,15 @@ module Ranger = struct
   type t = Defs.count
   let kind = Units.Ranger
   module Apply (S : State.S) = struct
-    module Temple = Temple.With(S)
-    let value = Temple.promote kind
+    module Recruit = Recruit.With(S)
+    let value = Recruit.promote kind
   end
   module Check (S : State.S) = struct
     let value = S.Deity.is Deity.Sitera
   end
   module Make (S : State.S) = struct
-    module Temple = Temple.With(S)
-    let value = Temple.promotable ()
+    module Recruit = Recruit.With(S)
+    let value = Recruit.(temple_cap () |> affordable kind)
   end
 end
 
@@ -157,15 +157,15 @@ module Templar = struct
   type t = Defs.count
   let kind = Units.Templar
   module Apply (S : State.S) = struct
-    module Temple = Temple.With(S)
-    let value = Temple.promote kind
+    module Recruit = Recruit.With(S)
+    let value = Recruit.promote kind
   end
   module Check (S : State.S) = struct
     let value = not (S.Deity.is Deity.Sitera)
   end
   module Make (S : State.S) = struct
-    module Temple = Temple.With(S)
-    let value = Temple.promotable ()
+    module Recruit = Recruit.With(S)
+    let value = Recruit.(temple_cap () |> affordable kind)
   end
 end
 
