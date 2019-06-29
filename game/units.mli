@@ -14,7 +14,9 @@ type t
 val empty : t
 
 val make : Defs.count -> kind -> t
+val make_cost : Defs.count -> kind -> t
 
+val affordable : kind -> Defs.count -> t -> Defs.count
 val barrage_power : t -> Defs.power
 val count : kind -> t -> Defs.count
 val count_all : t -> Defs.count
