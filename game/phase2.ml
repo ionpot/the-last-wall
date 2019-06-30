@@ -7,6 +7,7 @@ module Input = struct
     | Ballista of Event.Ballista.t
     | Build of Event.BuildAvlb.t
     | Dervish of Event.Dervish.t
+    | Knight of Event.Knight.t
     | LeaderNew of Event.LeaderNew.t
     | Mercs of Event.Mercs.t
     | Nations of Event.Nations.t
@@ -20,6 +21,7 @@ module Input = struct
       | Ballista x -> Apply.value x (module Event.Ballista)
       | Build x -> Apply.value x (module Event.BuildAvlb)
       | Dervish x -> Apply.value x (module Event.Dervish)
+      | Knight x -> Apply.value x (module Event.Knight)
       | LeaderNew x -> Apply.value x (module Event.LeaderNew)
       | Mercs x -> Apply.value x (module Event.Mercs)
       | Nations x -> Apply.value x (module Event.Nations)
@@ -60,6 +62,8 @@ module Convert = struct
           let make x = Input.Build x end)
       | Steps.Dervish -> (module struct module Event = Event.Dervish
           let make x = Input.Dervish x end)
+      | Steps.Knight -> (module struct module Event = Event.Knight
+          let make x = Input.Knight x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)
 

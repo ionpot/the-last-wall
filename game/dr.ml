@@ -11,7 +11,7 @@ let cav_dr too_many snow units =
   else Units.Dr.cavalry units
 
 module From (S : State.S) = struct
-  let cavs = S.Units.return Units.(count Cavalry)
+  let cavs = S.Units.return Units.count_cavalry
   let snow = S.Weather.is Weather.(Snow Heavy)
   let infantry = S.Units.return Units.count_infantry
   let ratio = Number.ratio cavs infantry

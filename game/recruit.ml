@@ -10,7 +10,7 @@ module With (S : State.S) = struct
   let stable_cap () =
     Number.sub
       (S.Build.return Build.stable_cap)
-      (S.Units.return Units.(count Cavalry))
+      (S.Units.return Units.count_cavalry)
 
   let temple_cap () =
     Number.sub

@@ -70,6 +70,19 @@ module Dervish = struct
   end
 end
 
+module Knight = struct
+  type t = Defs.count
+  let kind = Units.Knight
+  module Apply (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value = Recruit.promote kind
+  end
+  module Make (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value = Recruit.(stable_cap () |> affordable kind)
+  end
+end
+
 module LeaderKind = struct
   type t = Leader.kind
   module Apply (S : State.S) = struct

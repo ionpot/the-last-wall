@@ -1,10 +1,12 @@
-type kind = Ballista | Cavalry | Demon | Dervish | Harpy | Men | Orc | Ranger | Skeleton | Templar
+type kind = Ballista | Cavalry | Demon | Dervish | Harpy | Knight | Men | Orc | Ranger | Skeleton | Templar
 type report = (kind * Defs.count) list
 type sum_report = (Defs.count * kind list)
 
 let attacks = [Skeleton; Orc; Demon; Harpy]
-let defends = [Men; Cavalry; Ranger; Templar; Dervish; Ballista]
+let defends = [Men; Cavalry; Knight; Ranger; Templar; Dervish; Ballista]
+
 let barrage = [Men; Ranger]
+let cavalry = [Cavalry; Knight]
 let holy = [Dervish; Ranger; Templar]
 let infantry = [Men; Ranger; Templar; Dervish]
 let revive = infantry
@@ -24,7 +26,7 @@ let chance_of = function
   | _ -> 0.
 
 let base_power = function
-  | Harpy -> 4.
+  | Harpy | Knight -> 4.
   | Ballista | Cavalry | Demon | Ranger | Templar -> 2.
   | Dervish | Men | Orc -> 1.
   | Skeleton -> 0.5
@@ -63,6 +65,7 @@ module Cost = struct
   let of_kind = function
     | Ballista -> make 2 Men
     | Cavalry -> make 1 Men
+    | Knight -> make 1 Cavalry
     | Ranger
     | Templar -> make 1 Dervish
     | _ -> empty
@@ -74,10 +77,12 @@ module Cost = struct
     | Dervish
     | Ranger -> 1
     | Templar -> 2
+    | Knight -> 10
     | Ballista -> 12
     | _ -> 0
 
   let upkeep = function
+    | Knight -> 3
     | Ballista -> 2
     | _ -> 1
 
@@ -126,6 +131,7 @@ end
 
 let count = Ls.count
 let count_all = Ls.count_all
+let count_cavalry = Ls.count_ls cavalry
 let count_holy = Ls.count_ls holy
 let count_infantry = Ls.count_ls infantry
 
@@ -140,6 +146,7 @@ let affordable kind cap t =
 
 module Dr = struct
   let of_kind = function
+    | Knight -> 0.04
     | Cavalry | Harpy -> 0.002
     | _ -> 0.
 
