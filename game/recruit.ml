@@ -9,13 +9,13 @@ module With (S : State.S) = struct
 
   let stable_cap () =
     Number.sub
-    (S.Build.return Build.stable_cap)
-    (S.Units.return Units.(count Cavalry))
+      (S.Build.return Build.stable_cap)
+      (S.Units.return Units.(count Cavalry))
 
   let temple_cap () =
     Number.sub
-    (S.Build.return Build.temple_cap)
-    (S.Units.return Units.count_holy)
+      (S.Build.return Build.temple_cap)
+      (S.Units.return Units.count_holy)
 
   let supply_limit kind cap =
     let cost = Units.Cost.supply kind in
@@ -33,7 +33,7 @@ module With (S : State.S) = struct
 
   let affordable kind cap =
     min (supply_limit kind cap)
-    (units_for kind |> Units.affordable kind cap)
+      (units_for kind |> Units.affordable kind cap)
 
   let sub_cost kind n =
     S.Supply.sub (Units.Cost.supply kind * n);
