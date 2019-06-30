@@ -89,6 +89,10 @@ module Ls = struct
   let clean t =
     List.filter Expr.has_count t
 
+  let count_all t =
+    List.map Expr.count t
+    |> Listx.sum
+
   let discard kind t =
     Listx.discard (Expr.is kind) t
 
@@ -98,6 +102,12 @@ module Ls = struct
   let filter_ls kinds t =
     List.map (fun k -> filter k t) kinds
     |> List.concat
+
+  let count kind t =
+    filter kind t |> count_all
+
+  let count_ls kinds t =
+    filter_ls kinds t |> count_all
 
   let has kind t =
     List.exists (Expr.is kind) t
@@ -114,10 +124,10 @@ module Ls = struct
     List.map (Expr.sub expr) t
 end
 
-let count kind t =
-  match Ls.filter kind t with
-  | [] -> 0
-  | expr :: _ -> Expr.count expr
+let count = Ls.count
+let count_all = Ls.count_all
+let count_holy = Ls.count_ls holy
+let count_infantry = Ls.count_ls infantry
 
 let affordable kind cap t =
   match Cost.of_kind kind with
@@ -127,18 +137,6 @@ let affordable kind cap t =
       |> List.map (fun (n, total) -> Number.div total n)
       |> Listx.min_of
       |> min cap
-
-let count_all t =
-  List.map Expr.count t
-  |> Listx.sum
-
-let count_holy t =
-  List.map (fun k -> count k t) holy
-  |> Listx.sum
-
-let count_infantry t =
-  List.map (fun k -> count k t) infantry
-  |> Listx.sum
 
 module Dr = struct
   let of_kind = function
