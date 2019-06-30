@@ -63,7 +63,8 @@ module Cost = struct
   let of_kind = function
     | Ballista -> make 2 Men
     | Cavalry -> make 1 Men
-    | Ranger | Templar -> make 1 Dervish
+    | Ranger
+    | Templar -> make 1 Dervish
     | _ -> empty
 
   let from n kind =
