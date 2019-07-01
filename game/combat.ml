@@ -32,7 +32,7 @@ let fort_cap = 20.
 let to_power = Defs.to_power
 
 let countered units enemies =
-  if Units.count_cavalry units > 0
+  if Units.has_base_power 2. units
   then enemies
   else Units.(rm Cyclops) enemies
 

@@ -34,6 +34,7 @@ val count_holy : t -> Defs.count
 val count_infantry : t -> Defs.count
 val find : Defs.count -> kind -> t -> Defs.count
 val has : kind -> t -> bool
+val has_base_power : Defs.power -> t -> bool
 val kinds_of : t -> kind list
 val power : t -> Defs.power
 val power_of : kind -> t -> Defs.power

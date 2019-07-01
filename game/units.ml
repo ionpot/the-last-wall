@@ -179,6 +179,10 @@ let find n kind t =
 
 let has = Ls.has
 
+let has_base_power p t =
+  List.map Expr.power_base t
+  |> List.exists ((<=) p)
+
 let kinds_of t =
   List.map Expr.kind t
 
