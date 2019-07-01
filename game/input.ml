@@ -79,7 +79,8 @@ module Knight = struct
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
-    let value = Recruit.(stable_cap () |> affordable kind)
+    let cap = S.Units.return Units.(count Cavalry)
+    let value = Recruit.affordable kind cap
   end
 end
 

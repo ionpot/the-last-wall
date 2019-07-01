@@ -152,7 +152,7 @@ let affordable kind cap t =
 
 module Dr = struct
   let of_kind = function
-    | Knight -> 0.04
+    | Knight -> 0.004
     | Cavalry | Harpy -> 0.002
     | _ -> 0.
 
@@ -166,7 +166,9 @@ module Dr = struct
     from (count k t) k
 
   let cavalry t =
-    from_kind Cavalry t
+    cavalry
+    |> List.map (fun k -> from_kind k t)
+    |> Listx.sumf
 
   let harpy t =
     from_kind Harpy t
