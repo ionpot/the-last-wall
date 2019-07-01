@@ -63,8 +63,8 @@ module After (S : Status.S) = struct
     function
       | Blessing res -> if res <> Game.Resource.empty then S.res ()
       | BuildSupply s -> if s > 0 then S.res ()
-      | Cavalry c -> S.cavalry c; S.res ()
-      | Facilities _
+      | Cavalry n -> if n > 0 then begin S.cavalry n; S.res () end
+      | Facilities ls -> if ls <> [] then S.res ()
       | Market _
       | Starvation _
       | Support _

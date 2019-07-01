@@ -36,13 +36,14 @@ module After (S : Status.S) = struct
   let input =
     let open Phase.Input in
     function
-      | Barrage yes -> if yes then S.enemies ()
+      | Barrage _
       | Scout _ -> ()
 
   let output =
     let open Phase.Output in
     function
       | Ballista (n, _) -> if n > 0 then S.enemies ()
+      | Barraged _ -> S.enemies ()
       | Cyclops (n, _) -> if n > 0 then S.units ()
       | Smite _ -> S.enemies ()
       | Victory -> S.units ()
