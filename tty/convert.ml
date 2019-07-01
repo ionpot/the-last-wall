@@ -138,13 +138,14 @@ let deity_text = function
 
 let unit_order =
   Units.([Men; Cavalry; Knight; Ranger; Templar; Dervish;
-  Skeleton; Orc; Demon; Harpy])
+  Skeleton; Orc; Demon; Harpy; Cyclops])
 
 let unit_cmp = Listx.compare unit_order
 
 let unit2str = function
   | Units.Ballista -> "ballista"
   | Units.Cavalry -> "cavalry"
+  | Units.Cyclops -> "cyclops"
   | Units.Demon -> "demon"
   | Units.Dervish -> "dervish"
   | Units.Harpy -> "harpy"

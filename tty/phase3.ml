@@ -22,6 +22,7 @@ module Make (S : Game.State.S) = struct
       | Combat x ->
           Print.Combat.outcome x
           |> S.Leader.return
+      | Cyclops x -> Print.cyclops x
       | Defeat -> Tty.writeln "defeat"
       | LevelUp -> S.Leader.return Print.Leader.lvup
       | NoAttack -> ()
@@ -42,6 +43,7 @@ module After (S : Status.S) = struct
     let open Phase.Output in
     function
       | Ballista (n, _) -> if n > 0 then S.enemies ()
+      | Cyclops (n, _) -> if n > 0 then S.units ()
       | Smite _ -> S.enemies ()
       | Victory -> S.units ()
       | _ -> ()

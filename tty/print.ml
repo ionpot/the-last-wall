@@ -91,6 +91,11 @@ let can_barrage w =
     | No Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
     | Yes -> ()
 
+let cyclops (n, units) =
+  if n > 0 then
+  sprintf "%d cyclops kills %s" n (units2str units)
+  |> Tty.writeln
+
 let disease (units, died) ldr =
   Tty.writeln "!!! disease outbreak !!!";
   Tty.pairln "died" (units2str units);
