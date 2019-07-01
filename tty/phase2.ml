@@ -12,6 +12,7 @@ module Make (S : Game.State.S) = struct
           S.Build.return Print.Build.all;
           Build (S.Build.return (Prompt.from avlb))
       | Dervish count -> Dervish (check Prompt.dervish count)
+      | LeaderNew ls -> LeaderNew (Prompt.new_leader ls)
       | Mercs count -> Mercs (Prompt.mercs count)
       | Nations chosen -> Nations (Prompt.nations chosen)
       | Ranger count -> Ranger (check Prompt.ranger count)
@@ -36,7 +37,6 @@ module Make (S : Game.State.S) = struct
       | Defeat -> Tty.writeln "defeat"
       | Disease x -> Print.disease x |> S.Leader.return
       | Facilities ls -> Tty.ifpairln "facilities" (facs2str ls)
-      | LeaderNew ldr -> Tty.pairln "new leader" (ldr2full ldr)
       | Market sup -> Tty.pairln "market" (sup2str sup)
       | Starvation units -> Tty.pairln "starvation" (units2str units)
       | Support s -> Print.support s
@@ -50,6 +50,7 @@ module After (S : Status.S) = struct
     function
       | Ballista (n, _) -> if n > 0 then S.res ()
       | Dervish n -> if n > 0 then begin S.dervish (); S.res () end
+      | LeaderNew ls -> S.new_leader ls
       | Mercs n -> if n > 0 then S.res ()
       | Ranger n -> if n > 0 then begin S.ranger (); S.res () end
       | Templar n -> if n > 0 then begin S.templar (); S.res () end
