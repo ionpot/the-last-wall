@@ -113,6 +113,22 @@ module Combat = struct
   module Make = Combat.Make
 end
 
+module Cyclops = struct
+  type t = Defs.count * Units.t
+  let power = 2.
+  module Apply (S : State.S) = struct
+    let value (_, loss) =
+      S.Casualty.map (Units.combine loss);
+      S.Units.map (Units.reduce loss)
+  end
+  module Make (S : State.S) = struct
+    module Roll = Units.Fill(S.Dice)
+    let count = S.Enemy.return Units.(count Cyclops)
+    let power' = Defs.to_power count power
+    let value = count, S.Units.return (Roll.from power')
+  end
+end
+
 module Facilities = struct
   type t = (Build.kind * Defs.supply) list
   let kinds = Build.([Foundry; Sawmill])
@@ -169,6 +185,7 @@ module Turn = struct
   type t = Defs.turn * Month.t * Weather.t
   module Apply (S : State.S) = struct
     let value (t, m, w) =
+      S.Casualty.clear ();
       S.Turn.set t;
       S.Month.set m;
       S.Weather.set w

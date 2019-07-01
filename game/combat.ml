@@ -13,11 +13,11 @@ module Apply (S : State.S) = struct
   let value (module O : Outcome) =
     let remaining = S.Units.return (Units.reduce O.units) in
     if O.retreat then begin
-      S.Casualty.set remaining;
+      S.Casualty.map (Units.combine remaining);
       S.Units.set O.units;
       S.Build.map Build.(raze Fort)
     end else begin
-      S.Casualty.set O.units;
+      S.Casualty.map (Units.combine O.units);
       S.Units.set remaining
     end;
     S.Enemy.map (Units.reduce O.enemies);

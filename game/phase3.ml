@@ -21,6 +21,7 @@ module Output = struct
     | Barraged of Cond.Barraged.t
     | CanBarrage of Direct.CanBarrage.t
     | Combat of Direct.Combat.t
+    | Cyclops of Direct.Cyclops.t
     | Defeat
     | LevelUp
     | NoAttack
@@ -76,6 +77,8 @@ module Convert = struct
           let make x = Output.CanBarrage x end)
       | Steps.Combat -> (module struct module Event = Direct.Combat
           let make x = Output.Combat x end)
+      | Steps.Cyclops -> (module struct module Event = Direct.Cyclops
+          let make x = Output.Cyclops x end)
       | Steps.Victory -> (module struct module Event = Direct.Victory
           let make () = Output.Victory end)
   end

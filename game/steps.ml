@@ -12,6 +12,7 @@ type ('i, 'o) step =
   | Do of 'o
   | Go of ('i, 'o) step list
   | GoIf of ('o * ('i, 'o) step list)
+  | Shuffle of (('i, 'o) step list * ('i, 'o) step list)
   | TryAsk of ('o * 'i)
 
 module type Input = sig
@@ -106,7 +107,7 @@ module Phase3 = struct
   module Output = struct
     type check = Attack | LevelUp | NoAttack | NoEnemies
     type cond = Barraged | Defeat | Revive | Smite
-    type direct = Ballista | CanBarrage | Combat | Victory
+    type direct = Ballista | CanBarrage | Combat | Cyclops | Victory
     type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
@@ -121,8 +122,13 @@ module Phase3 = struct
   let attack : t list =
     [ Do (Cond Output.Smite);
       check_enemies;
-      Do (Direct Output.Ballista);
-      check_enemies;
+      Shuffle ([
+        Do (Direct Output.Ballista);
+        check_enemies
+      ], [
+        Do (Direct Output.Cyclops);
+        Do (Cond Output.Defeat)
+      ]);
       Do (Direct Output.CanBarrage);
       Ask (Cond Input.Barrage);
       Do (Cond Output.Barraged);
