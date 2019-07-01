@@ -1,16 +1,19 @@
-type kind = Ballista | Cavalry | Demon | Dervish | Harpy | Men | Orc | Ranger | Skeleton | Templar
+type kind = Ballista | Cavalry | Cyclops | Demon | Dervish | Harpy | Knight | Men | Orc | Ranger | Skeleton | Templar
 type report = (kind * Defs.count) list
 type sum_report = (Defs.count * kind list)
 
-let attacks = [Skeleton; Orc; Demon; Harpy]
-let defends = [Men; Cavalry; Ranger; Templar; Dervish; Ballista]
+let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops]
+let defends = [Men; Cavalry; Knight; Ranger; Templar; Dervish; Ballista]
+
 let barrage = [Men; Ranger]
+let cavalry = [Cavalry; Knight]
+let holy = [Dervish; Ranger; Templar]
 let infantry = [Men; Ranger; Templar; Dervish]
 let revive = infantry
-let temple = [Dervish; Ranger; Templar]
 let work = [Men; Dervish]
 
 let abundance_of = function
+  | Cyclops -> 0.05
   | Demon -> 0.3
   | Harpy -> 0.15
   | Orc -> 0.6
@@ -23,18 +26,13 @@ let chance_of = function
   | Skeleton -> 0.8
   | _ -> 0.
 
-let cost_of = function
-  | Dervish
-  | Ranger -> 1
-  | Templar -> 2
-  | _ -> 0
-
-let upkeep_of = function
-  | Ballista -> 2
-  | _ -> 1
+let chance_growth_of = function
+  | Cyclops -> 0.05
+  | _ -> 0.1
 
 let base_power = function
-  | Harpy -> 4.
+  | Cyclops -> 5.
+  | Harpy | Knight -> 4.
   | Ballista | Cavalry | Demon | Ranger | Templar -> 2.
   | Dervish | Men | Orc -> 1.
   | Skeleton -> 0.5
@@ -50,12 +48,12 @@ module Expr = struct
   type t = kind * Defs.count
   let add = Pair.eq_map (+)
   let count = snd
-  let cost (k, n) = n * upkeep_of k
   let has_count t = count t > 0
   let is = Pair.fst_is
   let kind = fst
   let make n k = (k, n)
   let map_count = Pair.snd_map
+  let mul n t = map_count (( * ) n) t
   let of_pair p = p
   let power (k, n) = Defs.to_power n (base_power k)
   let power_base (k, _) = base_power k
@@ -69,9 +67,42 @@ let empty = []
 
 let make n kind = [Expr.make n kind]
 
+module Cost = struct
+  let of_kind = function
+    | Ballista -> make 2 Men
+    | Cavalry -> make 1 Men
+    | Knight -> make 1 Cavalry
+    | Ranger
+    | Templar -> make 1 Dervish
+    | _ -> empty
+
+  let from n kind =
+    of_kind kind |> List.map (Expr.mul n)
+
+  let supply = function
+    | Dervish
+    | Ranger -> 1
+    | Templar -> 2
+    | Knight -> 10
+    | Ballista -> 12
+    | _ -> 0
+
+  let upkeep = function
+    | Knight -> 3
+    | Ballista -> 2
+    | _ -> 1
+
+  let upkeep_of_expr e =
+    Expr.count e * upkeep (Expr.kind e)
+end
+
 module Ls = struct
   let clean t =
     List.filter Expr.has_count t
+
+  let count_all t =
+    List.map Expr.count t
+    |> Listx.sum
 
   let discard kind t =
     Listx.discard (Expr.is kind) t
@@ -83,11 +114,17 @@ module Ls = struct
     List.map (fun k -> filter k t) kinds
     |> List.concat
 
+  let count kind t =
+    filter kind t |> count_all
+
+  let count_ls kinds t =
+    filter_ls kinds t |> count_all
+
   let has kind t =
     List.exists (Expr.is kind) t
 
   let map_count f t =
-    List.map (fun expr -> Expr.set_count (f Expr.count expr) expr) t
+    List.map (Expr.map_count f) t
 
   let add expr t =
     if has (Expr.kind expr) t
@@ -98,18 +135,43 @@ module Ls = struct
     List.map (Expr.sub expr) t
 end
 
-let count kind t =
-  match Ls.filter kind t with
-  | [] -> 0
-  | expr :: _ -> Expr.count expr
+let count = Ls.count
+let count_all = Ls.count_all
+let count_cavalry = Ls.count_ls cavalry
+let count_holy = Ls.count_ls holy
+let count_infantry = Ls.count_ls infantry
 
-let count_all t =
-  List.map Expr.count t
-  |> Listx.sum
+let affordable kind cap t =
+  match Cost.of_kind kind with
+  | [] -> cap
+  | ls ->
+      ls |> List.map (fun (k, n) -> n, count k t)
+      |> List.map (fun (n, total) -> Number.div total n)
+      |> Listx.min_of
+      |> min cap
 
-let count_infantry t =
-  List.map (fun k -> count k t) infantry
-  |> Listx.sum
+module Dr = struct
+  let of_kind = function
+    | Knight -> 0.04
+    | Cavalry | Harpy -> 0.002
+    | _ -> 0.
+
+  let from n kind =
+    Defs.to_power n (of_kind kind)
+
+  let of_expr e =
+    from (Expr.count e) (Expr.kind e)
+
+  let from_kind k t =
+    from (count k t) k
+
+  let cavalry t =
+    from_kind Cavalry t
+
+  let harpy t =
+    from_kind Harpy t
+    |> Float.floor_by 0.01
+end
 
 let find n kind t =
   let found = count kind t in
@@ -117,9 +179,9 @@ let find n kind t =
 
 let has = Ls.has
 
-let in_temple t =
-  List.map (fun k -> count k t) temple
-  |> Listx.sum
+let has_base_power p t =
+  List.map Expr.power_base t
+  |> List.exists ((<=) p)
 
 let kinds_of t =
   List.map Expr.kind t
@@ -150,7 +212,7 @@ let revivable t =
   Ls.filter_ls revive t
 
 let upkeep t =
-  List.map Expr.cost t
+  List.map Cost.upkeep_of_expr t
   |> Listx.sum
 
 let workforce = powers_of work

@@ -6,9 +6,10 @@ module Make (S : State.S) = struct
   module Report = Units.Report(S.Dice)
 
   let can_regular turn kind =
-    let a = 0.1 *. float (Number.sub turn 1) in
-    let b = Units.chance_of kind in
-    S.Dice.chance (a +. b)
+    let growth = Units.chance_growth_of kind in
+    let growth' = growth *. float (Number.sub turn 1) in
+    let chance = Units.chance_of kind in
+    S.Dice.chance (chance +. growth')
 
   let can_spawn turn kind =
     if kind = Units.Harpy

@@ -93,10 +93,40 @@ module CanBarrage = struct
   end
 end
 
+module Cavalry = struct
+  type t = Defs.count
+  let kind = Units.Cavalry
+  module Apply (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value = Recruit.promote kind
+  end
+  module Make (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let cap = Recruit.stable_cap ()
+    let value = Recruit.affordable kind cap
+  end
+end
+
 module Combat = struct
   type t = (module Combat.Outcome)
   module Apply = Combat.Apply
   module Make = Combat.Make
+end
+
+module Cyclops = struct
+  type t = Defs.count * Units.t
+  let power = 2.
+  module Apply (S : State.S) = struct
+    let value (_, loss) =
+      S.Casualty.map (Units.combine loss);
+      S.Units.map (Units.reduce loss)
+  end
+  module Make (S : State.S) = struct
+    module Roll = Units.Fill(S.Dice)
+    let count = S.Enemy.return Units.(count Cyclops)
+    let power' = Defs.to_power count power
+    let value = count, S.Units.return (Roll.from power')
+  end
 end
 
 module Facilities = struct
@@ -155,6 +185,7 @@ module Turn = struct
   type t = Defs.turn * Month.t * Weather.t
   module Apply (S : State.S) = struct
     let value (t, m, w) =
+      S.Casualty.clear ();
       S.Turn.set t;
       S.Month.set m;
       S.Weather.set w

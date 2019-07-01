@@ -12,18 +12,6 @@ module Barraged = struct
   end
 end
 
-module Cavalry = struct
-  type t = Defs.count
-  module Apply (S : State.S) = struct
-    let value n =
-      S.Units.map Units.(add n Cavalry);
-      S.Units.map Units.(sub n Men);
-      S.Supply.sub n
-  end
-  module Check = Cavalry.Check
-  module Make = Cavalry.Make
-end
-
 module Defeat = struct
   include Event.NoValue
   module Apply (S : State.S) = struct
@@ -39,11 +27,12 @@ module Disease = struct
   type t = Units.t * leader_died
   let chance = 0.05
   let min_count = 50
-  let ratio = 0.1
+  let casualty = 0.1
+  let penalty = 0.2
   let susceptible = Units.(rm Ballista)
   module Apply (S : State.S) = struct
     let value (units, died) =
-      S.Disease.set ratio;
+      S.Disease.set penalty;
       S.Units.map Units.(reduce units);
       if died then Leader.died |> S.Turn.return |> S.Leader.map
   end
@@ -56,25 +45,10 @@ module Disease = struct
     module Fill = Units.FillCount(S.Dice)
     module Roll = Leader.Roll(S.Dice)
     let units = S.Units.return susceptible
-    let loss = Units.count_all units |> Number.portion ratio
+    let loss = Units.count_all units |> Number.portion casualty
     let value =
       Fill.from loss units,
       S.Leader.return Roll.death
-  end
-end
-
-module LeaderNew = struct
-  type t = Leader.t
-  module Apply (S : State.S) = struct
-    let value = S.Leader.set
-  end
-  module Check (S : State.S) = struct
-    let can_respawn = S.Turn.return Leader.can_respawn
-    let value = S.Leader.check can_respawn
-  end
-  module Make (S : State.S) = struct
-    module Roll = Leader.Roll(S.Dice)
-    let value = Roll.random ()
   end
 end
 

@@ -1,7 +1,6 @@
 Attack
 Build
 Build_bonus
-Cavalry
 Check
 Combat
 Cond
@@ -9,6 +8,7 @@ Defs
 Deity
 Dice
 Direct
+Dr
 Event
 Input
 Leader
@@ -23,10 +23,10 @@ Phase2
 Phase3
 Phases
 Pick
+Recruit
 Resource
 State
 Step
 Steps
-Temple
 Units
 Weather

@@ -1,27 +1,21 @@
 module Ballista = struct
   type t = Defs.count * Defs.count
-  let cap = 5
-  let mnp_cost = 2
-  let sup_cost = 12
+  let kind = Units.Ballista
   module Apply (S : State.S) = struct
+    module Recruit = Recruit.With(S)
     let value (n, _) =
-      S.Supply.sub (n * sup_cost);
-      let m = n * mnp_cost in
-      S.Units.map Units.(sub m Men);
+      Recruit.sub_cost kind n;
       let n' = S.Ballista.get () in
-      S.Units.map Units.(add n' Ballista);
+      S.Units.map (Units.add n' kind);
       S.Ballista.set n
   end
   module Make (S : State.S) = struct
-    let guild = S.Build.check Build.(ready Engrs)
-    let men = S.Units.return Units.(count Men)
-    let bal = S.Units.return Units.(count Ballista)
+    module Recruit = Recruit.With(S)
+    let cap = Recruit.ballista_cap ()
+    let avlb = Recruit.affordable kind cap
+    let bal = S.Units.return (Units.count kind)
     let have = S.Ballista.get () + bal
-    let cap' = Number.sub cap have
-    let sup = S.Supply.get ()
-    let avlb = min (men / mnp_cost) (sup / sup_cost)
-    let avlb' = if guild then min avlb cap' else 0
-    let value = avlb', have
+    let value = avlb, have
   end
 end
 
@@ -63,20 +57,33 @@ module Dervish = struct
   type t = Defs.count
   let kind = Units.Dervish
   module Apply (S : State.S) = struct
-    module Temple = Temple.With(S)
+    module Recruit = Recruit.With(S)
     let value n =
-      Temple.buy kind n;
+      Recruit.promote kind n;
       S.Dervish.set n
   end
   module Make (S : State.S) = struct
-    module Temple = Temple.With(S)
-    let cap = Temple.cap_for kind
-    let a, b = Temple.dervish_range ()
+    module Recruit = Recruit.With(S)
+    let cap = Recruit.(temple_cap () |> affordable kind)
+    let a, b = Recruit.dervish_range ()
     let value = S.Dice.between_try a (min b cap)
   end
 end
 
-module Leader = struct
+module Knight = struct
+  type t = Defs.count
+  let kind = Units.Knight
+  module Apply (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value = Recruit.promote kind
+  end
+  module Make (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value = Recruit.(stable_cap () |> affordable kind)
+  end
+end
+
+module LeaderKind = struct
   type t = Leader.kind
   module Apply (S : State.S) = struct
     module Roll = Leader.Roll(S.Dice)
@@ -84,6 +91,27 @@ module Leader = struct
   end
   module Make (S : State.S) = struct
     let value = Leader.(kind_of empty)
+  end
+end
+
+module LeaderNew = struct
+  type t = Leader.t list
+  module Apply (S : State.S) = struct
+    let value = function
+      | [] -> ()
+      | ldr :: _ ->
+          let level = Leader.level_of ldr in
+          if S.Supply.has level then begin
+            S.Supply.sub level;
+            S.Leader.set ldr
+          end
+  end
+  module Check (S : State.S) = struct
+    let value = S.Turn.return Leader.can_respawn |> S.Leader.check
+  end
+  module Make (S : State.S) = struct
+    module Roll = Leader.Roll(S.Dice)
+    let value = Roll.random ()
   end
 end
 
@@ -116,15 +144,15 @@ module Ranger = struct
   type t = Defs.count
   let kind = Units.Ranger
   module Apply (S : State.S) = struct
-    module Temple = Temple.With(S)
-    let value = Temple.promote kind
+    module Recruit = Recruit.With(S)
+    let value = Recruit.promote kind
   end
   module Check (S : State.S) = struct
     let value = S.Deity.is Deity.Sitera
   end
   module Make (S : State.S) = struct
-    module Temple = Temple.With(S)
-    let value = Temple.promotable ()
+    module Recruit = Recruit.With(S)
+    let value = Recruit.(temple_cap () |> affordable kind)
   end
 end
 
@@ -142,15 +170,15 @@ module Templar = struct
   type t = Defs.count
   let kind = Units.Templar
   module Apply (S : State.S) = struct
-    module Temple = Temple.With(S)
-    let value = Temple.promote kind
+    module Recruit = Recruit.With(S)
+    let value = Recruit.promote kind
   end
   module Check (S : State.S) = struct
     let value = not (S.Deity.is Deity.Sitera)
   end
   module Make (S : State.S) = struct
-    module Temple = Temple.With(S)
-    let value = Temple.promotable ()
+    module Recruit = Recruit.With(S)
+    let value = Recruit.(temple_cap () |> affordable kind)
   end
 end
 

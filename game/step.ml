@@ -128,6 +128,10 @@ module Of (Phase : Phase.S) = struct
       | Steps.GoIf (cond, ls) :: rest ->
           if output_ok cond then FoundOutput (cond, ls)
           else seek rest
+      | Steps.Shuffle (ls_a, ls_b) :: rest ->
+          if State.Dice.yes ()
+          then seek (ls_a @ ls_b @ rest)
+          else seek (ls_b @ ls_a @ rest)
       | Steps.TryAsk (cond, input) :: rest ->
           if output_ok cond then FoundOutput (cond, rest)
           else seek (Ask input :: rest)

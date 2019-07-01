@@ -7,6 +7,8 @@ module Input = struct
     | Ballista of Event.Ballista.t
     | Build of Event.BuildAvlb.t
     | Dervish of Event.Dervish.t
+    | Knight of Event.Knight.t
+    | LeaderNew of Event.LeaderNew.t
     | Mercs of Event.Mercs.t
     | Nations of Event.Nations.t
     | Ranger of Event.Ranger.t
@@ -19,6 +21,8 @@ module Input = struct
       | Ballista x -> Apply.value x (module Event.Ballista)
       | Build x -> Apply.value x (module Event.BuildAvlb)
       | Dervish x -> Apply.value x (module Event.Dervish)
+      | Knight x -> Apply.value x (module Event.Knight)
+      | LeaderNew x -> Apply.value x (module Event.LeaderNew)
       | Mercs x -> Apply.value x (module Event.Mercs)
       | Nations x -> Apply.value x (module Event.Nations)
       | Ranger x -> Apply.value x (module Event.Ranger)
@@ -34,11 +38,10 @@ module Output = struct
     | BuildManp of Direct.BuildManp.t
     | BuildStatus of Direct.BuildStatus.t
     | BuildSupply of Direct.BuildSupply.t
-    | Cavalry of Cond.Cavalry.t
+    | Cavalry of Direct.Cavalry.t
     | Defeat
     | Disease of Cond.Disease.t
     | Facilities of Direct.Facilities.t
-    | LeaderNew of Cond.LeaderNew.t
     | Market of Cond.Market.t
     | Starvation of Cond.Starvation.t
     | Support of Direct.Support.t
@@ -59,10 +62,14 @@ module Convert = struct
           let make x = Input.Build x end)
       | Steps.Dervish -> (module struct module Event = Event.Dervish
           let make x = Input.Dervish x end)
+      | Steps.Knight -> (module struct module Event = Event.Knight
+          let make x = Input.Knight x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)
 
     let cond : Convert.cond = function
+      | Steps.LeaderNew -> (module struct module Event = Event.LeaderNew
+          let make x = Input.LeaderNew x end)
       | Steps.Mercs -> (module struct module Event = Event.Mercs
           let make x = Input.Mercs x end)
       | Steps.Ranger -> (module struct module Event = Event.Ranger
@@ -80,14 +87,10 @@ module Convert = struct
     let check () = failwith "no phase2 check"
 
     let cond : Convert.cond = function
-      | Steps.Cavalry -> (module struct module Event = Cond.Cavalry
-          let make x = Output.Cavalry x end)
       | Steps.Defeat -> (module struct module Event = Cond.Defeat
           let make () = Output.Defeat end)
       | Steps.Disease -> (module struct module Event = Cond.Disease
           let make x = Output.Disease x end)
-      | Steps.LeaderNew -> (module struct module Event = Cond.LeaderNew
-          let make x = Output.LeaderNew x end)
       | Steps.Market -> (module struct module Event = Cond.Market
           let make x = Output.Market x end)
       | Steps.Starvation -> (module struct module Event = Cond.Starvation
@@ -104,6 +107,8 @@ module Convert = struct
           let make x = Output.BuildStatus x end)
       | Steps.BuildSupply -> (module struct module Event = Direct.BuildSupply
           let make x = Output.BuildSupply x end)
+      | Steps.Cavalry -> (module struct module Event = Direct.Cavalry
+          let make x = Output.Cavalry x end)
       | Steps.Facilities -> (module struct module Event = Direct.Facilities
           let make x = Output.Facilities x end)
       | Steps.Support -> (module struct module Event = Direct.Support
