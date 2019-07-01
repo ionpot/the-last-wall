@@ -13,6 +13,7 @@ module Make (S : Game.State.S) = struct
           Build (S.Build.return (Prompt.from avlb))
       | Dervish count -> Dervish (check Prompt.dervish count)
       | LeaderNew ls -> LeaderNew (Prompt.new_leader ls)
+      | Knight count -> Knight (check Prompt.knight count)
       | Mercs count -> Mercs (Prompt.mercs count)
       | Nations chosen -> Nations (Prompt.nations chosen)
       | Ranger count -> Ranger (check Prompt.ranger count)
@@ -51,6 +52,7 @@ module After (S : Status.S) = struct
       | Ballista (n, _) -> if n > 0 then S.res ()
       | Dervish n -> if n > 0 then begin S.dervish (); S.res () end
       | LeaderNew ls -> S.new_leader ls
+      | Knight n -> if n > 0 then S.res ()
       | Mercs n -> if n > 0 then S.res ()
       | Ranger n -> if n > 0 then begin S.ranger (); S.res () end
       | Templar n -> if n > 0 then begin S.templar (); S.res () end
