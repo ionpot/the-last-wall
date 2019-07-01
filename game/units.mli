@@ -38,6 +38,7 @@ val has_base_power : Defs.power -> t -> bool
 val kinds_of : t -> kind list
 val power : t -> Defs.power
 val power_of : kind -> t -> Defs.power
+val promotable : kind -> t -> Defs.count
 val ratio : kind -> kind -> t -> float
 val report : t -> report
 val revivable : t -> t

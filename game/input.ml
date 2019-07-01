@@ -11,11 +11,11 @@ module Ballista = struct
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
-    let cap = Recruit.ballista_cap ()
-    let avlb = Recruit.affordable kind cap
-    let bal = S.Units.return (Units.count kind)
-    let have = S.Ballista.get () + bal
-    let value = avlb, have
+    let have = S.Units.return (Units.count kind)
+    let total = have + S.Ballista.get ()
+    let cap = S.Build.return Build.ballista_cap
+    let avlb = Recruit.affordable kind (cap - total)
+    let value = avlb, total
   end
 end
 
@@ -64,7 +64,7 @@ module Dervish = struct
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
-    let cap = Recruit.(temple_cap () |> affordable kind)
+    let cap = Recruit.(Missing.temple () |> affordable kind)
     let a, b = Recruit.dervish_range ()
     let value = S.Dice.between_try a (min b cap)
   end
@@ -79,8 +79,7 @@ module Knight = struct
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
-    let cap = S.Units.return Units.(count Cavalry)
-    let value = Recruit.affordable kind cap
+    let value = Recruit.promotable kind
   end
 end
 
@@ -153,7 +152,7 @@ module Ranger = struct
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
-    let value = Recruit.(temple_cap () |> affordable kind)
+    let value = Recruit.promotable kind
   end
 end
 
@@ -179,7 +178,7 @@ module Templar = struct
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
-    let value = Recruit.(temple_cap () |> affordable kind)
+    let value = Recruit.promotable kind
   end
 end
 
