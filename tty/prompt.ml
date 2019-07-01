@@ -90,7 +90,7 @@ let leader () =
   |> choose_one ls Game.Leader.(kind_of empty)
 
 let new_leader ls =
-  List.map ldr2full ls |> vertical "new leader:";
+  List.map ldr2full ls |> vertical "new leader";
   Tty.prompt "choose" |> choose_from ls
 
 let knight cap =
