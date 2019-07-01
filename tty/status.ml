@@ -4,6 +4,7 @@ module type S = sig
   val cavalry : Defs.count -> unit
   val dervish : unit -> unit
   val enemies : unit -> unit
+  val new_leader : Leader.t list -> unit
   val ranger : unit -> unit
   val res : unit -> unit
   val templar : unit -> unit
@@ -48,6 +49,13 @@ module With (S : State.S) = struct
     let s = S.Supply.get () in
     Convert.([sup2str s; manp2str m] |> commas)
     |> Tty.pairln "status"
+
+  let new_leader = function
+    | [] -> ()
+    | ldr :: _ ->
+        sprintf "%s chosen" (Convert.ldr2first ldr)
+        |> Tty.writeln;
+        res ()
 
   let units () =
     S.Units.return Convert.units2mnpstr

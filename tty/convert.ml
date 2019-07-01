@@ -136,15 +136,20 @@ let deity_text = function
   | Deity.Sitera -> "mother earth, spring of all living"
   | Deity.Sekrefir -> "leader of gods, envoy of order and justice"
 
-let unit_order = Units.([Men; Cavalry; Ranger; Templar; Dervish; Skeleton; Orc; Demon; Harpy])
+let unit_order =
+  Units.([Men; Cavalry; Knight; Ranger; Templar; Dervish;
+  Skeleton; Orc; Demon; Harpy; Cyclops])
+
 let unit_cmp = Listx.compare unit_order
 
 let unit2str = function
   | Units.Ballista -> "ballista"
   | Units.Cavalry -> "cavalry"
+  | Units.Cyclops -> "cyclops"
   | Units.Demon -> "demon"
   | Units.Dervish -> "dervish"
   | Units.Harpy -> "harpy"
+  | Units.Knight -> "knight"
   | Units.Men -> "men"
   | Units.Orc -> "orc"
   | Units.Ranger -> "ranger"

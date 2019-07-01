@@ -12,6 +12,7 @@ type ('i, 'o) step =
   | Do of 'o
   | Go of ('i, 'o) step list
   | GoIf of ('o * ('i, 'o) step list)
+  | Shuffle of (('i, 'o) step list * ('i, 'o) step list)
   | TryAsk of ('o * 'i)
 
 module type Input = sig
@@ -58,14 +59,14 @@ end
 
 module Phase2 = struct
   module Input = struct
-    type cond = Mercs | Ranger | Templar | Trade
-    type direct = Ballista | Build | Dervish | Nations
+    type cond = LeaderNew | Mercs | Ranger | Templar | Trade
+    type direct = Ballista | Build | Dervish | Knight | Nations
     type t = (cond, direct) input
   end
   module Output = struct
     type check = unit
-    type cond = Cavalry | Defeat | Disease | LeaderNew | Market | Starvation
-    type direct = Attack | Blessing | BuildManp | BuildStatus | BuildSupply | Facilities | Support | Turn | Upkeep
+    type cond = Defeat | Disease | Market | Starvation
+    type direct = Attack | Blessing | BuildManp | BuildStatus | BuildSupply | Cavalry | Facilities | Support | Turn | Upkeep
     type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
@@ -73,7 +74,7 @@ module Phase2 = struct
     [ Do (Direct Output.Turn);
       Do (Direct Output.BuildManp);
       Do (Direct Output.BuildStatus);
-      Do (Cond Output.LeaderNew);
+      Ask (Cond Input.LeaderNew);
       Do (Direct Output.Upkeep);
       Do (Cond Output.Starvation);
       Do (Cond Output.Defeat);
@@ -88,7 +89,8 @@ module Phase2 = struct
       Ask (Direct Input.Build);
       Do (Direct Output.BuildSupply);
       Ask (Direct Input.Ballista);
-      Do (Cond Output.Cavalry);
+      Do (Direct Output.Cavalry);
+      Ask (Direct Input.Knight);
       Ask (Direct Input.Dervish);
       Ask (Cond Input.Templar);
       Ask (Cond Input.Ranger);
@@ -105,7 +107,7 @@ module Phase3 = struct
   module Output = struct
     type check = Attack | LevelUp | NoAttack | NoEnemies
     type cond = Barraged | Defeat | Revive | Smite
-    type direct = Ballista | CanBarrage | Combat | Victory
+    type direct = Ballista | CanBarrage | Combat | Cyclops | Victory
     type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
@@ -120,8 +122,13 @@ module Phase3 = struct
   let attack : t list =
     [ Do (Cond Output.Smite);
       check_enemies;
-      Do (Direct Output.Ballista);
-      check_enemies;
+      Shuffle ([
+        Do (Direct Output.Ballista);
+        check_enemies
+      ], [
+        Do (Direct Output.Cyclops);
+        Do (Cond Output.Defeat)
+      ]);
       Do (Direct Output.CanBarrage);
       Ask (Cond Input.Barrage);
       Do (Cond Output.Barraged);

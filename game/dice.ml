@@ -16,6 +16,7 @@ module type S = sig
   val index : int -> int
   val pick : 'a list -> 'a
   val pick_w : float list -> 'a list -> 'a
+  val pop : 'a list -> 'a * 'a list
   val range : int * int -> int
   val rangef_times_try : int -> float * float -> float
   val roll : int -> int
@@ -76,6 +77,10 @@ module From (M : From) : S = struct
   let pick_w probs ls =
     let num = Listx.sumf probs |> M.float in
     Listx.pick num probs ls
+
+  let pop ls =
+    let x = pick ls in
+    x, Listx.rm x ls
 
   let yes = M.bool
 

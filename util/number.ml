@@ -1,3 +1,6 @@
+let div a b =
+  a / max b 1
+
 let increase_by ratio x =
   truncate (Float.increase (float x) ratio)
 

@@ -28,6 +28,7 @@ val mausoleums : t -> count
 val need_manp : t -> manpower
 val need_supp : t -> supply
 val ready : kind -> t -> bool
+val stable_cap : t -> count
 val status : t -> status
 val temple_cap : t -> count
 val trade : t -> Nation.trade

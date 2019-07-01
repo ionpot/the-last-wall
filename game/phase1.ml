@@ -5,7 +5,7 @@ module Input = struct
   type event =
     | Build of Event.BuildAvlb.t
     | Deity of Event.DeityChoice.t
-    | Leader of Event.Leader.t
+    | Leader of Event.LeaderKind.t
     | Nations of Event.Nations.t
     | Scout of Event.Scout.t
   module Apply (State : State.S) = struct
@@ -13,7 +13,7 @@ module Input = struct
     let event = function
       | Build x -> Apply.value x (module Event.BuildAvlb)
       | Deity x -> Apply.value x (module Event.DeityChoice)
-      | Leader x -> Apply.value x (module Event.Leader)
+      | Leader x -> Apply.value x (module Event.LeaderKind)
       | Nations x -> Apply.value x (module Event.Nations)
       | Scout x -> Apply.value x (module Event.Scout)
   end
@@ -39,7 +39,7 @@ module Convert = struct
           let make x = Input.Build x end)
       | Steps.Deity -> (module struct module Event = Event.DeityChoice
           let make x = Input.Deity x end)
-      | Steps.Leader -> (module struct module Event = Event.Leader
+      | Steps.Leader -> (module struct module Event = Event.LeaderKind
           let make x = Input.Leader x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)

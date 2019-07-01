@@ -89,6 +89,14 @@ let leader () =
   Tty.prompt "choose"
   |> choose_one ls Game.Leader.(kind_of empty)
 
+let new_leader ls =
+  List.map ldr2full ls |> vertical "new leader:";
+  Tty.prompt "choose" |> choose_from ls
+
+let knight cap =
+  Tty.writeln (sprintf "can promote %d cavalry to knight" cap);
+  Tty.prompt_amount cap
+
 let mercs cap =
   Tty.writeln (sprintf "%d mercenaries available" cap);
   Tty.prompt_yn "accept? y/n"
