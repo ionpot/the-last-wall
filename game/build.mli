@@ -18,6 +18,7 @@ val cost_of : kind -> Bonus.t list -> cost
 val supply_range : kind -> supply * supply
 val multiple : kind -> bool
 
+val ballista_cap : t -> count
 val built : kind -> t -> bool
 val count : kind -> t -> count
 val ls_avlb : t -> kind list

@@ -97,6 +97,9 @@ let cost_of kind bonuses =
   Bonus.find kind bonuses
   |> Bonus.apply_to (base_cost_of kind)
 
+let ballista_cap t =
+  if ready Engrs t then 5 else 0
+
 let stable_cap t =
   count Stable t * 10
 

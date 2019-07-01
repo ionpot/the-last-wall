@@ -102,7 +102,7 @@ module Cavalry = struct
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
-    let cap = Recruit.stable_cap ()
+    let cap = Recruit.Missing.stable ()
     let value = Recruit.affordable kind cap
   end
 end

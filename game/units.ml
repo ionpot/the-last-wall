@@ -141,14 +141,20 @@ let count_cavalry = Ls.count_ls cavalry
 let count_holy = Ls.count_ls holy
 let count_infantry = Ls.count_ls infantry
 
+let min_promotable ls t =
+  ls |> List.map (fun (k, n) -> n, count k t)
+  |> List.map (fun (n, total) -> Number.div total n)
+  |> Listx.min_of
+
 let affordable kind cap t =
   match Cost.of_kind kind with
   | [] -> cap
-  | ls ->
-      ls |> List.map (fun (k, n) -> n, count k t)
-      |> List.map (fun (n, total) -> Number.div total n)
-      |> Listx.min_of
-      |> min cap
+  | ls -> min_promotable ls t |> min cap
+
+let promotable kind t =
+  match Cost.of_kind kind with
+  | [] -> 0
+  | ls -> min_promotable ls t
 
 module Dr = struct
   let of_kind = function
