@@ -10,6 +10,7 @@ module type FromNum = From with type t = int
 module type S = sig
   type t
   val check : (t -> bool) -> bool
+  val clear : unit -> unit
   val empty : unit -> bool
   val get : unit -> t
   val is : t -> bool
@@ -21,7 +22,6 @@ end
 
 module type Bit = sig
   include S with type t = bool
-  val clear : unit -> unit
   val either : 'a -> 'a -> 'a
   val flip : unit -> unit
   val set : unit -> unit
@@ -31,13 +31,11 @@ end
 module type Float = sig
   include S with type t = float
   val add : t -> unit
-  val clear : unit -> unit
 end
 
 module type Num = sig
   include S with type t = int
   val add : t -> unit
-  val clear : unit -> unit
   val deduce : t -> t
   val deduce_from : t -> t
   val has : t -> bool
@@ -53,6 +51,7 @@ module From (M : From) : S with type t = M.t = struct
   type t = M.t
   let x = ref M.empty
   let check f = f !x
+  let clear () = x := M.empty
   let empty () = !x = M.empty
   let get () = !x
   let is t = t = !x
@@ -74,13 +73,11 @@ end
 module Float (M : FromFloat) : Float = struct
   include From(M)
   let add x = map ((+.) x)
-  let clear () = set 0.
 end
 
 module Num (M : FromNum) : Num = struct
   include From(M)
   let add i = map ((+) i)
-  let clear () = set 0
   let deduce i =
     let a, b = Number.deduce (get ()) i in
     set a; b
