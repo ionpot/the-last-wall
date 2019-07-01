@@ -31,6 +31,11 @@ let fort_cap = 20.
 
 let to_power = Defs.to_power
 
+let countered units enemies =
+  if Units.count_cavalry units > 0
+  then enemies
+  else Units.(rm Cyclops) enemies
+
 module Units (S : State.S) = struct
   module Dist = Units.Dist(S.Dice)
   module Fill = Units.Fill(S.Dice)
@@ -41,7 +46,7 @@ module Units (S : State.S) = struct
   let fled () = Fill.from fort_cap units
   let fought () = Float.sub power fort_cap
   let lost dmg = S.Units.return (Dist.from dmg)
-  let enemy_loss dmg = S.Enemy.return (Dist.from dmg)
+  let enemy_loss dmg = S.Enemy.return (countered units) |> Dist.from dmg
 end
 
 module Make (S : State.S) = struct

@@ -1,8 +1,8 @@
-type kind = Ballista | Cavalry | Demon | Dervish | Harpy | Knight | Men | Orc | Ranger | Skeleton | Templar
+type kind = Ballista | Cavalry | Cyclops | Demon | Dervish | Harpy | Knight | Men | Orc | Ranger | Skeleton | Templar
 type report = (kind * Defs.count) list
 type sum_report = (Defs.count * kind list)
 
-let attacks = [Skeleton; Orc; Demon; Harpy]
+let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops]
 let defends = [Men; Cavalry; Knight; Ranger; Templar; Dervish; Ballista]
 
 let barrage = [Men; Ranger]
@@ -13,6 +13,7 @@ let revive = infantry
 let work = [Men; Dervish]
 
 let abundance_of = function
+  | Cyclops -> 0.05
   | Demon -> 0.3
   | Harpy -> 0.15
   | Orc -> 0.6
@@ -25,7 +26,12 @@ let chance_of = function
   | Skeleton -> 0.8
   | _ -> 0.
 
+let chance_growth_of = function
+  | Cyclops -> 0.05
+  | _ -> 0.1
+
 let base_power = function
+  | Cyclops -> 5.
   | Harpy | Knight -> 4.
   | Ballista | Cavalry | Demon | Ranger | Templar -> 2.
   | Dervish | Men | Orc -> 1.

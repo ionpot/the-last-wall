@@ -1,4 +1,4 @@
-type kind = Ballista | Cavalry | Demon | Dervish | Harpy | Knight | Men | Orc | Ranger | Skeleton | Templar
+type kind = Ballista | Cavalry | Cyclops | Demon | Dervish | Harpy | Knight | Men | Orc | Ranger | Skeleton | Templar
 type report = (kind * Defs.count) list
 type sum_report = (Defs.count * kind list)
 
@@ -7,6 +7,7 @@ val defends : kind list
 
 val abundance_of : kind -> float
 val chance_of : kind -> float
+val chance_growth_of : kind -> float
 
 type t
 
