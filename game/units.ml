@@ -21,14 +21,14 @@ let abundance_of = function
   | _ -> 0.
 
 let chance_of = function
-  | Cyclops -> -.0.05
+  | Cyclops -> -.0.8
   | Demon -> 0.4
   | Orc -> 0.6
   | Skeleton -> 0.8
   | _ -> 0.
 
 let chance_growth_of = function
-  | Cyclops -> 0.05
+  | Cyclops -> 0.1
   | _ -> 0.1
 
 let base_power = function
