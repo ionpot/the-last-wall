@@ -4,6 +4,7 @@ module type S = sig
   val cavalry : Defs.count -> unit
   val dervish : unit -> unit
   val enemies : unit -> unit
+  val enemies_remaining : unit -> unit
   val new_leader : Leader.t list -> unit
   val ranger : unit -> unit
   val res : unit -> unit
@@ -39,10 +40,16 @@ module With (S : State.S) = struct
   let templar () =
     total Units.([Templar; Dervish])
 
-  let enemies () =
+  let print_enemies prefix =
     S.Enemy.return Units.report
     |> Convert.unit_pairs2str
-    |> Tty.ifpairln "enemies"
+    |> Tty.ifpairln prefix
+
+  let enemies () =
+    print_enemies "enemies"
+
+  let enemies_remaining () =
+    print_enemies "enemies remaining"
 
   let res () =
     let m = S.Units.return Units.workforce |> truncate in
