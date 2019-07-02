@@ -21,6 +21,7 @@ let abundance_of = function
   | _ -> 0.
 
 let chance_of = function
+  | Cyclops -> -.0.05
   | Demon -> 0.4
   | Orc -> 0.6
   | Skeleton -> 0.8
