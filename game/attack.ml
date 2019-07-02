@@ -20,7 +20,7 @@ module Make (S : State.S) = struct
     let abundance = Units.abundance_of kind in
     let minimum = 10. *. abundance in
     let amount =
-      let x = 1.3 *. float (turn + 3) in
+      let x = 1.3 *. float (turn + 5) in
       abundance *. x *. log x
     in
     let x = ceil (minimum +. amount) |> truncate in
