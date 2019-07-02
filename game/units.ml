@@ -40,6 +40,7 @@ let base_power = function
 let hit_chance = function
   | Ballista -> 0.1
   | Dervish -> 0.3
+  | Knight -> 0.8
   | Ranger -> 0.2
   | Templar -> 0.5
   | _ -> 1.
@@ -80,6 +81,7 @@ module Cost = struct
     of_kind kind |> List.map (Expr.mul n)
 
   let supply = function
+    | Cavalry
     | Dervish
     | Ranger -> 1
     | Templar -> 2
