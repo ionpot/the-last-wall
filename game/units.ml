@@ -81,6 +81,7 @@ module Cost = struct
     of_kind kind |> List.map (Expr.mul n)
 
   let supply = function
+    | Cavalry
     | Dervish
     | Ranger -> 1
     | Templar -> 2
