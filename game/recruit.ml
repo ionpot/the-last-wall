@@ -25,8 +25,7 @@ module With (S : State.S) = struct
     S.Units.return Units.(sub n Dervish)
 
   let affordable kind cap =
-    min (supply_limit kind cap)
-      (exclude () |> Units.affordable kind cap)
+    exclude () |> Units.affordable kind cap |> supply_limit kind
 
   let promotable kind =
     exclude () |> Units.promotable kind |> supply_limit kind
