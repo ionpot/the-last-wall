@@ -29,7 +29,7 @@ let chance_of = function
 
 let chance_growth_of = function
   | Cyclops -> 0.1
-  | _ -> 0.1
+  | _ -> 0.05
 
 let base_power = function
   | Cyclops -> 5.
