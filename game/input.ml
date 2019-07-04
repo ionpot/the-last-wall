@@ -117,16 +117,18 @@ end
 
 module Mercs = struct
   type t = Defs.count
+  let kind = Units.Men
   module Apply (S : State.S) = struct
-    let value count =
-      let count' = S.Supply.take count in
-      S.Units.map Units.(add count' Men)
+    module Recruit = Recruit.With(S)
+    let value = Recruit.promote kind
   end
   module Check (S : State.S) = struct
     let value = S.Dice.chance 0.8
   end
   module Make (S : State.S) = struct
-    let value = S.Dice.between 10 30
+    module Recruit = Recruit.With(S)
+    let cap = S.Dice.between 10 30
+    let value = Recruit.supply_limit kind cap
   end
 end
 
