@@ -22,6 +22,7 @@ end
 module Output = struct
   type event =
     | BuildSupply of Direct.BuildSupply.t
+    | Facilities of Direct.Facilities.t
     | Starting of Direct.Starting.t
     | Support of Direct.Support.t
 end
@@ -57,6 +58,8 @@ module Convert = struct
     let direct : Convert.direct = function
       | Steps.BuildSupply -> (module struct module Event = Direct.BuildSupply
           let make x = Output.BuildSupply x end)
+      | Steps.Facilities -> (module struct module Event = Direct.Facilities
+          let make x = Output.Facilities x end)
       | Steps.Starting -> (module struct module Event = Direct.Starting
           let make x = Output.Starting x end)
       | Steps.Support -> (module struct module Event = Direct.Support

@@ -41,7 +41,7 @@ module Phase1 = struct
   module Output = struct
     type check = unit
     type cond = unit
-    type direct = BuildSupply | Starting | Support
+    type direct = BuildSupply | Facilities | Starting | Support
     type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
@@ -49,6 +49,7 @@ module Phase1 = struct
     [ Ask (Direct Input.Deity);
       Ask (Direct Input.Leader);
       Do (Direct Output.Starting);
+      Do (Direct Output.Facilities);
       Ask (Direct Input.Nations);
       Do (Direct Output.Support);
       Ask (Direct Input.Build);
