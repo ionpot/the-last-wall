@@ -198,3 +198,17 @@ module Trade = struct
     let value = none
   end
 end
+
+module Volunteers = struct
+  type t = Defs.count
+  let kind = Units.Men
+  module Apply (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value = Recruit.promote kind
+  end
+  module Make (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let cap = S.Dice.between 3 9
+    let value = Recruit.supply_limit kind cap
+  end
+end

@@ -8,6 +8,7 @@ module Input = struct
     | Leader of Event.LeaderKind.t
     | Nations of Event.Nations.t
     | Scout of Event.Scout.t
+    | Volunteers of Event.Volunteers.t
   module Apply (State : State.S) = struct
     module Apply = Phase.Apply(State)
     let event = function
@@ -16,6 +17,7 @@ module Input = struct
       | Leader x -> Apply.value x (module Event.LeaderKind)
       | Nations x -> Apply.value x (module Event.Nations)
       | Scout x -> Apply.value x (module Event.Scout)
+      | Volunteers x -> Apply.value x (module Event.Volunteers)
   end
 end
 
@@ -46,6 +48,8 @@ module Convert = struct
           let make x = Input.Nations x end)
       | Steps.Scout -> (module struct module Event = Event.Scout
           let make x = Input.Scout x end)
+      | Steps.Volunteers -> (module struct module Event = Event.Volunteers
+          let make x = Input.Volunteers x end)
   end
 
   module Output = struct

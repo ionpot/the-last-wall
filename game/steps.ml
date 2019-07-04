@@ -35,7 +35,7 @@ end
 module Phase1 = struct
   module Input = struct
     type cond = unit
-    type direct = Build | Deity | Leader | Nations | Scout
+    type direct = Build | Deity | Leader | Nations | Scout | Volunteers
     type t = (cond, direct) input
   end
   module Output = struct
@@ -52,6 +52,7 @@ module Phase1 = struct
       Do (Direct Output.Facilities);
       Ask (Direct Input.Nations);
       Do (Direct Output.Support);
+      Ask (Direct Input.Volunteers);
       Ask (Direct Input.Build);
       Do (Direct Output.BuildSupply);
       Ask (Direct Input.Scout)
@@ -61,7 +62,7 @@ end
 module Phase2 = struct
   module Input = struct
     type cond = LeaderNew | Mercs | Ranger | Templar | Trade
-    type direct = Ballista | Build | Dervish | Knight | Nations
+    type direct = Ballista | Build | Dervish | Knight | Nations | Volunteers
     type t = (cond, direct) input
   end
   module Output = struct
@@ -86,6 +87,7 @@ module Phase2 = struct
       Do (Direct Output.Facilities);
       Ask (Direct Input.Nations);
       Do (Direct Output.Support);
+      Ask (Direct Input.Volunteers);
       Ask (Cond Input.Trade);
       Ask (Direct Input.Build);
       Do (Direct Output.BuildSupply);
