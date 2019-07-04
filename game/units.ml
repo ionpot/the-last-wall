@@ -114,8 +114,7 @@ module Ls = struct
     List.filter (Expr.is kind) t
 
   let filter_ls kinds t =
-    List.map (fun k -> filter k t) kinds
-    |> List.concat
+    List.filter (fun e -> List.mem (Expr.kind e) kinds) t
 
   let count kind t =
     filter kind t |> count_all
