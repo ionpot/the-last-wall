@@ -53,7 +53,7 @@ let base_cost =
   | Sawmill -> Manpwr 23, Supply 25
   | Stable -> Manpwr 49, Supply 54
   | Tavern -> Manpwr 0, Supply 0
-  | Temple -> Manpwr 54, Supply 56
+  | Temple -> Manpwr 61, Supply 63
   | Trade _ -> Manpwr 51, Supply 49
 
 let base_cost_of kind =
@@ -110,8 +110,8 @@ let status t =
   t.built, List.map fst built, ongoing
 
 let temple_cap t =
-  if ready Guesthouse t then 30
-  else if ready Temple t then 10
+  if ready Guesthouse t then 40
+  else if ready Temple t then 20
   else 0
 
 let trade t =
