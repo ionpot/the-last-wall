@@ -230,6 +230,8 @@ let workforce = powers_of work
 let add n kind t =
   Ls.add (Expr.make n kind) t
 
+let clean = Ls.clean
+
 let combine t t' =
   List.fold_left (Fn.flip Ls.add) t t'
 
@@ -250,77 +252,75 @@ let sub n kind t =
   Ls.sub (Expr.make n kind) t
   |> Ls.clean
 
-module Ops (Total : Pick.Num) (Num : Pick.Num) (Dice : Dice.S) = struct
+module Ops (Num : Pick.Num) (Dice : Dice.S) = struct
   module Num = Num
-  module Total = Total
   type key = kind
   type pair = key * Num.t
   let choose = Dice.pick
 end
 
-let check_pick fn pwr t =
-  if pwr > power t then t else fn pwr t
+module Picked = struct
+  type dist = (kind * Defs.power) list
 
-module Damage = struct
-  let accept n = n, n
-  let heal pwr n = n, Float.floor_by pwr n
-  let handle kind =
-    if kind = Templar
-    then heal (base_power kind)
-    else accept
+  let group_by t ls =
+    List.map (fun k -> k, Ls.count k ls) (kinds_of t)
+
+  let groupf_by t ls =
+    let count k =
+      List.filter (Pair.fst_is k) ls
+      |> List.map snd |> Listx.sumf
+    in
+    List.map (fun k -> k, count k) (kinds_of t)
+
+  let to_units ls =
+    ls |> List.map (fun (k, n) -> k, n /. base_power k)
+    |> List.map (fun (k, n) -> Expr.make (truncate n) k)
 end
 
 module Dist (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
-    include Ops(Pick.Float)(Pick.Float)(Dice)
+    include Ops(Pick.Float)(Dice)
     let choose pairs =
       let probs = List.map (Pair.fst_to hit_chance) pairs in
       Dice.pick_w probs pairs
-    let roll (k, n) = Dice.rollf n |> Damage.handle k
+    let roll (k, n) = Dice.rollf n
     let trim cap (k, n) = min cap n
+  end)
+
+  let from power t =
+    List.map (fun expr -> Expr.(kind expr, power expr)) t
+    |> Pick.from power
+end
+
+module Fill (Dice : Dice.S) = struct
+  module Pick = Pick.With(struct
+    include Ops(Pick.Float)(Dice)
+    let roll (k, n) = Dice.rollf n |> Float.floor_by (base_power k)
+    let trim cap (k, n) = min cap n |> Float.floor_by (base_power k)
   end)
 
   let fn power t =
     List.map (fun expr -> Expr.(kind expr, power expr)) t
     |> Pick.from power
-    |> List.map (fun (k, n) ->
-        let n' = truncate (n /. base_power k) in
-        Expr.make n' k)
+    |> Picked.groupf_by t
+    |> Picked.to_units
+    |> Ls.clean
 
-  let from = check_pick fn
-end
-
-module Fill (Dice : Dice.S) = struct
-  module Pick = Pick.With(struct
-    include Ops(Pick.Float)(Pick.Int)(Dice)
-    let roll (k, n) =
-      let n' = Dice.roll n in
-      let pwr = Expr.(make n' k |> power) in
-      pwr, n'
-    let trim cap (k, n) =
-      let power = base_power k in
-      min n (if power > 0. then truncate (cap /. power) else n)
-  end)
-
-  let fn power t =
-    List.map (fun expr -> Expr.(kind expr, count expr)) t
-    |> Pick.from power
-    |> List.map Expr.of_pair
-
-  let from = check_pick fn
+  let from pwr t =
+    if pwr > power t then t else fn pwr t
 end
 
 module FillCount (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
-    include Ops(Pick.Int)(Pick.Int)(Dice)
-    let roll (k, n) = let n' = Dice.roll n in n', n'
+    include Ops(Pick.Int)(Dice)
+    let roll (k, n) = Dice.roll n
     let trim cap (k, n) = min cap n
   end)
 
   let fn total t =
     List.map (fun expr -> Expr.(kind expr, count expr)) t
     |> Pick.from total
-    |> List.map Expr.of_pair
+    |> Picked.group_by t
 
   let from total t =
     if total > count_all t then t else fn total t

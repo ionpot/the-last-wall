@@ -6,6 +6,7 @@ val attacks : kind list
 val defends : kind list
 
 val abundance_of : kind -> float
+val base_power : kind -> float
 val chance_of : kind -> float
 val chance_growth_of : kind -> float
 
@@ -46,14 +47,21 @@ val upkeep : t -> Defs.supply
 val workforce : t -> Defs.power
 
 val add : Defs.count -> kind -> t -> t
+val clean : t -> t
 val combine : t -> t -> t
 val reduce : t -> t -> t
 val rm : kind -> t -> t
 val starve : Defs.supply -> t -> t
 val sub : Defs.count -> kind -> t -> t
 
+module Picked : sig
+  type dist = (kind * Defs.power) list
+  val groupf_by : t -> dist -> dist
+  val to_units : dist -> t
+end
+
 module Dist : Dice.S -> sig
-  val from : Defs.power -> t -> t
+  val from : Defs.power -> t -> Picked.dist
 end
 
 module Fill : Dice.S -> sig
