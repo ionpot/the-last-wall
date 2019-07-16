@@ -3,7 +3,7 @@ type report = (kind * Defs.count) list
 type sum_report = (Defs.count * kind list)
 
 let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops]
-let defends = [Men; Cavalry; Knight; Ranger; Templar; Dervish; Ballista]
+let defends = [Men; Dervish; Cavalry; Ranger; Templar; Ballista; Knight]
 
 let barrage = [Men; Ranger]
 let cavalry = [Cavalry; Knight]
