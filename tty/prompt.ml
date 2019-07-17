@@ -138,3 +138,7 @@ let trade () =
   |> horizontal "trade type";
   if Tty.prompt_int "choose" = 2 then certain else boost
   |> echo (fun x -> Tty.pairln "chosen" (trade2str x))
+
+let volunteers cap =
+  Tty.writeln (sprintf "%d volunteers want to join" cap);
+  Tty.prompt_amount cap

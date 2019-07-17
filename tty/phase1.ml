@@ -3,6 +3,7 @@ module Phase = Game.Phase1
 module Make (S : Game.State.S) = struct
   let input =
     let open Phase.Input in
+    let check f x = if x > 0 then f x else x in
     function
       | Build avlb ->
           let module Prompt = Prompt.Build(S) in
@@ -12,6 +13,7 @@ module Make (S : Game.State.S) = struct
       | Leader _ -> Leader (Prompt.leader ())
       | Nations chosen -> Nations (Prompt.nations chosen)
       | Scout _ -> Scout (Prompt.scout ())
+      | Volunteers n -> Volunteers (check Prompt.volunteers n)
 
   let output =
     let open Phase.Output in
@@ -24,7 +26,11 @@ module Make (S : Game.State.S) = struct
 end
 
 module After (S : Status.S) = struct
-  let input _ = ()
+  let input =
+    let open Phase.Input in
+    function
+      | Volunteers n -> if n > 0 then S.res ()
+      | _ -> ()
 
   let output =
     let open Phase.Output in
