@@ -8,6 +8,7 @@ module Input = struct
     | Leader of Event.LeaderKind.t
     | Nations of Event.Nations.t
     | Scout of Event.Scout.t
+    | Volunteers of Event.Volunteers.t
   module Apply (State : State.S) = struct
     module Apply = Phase.Apply(State)
     let event = function
@@ -16,12 +17,14 @@ module Input = struct
       | Leader x -> Apply.value x (module Event.LeaderKind)
       | Nations x -> Apply.value x (module Event.Nations)
       | Scout x -> Apply.value x (module Event.Scout)
+      | Volunteers x -> Apply.value x (module Event.Volunteers)
   end
 end
 
 module Output = struct
   type event =
     | BuildSupply of Direct.BuildSupply.t
+    | Facilities of Direct.Facilities.t
     | Starting of Direct.Starting.t
     | Support of Direct.Support.t
 end
@@ -45,6 +48,8 @@ module Convert = struct
           let make x = Input.Nations x end)
       | Steps.Scout -> (module struct module Event = Event.Scout
           let make x = Input.Scout x end)
+      | Steps.Volunteers -> (module struct module Event = Event.Volunteers
+          let make x = Input.Volunteers x end)
   end
 
   module Output = struct
@@ -57,6 +62,8 @@ module Convert = struct
     let direct : Convert.direct = function
       | Steps.BuildSupply -> (module struct module Event = Direct.BuildSupply
           let make x = Output.BuildSupply x end)
+      | Steps.Facilities -> (module struct module Event = Direct.Facilities
+          let make x = Output.Facilities x end)
       | Steps.Starting -> (module struct module Event = Direct.Starting
           let make x = Output.Starting x end)
       | Steps.Support -> (module struct module Event = Direct.Support

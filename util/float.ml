@@ -1,5 +1,5 @@
 let floor_by ratio x =
-  ratio *. floor (x *. 1. /. ratio)
+  ratio *. floor (x /. ratio)
 
 let increase x ratio =
   x +. x *. ratio

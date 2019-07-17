@@ -19,6 +19,7 @@ module Make (S : Game.State.S) = struct
       | Ranger count -> Ranger (check Prompt.ranger count)
       | Templar count -> Templar (check Prompt.templar count)
       | Trade _ -> Trade (Prompt.trade ())
+      | Volunteers count -> Volunteers (check Prompt.volunteers count)
 
   let output =
     let open Convert in
@@ -56,6 +57,7 @@ module After (S : Status.S) = struct
       | Mercs n -> if n > 0 then S.res ()
       | Ranger n -> if n > 0 then begin S.ranger (); S.res () end
       | Templar n -> if n > 0 then begin S.templar (); S.res () end
+      | Volunteers n -> if n > 0 then S.res ()
       | _ -> ()
 
   let output =
