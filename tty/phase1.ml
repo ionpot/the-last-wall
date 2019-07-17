@@ -19,6 +19,7 @@ module Make (S : Game.State.S) = struct
     let open Phase.Output in
     function
       | BuildSupply s -> S.Supply.return (Print.Build.supply s)
+      | Facilities ls -> Tty.ifpairln "facilities" (Convert.facs2str ls)
       | Starting (ldr, _, res) ->
           Tty.pairln "leader" (Convert.ldr2full ldr);
           Tty.pairln "starting" (Convert.res2str res)
@@ -35,7 +36,8 @@ module After (S : Status.S) = struct
   let output =
     let open Phase.Output in
     function
-      | BuildSupply _
+      | BuildSupply _ -> ()
+      | Facilities ls -> if ls <> [] then S.res ()
       | Support _ -> S.res ()
       | Starting _ -> ()
 end
