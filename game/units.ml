@@ -97,6 +97,12 @@ module Cost = struct
 
   let upkeep_of_expr e =
     Expr.count e * upkeep (Expr.kind e)
+
+  let from_upkeep kind sup =
+    Number.div sup (upkeep kind)
+
+  let to_upkeep kind n =
+    n * upkeep kind
 end
 
 module Ls = struct
@@ -244,8 +250,11 @@ let rm = Ls.discard
 let starve supply t =
   let ns =
     List.map (fun k -> count k t) defends
+    |> List.map2 Cost.to_upkeep defends
     |> Listx.map_with Number.take supply
-  in List.map2 Expr.make ns defends
+    |> List.map2 Cost.from_upkeep defends
+  in
+  List.map2 Expr.make ns defends
   |> Ls.clean
 
 let sub n kind t =
