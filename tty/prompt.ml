@@ -99,7 +99,7 @@ let knight cap =
 
 let mercs cap =
   Tty.writeln (sprintf "%d mercenaries available" cap);
-  Tty.prompt_yn "accept? y/n"
+  Tty.prompt_yn "sign contract? y/n"
   |> either cap 0
 
 let nations chosen =
