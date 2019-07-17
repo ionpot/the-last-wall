@@ -14,6 +14,7 @@ module Input = struct
     | Ranger of Event.Ranger.t
     | Templar of Event.Templar.t
     | Trade of Event.Trade.t
+    | Volunteers of Event.Volunteers.t
 
   module Apply (State : State.S) = struct
     module Apply = Phase.Apply(State)
@@ -28,6 +29,7 @@ module Input = struct
       | Ranger x -> Apply.value x (module Event.Ranger)
       | Templar x -> Apply.value x (module Event.Templar)
       | Trade x -> Apply.value x (module Event.Trade)
+      | Volunteers x -> Apply.value x (module Event.Volunteers)
   end
 end
 
@@ -66,6 +68,8 @@ module Convert = struct
           let make x = Input.Knight x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)
+      | Steps.Volunteers -> (module struct module Event = Event.Volunteers
+          let make x = Input.Volunteers x end)
 
     let cond : Convert.cond = function
       | Steps.LeaderNew -> (module struct module Event = Event.LeaderNew
