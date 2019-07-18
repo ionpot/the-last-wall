@@ -15,34 +15,36 @@ end
 
 module type Ops = sig
   module Num : Num
+  module Total : Num
   type key
   type pair = key * Num.t
   val choose : pair list -> pair
-  val roll : pair -> Num.t
-  val trim : Num.t -> pair -> Num.t
+  val roll : pair -> Total.t * Num.t
+  val trim : Total.t -> pair -> Num.t
 end
 
 module With (S : Ops) = struct
   let zero = S.Num.zero
 
+  let add = Pair.eq_map S.Num.add
   let sub = Pair.eq_map (Fn.flip S.Num.sub)
 
   let clean = List.filter (fun (_, x) -> x > zero)
 
   let picked pair pairs output =
     List.map (sub pair) pairs,
-    pair :: output
+    List.map (add pair) output
 
   let pick cap pairs output =
     let pair = S.choose pairs in
     let key = fst pair in
-    let num = S.roll pair in
+    let pwr, num = S.roll pair in
     let pairs', output' =
       if num > zero
       then picked (key, num) pairs output
       else pairs, output
     in
-    S.Num.sub cap num, pairs', output'
+    S.Total.sub cap pwr, pairs', output'
 
   let trim pairs cap =
     pairs
@@ -55,5 +57,7 @@ module With (S : Ops) = struct
     | pairs' -> start (pick cap pairs' output)
 
   let from cap pairs =
-    start (cap, pairs, [])
+    let output = List.map (Pair.snd_set zero) pairs in
+    start (cap, pairs, output)
+    |> clean
 end
