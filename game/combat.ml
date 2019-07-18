@@ -31,37 +31,22 @@ let fort_cap = 20.
 
 let to_power = Defs.to_power
 
-let heal kind ls =
-  let f = Float.floor_by (Units.base_power kind) in
-  List.map (fun (k, n) -> k, if k = kind then f n else n) ls
-
-let after ls =
-  heal Units.Templar ls
-
 let countered units enemies =
   if Units.has_base_power 2. units
   then enemies
   else Units.(rm Cyclops) enemies
-
-let to_units t ls =
-  Units.Picked.(groupf_by t ls |> to_units)
-  |> Units.clean
 
 module Units (S : State.S) = struct
   module Dist = Units.Dist(S.Dice)
   module Fill = Units.Fill(S.Dice)
   let attack = S.Enemy.return Units.power
   let harpies = S.Enemy.return Units.(count Harpy)
-  let defending = S.Units.get ()
-  let units = Units.(rm Ballista) defending
+  let units = S.Units.return Units.(rm Ballista)
   let power = Units.power units
   let fled () = Fill.from fort_cap units
   let fought () = Float.sub power fort_cap
-  let lost dmg =
-    Dist.from dmg defending |> after |> to_units defending
-  let enemy_loss dmg =
-    let e = S.Enemy.return (countered units) in
-    Dist.from dmg e |> to_units e
+  let lost dmg = S.Units.return (Dist.from dmg)
+  let enemy_loss dmg = S.Enemy.return (countered units) |> Dist.from dmg
 end
 
 module Make (S : State.S) = struct
