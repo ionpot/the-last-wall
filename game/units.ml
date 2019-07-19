@@ -221,9 +221,6 @@ let ratio kind1 kind2 t =
 
 let report t = t
 
-let revivable t =
-  Ls.filter_ls revive t
-
 let upkeep t =
   List.map Cost.upkeep_of_expr t
   |> Listx.sum
@@ -239,6 +236,9 @@ let combine t t' =
 let reduce t t' =
   List.fold_left (Fn.flip Ls.sub) t' t
   |> Ls.clean
+
+let revivable t =
+  Ls.filter_ls revive t
 
 let rm = Ls.discard
 
