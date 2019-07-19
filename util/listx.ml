@@ -25,6 +25,10 @@ let filteri f ls =
 let in_both a b =
   List.filter (fun x -> List.mem x a) b
 
+let maxf_of = function
+  | [] -> 0.
+  | x :: xs -> List.fold_left max x xs
+
 let min_of = function
   | [] -> 0
   | x :: xs -> List.fold_left min x xs
