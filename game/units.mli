@@ -46,6 +46,7 @@ val workforce : t -> Defs.power
 
 val add : Defs.count -> kind -> t -> t
 val combine : t -> t -> t
+val defending : t -> t
 val reduce : t -> t -> t
 val revivable : t -> t
 val rm : kind -> t -> t

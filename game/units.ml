@@ -230,6 +230,9 @@ let workforce = powers_of work
 let add n kind t =
   Ls.add (Expr.make n kind) t
 
+let defending t =
+  Ls.discard Ballista t
+
 let combine t t' =
   List.fold_left (Fn.flip Ls.add) t t'
 
