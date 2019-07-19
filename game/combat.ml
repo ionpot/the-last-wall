@@ -64,7 +64,7 @@ module Make (S : State.S) = struct
     let retreat = defeat && S.Build.check Build.(ready Fort)
     let power = if retreat then Units.fought () else Units.power
     let units = if retreat then Units.fled () else Units.lost damage
-    let enemies = Units.enemy_loss power
+    let enemies = Units.enemy_loss (Float.increase power defense)
     let ldr_died =
       if retreat then false
       else S.Leader.check LdrRoll.death
