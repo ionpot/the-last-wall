@@ -29,19 +29,21 @@ end
 
 let fort_cap = 20.
 
-let to_power = Defs.to_power
-
 module Units (S : State.S) = struct
   module Dist = Units.Dist(S.Dice)
   module Fill = Units.Fill(S.Dice)
-  let attack = S.Enemy.return Units.power
-  let harpies = S.Enemy.return Units.(count Harpy)
-  let units = S.Units.return Units.defending
-  let power = Units.power units
-  let fled () = Fill.from fort_cap units
+  let enemies = S.Enemy.get ()
+  let attack = Units.power enemies
+  let harpies = Units.(count Harpy) enemies
+  let units = S.Units.get ()
+  let defending = Units.defending units
+  let power = Units.power defending
+  let fled () = Fill.from fort_cap defending
   let fought () = Float.sub power fort_cap
-  let lost dmg = S.Units.return (Dist.from dmg)
-  let enemy_loss dmg = S.Enemy.return (Units.countered units) |> Dist.from dmg
+  let lost dmg = Dist.from dmg units
+  let enemy_loss dmg =
+    Units.countered units enemies
+    |> Dist.from dmg
 end
 
 module Make (S : State.S) = struct
@@ -49,7 +51,9 @@ module Make (S : State.S) = struct
   module LdrRoll = Leader.Roll(S.Dice)
   module Units = Units(S)
 
-  let harpy_weaken = to_power Units.harpies (S.Barraging.either 1. 0.)
+  let harpy_weaken =
+    S.Barraging.either 1. 0.
+    |> Defs.to_power Units.harpies
 
   let value = (module struct
     let cav_too_many = Dr.cav_too_many
