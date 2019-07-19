@@ -12,6 +12,7 @@ val group : 'a list -> (int * 'a) list
 val index_of : 'a -> 'a list -> int
 val in_both : 'a list -> 'a list -> 'a list
 val map_with : ('a -> 'b -> 'a * 'b) -> 'a -> 'b list -> 'b list
+val maxf_of : float list -> float
 val min_of : int list -> int
 val pick : float -> float list -> 'a list -> 'a
 val pick_first : int -> 'a list -> 'a list

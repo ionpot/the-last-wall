@@ -46,6 +46,10 @@ let hit_chance = function
   | Templar -> 0.5
   | _ -> 1.
 
+let toughness = function
+  | Cyclops -> 2.
+  | _ -> 1.
+
 module Expr = struct
   type t = kind * Defs.count
   let add = Pair.eq_map (+)
@@ -61,6 +65,7 @@ module Expr = struct
   let power_base (k, _) = base_power k
   let set_count = Pair.snd_set
   let sub = Fn.flip (-) |> Pair.eq_map
+  let toughness t = kind t |> toughness
 end
 
 type t = Expr.t list
@@ -196,6 +201,10 @@ let has_base_power p t =
   List.map Expr.power_base t
   |> List.exists ((<=) p)
 
+let highest_base_power t =
+  List.map Expr.power_base t
+  |> Listx.maxf_of
+
 let kinds_of t =
   List.map Expr.kind t
 
@@ -221,9 +230,6 @@ let ratio kind1 kind2 t =
 
 let report t = t
 
-let revivable t =
-  Ls.filter_ls revive t
-
 let upkeep t =
   List.map Cost.upkeep_of_expr t
   |> Listx.sum
@@ -233,12 +239,22 @@ let workforce = powers_of work
 let add n kind t =
   Ls.add (Expr.make n kind) t
 
+let defending t =
+  Ls.discard Ballista t
+
 let combine t t' =
   List.fold_left (Fn.flip Ls.add) t t'
+
+let countered units t =
+  let pwr = highest_base_power units in
+  Listx.discard (fun e -> Expr.toughness e > pwr) t
 
 let reduce t t' =
   List.fold_left (Fn.flip Ls.sub) t' t
   |> Ls.clean
+
+let revivable t =
+  Ls.filter_ls revive t
 
 let rm = Ls.discard
 

@@ -29,24 +29,21 @@ end
 
 let fort_cap = 20.
 
-let to_power = Defs.to_power
-
-let countered units enemies =
-  if Units.has_base_power 2. units
-  then enemies
-  else Units.(rm Cyclops) enemies
-
 module Units (S : State.S) = struct
   module Dist = Units.Dist(S.Dice)
   module Fill = Units.Fill(S.Dice)
-  let attack = S.Enemy.return Units.power
-  let harpies = S.Enemy.return Units.(count Harpy)
-  let units = S.Units.return Units.(rm Ballista)
+  let enemies = S.Enemy.get ()
+  let attack = Units.power enemies
+  let harpies = Units.(count Harpy) enemies
+  let units = S.Units.get ()
+  let defending = Units.defending units
   let power = Units.power units
-  let fled () = Fill.from fort_cap units
+  let fled () = Fill.from fort_cap defending
   let fought () = Float.sub power fort_cap
-  let lost dmg = S.Units.return (Dist.from dmg)
-  let enemy_loss dmg = S.Enemy.return (countered units) |> Dist.from dmg
+  let lost dmg = Dist.from dmg units
+  let enemy_loss dmg =
+    Units.countered units enemies
+    |> Dist.from dmg
 end
 
 module Make (S : State.S) = struct
@@ -54,7 +51,9 @@ module Make (S : State.S) = struct
   module LdrRoll = Leader.Roll(S.Dice)
   module Units = Units(S)
 
-  let harpy_weaken = to_power Units.harpies (S.Barraging.either 1. 0.)
+  let harpy_weaken =
+    S.Barraging.either 1. 0.
+    |> Defs.to_power Units.harpies
 
   let value = (module struct
     let cav_too_many = Dr.cav_too_many
@@ -65,7 +64,7 @@ module Make (S : State.S) = struct
     let retreat = defeat && S.Build.check Build.(ready Fort)
     let power = if retreat then Units.fought () else Units.power
     let units = if retreat then Units.fled () else Units.lost damage
-    let enemies = Units.enemy_loss power
+    let enemies = Units.enemy_loss (Float.increase power defense)
     let ldr_died =
       if retreat then false
       else S.Leader.check LdrRoll.death
