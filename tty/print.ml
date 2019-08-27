@@ -28,7 +28,9 @@ end
 
 module Leader = struct
   let died t =
-    sprintf "%s has died" (ldr2first t)
+    sprintf
+      "%s has died, it was a grim sacrifice to protect the wall"
+      (ldr2first t)
     |> Tty.writeln
 
   let check f t =
