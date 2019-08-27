@@ -76,7 +76,7 @@ let deity () =
   |> vertical "deities";
   Tty.prompt "choose"
   |> choose_one ls Game.Deity.empty
-  |> echo (fun d -> Tty.spln (deity2str d) "chosen")
+  |> echo (fun d -> Tty.spln (deity2str d) "will enlighten our path in this holy quest")
 
 let dervish cap =
   Tty.writeln (sprintf "%d dervish available" cap);
