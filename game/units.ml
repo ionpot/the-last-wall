@@ -213,11 +213,6 @@ let powers_of kinds t =
 let barrage_power t =
   powers_of barrage t *. 0.05
 
-let ratio kind1 kind2 t =
-  let a = count kind1 t in
-  let b = count kind2 t in
-  float a /. float b
-
 let report = Map.bindings
 
 let upkeep t =

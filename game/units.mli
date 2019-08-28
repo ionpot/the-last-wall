@@ -39,7 +39,6 @@ val kinds_of : t -> kind list
 val power : t -> Defs.power
 val power_of : kind -> t -> Defs.power
 val promotable : kind -> t -> Defs.count
-val ratio : kind -> kind -> t -> float
 val report : t -> report
 val upkeep : t -> Defs.supply
 val workforce : t -> Defs.power
