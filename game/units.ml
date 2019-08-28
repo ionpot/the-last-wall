@@ -3,13 +3,12 @@ type report = (kind * Defs.count) list
 type sum_report = (Defs.count * kind list)
 
 let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops]
-let defends = [Men; Dervish; Cavalry; Ranger; Templar; Ballista; Knight]
-
 let barrage = [Men; Ranger]
 let cavalry = [Cavalry; Knight]
 let holy = [Dervish; Ranger; Templar]
 let infantry = [Men; Ranger; Templar; Dervish]
 let revive = infantry
+let starve_order = [Men; Dervish; Cavalry; Ranger; Templar; Ballista; Knight]
 let work = [Men; Dervish]
 
 let abundance_of = function
@@ -246,7 +245,7 @@ let starve supply t =
     let n = Cost.from_upkeep k cost' in
     sup', if n > 0 then add n k t' else t'
   in
-  List.fold_left f (supply, empty) defends
+  List.fold_left f (supply, empty) starve_order
   |> snd
 
 let sub n kind t =

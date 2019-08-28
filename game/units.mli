@@ -3,7 +3,6 @@ type report = (kind * Defs.count) list
 type sum_report = (Defs.count * kind list)
 
 val attacks : kind list
-val defends : kind list
 
 val abundance_of : kind -> float
 val chance_of : kind -> float
