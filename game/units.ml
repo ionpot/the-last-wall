@@ -50,29 +50,68 @@ let toughness = function
   | Cyclops -> 2.
   | _ -> 1.
 
-module Expr = struct
-  type t = kind * Defs.count
-  let add = Pair.eq_map (+)
-  let count = snd
-  let has_count t = count t > 0
-  let is = Pair.fst_is
-  let kind = fst
-  let make n k = (k, n)
-  let map_count = Pair.snd_map
-  let mul n t = map_count (( * ) n) t
-  let of_pair p = p
-  let power (k, n) = Defs.to_power n (base_power k)
-  let power_base (k, _) = base_power k
-  let set_count = Pair.snd_set
-  let sub = Fn.flip (-) |> Pair.eq_map
-  let toughness t = kind t |> toughness
+let to_power kind n =
+  Defs.to_power n (base_power kind)
+
+module Map = Map.Make(struct
+  type t = kind
+  let compare = compare
+end)
+
+type t = Defs.count Map.t
+
+let empty : t = Map.empty
+
+let make n kind =
+  Map.singleton kind n
+
+let make_ls ls =
+  List.fold_left (fun t (k, n) -> Map.add k n t) empty ls
+
+let filter_ls kinds t =
+  Map.filter (fun k _ -> List.mem k kinds) t
+
+module Ops = struct
+  let add t_a t_b =
+    Map.union (fun _ a b -> Some (a + b)) t_a t_b
+
+  let div t_a t_b =
+    let f _ a_opt = function
+      | Some b ->
+          if b > 0
+          then Some (Number.maybe 0 a_opt / b)
+          else None
+      | None -> None
+    in
+    Map.merge f t_a t_b
+
+  let min t =
+    let cmp n = function
+      | Some x -> Some (min x n)
+      | None -> Some n
+    in
+    Map.fold (fun _ -> cmp) t None
+    |> Number.maybe 0
+
+  let mul n t =
+    Map.map (( * ) n) t
+
+  let powers t =
+    Map.mapi to_power t
+
+  let sub t_a t_b =
+    let f _ a_opt = function
+      | Some b -> Number.(sub_opt (maybe 0 a_opt) b)
+      | None -> None
+    in
+    Map.merge f t_a t_b
+
+  let sum t =
+    Map.fold (fun _ -> (+)) t 0
+
+  let sumf t =
+    Map.fold (fun _ -> (+.)) t 0.
 end
-
-type t = Expr.t list
-
-let empty = []
-
-let make n kind = [Expr.make n kind]
 
 module Cost = struct
   let of_kind = function
@@ -84,7 +123,7 @@ module Cost = struct
     | _ -> empty
 
   let from n kind =
-    of_kind kind |> List.map (Expr.mul n)
+    of_kind kind |> Ops.mul n
 
   let supply = function
     | Templar -> 2
@@ -97,9 +136,6 @@ module Cost = struct
     | Ballista -> 2
     | _ -> 1
 
-  let upkeep_of_expr e =
-    Expr.count e * upkeep (Expr.kind e)
-
   let from_upkeep kind sup =
     Number.div sup (upkeep kind)
 
@@ -107,64 +143,28 @@ module Cost = struct
     n * upkeep kind
 end
 
-module Ls = struct
-  let clean t =
-    List.filter Expr.has_count t
+let count kind t =
+  try Map.find kind t with
+  | Not_found -> 0
 
-  let count_all t =
-    List.map Expr.count t
-    |> Listx.sum
+let count_all = Ops.sum
 
-  let discard kind t =
-    Listx.discard (Expr.is kind) t
+let count_ls ls t =
+  filter_ls ls t |> count_all
 
-  let filter kind t =
-    List.filter (Expr.is kind) t
-
-  let filter_ls kinds t =
-    List.filter (fun e -> List.mem (Expr.kind e) kinds) t
-
-  let count kind t =
-    filter kind t |> count_all
-
-  let count_ls kinds t =
-    filter_ls kinds t |> count_all
-
-  let has kind t =
-    List.exists (Expr.is kind) t
-
-  let map_count f t =
-    List.map (Expr.map_count f) t
-
-  let add expr t =
-    if has (Expr.kind expr) t
-    then List.map (Expr.add expr) t
-    else expr :: t
-
-  let sub expr t =
-    List.map (Expr.sub expr) t
-end
-
-let count = Ls.count
-let count_all = Ls.count_all
-let count_cavalry = Ls.count_ls cavalry
-let count_holy = Ls.count_ls holy
-let count_infantry = Ls.count_ls infantry
-
-let min_promotable ls t =
-  ls |> List.map (fun (k, n) -> n, count k t)
-  |> List.map (fun (n, total) -> Number.div total n)
-  |> Listx.min_of
+let count_cavalry = count_ls cavalry
+let count_holy = count_ls holy
+let count_infantry = count_ls infantry
 
 let affordable kind cap t =
-  match Cost.of_kind kind with
-  | [] -> cap
-  | ls -> min_promotable ls t |> min cap
+  let m = Ops.div t (Cost.of_kind kind) in
+  if Map.is_empty m then cap
+  else Ops.min m |> min cap
 
 let promotable kind t =
-  match Cost.of_kind kind with
-  | [] -> 0
-  | ls -> min_promotable ls t
+  let m = Ops.div t (Cost.of_kind kind) in
+  if Map.is_empty m then 0
+  else Ops.min m
 
 module Dr = struct
   let of_kind = function
@@ -172,22 +172,17 @@ module Dr = struct
     | Cavalry | Harpy -> 0.002
     | _ -> 0.
 
-  let from n kind =
+  let to_power kind n =
     Defs.to_power n (of_kind kind)
 
-  let of_expr e =
-    from (Expr.count e) (Expr.kind e)
-
-  let from_kind k t =
-    from (count k t) k
-
   let cavalry t =
-    cavalry
-    |> List.map (fun k -> from_kind k t)
-    |> Listx.sumf
+    filter_ls cavalry t
+    |> Map.mapi to_power
+    |> Ops.sumf
 
   let harpy t =
-    from_kind Harpy t
+    count Harpy t
+    |> to_power Harpy
     |> Float.floor_by 0.01
 end
 
@@ -195,30 +190,25 @@ let find n kind t =
   let found = count kind t in
   min n found
 
-let has = Ls.has
+let has kind t =
+  count kind t > 0
 
 let has_base_power p t =
-  List.map Expr.power_base t
-  |> List.exists ((<=) p)
-
-let highest_base_power t =
-  List.map Expr.power_base t
-  |> Listx.maxf_of
+  Map.exists (fun k _ -> base_power k >= p) t
 
 let kinds_of t =
-  List.map Expr.kind t
+  Map.bindings t
+  |> List.map fst
 
 let power t =
-  List.map Expr.power t
-  |> Listx.sumf
+  Ops.(powers t |> sumf)
 
 let power_of kind t =
-  Ls.filter kind t |> power
+  to_power kind (count kind t)
 
 let powers_of kinds t =
-  kinds
-  |> List.map (fun k -> power_of k t)
-  |> Listx.sumf
+  filter_ls kinds t
+  |> power
 
 let barrage_power t =
   powers_of barrage t *. 0.05
@@ -228,51 +218,46 @@ let ratio kind1 kind2 t =
   let b = count kind2 t in
   float a /. float b
 
-let report t = t
+let report = Map.bindings
 
 let upkeep t =
-  List.map Cost.upkeep_of_expr t
-  |> Listx.sum
+  Map.mapi Cost.to_upkeep t |> count_all
 
 let workforce = powers_of work
 
 let add n kind t =
-  Ls.add (Expr.make n kind) t
+  Map.add kind (n + count kind t) t
 
 let defending t =
-  Ls.discard Ballista t
+  Map.remove Ballista t
 
-let combine t t' =
-  List.fold_left (Fn.flip Ls.add) t t'
+let combine = Ops.add
 
 let countered units t =
-  let pwr = highest_base_power units in
-  Listx.discard (fun e -> Expr.toughness e > pwr) t
+  Map.filter (fun k _ -> has_base_power (toughness k) units) t
 
 let reduce t t' =
-  List.fold_left (Fn.flip Ls.sub) t' t
-  |> Ls.clean
+  Ops.sub t' t
 
 let revivable t =
-  Ls.filter_ls revive t
+  filter_ls revive t
 
-let rm = Ls.discard
+let rm = Map.remove
 
 let starve supply t =
-  let ns =
-    List.map (fun k -> count k t) defends
-    |> List.map2 Cost.to_upkeep defends
-    |> Listx.map_with Number.take supply
-    |> List.map2 Cost.from_upkeep defends
+  let f (sup, t') k =
+    let cost = count k t |> Cost.to_upkeep k in
+    let sup', cost' = Number.take sup cost in
+    let n = Cost.from_upkeep k cost' in
+    sup', if n > 0 then add n k t' else t'
   in
-  List.map2 Expr.make ns defends
-  |> Ls.clean
+  List.fold_left f (supply, empty) defends
+  |> snd
 
 let sub n kind t =
-  Ls.sub (Expr.make n kind) t
-  |> Ls.clean
+  Map.update kind (function Some x -> Number.sub_opt x n | x -> x) t
 
-module Ops (Total : Pick.Num) (Num : Pick.Num) (Dice : Dice.S) = struct
+module PickOps (Total : Pick.Num) (Num : Pick.Num) (Dice : Dice.S) = struct
   module Num = Num
   module Total = Total
   type key = kind
@@ -294,7 +279,7 @@ end
 
 module Dist (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
-    include Ops(Pick.Float)(Pick.Float)(Dice)
+    include PickOps(Pick.Float)(Pick.Float)(Dice)
     let choose pairs =
       let probs = List.map (Pair.fst_to hit_chance) pairs in
       Dice.pick_w probs pairs
@@ -303,46 +288,45 @@ module Dist (Dice : Dice.S) = struct
   end)
 
   let fn power t =
-    List.map (fun expr -> Expr.(kind expr, power expr)) t
+    Ops.powers t
+    |> Map.bindings
     |> Pick.from power
-    |> List.map (fun (k, n) ->
-        let n' = truncate (n /. base_power k) in
-        Expr.make n' k)
+    |> List.map (fun (k, n) -> k, truncate (n /. base_power k))
+    |> make_ls
 
   let from = check_pick fn
 end
 
 module Fill (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
-    include Ops(Pick.Float)(Pick.Int)(Dice)
+    include PickOps(Pick.Float)(Pick.Int)(Dice)
     let roll (k, n) =
       let n' = Dice.roll n in
-      let pwr = Expr.(make n' k |> power) in
-      pwr, n'
+      to_power k n', n'
     let trim cap (k, n) =
       let power = base_power k in
       min n (if power > 0. then truncate (cap /. power) else n)
   end)
 
   let fn power t =
-    List.map (fun expr -> Expr.(kind expr, count expr)) t
+    Map.bindings t
     |> Pick.from power
-    |> List.map Expr.of_pair
+    |> make_ls
 
   let from = check_pick fn
 end
 
 module FillCount (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
-    include Ops(Pick.Int)(Pick.Int)(Dice)
+    include PickOps(Pick.Int)(Pick.Int)(Dice)
     let roll (k, n) = let n' = Dice.roll n in n', n'
     let trim cap (k, n) = min cap n
   end)
 
   let fn total t =
-    List.map (fun expr -> Expr.(kind expr, count expr)) t
+    Map.bindings t
     |> Pick.from total
-    |> List.map Expr.of_pair
+    |> make_ls
 
   let from total t =
     if total > count_all t then t else fn total t
@@ -353,7 +337,8 @@ module Report (Dice : Dice.S) = struct
     if x > 10 then 10 * Dice.round (0.1 *. float x) else x
 
   let from t =
-    List.map (Expr.map_count try_round) t
+    Map.map try_round t
+    |> report
 
   let sum_from t =
     try_round (count_all t), (kinds_of t)

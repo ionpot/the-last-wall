@@ -1,6 +1,14 @@
 let div a b =
   a / max b 1
 
+let maybe x = function
+  | Some a -> a
+  | None -> x
+
+let sub_opt a b =
+  let x = a - b in
+  if x > 0 then Some x else None
+
 let increase_by ratio x =
   truncate (Float.increase (float x) ratio)
 
