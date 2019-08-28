@@ -35,6 +35,9 @@ let manp2str mp =
 let sup2str sp =
   sprintf "%d sup" sp
 
+let work2str wp =
+  sprintf "%d wrp" wp
+
 let res2str res =
   Resource.([supp_of res, sup2str; manp_of res, manp2str])
   |> List.filter (fun (n, _) -> n > 0)

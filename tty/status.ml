@@ -52,10 +52,14 @@ module With (S : State.S) = struct
     print_enemies "enemies remaining"
 
   let res () =
-    let m = S.Units.return Units.workforce |> truncate in
+    let m = S.Units.return Units.power |> truncate in
     let s = S.Supply.get () in
-    Convert.([sup2str s; manp2str m] |> commas)
-    |> Tty.pairln "status"
+    let w = S.Units.return Units.workforce |> truncate in
+    Printf.sprintf "status: %s, %s (%s)"
+      (Convert.sup2str s)
+      (Convert.manp2str m)
+      (Convert.work2str w)
+    |> Tty.writeln
 
   let new_leader = function
     | [] -> ()
