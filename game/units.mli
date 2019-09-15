@@ -4,6 +4,16 @@ type sum_report = (Defs.count * kind list)
 
 val attacks : kind list
 
+module Attr : sig
+  val can_barrage : kind -> bool
+  val can_build : kind -> bool
+  val is_cavalry : kind -> bool
+  val is_holy : kind -> bool
+  val is_infantry : kind -> bool
+  val is_revivable : kind -> bool
+  val is_siege : kind -> bool
+end
+
 module Base : sig
   val abundance : kind -> float
   val chance : kind -> float
@@ -18,18 +28,12 @@ val empty : t
 val make : Defs.count -> kind -> t
 val cost : Defs.count -> kind -> t
 
-module Dr : sig
-  val cavalry : t -> Defs.power
-  val harpy : t -> Defs.power
-end
-
 val affordable : kind -> Defs.count -> t -> Defs.count
-val barrage_power : t -> Defs.power
 val count : kind -> t -> Defs.count
 val count_all : t -> Defs.count
-val count_cavalry : t -> Defs.count
-val count_holy : t -> Defs.count
-val count_infantry : t -> Defs.count
+val dr : t -> Defs.power
+val filter_count : (kind -> bool) -> t -> Defs.count
+val filter_power : (kind -> bool) -> t -> Defs.power
 val find : Defs.count -> kind -> t -> Defs.count
 val has : kind -> t -> bool
 val has_base_power : Defs.power -> t -> bool
@@ -39,15 +43,13 @@ val power_of : kind -> t -> Defs.power
 val promotable : kind -> t -> Defs.count
 val report : t -> report
 val upkeep : t -> Defs.supply
-val workforce : t -> Defs.power
 
 val add : Defs.count -> kind -> t -> t
 val combine : t -> t -> t
 val countered : t -> t -> t
-val defending : t -> t
+val discard : (kind -> bool) -> t -> t
+val filter : (kind -> bool) -> t -> t
 val reduce : t -> t -> t
-val revivable : t -> t
-val rm : kind -> t -> t
 val starve : Defs.supply -> t -> t
 val sub : Defs.count -> kind -> t -> t
 

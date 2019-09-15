@@ -3,13 +3,28 @@ type report = (kind * Defs.count) list
 type sum_report = (Defs.count * kind list)
 
 let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops]
-let barrage = [Men; Ranger]
-let cavalry = [Cavalry; Knight]
-let holy = [Dervish; Ranger; Templar]
-let infantry = [Men; Ranger; Templar; Dervish]
-let revive = infantry
 let starve_order = [Men; Dervish; Cavalry; Ranger; Templar; Ballista; Knight]
-let work = [Men; Dervish]
+
+module Attr = struct
+  let can_barrage = function
+    | Men | Ranger -> true
+    | _ -> false
+  let can_build = function
+    | Men | Dervish -> true
+    | _ -> false
+  let is_cavalry = function
+    | Cavalry | Knight -> true
+    | _ -> false
+  let is_holy = function
+    | Dervish | Ranger | Templar -> true
+    | _ -> false
+  let is_infantry = function
+    | Men | Dervish | Ranger | Templar -> true
+    | _ -> false
+  let is_revivable = is_infantry
+  let is_siege kind =
+    kind = Ballista
+end
 
 module Base = struct
   let abundance = function
@@ -67,6 +82,9 @@ module Base = struct
     | _ -> 1.
 end
 
+let to_dr kind n =
+  Defs.to_power n (Base.dr kind)
+
 let from_power kind p =
   Float.div p (Base.power kind)
   |> truncate
@@ -100,8 +118,11 @@ let promotion_cost = function
   | Templar -> make 1 Dervish
   | _ -> empty
 
-let filter_ls kinds t =
-  Map.filter (fun k _ -> List.mem k kinds) t
+let discard attr t =
+  Map.filter (fun k _ -> not (attr k)) t
+
+let filter attr t =
+  Map.filter (fun k _ -> attr k) t
 
 module Ops = struct
   let add t_a t_b =
@@ -145,6 +166,11 @@ module Ops = struct
     Map.fold (fun _ -> (+.)) t 0.
 end
 
+let affordable kind cap t =
+  let m = Ops.div t (promotion_cost kind) in
+  if Map.is_empty m then cap
+  else Ops.min m |> min cap
+
 let cost n kind =
   promotion_cost kind |> Ops.mul n
 
@@ -154,37 +180,12 @@ let count kind t =
 
 let count_all = Ops.sum
 
-let count_ls ls t =
-  filter_ls ls t |> count_all
+let dr t =
+  Map.mapi to_dr t
+  |> Ops.sumf
 
-let count_cavalry = count_ls cavalry
-let count_holy = count_ls holy
-let count_infantry = count_ls infantry
-
-let affordable kind cap t =
-  let m = Ops.div t (promotion_cost kind) in
-  if Map.is_empty m then cap
-  else Ops.min m |> min cap
-
-let promotable kind t =
-  let m = Ops.div t (promotion_cost kind) in
-  if Map.is_empty m then 0
-  else Ops.min m
-
-module Dr = struct
-  let to_power kind n =
-    Defs.to_power n (Base.dr kind)
-
-  let cavalry t =
-    filter_ls cavalry t
-    |> Map.mapi to_power
-    |> Ops.sumf
-
-  let harpy t =
-    count Harpy t
-    |> to_power Harpy
-    |> Float.floor_by 0.01
-end
+let filter_count attr t =
+  filter attr t |> count_all
 
 let find n kind t =
   let found = count kind t in
@@ -203,28 +204,24 @@ let kinds_of t =
 let power t =
   Ops.(powers t |> sumf)
 
+let filter_power attr t =
+  filter attr t |> power
+
 let power_of kind t =
   to_power kind (count kind t)
 
-let powers_of kinds t =
-  filter_ls kinds t
-  |> power
-
-let barrage_power t =
-  powers_of barrage t *. 0.05
+let promotable kind t =
+  let m = Ops.div t (promotion_cost kind) in
+  if Map.is_empty m then 0
+  else Ops.min m
 
 let report = Map.bindings
 
 let upkeep t =
   Map.mapi to_upkeep t |> count_all
 
-let workforce = powers_of work
-
 let add n kind t =
   Map.add kind (n + count kind t) t
-
-let defending t =
-  Map.remove Ballista t
 
 let combine = Ops.add
 
@@ -236,11 +233,6 @@ let heal kind =
 
 let reduce t t' =
   Ops.sub t' t
-
-let revivable t =
-  filter_ls revive t
-
-let rm = Map.remove
 
 let starve supply t =
   let f (sup, t') k =

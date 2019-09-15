@@ -7,14 +7,14 @@ module With (S : State.S) = struct
 
   module Missing = struct
     let stable () =
-      Number.sub
-        (S.Build.return Build.stable_cap)
-        (S.Units.return Units.count_cavalry)
+      Units.(filter_count Attr.is_cavalry)
+      |> S.Units.return
+      |> Number.sub (S.Build.return Build.stable_cap)
 
     let temple () =
-      Number.sub
-        (S.Build.return Build.temple_cap)
-        (S.Units.return Units.count_holy)
+      Units.(filter_count Attr.is_holy)
+      |> S.Units.return
+      |> Number.sub (S.Build.return Build.temple_cap)
   end
 
   let supply_limit kind cap =

@@ -46,7 +46,10 @@ end
 module BuildManp = struct
   type t = Defs.manpower
   module Apply (S : State.S) = struct
-    let avlb = S.Units.return Units.workforce |> truncate
+    let avlb =
+      Units.(filter_power Attr.can_build)
+      |> S.Units.return
+      |> truncate
     let value need =
       S.Build.map (Build.manp need avlb)
   end
