@@ -13,22 +13,37 @@ module Float = struct
   type t = float let zero = 0. let add = (+.) let sub = (-.)
 end
 
-module type Ops = sig
+module type OpsBase = sig
   module Cap : Num
   module Map : Map.S
   module Type : Num
+end
+
+module type Ops = sig
+  include OpsBase
   type step = Cap.t * Type.t
   val choose : Type.t Map.t -> Map.key
   val roll : Map.key -> Cap.t -> Type.t Map.t -> step
 end
 
-module With (S : Ops) = struct
+module type OpsAcc = sig
+  include OpsBase
+  type acc
+  type step = acc * Cap.t * Type.t
+  val choose : Type.t Map.t -> Map.key
+  val roll : acc -> Map.key -> Cap.t -> Type.t Map.t -> step
+end
+
+module Base (S : OpsBase) = struct
   let add key v output =
     let f = function
       | Some x -> Some (S.Type.add v x)
       | None -> Some v
     in
     S.Map.update key f output
+
+  let check cap input =
+    cap <= S.Cap.zero || S.Map.is_empty input
 
   let sub key v input =
     let f = function
@@ -37,12 +52,32 @@ module With (S : Ops) = struct
       | None -> None
     in
     S.Map.update key f input
+end
+
+module With (S : Ops) = struct
+  module Base = Base(S)
 
   let rec from cap input output =
-    if cap <= S.Cap.zero || S.Map.is_empty input
+    if Base.check cap input
     then output
     else
       let key = S.choose input in
       let cap', n = S.roll key cap input in
-      from (S.Cap.sub cap cap') (sub key n input) (add key n output)
+      from (S.Cap.sub cap cap')
+        (Base.sub key n input)
+        (Base.add key n output)
+end
+
+module WithAcc (S : OpsAcc) = struct
+  module Base = Base(S)
+
+  let rec from acc cap input output =
+    if Base.check cap input
+    then acc, output
+    else
+      let key = S.choose input in
+      let acc', cap', n = S.roll acc key cap input in
+      from acc' (S.Cap.sub cap cap')
+        (Base.sub key n input)
+        (Base.add key n output)
 end

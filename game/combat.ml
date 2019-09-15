@@ -30,7 +30,8 @@ end
 let fort_cap = 20.
 
 module Units (S : State.S) = struct
-  module Dist = Units.Dist(S.Dice)
+  module Dist = Units.Dist
+  module DistRoll = Dist.Roll(S.Dice)
   module Fill = Units.Fill(S.Dice)
   let enemies = S.Enemy.get ()
   let attack = Units.power enemies
@@ -40,10 +41,11 @@ module Units (S : State.S) = struct
   let power = Units.power units
   let fled () = Fill.from fort_cap defending
   let fought () = Float.sub power fort_cap
-  let lost dmg = Dist.from dmg units
+  let lost dmg = DistRoll.from dmg units |> Dist.outcome
   let enemy_loss dmg =
     Units.countered units enemies
-    |> Dist.from dmg
+    |> DistRoll.from dmg
+    |> Dist.outcome
 end
 
 module Make (S : State.S) = struct

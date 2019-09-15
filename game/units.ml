@@ -98,6 +98,13 @@ let from_upkeep kind sup =
 let to_upkeep kind n =
   n * Base.upkeep_cost kind
 
+let mod_power kind n =
+  Base.power kind |> mod_float n
+
+let heal kind n =
+  let pwr = Base.power kind in
+  Float.floor_by pwr n, mod_float n pwr
+
 module Map = Map.Make(struct
   type t = kind
   let compare = compare
@@ -228,9 +235,6 @@ let combine = Ops.add
 let countered units t =
   Map.filter (fun k _ -> has_base_power (Base.toughness k) units) t
 
-let heal kind =
-  Float.floor_by (Base.power kind)
-
 let reduce t t' =
   Ops.sub t' t
 
@@ -247,9 +251,6 @@ let starve supply t =
 let sub n kind t =
   Map.update kind (function Some x -> Number.sub_opt x n | x -> x) t
 
-let check_pick fn pwr t =
-  if pwr > power t then t else fn pwr t
-
 let pick_w t n =
   let key, _ = Map.min_binding t in
   let f k hit (k', n') =
@@ -257,28 +258,44 @@ let pick_w t n =
   in
   Map.fold f t (key, n) |> fst
 
-module Dist (Dice : Dice.S) = struct
-  module Pick = Pick.With(struct
-    module Cap = Pick.Float
-    module Map = Map
-    module Type = Cap
-    type step = Cap.t * Type.t
-    let choose input =
-      let probs = Map.mapi (fun k _ -> Base.hit_chance k) input in
-      Ops.sumf probs |> Dice.rollf |> pick_w probs
-    let roll kind cap input =
-      let cap = Map.find kind input |> min cap |> Dice.rollf in
-      let sub = if kind = Templar then heal kind cap else cap in
-      cap, sub
-  end)
+module Dist = struct
+  type healed = Defs.power
+  type result = healed * Defs.power Map.t
 
-  let fn power t =
-    let input = Ops.powers t in
-    let output = Map.map (fun _ -> 0.) t in
-    Pick.from power input output
-    |> Map.mapi from_power
+  let empty_acc = 0.
+  let absorbed (_, m) = Map.mapi mod_power m |> Ops.sumf
+  let healed = fst
+  let outcome (_, m) = Map.mapi from_power m
 
-  let from = check_pick fn
+  let heal kind n acc =
+    let n', healed = heal kind n in
+    acc +. healed, n'
+
+  module Roll (Dice : Dice.S) = struct
+    module Pick = Pick.WithAcc(struct
+      module Cap = Pick.Float
+      module Map = Map
+      module Type = Cap
+      type acc = healed
+      type step = acc * Cap.t * Type.t
+      let choose input =
+        let probs = Map.mapi (fun k _ -> Base.hit_chance k) input in
+        Ops.sumf probs |> Dice.rollf |> pick_w probs
+      let roll acc kind cap input =
+        let cap = Map.find kind input |> min cap |> Dice.rollf in
+        let acc', sub =
+          if kind = Templar
+          then heal kind cap acc
+          else acc, cap
+        in acc', cap, sub
+    end)
+
+    let from power t =
+      let acc = empty_acc in
+      let input = Ops.powers t in
+      let output = Map.map (fun _ -> 0.) t in
+      Pick.from acc power input output
+  end
 end
 
 let random_key roll t =
@@ -301,10 +318,9 @@ module Fill (Dice : Dice.S) = struct
       to_power kind n, n
   end)
 
-  let fn power t =
-    Pick.from power t empty
-
-  let from = check_pick fn
+  let from pwr t =
+    if pwr > power t then t
+    else Pick.from pwr t empty
 end
 
 module FillCount (Dice : Dice.S) = struct
