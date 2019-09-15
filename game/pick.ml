@@ -14,50 +14,35 @@ module Float = struct
 end
 
 module type Ops = sig
-  module Num : Num
-  module Total : Num
-  type key
-  type pair = key * Num.t
-  val choose : pair list -> pair
-  val roll : pair -> Total.t * Num.t
-  val trim : Total.t -> pair -> Num.t
+  module Cap : Num
+  module Map : Map.S
+  module Type : Num
+  type step = Cap.t * Type.t
+  val choose : Type.t Map.t -> Map.key
+  val roll : Map.key -> Cap.t -> Type.t Map.t -> step
 end
 
 module With (S : Ops) = struct
-  let zero = S.Num.zero
-
-  let add = Pair.eq_map S.Num.add
-  let sub = Pair.eq_map (Fn.flip S.Num.sub)
-
-  let clean = List.filter (fun (_, x) -> x > zero)
-
-  let picked pair pairs output =
-    List.map (sub pair) pairs,
-    List.map (add pair) output
-
-  let pick cap pairs output =
-    let pair = S.choose pairs in
-    let key = fst pair in
-    let pwr, num = S.roll pair in
-    let pairs', output' =
-      if num > zero
-      then picked (key, num) pairs output
-      else pairs, output
+  let add key v output =
+    let f = function
+      | Some x -> Some (S.Type.add v x)
+      | None -> Some v
     in
-    S.Total.sub cap pwr, pairs', output'
+    S.Map.update key f output
 
-  let trim pairs cap =
-    pairs
-    |> List.map (fun pair -> fst pair, S.trim cap pair)
-    |> clean
+  let sub key v input =
+    let f = function
+      | Some x ->
+          if x > v then Some (S.Type.sub x v) else None
+      | None -> None
+    in
+    S.Map.update key f input
 
-  let rec start (cap, pairs, output) =
-    match trim pairs cap with
-    | [] -> output
-    | pairs' -> start (pick cap pairs' output)
-
-  let from cap pairs =
-    let output = List.map (Pair.snd_set zero) pairs in
-    start (cap, pairs, output)
-    |> clean
+  let rec from cap input output =
+    if cap <= S.Cap.zero || S.Map.is_empty input
+    then output
+    else
+      let key = S.choose input in
+      let cap', n = S.roll key cap input in
+      from (S.Cap.sub cap cap') (sub key n input) (add key n output)
 end

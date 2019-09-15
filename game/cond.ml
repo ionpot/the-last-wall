@@ -1,5 +1,6 @@
 module Barraged = struct
   type t = Defs.count
+  let coefficient = 0.05
   module Apply (S : State.S) = struct
     let value n = S.Enemy.map Units.(sub n Orc)
   end
@@ -7,7 +8,11 @@ module Barraged = struct
     let value = S.Barraging.get ()
   end
   module Make (S : State.S) = struct
-    let n = S.Units.return Units.barrage_power |> truncate
+    let n =
+      Units.(filter_power Attr.can_barrage)
+      |> S.Units.return
+      |> ( *. ) coefficient
+      |> truncate
     let value = S.Enemy.return Units.(find n Orc)
   end
 end
@@ -29,7 +34,7 @@ module Disease = struct
   let min_count = 50
   let casualty = 0.1
   let penalty = 0.2
-  let susceptible = Units.(rm Ballista)
+  let susceptible = Units.(discard Attr.is_siege)
   module Apply (S : State.S) = struct
     let value (units, died) =
       S.Disease.set penalty;
@@ -80,7 +85,7 @@ module Revive = struct
     module Fill = Units.Fill(S.Dice)
     let pwr = S.Units.return Units.(power_of Dervish)
     let value =
-      Units.revivable
+      Units.(filter Attr.is_revivable)
       |> S.Casualty.return
       |> Fill.from pwr
   end
