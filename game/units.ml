@@ -49,6 +49,10 @@ let toughness = function
   | Cyclops -> 2.
   | _ -> 1.
 
+let from_power kind p =
+  Float.div p (base_power kind)
+  |> truncate
+
 let to_power kind n =
   Defs.to_power n (base_power kind)
 
@@ -230,6 +234,9 @@ let combine = Ops.add
 let countered units t =
   Map.filter (fun k _ -> has_base_power (toughness k) units) t
 
+let heal kind =
+  Float.floor_by (base_power kind)
+
 let reduce t t' =
   Ops.sub t' t
 
@@ -251,79 +258,81 @@ let starve supply t =
 let sub n kind t =
   Map.update kind (function Some x -> Number.sub_opt x n | x -> x) t
 
-module PickOps (Total : Pick.Num) (Num : Pick.Num) (Dice : Dice.S) = struct
-  module Num = Num
-  module Total = Total
-  type key = kind
-  type pair = key * Num.t
-  let choose = Dice.pick
-end
-
 let check_pick fn pwr t =
   if pwr > power t then t else fn pwr t
 
-module Damage = struct
-  let accept n = n, n
-  let heal pwr n = n, Float.floor_by pwr n
-  let handle kind =
-    if kind = Templar
-    then heal (base_power kind)
-    else accept
-end
+let pick_w t n =
+  let key, _ = Map.min_binding t in
+  let f k hit (k', n') =
+    if n' > 0. then k, n' -. hit else k', n'
+  in
+  Map.fold f t (key, n) |> fst
 
 module Dist (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
-    include PickOps(Pick.Float)(Pick.Float)(Dice)
-    let choose pairs =
-      let probs = List.map (Pair.fst_to hit_chance) pairs in
-      Dice.pick_w probs pairs
-    let roll (k, n) = Dice.rollf n |> Damage.handle k
-    let trim cap (k, n) = min cap n
+    module Cap = Pick.Float
+    module Map = Map
+    module Type = Cap
+    type step = Cap.t * Type.t
+    let choose input =
+      let probs = Map.mapi (fun k _ -> hit_chance k) input in
+      Ops.sumf probs |> Dice.rollf |> pick_w probs
+    let roll kind cap input =
+      let cap = Map.find kind input |> min cap |> Dice.rollf in
+      let sub = if kind = Templar then heal kind cap else cap in
+      cap, sub
   end)
 
   let fn power t =
-    Ops.powers t
-    |> Map.bindings
-    |> Pick.from power
-    |> List.map (fun (k, n) -> k, truncate (n /. base_power k))
-    |> make_ls
+    let input = Ops.powers t in
+    let output = Map.map (fun _ -> 0.) t in
+    Pick.from power input output
+    |> Map.mapi from_power
 
   let from = check_pick fn
 end
 
+let random_key roll t =
+  let n = Map.cardinal t |> roll in
+  let key, _ = Map.choose t in
+  let f k _ (k', n') =
+    if n' > 0 then k, pred n' else k', n'
+  in
+  Map.fold f t (key, n) |> fst
+
 module Fill (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
-    include PickOps(Pick.Float)(Pick.Int)(Dice)
-    let roll (k, n) =
-      let n' = Dice.roll n in
-      to_power k n', n'
-    let trim cap (k, n) =
-      let power = base_power k in
-      min n (if power > 0. then truncate (cap /. power) else n)
+    module Cap = Pick.Float
+    module Map = Map
+    module Type = Pick.Int
+    type step = Cap.t * Type.t
+    let choose = random_key Dice.roll
+    let roll kind cap t =
+      let n = Map.find kind t |> min (from_power kind cap) |> Dice.roll in
+      to_power kind n, n
   end)
 
   let fn power t =
-    Map.bindings t
-    |> Pick.from power
-    |> make_ls
+    Pick.from power t empty
 
   let from = check_pick fn
 end
 
 module FillCount (Dice : Dice.S) = struct
   module Pick = Pick.With(struct
-    include PickOps(Pick.Int)(Pick.Int)(Dice)
-    let roll (k, n) = let n' = Dice.roll n in n', n'
-    let trim cap (k, n) = min cap n
+    module Cap = Pick.Int
+    module Map = Map
+    module Type = Cap
+    type step = Cap.t * Type.t
+    let choose = random_key Dice.roll
+    let roll kind cap t =
+      let n = Map.find kind t |> min cap |> Dice.roll in
+      n, n
   end)
 
-  let fn total t =
-    Map.bindings t
-    |> Pick.from total
-    |> make_ls
-
   let from total t =
-    if total > count_all t then t else fn total t
+    if total > count_all t then t
+    else Pick.from total t empty
 end
 
 module Report (Dice : Dice.S) = struct
