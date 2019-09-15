@@ -68,9 +68,6 @@ let empty : t = Map.empty
 let make n kind =
   Map.singleton kind n
 
-let make_ls ls =
-  List.fold_left (fun t (k, n) -> Map.add k n t) empty ls
-
 let filter_ls kinds t =
   Map.filter (fun k _ -> List.mem k kinds) t
 
