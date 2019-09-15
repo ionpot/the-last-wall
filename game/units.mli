@@ -53,8 +53,14 @@ val reduce : t -> t -> t
 val starve : Defs.supply -> t -> t
 val sub : Defs.count -> kind -> t -> t
 
-module Dist : Dice.S -> sig
-  val from : Defs.power -> t -> t
+module Dist : sig
+  type result
+  val absorbed : result -> Defs.power
+  val healed : result -> Defs.power
+  val outcome : result -> t
+  module Roll : Dice.S -> sig
+    val from : Defs.power -> t -> result
+  end
 end
 
 module Fill : Dice.S -> sig
