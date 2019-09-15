@@ -34,7 +34,7 @@ module With (S : State.S) = struct
 
   let sub_cost kind n =
     S.Supply.sub (Base.supply_cost kind * n);
-    S.Units.map Units.(Cost.from n kind |> reduce)
+    S.Units.map Units.(cost n kind |> reduce)
 
   let promote kind n =
     sub_cost kind n;

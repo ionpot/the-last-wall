@@ -74,6 +74,12 @@ let from_power kind p =
 let to_power kind n =
   Defs.to_power n (Base.power kind)
 
+let from_upkeep kind sup =
+  Number.div sup (Base.upkeep_cost kind)
+
+let to_upkeep kind n =
+  n * Base.upkeep_cost kind
+
 module Map = Map.Make(struct
   type t = kind
   let compare = compare
@@ -85,6 +91,14 @@ let empty : t = Map.empty
 
 let make n kind =
   Map.singleton kind n
+
+let promotion_cost = function
+  | Ballista -> make 2 Men
+  | Cavalry -> make 1 Men
+  | Knight -> make 1 Cavalry
+  | Ranger
+  | Templar -> make 1 Dervish
+  | _ -> empty
 
 let filter_ls kinds t =
   Map.filter (fun k _ -> List.mem k kinds) t
@@ -131,24 +145,8 @@ module Ops = struct
     Map.fold (fun _ -> (+.)) t 0.
 end
 
-module Cost = struct
-  let of_kind = function
-    | Ballista -> make 2 Men
-    | Cavalry -> make 1 Men
-    | Knight -> make 1 Cavalry
-    | Ranger
-    | Templar -> make 1 Dervish
-    | _ -> empty
-
-  let from n kind =
-    of_kind kind |> Ops.mul n
-
-  let from_upkeep kind sup =
-    Number.div sup (Base.upkeep_cost kind)
-
-  let to_upkeep kind n =
-    n * Base.upkeep_cost kind
-end
+let cost n kind =
+  promotion_cost kind |> Ops.mul n
 
 let count kind t =
   try Map.find kind t with
@@ -164,12 +162,12 @@ let count_holy = count_ls holy
 let count_infantry = count_ls infantry
 
 let affordable kind cap t =
-  let m = Ops.div t (Cost.of_kind kind) in
+  let m = Ops.div t (promotion_cost kind) in
   if Map.is_empty m then cap
   else Ops.min m |> min cap
 
 let promotable kind t =
-  let m = Ops.div t (Cost.of_kind kind) in
+  let m = Ops.div t (promotion_cost kind) in
   if Map.is_empty m then 0
   else Ops.min m
 
@@ -218,7 +216,7 @@ let barrage_power t =
 let report = Map.bindings
 
 let upkeep t =
-  Map.mapi Cost.to_upkeep t |> count_all
+  Map.mapi to_upkeep t |> count_all
 
 let workforce = powers_of work
 
@@ -246,9 +244,9 @@ let rm = Map.remove
 
 let starve supply t =
   let f (sup, t') k =
-    let cost = count k t |> Cost.to_upkeep k in
+    let cost = count k t |> to_upkeep k in
     let sup', cost' = Number.take sup cost in
-    let n = Cost.from_upkeep k cost' in
+    let n = from_upkeep k cost' in
     sup', if n > 0 then add n k t' else t'
   in
   List.fold_left f (supply, empty) starve_order

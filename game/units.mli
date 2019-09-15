@@ -16,10 +16,7 @@ type t
 val empty : t
 
 val make : Defs.count -> kind -> t
-
-module Cost : sig
-  val from : Defs.count -> kind -> t
-end
+val cost : Defs.count -> kind -> t
 
 module Dr : sig
   val cavalry : t -> Defs.power
