@@ -11,50 +11,68 @@ let revive = infantry
 let starve_order = [Men; Dervish; Cavalry; Ranger; Templar; Ballista; Knight]
 let work = [Men; Dervish]
 
-let abundance_of = function
-  | Cyclops -> 0.05
-  | Demon -> 0.3
-  | Harpy -> 0.15
-  | Orc -> 0.6
-  | Skeleton -> 1.25
-  | _ -> 0.
+module Base = struct
+  let abundance = function
+    | Cyclops -> 0.05
+    | Demon -> 0.3
+    | Harpy -> 0.15
+    | Orc -> 0.6
+    | Skeleton -> 1.25
+    | _ -> 0.
 
-let chance_of = function
-  | Cyclops -> -.0.8
-  | Demon -> 0.4
-  | Orc -> 0.6
-  | Skeleton -> 0.8
-  | _ -> 0.
+  let chance = function
+    | Cyclops -> -.0.8
+    | Demon -> 0.4
+    | Orc -> 0.6
+    | Skeleton -> 0.8
+    | _ -> 0.
 
-let chance_growth_of = function
-  | Cyclops -> 0.1
-  | _ -> 0.05
+  let chance_growth = function
+    | Cyclops -> 0.1
+    | _ -> 0.05
 
-let base_power = function
-  | Cyclops -> 5.
-  | Harpy | Knight -> 4.
-  | Ballista | Cavalry | Demon | Ranger | Templar -> 2.
-  | Dervish | Men | Orc -> 1.
-  | Skeleton -> 0.5
+  let dr = function
+    | Knight -> 0.004
+    | Cavalry | Harpy -> 0.002
+    | _ -> 0.
 
-let hit_chance = function
-  | Ballista -> 0.1
-  | Dervish -> 0.3
-  | Knight -> 0.8
-  | Ranger -> 0.2
-  | Templar -> 0.5
-  | _ -> 1.
+  let hit_chance = function
+    | Ballista -> 0.1
+    | Dervish -> 0.3
+    | Knight -> 0.8
+    | Ranger -> 0.2
+    | Templar -> 0.5
+    | _ -> 1.
 
-let toughness = function
-  | Cyclops -> 2.
-  | _ -> 1.
+  let power = function
+    | Cyclops -> 5.
+    | Harpy | Knight -> 4.
+    | Ballista | Cavalry | Demon | Ranger | Templar -> 2.
+    | Dervish | Men | Orc -> 1.
+    | Skeleton -> 0.5
+
+  let supply_cost = function
+    | Templar -> 2
+    | Knight -> 10
+    | Ballista -> 12
+    | _ -> 1
+
+  let upkeep_cost = function
+    | Knight -> 3
+    | Ballista -> 2
+    | _ -> 1
+
+  let toughness = function
+    | Cyclops -> 2.
+    | _ -> 1.
+end
 
 let from_power kind p =
-  Float.div p (base_power kind)
+  Float.div p (Base.power kind)
   |> truncate
 
 let to_power kind n =
-  Defs.to_power n (base_power kind)
+  Defs.to_power n (Base.power kind)
 
 module Map = Map.Make(struct
   type t = kind
@@ -125,22 +143,11 @@ module Cost = struct
   let from n kind =
     of_kind kind |> Ops.mul n
 
-  let supply = function
-    | Templar -> 2
-    | Knight -> 10
-    | Ballista -> 12
-    | _ -> 1
-
-  let upkeep = function
-    | Knight -> 3
-    | Ballista -> 2
-    | _ -> 1
-
   let from_upkeep kind sup =
-    Number.div sup (upkeep kind)
+    Number.div sup (Base.upkeep_cost kind)
 
   let to_upkeep kind n =
-    n * upkeep kind
+    n * Base.upkeep_cost kind
 end
 
 let count kind t =
@@ -167,13 +174,8 @@ let promotable kind t =
   else Ops.min m
 
 module Dr = struct
-  let of_kind = function
-    | Knight -> 0.004
-    | Cavalry | Harpy -> 0.002
-    | _ -> 0.
-
   let to_power kind n =
-    Defs.to_power n (of_kind kind)
+    Defs.to_power n (Base.dr kind)
 
   let cavalry t =
     filter_ls cavalry t
@@ -194,7 +196,7 @@ let has kind t =
   count kind t > 0
 
 let has_base_power p t =
-  Map.exists (fun k _ -> base_power k >= p) t
+  Map.exists (fun k _ -> Base.power k >= p) t
 
 let kinds_of t =
   Map.bindings t
@@ -229,10 +231,10 @@ let defending t =
 let combine = Ops.add
 
 let countered units t =
-  Map.filter (fun k _ -> has_base_power (toughness k) units) t
+  Map.filter (fun k _ -> has_base_power (Base.toughness k) units) t
 
 let heal kind =
-  Float.floor_by (base_power kind)
+  Float.floor_by (Base.power kind)
 
 let reduce t t' =
   Ops.sub t' t
@@ -272,7 +274,7 @@ module Dist (Dice : Dice.S) = struct
     module Type = Cap
     type step = Cap.t * Type.t
     let choose input =
-      let probs = Map.mapi (fun k _ -> hit_chance k) input in
+      let probs = Map.mapi (fun k _ -> Base.hit_chance k) input in
       Ops.sumf probs |> Dice.rollf |> pick_w probs
     let roll kind cap input =
       let cap = Map.find kind input |> min cap |> Dice.rollf in

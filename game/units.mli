@@ -4,9 +4,12 @@ type sum_report = (Defs.count * kind list)
 
 val attacks : kind list
 
-val abundance_of : kind -> float
-val chance_of : kind -> float
-val chance_growth_of : kind -> float
+module Base : sig
+  val abundance : kind -> float
+  val chance : kind -> float
+  val chance_growth : kind -> float
+  val supply_cost : kind -> Defs.supply
+end
 
 type t
 
@@ -16,7 +19,6 @@ val make : Defs.count -> kind -> t
 
 module Cost : sig
   val from : Defs.count -> kind -> t
-  val supply : kind -> Defs.supply
 end
 
 module Dr : sig

@@ -3,12 +3,13 @@ type report =
   | Vague of Units.sum_report
 
 module Make (S : State.S) = struct
+  module Base = Units.Base
   module Report = Units.Report(S.Dice)
 
   let can_regular turn kind =
-    let growth = Units.chance_growth_of kind in
+    let growth = Base.chance_growth kind in
     let growth' = growth *. float (Number.sub turn 1) in
-    let chance = Units.chance_of kind in
+    let chance = Base.chance kind in
     S.Dice.chance (chance +. growth')
 
   let can_spawn turn kind =
@@ -17,7 +18,7 @@ module Make (S : State.S) = struct
     else can_regular turn kind
 
   let roll_count turn kind =
-    let abundance = Units.abundance_of kind in
+    let abundance = Base.abundance kind in
     let minimum = 10. *. abundance in
     let amount =
       let x = 1.2 *. float (turn + 5) in

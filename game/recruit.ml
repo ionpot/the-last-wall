@@ -1,4 +1,6 @@
 module With (S : State.S) = struct
+  module Base = Units.Base
+
   let dervish_range () =
     if S.Build.check Build.(ready Guesthouse)
     then 3, 12 else 2, 8
@@ -16,7 +18,7 @@ module With (S : State.S) = struct
   end
 
   let supply_limit kind cap =
-    let cost = Units.Cost.supply kind in
+    let cost = Base.supply_cost kind in
     let supp = S.Supply.get () in
     min cap (Number.div supp cost)
 
@@ -31,7 +33,7 @@ module With (S : State.S) = struct
     exclude () |> Units.promotable kind |> supply_limit kind
 
   let sub_cost kind n =
-    S.Supply.sub (Units.Cost.supply kind * n);
+    S.Supply.sub (Base.supply_cost kind * n);
     S.Units.map Units.(Cost.from n kind |> reduce)
 
   let promote kind n =
