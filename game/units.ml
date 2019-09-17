@@ -235,6 +235,10 @@ let combine = Ops.add
 let countered units t =
   Map.filter (fun k _ -> has_base_power (Base.toughness k) units) t
 
+let only kind t =
+  let n = count kind t in
+  if n > 0 then Map.add kind n empty else empty
+
 let reduce t t' =
   Ops.sub t' t
 

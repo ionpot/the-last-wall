@@ -32,7 +32,8 @@ module From (S : State.S) = struct
     if ldr_alive then S.Barraging.either barrage_dr 0. else 0.
 
   let harpy_dr =
-    S.Enemy.return Units.(power_of Harpy)
+    S.Enemy.return Units.(only Harpy)
+    |> Units.dr
     |> Float.floor_by 0.01
 
   let value =
