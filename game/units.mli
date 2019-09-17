@@ -41,11 +41,11 @@ val power : t -> Defs.power
 val power_of : kind -> t -> Defs.power
 val promotable : kind -> t -> Defs.count
 val report : t -> report
+val untouchable : t -> t -> kind list
 val upkeep : t -> Defs.supply
 
 val add : Defs.count -> kind -> t -> t
 val combine : t -> t -> t
-val countered : t -> t -> t
 val discard : (kind -> bool) -> t -> t
 val filter : (kind -> bool) -> t -> t
 val only : kind -> t -> t
@@ -58,6 +58,7 @@ module Dist : sig
   val empty : result
   val absorbed : result -> Defs.power
   val healed : result -> Defs.power
+  val move_back : kind -> result -> result
   val outcome : result -> t
   val remaining : result -> t
   module Roll : Dice.S -> sig

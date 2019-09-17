@@ -30,9 +30,15 @@ end
 
 let fort_cap = 20.
 
+let move_back kinds dist =
+  List.fold_left (fun d k -> Dist.move_back k d) dist kinds
+
 module Units (S : State.S) = struct
   module DistRoll = Dist.Roll(S.Dice)
   module Fill = Units.Fill(S.Dice)
+  let dist dmg a b =
+    DistRoll.from dmg a
+    |> move_back (Units.untouchable b a)
   let enemies = S.Enemy.get ()
   let attack = Units.power enemies
   let harpies = Units.(count Harpy) enemies
@@ -43,10 +49,6 @@ module Units (S : State.S) = struct
     let fled = Fill.from fort_cap defending in
     fled, Units.reduce fled units
   let fought () = Float.sub power fort_cap
-  let lost dmg = DistRoll.from dmg units
-  let enemy_loss dmg =
-    Units.countered units enemies
-    |> DistRoll.from dmg
 end
 
 module Make (S : State.S) = struct
@@ -69,8 +71,13 @@ module Make (S : State.S) = struct
     let retreat = damage > Units.power && have_fort
     let fled = if retreat then Some (Units.fled ()) else None
     let power = if retreat then Units.fought () else Units.power
-    let units = if retreat then Dist.empty else Units.lost damage
-    let enemies = Units.enemy_loss (Float.increase power defense)
+    let units = if retreat then Dist.empty else Units.(dist damage units enemies)
+    let enemies =
+      let dmg = Float.increase power defense in
+      let dist = Units.(dist dmg enemies) in
+      match fled with
+      | Some (_, remaining) -> dist remaining
+      | None -> dist Units.units
     let ldr_died =
       if retreat then false
       else S.Leader.check LdrRoll.death

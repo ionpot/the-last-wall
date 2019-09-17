@@ -223,6 +223,10 @@ let promotable kind t =
 
 let report = Map.bindings
 
+let untouchable t_atk t_dfn =
+  let pwr = max_base_power t_atk in
+  Map.fold (fun k _ ls -> if can_hit k pwr then ls else k :: ls) t_dfn []
+
 let upkeep t =
   Map.mapi to_upkeep t |> count_all
 
@@ -230,10 +234,6 @@ let add n kind t =
   Map.add kind (n + count kind t) t
 
 let combine = Ops.add
-
-let countered units t =
-  let pwr = max_base_power units in
-  Map.filter (fun k _ -> can_hit k pwr) t
 
 let only kind t =
   let n = count kind t in
@@ -262,6 +262,10 @@ let pick_w t n =
   in
   Map.fold f t (key, n) |> fst
 
+let move kind t = function
+  | Some x -> Some (try Map.find kind t +. x with _ -> x)
+  | None -> try Some (Map.find kind t) with _ -> None
+
 module Dist = struct
   type healed = Defs.power
   type result = healed * Defs.power Map.t * Defs.power Map.t
@@ -270,6 +274,7 @@ module Dist = struct
   let empty : result = empty_acc, Map.empty, Map.empty
   let absorbed (_, _, m) = Map.mapi mod_power m |> Ops.sumf
   let healed (x, _, _) = x
+  let move_back k (h, i, o) = h, Map.update k (move k o) i, Map.remove k o
   let outcome (_, _, m) = Map.mapi from_power m
   let remaining (_, m, _) = Map.mapi from_power m
 
