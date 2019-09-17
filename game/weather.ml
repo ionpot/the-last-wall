@@ -3,6 +3,7 @@ type t =
   | Breeze
   | Clear
   | Cloudy
+  | Heat
   | Wind
   | Rain of degree
   | Snow of degree
@@ -17,7 +18,7 @@ let possible =
   let open Month in
   function
     | Mar | Apr | May -> [Breeze; Clear; Cloudy; Rain Light; Rain Heavy]
-    | Jun | Jul | Aug -> [Breeze; Clear; Clear; Cloudy; Rain Light]
+    | Jun | Jul | Aug -> [Breeze; Clear; Clear; Cloudy; Heat; Rain Light]
     | Sep | Oct | Nov -> [Cloudy; Rain Light; Rain Heavy; Wind]
     | Dec | Jan | Feb -> [Cloudy; Rain Heavy; Snow Light; Snow Heavy]
 

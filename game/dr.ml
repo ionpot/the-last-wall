@@ -1,6 +1,7 @@
 let barrage_dr = 0.05
 let cav_dr_penalty = 0.05
 let cav_men_ratio = 0.4
+let heat_penalty = 0.02
 let mausoleum_dr = 0.01
 
 let to_power = Defs.to_power
@@ -34,6 +35,11 @@ module From (S : State.S) = struct
   let enemy_dr =
     S.Enemy.return Units.dr
 
+  let heat_dr =
+    if S.Weather.is Weather.Heat
+    then heat_penalty else 0.
+
   let value =
-      cav_dr +. ldr_dr +. mausoleum_dr -. barrage_dr -. enemy_dr
+      cav_dr +. ldr_dr +. mausoleum_dr
+      -. barrage_dr -. enemy_dr -. heat_dr
 end

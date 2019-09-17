@@ -3,6 +3,7 @@ type t =
   | Breeze
   | Clear
   | Cloudy
+  | Heat
   | Wind
   | Rain of degree
   | Snow of degree
