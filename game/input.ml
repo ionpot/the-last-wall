@@ -203,12 +203,9 @@ module Volunteers = struct
   type t = Defs.count
   let kind = Units.Men
   module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
+    let value n = S.Units.map (Units.add n kind)
   end
   module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let cap = S.Dice.between 3 9
-    let value = Recruit.supply_limit kind cap
+    let value = S.Dice.between 3 9
   end
 end
