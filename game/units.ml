@@ -1,13 +1,13 @@
-type kind = Ballista | Cavalry | Cyclops | Demon | Dervish | Harpy | Knight | Men | Orc | Ranger | Skeleton | Templar
+type kind = Ballista | Cavalry | Cyclops | Demon | Dervish | Harpy | Knight | Men | Merc | Orc | Ranger | Skeleton | Templar
 type report = (kind * Defs.count) list
 type sum_report = (Defs.count * kind list)
 
 let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops]
-let starve_order = [Men; Dervish; Cavalry; Ranger; Templar; Ballista; Knight]
+let starve_order = [Men; Dervish; Cavalry; Ranger; Templar; Merc; Ballista; Knight]
 
 module Attr = struct
   let can_barrage = function
-    | Men | Ranger -> true
+    | Men | Merc | Ranger -> true
     | _ -> false
   let can_build = function
     | Men | Dervish -> true
@@ -19,7 +19,7 @@ module Attr = struct
     | Dervish | Ranger | Templar -> true
     | _ -> false
   let is_infantry = function
-    | Men | Dervish | Ranger | Templar -> true
+    | Men | Merc | Dervish | Ranger | Templar -> true
     | _ -> false
   let is_revivable = is_infantry
   let is_siege kind =
@@ -62,11 +62,12 @@ module Base = struct
   let power = function
     | Cyclops -> 5.
     | Harpy | Knight -> 4.
-    | Ballista | Cavalry | Demon | Ranger | Templar -> 2.
+    | Ballista | Cavalry | Demon | Merc | Ranger | Templar -> 2.
     | Dervish | Men | Orc -> 1.
     | Skeleton -> 0.5
 
   let supply_cost = function
+    | Merc
     | Templar -> 2
     | Knight -> 10
     | Ballista -> 12

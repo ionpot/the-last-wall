@@ -117,7 +117,7 @@ end
 
 module Mercs = struct
   type t = Defs.count
-  let kind = Units.Men
+  let kind = Units.Merc
   module Apply (S : State.S) = struct
     module Recruit = Recruit.With(S)
     let value = Recruit.promote kind
