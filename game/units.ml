@@ -243,6 +243,9 @@ let only kind t =
 let reduce t t' =
   Ops.sub t' t
 
+let split kind t =
+  Map.partition (fun k _ -> k = kind) t
+
 let starve supply t =
   let f (sup, t') k =
     let cost = count k t |> to_upkeep k in

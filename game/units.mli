@@ -50,6 +50,7 @@ val discard : (kind -> bool) -> t -> t
 val filter : (kind -> bool) -> t -> t
 val only : kind -> t -> t
 val reduce : t -> t -> t
+val split : kind -> t -> t * t
 val starve : Defs.supply -> t -> t
 val sub : Defs.count -> kind -> t -> t
 

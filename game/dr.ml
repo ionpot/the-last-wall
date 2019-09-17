@@ -33,7 +33,9 @@ module From (S : State.S) = struct
     if ldr_alive then S.Barraging.either barrage_dr 0. else 0.
 
   let enemy_dr =
-    S.Enemy.return Units.dr
+    let harpy, rest = S.Enemy.return Units.(split Harpy) in
+    Units.dr rest +.
+    if S.Weather.is Weather.Wind then 0. else Units.dr harpy
 
   let heat_dr =
     if S.Weather.is Weather.Heat
