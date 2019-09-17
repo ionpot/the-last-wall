@@ -200,9 +200,6 @@ let find n kind t =
 let has kind t =
   count kind t > 0
 
-let has_base_power p t =
-  Map.exists (fun k _ -> Base.power k >= p) t
-
 let kinds_of t =
   Map.bindings t
   |> List.map fst
