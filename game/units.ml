@@ -76,11 +76,10 @@ module Base = struct
     | Knight -> 3
     | Ballista -> 2
     | _ -> 1
-
-  let toughness = function
-    | Cyclops -> 2.
-    | _ -> 1.
 end
+
+let can_hit kind pwr =
+  Base.power kind < pwr +. 4.
 
 let to_dr kind n =
   Defs.to_power n (Base.dr kind)
@@ -214,6 +213,9 @@ let power t =
 let filter_power attr t =
   filter attr t |> power
 
+let max_base_power t =
+  Map.fold (fun k _ acc -> Base.power k |> max acc) t 0.
+
 let power_of kind t =
   to_power kind (count kind t)
 
@@ -233,7 +235,8 @@ let add n kind t =
 let combine = Ops.add
 
 let countered units t =
-  Map.filter (fun k _ -> has_base_power (Base.toughness k) units) t
+  let pwr = max_base_power units in
+  Map.filter (fun k _ -> can_hit k pwr) t
 
 let only kind t =
   let n = count kind t in
