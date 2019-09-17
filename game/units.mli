@@ -56,9 +56,11 @@ val sub : Defs.count -> kind -> t -> t
 
 module Dist : sig
   type result
+  val empty : result
   val absorbed : result -> Defs.power
   val healed : result -> Defs.power
   val outcome : result -> t
+  val remaining : result -> t
   module Roll : Dice.S -> sig
     val from : Defs.power -> t -> result
   end

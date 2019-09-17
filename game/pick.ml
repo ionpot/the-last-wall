@@ -74,7 +74,7 @@ module WithAcc (S : OpsAcc) = struct
 
   let rec from acc cap input output =
     if Base.check cap input
-    then acc, output
+    then acc, input, output
     else
       let key = S.choose input in
       let acc', cap', n = S.roll acc key cap input in

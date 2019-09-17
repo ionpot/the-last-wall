@@ -1,36 +1,36 @@
+module Dist = Units.Dist
+
 module type Outcome = sig
   val attack : Defs.power
   val cav_too_many : bool
   val damage : Defs.power
   val defense : Defs.power
-  val enemies : Units.t
+  val enemies : Dist.result
+  val fled : (Units.t * Units.t) option
   val ldr_died : bool
-  val retreat : bool
-  val units : Units.t
+  val units : Dist.result
 end
 
 module Apply (S : State.S) = struct
   let value (module O : Outcome) =
-    let remaining = S.Units.return (Units.reduce O.units) in
-    if O.retreat then begin
-      S.Casualty.map (Units.combine remaining);
-      S.Units.set O.units;
-      S.Build.map Build.(raze Fort)
-    end else begin
-      S.Casualty.map (Units.combine O.units);
-      S.Units.set remaining
-    end;
-    S.Enemy.map (Units.reduce O.enemies);
+    S.Enemy.map (O.enemies |> Dist.outcome |> Units.reduce);
     if O.ldr_died then begin
       S.Leader.map (S.Turn.return Leader.died);
       S.Build.map (S.Leader.return Build.died)
-    end
+    end;
+    match O.fled with
+    | Some (fled, remaining) ->
+        S.Casualty.map (Units.combine remaining);
+        S.Units.set fled;
+        S.Build.map Build.(raze Fort)
+    | None ->
+        S.Casualty.map (O.units |> Dist.outcome |> Units.combine);
+        S.Units.set (Dist.remaining O.units)
 end
 
 let fort_cap = 20.
 
 module Units (S : State.S) = struct
-  module Dist = Units.Dist
   module DistRoll = Dist.Roll(S.Dice)
   module Fill = Units.Fill(S.Dice)
   let enemies = S.Enemy.get ()
@@ -39,13 +39,14 @@ module Units (S : State.S) = struct
   let units = S.Units.get ()
   let defending = Units.(discard Attr.is_siege) units
   let power = Units.power units
-  let fled () = Fill.from fort_cap defending
+  let fled () =
+    let fled = Fill.from fort_cap defending in
+    fled, Units.reduce fled units
   let fought () = Float.sub power fort_cap
-  let lost dmg = DistRoll.from dmg units |> Dist.outcome
+  let lost dmg = DistRoll.from dmg units
   let enemy_loss dmg =
     Units.countered units enemies
     |> DistRoll.from dmg
-    |> Dist.outcome
 end
 
 module Make (S : State.S) = struct
@@ -57,15 +58,18 @@ module Make (S : State.S) = struct
     S.Barraging.either 1. 0.
     |> Defs.to_power Units.harpies
 
+  let have_fort =
+    S.Build.check Build.(ready Fort)
+
   let value = (module struct
     let cav_too_many = Dr.cav_too_many
     let attack = Units.attack -. harpy_weaken
     let defense = Dr.value
     let damage = Float.reduce attack defense
-    let defeat = damage > Units.power
-    let retreat = defeat && S.Build.check Build.(ready Fort)
+    let retreat = damage > Units.power && have_fort
+    let fled = if retreat then Some (Units.fled ()) else None
     let power = if retreat then Units.fought () else Units.power
-    let units = if retreat then Units.fled () else Units.lost damage
+    let units = if retreat then Dist.empty else Units.lost damage
     let enemies = Units.enemy_loss (Float.increase power defense)
     let ldr_died =
       if retreat then false

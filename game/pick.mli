@@ -35,5 +35,5 @@ module With (S : Ops) : sig
 end
 
 module WithAcc (S : OpsAcc) : sig
-  val from : S.acc -> S.Cap.t -> S.map -> S.map -> S.acc * S.map
+  val from : S.acc -> S.Cap.t -> S.map -> S.map -> S.acc * S.map * S.map
 end

@@ -264,12 +264,14 @@ let pick_w t n =
 
 module Dist = struct
   type healed = Defs.power
-  type result = healed * Defs.power Map.t
+  type result = healed * Defs.power Map.t * Defs.power Map.t
 
   let empty_acc = 0.
-  let absorbed (_, m) = Map.mapi mod_power m |> Ops.sumf
-  let healed = fst
-  let outcome (_, m) = Map.mapi from_power m
+  let empty : result = empty_acc, Map.empty, Map.empty
+  let absorbed (_, _, m) = Map.mapi mod_power m |> Ops.sumf
+  let healed (x, _, _) = x
+  let outcome (_, _, m) = Map.mapi from_power m
+  let remaining (_, m, _) = Map.mapi from_power m
 
   let heal kind n acc =
     let n', healed = heal kind n in
