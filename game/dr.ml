@@ -31,11 +31,9 @@ module From (S : State.S) = struct
   let barrage_dr =
     if ldr_alive then S.Barraging.either barrage_dr 0. else 0.
 
-  let harpy_dr =
-    S.Enemy.return Units.(only Harpy)
-    |> Units.dr
-    |> Float.floor_by 0.01
+  let enemy_dr =
+    S.Enemy.return Units.dr
 
   let value =
-      cav_dr +. ldr_dr +. mausoleum_dr -. barrage_dr -. harpy_dr
+      cav_dr +. ldr_dr +. mausoleum_dr -. barrage_dr -. enemy_dr
 end
