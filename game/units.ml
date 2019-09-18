@@ -267,32 +267,33 @@ let pick_w t n =
   in
   Map.fold f t (key, n) |> fst
 
-let move kind t = function
-  | Some x -> Some (try Map.find kind t +. x with _ -> x)
-  | None -> try Some (Map.find kind t) with _ -> None
-
 module Dist = struct
-  type healed = Defs.power
-  type result = healed * Defs.power Map.t * Defs.power Map.t
+  type acc = { absorbed : Defs.power; healed : Defs.power }
+  type result = acc * Defs.power Map.t * Defs.power Map.t
 
-  let empty_acc = 0.
+  let empty_acc = { absorbed = 0.; healed = 0. }
   let empty : result = empty_acc, Map.empty, Map.empty
-  let absorbed (_, _, m) = Map.mapi mod_power m |> Ops.sumf
-  let healed (x, _, _) = x
-  let move_back k (h, i, o) = h, Map.update k (move k o) i, Map.remove k o
+  let absorbed (a, _, m) =
+    Map.mapi mod_power m |> Ops.sumf |> (+.) a.absorbed
+  let healed (a, _, _) = a.healed
+  let move_back k (a, i, o) =
+    let n = try Map.find k o with _ -> 0. in
+    { a with absorbed = n +. a.absorbed },
+    Map.update k (function Some x -> Some (x +. n) | None -> Some n) i,
+    Map.remove k o
   let outcome (_, _, m) = Map.mapi from_power m
   let remaining (_, m, _) = Map.mapi from_power m
 
   let heal kind n acc =
     let n', healed = heal kind n in
-    acc +. healed, n'
+    { acc with healed = acc.healed +. healed }, n'
 
   module Roll (Dice : Dice.S) = struct
     module Pick = Pick.WithAcc(struct
       module Cap = Pick.Float
       module Map = Map
       module Type = Cap
-      type acc = healed
+      type nonrec acc = acc
       type map = Type.t Map.t
       type step = acc * Cap.t * Type.t
       let choose input =
