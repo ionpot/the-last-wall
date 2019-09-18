@@ -15,7 +15,7 @@ end
 module Apply (S : State.S) = struct
   let value (module O : Outcome) =
     S.Casualty.map (O.casualty |> Dist.outcome |> Units.combine);
-    S.Enemy.map (O.enemies |> Dist.outcome |> Units.reduce);
+    S.Enemy.set (Dist.remaining O.enemies);
     S.Units.set O.fled;
     if O.retreat then S.Build.map Build.(raze Fort);
     if O.ldr_died then begin
