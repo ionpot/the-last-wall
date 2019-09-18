@@ -70,14 +70,13 @@ module Make (S : State.S) = struct
     let damage = Float.reduce attack defense
     let retreat = damage > Units.power && have_fort
     let fled = if retreat then Some (Units.fled ()) else None
+    let fought () = match fled with Some x -> snd x | None -> Units.units
     let power = if retreat then Units.fought () else Units.power
-    let units = if retreat then Dist.empty else Units.(dist damage units enemies)
+    let units = Units.dist damage (fought ()) Units.enemies
     let enemies =
+      let ref = Dist.reflected units in
       let dmg = Float.increase power defense in
-      let dist = Units.(dist dmg enemies) in
-      match fled with
-      | Some (_, remaining) -> dist remaining
-      | None -> dist Units.units
+      fought () |> Units.(dist (dmg +. ref) enemies)
     let ldr_died =
       if retreat then false
       else S.Leader.check LdrRoll.death

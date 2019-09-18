@@ -13,6 +13,7 @@ module Attr = struct
     | Men | Dervish -> true
     | _ -> false
   let can_heal = (=) Templar
+  let can_reflect = (=) Berserker
   let is_cavalry = function
     | Cavalry | Knight -> true
     | _ -> false
@@ -268,11 +269,16 @@ let pick_w t n =
   Map.fold f t (key, n) |> fst
 
 module Dist = struct
-  type acc = { absorbed : Defs.power; healed : Defs.power }
+  type acc =
+    { absorbed : Defs.power;
+      healed : Defs.power;
+      reflected : Defs.power
+    }
   type result = acc * Defs.power Map.t * Defs.power Map.t
 
-  let empty_acc = { absorbed = 0.; healed = 0. }
+  let empty_acc = { absorbed = 0.; healed = 0.; reflected = 0. }
   let empty : result = empty_acc, Map.empty, Map.empty
+
   let absorbed (a, _, m) =
     Map.mapi mod_power m |> Ops.sumf |> (+.) a.absorbed
   let healed (a, _, _) = a.healed
@@ -282,11 +288,16 @@ module Dist = struct
     Map.update k (function Some x -> Some (x +. n) | None -> Some n) i,
     Map.remove k o
   let outcome (_, _, m) = Map.mapi from_power m
+  let reflected (a, _, _) = a.reflected
   let remaining (_, m, _) = Map.mapi from_power m
 
   let heal kind n acc =
     let n', healed = heal kind n in
     { acc with healed = acc.healed +. healed }, n'
+
+  let reflect kind n acc =
+    let n' = mod_power kind n in
+    { acc with reflected = acc.reflected +. n' }, n
 
   module Roll (Dice : Dice.S) = struct
     module Pick = Pick.WithAcc(struct
@@ -304,6 +315,8 @@ module Dist = struct
         let acc', sub =
           if Attr.can_heal kind
           then heal kind cap acc
+          else if Attr.can_reflect kind
+          then reflect kind cap acc
           else acc, cap
         in acc', cap, sub
     end)
