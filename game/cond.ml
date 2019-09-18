@@ -89,22 +89,6 @@ module Disease = struct
   end
 end
 
-module Market = struct
-  type t = Defs.supply
-  module Apply (S : State.S) = struct
-    let value = S.Supply.add
-  end
-  module Check (S : State.S) = struct
-    let value = S.Build.check Build.(ready Market)
-  end
-  module Make (S : State.S) = struct
-    let value =
-      Build.(supply_range Market)
-      |> S.Dice.range
-      |> S.Disease.return Number.reduce_by
-  end
-end
-
 module Revive = struct
   type t = Units.t
   module Apply (S : State.S) = struct

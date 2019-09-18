@@ -44,7 +44,6 @@ module Output = struct
     | Defeat
     | Disease of Cond.Disease.t
     | Facilities of Direct.Facilities.t
-    | Market of Cond.Market.t
     | Starvation of Cond.Starvation.t
     | Support of Direct.Support.t
     | Turn of Direct.Turn.t
@@ -95,8 +94,6 @@ module Convert = struct
           let make () = Output.Defeat end)
       | Steps.Disease -> (module struct module Event = Cond.Disease
           let make x = Output.Disease x end)
-      | Steps.Market -> (module struct module Event = Cond.Market
-          let make x = Output.Market x end)
       | Steps.Starvation -> (module struct module Event = Cond.Starvation
           let make x = Output.Starvation x end)
 

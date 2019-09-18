@@ -104,7 +104,7 @@ end
 
 module Facilities = struct
   type t = (Build.kind * Defs.supply) list
-  let kinds = Build.([Foundry; Sawmill; Tavern])
+  let kinds = Build.([Foundry; Market; Sawmill; Tavern])
   module Apply (S : State.S) = struct
     let value t = List.map snd t |> Listx.sum |> S.Supply.add
   end
