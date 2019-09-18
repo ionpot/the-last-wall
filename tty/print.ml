@@ -42,9 +42,11 @@ module Leader = struct
 
   let to_fled t units =
     let units = units2str units in
-    match to_first t with
-    | "" -> sprintf "%s has fled" units
-    | ldr -> sprintf "%s fled with %s" ldr units
+    match to_first t, units with
+    | "", "none" -> ""
+    | "", str
+    | str, "none" -> sprintf "%s has fled" str
+    | ldr, units -> sprintf "%s has fled with %s" ldr units
 
   let lvup t =
     sprintf "%s is now %s" (ldr2first t) (ldr2status t)
