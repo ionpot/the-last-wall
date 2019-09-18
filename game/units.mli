@@ -62,6 +62,7 @@ module Dist : sig
   val absorbed : result -> Defs.power
   val healed : result -> Defs.power
   val move_back : kind -> result -> result
+  val no_remaining : result -> bool
   val outcome : result -> t
   val reflected : result -> Defs.power
   val remaining : result -> t

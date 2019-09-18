@@ -2,30 +2,26 @@ module Dist = Units.Dist
 
 module type Outcome = sig
   val attack : Defs.power
+  val casualty : Dist.result
   val cav_too_many : bool
   val damage : Defs.power
   val defense : Defs.power
   val enemies : Dist.result
-  val fled : (Units.t * Units.t) option
+  val fled : Units.t
   val ldr_died : bool
-  val units : Dist.result
+  val retreat : bool
 end
 
 module Apply (S : State.S) = struct
   let value (module O : Outcome) =
+    S.Casualty.map (O.casualty |> Dist.outcome |> Units.combine);
     S.Enemy.map (O.enemies |> Dist.outcome |> Units.reduce);
+    S.Units.set O.fled;
+    if O.retreat then S.Build.map Build.(raze Fort);
     if O.ldr_died then begin
       S.Leader.map (S.Turn.return Leader.died);
       S.Build.map (S.Leader.return Build.died)
-    end;
-    match O.fled with
-    | Some (fled, remaining) ->
-        S.Casualty.map (Units.combine remaining);
-        S.Units.set fled;
-        S.Build.map Build.(raze Fort)
-    | None ->
-        S.Casualty.map (O.units |> Dist.outcome |> Units.combine);
-        S.Units.set (Dist.remaining O.units)
+    end
 end
 
 let fort_cap = 20.
@@ -40,15 +36,14 @@ module Units (S : State.S) = struct
     DistRoll.from dmg a
     |> move_back (Units.untouchable b a)
   let enemies = S.Enemy.get ()
-  let attack = Units.power enemies
+  let power = Units.power
+  let attack = power enemies
   let harpies = Units.(count Harpy) enemies
   let units = S.Units.get ()
   let defending = Units.(discard Attr.is_siege) units
-  let power = Units.power units
   let fled () =
     let fled = Fill.from fort_cap defending in
     fled, Units.reduce fled units
-  let fought () = Float.sub power fort_cap
 end
 
 module Make (S : State.S) = struct
@@ -68,15 +63,20 @@ module Make (S : State.S) = struct
     let attack = Units.attack -. harpy_weaken
     let defense = Dr.value
     let damage = Float.reduce attack defense
-    let retreat = damage > Units.power && have_fort
-    let fled = if retreat then Some (Units.fled ()) else None
-    let fought () = match fled with Some x -> snd x | None -> Units.units
-    let power = if retreat then Units.fought () else Units.power
-    let units = Units.dist damage (fought ()) Units.enemies
+    let units = Units.(dist damage units enemies)
+    let retreat = Dist.no_remaining units && have_fort
+    let fled, fought =
+      if retreat then Units.fled ()
+      else Dist.remaining units, Units.units
+    let power = Units.power fought
+    let casualty =
+      if retreat
+      then Units.dist power fought Units.enemies
+      else units
     let enemies =
-      let ref = Dist.reflected units in
+      let ref = Dist.reflected casualty in
       let dmg = Float.increase power defense in
-      fought () |> Units.(dist (dmg +. ref) enemies)
+      Units.(dist (dmg +. ref) enemies) fought
     let ldr_died =
       if retreat then false
       else S.Leader.check LdrRoll.death

@@ -287,6 +287,7 @@ module Dist = struct
     { a with absorbed = n +. a.absorbed },
     Map.update k (function Some x -> Some (x +. n) | None -> Some n) i,
     Map.remove k o
+  let no_remaining (_, m, _) = Map.is_empty m
   let outcome (_, _, m) = Map.mapi from_power m
   let reflected (a, _, _) = a.reflected
   let remaining (_, m, _) = Map.mapi from_power m
