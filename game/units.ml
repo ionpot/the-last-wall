@@ -23,8 +23,7 @@ module Attr = struct
     | Berserker | Men | Merc | Dervish | Ranger | Templar -> true
     | _ -> false
   let is_revivable = is_infantry
-  let is_siege kind =
-    kind = Ballista
+  let is_siege = (=) Ballista
 end
 
 module Base = struct
