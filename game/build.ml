@@ -1,5 +1,5 @@
 type cost = Resource.t
-type kind = Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.trade
+type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.trade
 type bonus = To of kind | ToAll
 type queued = kind * cost
 type status = kind list * kind list * queued list
@@ -34,7 +34,7 @@ let rm_ls kinds ls =
   |> Listx.rm_from ls
 
 let empty =
-  { avlb = [Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; Trade Nation.NoTrade];
+  { avlb = [Arena; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; Trade Nation.NoTrade];
     built = [];
     queue = [];
     ready = [Tavern]
@@ -43,6 +43,7 @@ let empty =
 let base_cost =
   let open Resource in
   function
+  | Arena -> Manpwr 43, Supply 49
   | Engrs -> Manpwr 66, Supply 67
   | Fort -> Manpwr 124, Supply 136
   | Foundry -> Manpwr 28, Supply 30
@@ -60,7 +61,8 @@ let base_cost_of kind =
   let a, b = base_cost kind in
   Resource.(empty <+ a <+ b)
 
-let manpwr_range _ = (0, 0)
+let manpwr_range kind =
+  if kind = Arena then (1, 4) else (0, 0)
 
 let supply_range = function
   | Foundry -> (9, 15)

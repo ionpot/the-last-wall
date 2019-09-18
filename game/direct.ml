@@ -104,7 +104,7 @@ end
 
 module Facilities = struct
   type t = (Build.kind * Resource.t) list
-  let kinds = Build.([Foundry; Market; Sawmill; Tavern])
+  let kinds = Build.([Arena; Foundry; Market; Sawmill; Tavern])
   module Apply (S : State.S) = struct
     module Add = Event.AddRes(S)
     let value t = List.map snd t |> List.iter Add.value
