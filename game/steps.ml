@@ -109,8 +109,8 @@ module Phase3 = struct
   end
   module Output = struct
     type check = Attack | LevelUp | NoAttack | NoEnemies
-    type cond = Barraged | Defeat | Revive | Smite
-    type direct = Ballista | CanBarrage | Combat | Cyclops | Victory
+    type cond = Ballista | Barraged | Cyclops | Defeat | Revive | Smite
+    type direct = CanBarrage | Combat | Victory
     type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
@@ -126,10 +126,10 @@ module Phase3 = struct
     [ Do (Cond Output.Smite);
       check_enemies;
       Shuffle ([
-        Do (Direct Output.Ballista);
+        Do (Cond Output.Ballista);
         check_enemies
       ], [
-        Do (Direct Output.Cyclops);
+        Do (Cond Output.Cyclops);
         Do (Cond Output.Defeat)
       ]);
       Do (Direct Output.CanBarrage);

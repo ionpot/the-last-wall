@@ -16,20 +16,6 @@ module Attack = struct
   end
 end
 
-module Ballista = struct
-  type t = Defs.count * Units.t
-  let power = 2.
-  module Apply (S : State.S) = struct
-    let value (_, enemies) = S.Enemy.map (Units.reduce enemies)
-  end
-  module Make (S : State.S) = struct
-    module Roll = Units.Fill(S.Dice)
-    let count = S.Units.return Units.(count Ballista)
-    let power' = Defs.to_power count power
-    let value = count, S.Enemy.return (Roll.from power')
-  end
-end
-
 module Blessing = struct
   type t = Resource.t
   module Apply = Event.AddRes
@@ -114,22 +100,6 @@ module Combat = struct
   type t = (module Combat.Outcome)
   module Apply = Combat.Apply
   module Make = Combat.Make
-end
-
-module Cyclops = struct
-  type t = Defs.count * Units.t
-  let power = 2.
-  module Apply (S : State.S) = struct
-    let value (_, loss) =
-      S.Casualty.map (Units.combine loss);
-      S.Units.map (Units.reduce loss)
-  end
-  module Make (S : State.S) = struct
-    module Roll = Units.Fill(S.Dice)
-    let count = S.Enemy.return Units.(count Cyclops)
-    let power' = Defs.to_power count power
-    let value = count, S.Units.return (Roll.from power')
-  end
 end
 
 module Facilities = struct

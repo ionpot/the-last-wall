@@ -1,3 +1,18 @@
+module Ballista = struct
+  type t = Defs.count * Units.t
+  let power = 2.
+  module Apply (S : State.S) = struct
+    let value (_, enemies) = S.Enemy.map (Units.reduce enemies)
+  end
+  module Check = Check.NoFog
+  module Make (S : State.S) = struct
+    module Roll = Units.Fill(S.Dice)
+    let count = S.Units.return Units.(count Ballista)
+    let power' = Defs.to_power count power
+    let value = count, S.Enemy.return (Roll.from power')
+  end
+end
+
 module Barraged = struct
   type t = Defs.count
   let coefficient = 0.05
@@ -14,6 +29,23 @@ module Barraged = struct
       |> ( *. ) coefficient
       |> truncate
     let value = S.Enemy.return Units.(find n Orc)
+  end
+end
+
+module Cyclops = struct
+  type t = Defs.count * Units.t
+  let power = 2.
+  module Apply (S : State.S) = struct
+    let value (_, loss) =
+      S.Casualty.map (Units.combine loss);
+      S.Units.map (Units.reduce loss)
+  end
+  module Check = Check.NoFog
+  module Make (S : State.S) = struct
+    module Roll = Units.Fill(S.Dice)
+    let count = S.Enemy.return Units.(count Cyclops)
+    let power' = Defs.to_power count power
+    let value = count, S.Units.return (Roll.from power')
   end
 end
 
