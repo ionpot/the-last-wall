@@ -19,6 +19,7 @@ val manpwr_range : kind -> manpower * manpower
 val supply_range : kind -> supply * supply
 val multiple : kind -> bool
 
+val arena_cap : t -> count
 val ballista_cap : t -> count
 val built : kind -> t -> bool
 val count : kind -> t -> count

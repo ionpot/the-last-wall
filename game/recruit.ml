@@ -6,6 +6,11 @@ module With (S : State.S) = struct
     then 3, 12 else 2, 8
 
   module Missing = struct
+    let arena () =
+      Units.(count Berserker)
+      |> S.Units.return
+      |> Number.sub (S.Build.return Build.arena_cap)
+
     let stable () =
       Units.(filter_count Attr.is_cavalry)
       |> S.Units.return

@@ -32,6 +32,23 @@ module Barrage = struct
   end
 end
 
+module Berserker = struct
+  type t = bool * Defs.count
+  let kind = Units.Berserker
+  module Apply (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value (accepted, n) =
+      if accepted
+      then Recruit.promote kind n
+      else S.Units.map Units.(add n Men)
+  end
+  module Make (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let cap = Recruit.(Missing.arena () |> affordable kind)
+    let value = false, S.Dice.roll 4 |> min cap
+  end
+end
+
 module BuildAvlb = struct
   type t = Build.kind list
   module Apply (S : State.S) = struct

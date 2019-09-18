@@ -61,8 +61,7 @@ let base_cost_of kind =
   let a, b = base_cost kind in
   Resource.(empty <+ a <+ b)
 
-let manpwr_range kind =
-  if kind = Arena then (1, 4) else (0, 0)
+let manpwr_range _ = 0, 0
 
 let supply_range = function
   | Foundry -> (9, 15)
@@ -101,6 +100,9 @@ let ready kind t =
 let cost_of kind bonuses =
   Bonus.find kind bonuses
   |> Bonus.apply_to (base_cost_of kind)
+
+let arena_cap t =
+  count Arena t * 10
 
 let ballista_cap t =
   if ready Engrs t then 5 else 0
