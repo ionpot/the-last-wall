@@ -139,9 +139,6 @@ module Mercs = struct
     module Recruit = Recruit.With(S)
     let value = Recruit.promote kind
   end
-  module Check (S : State.S) = struct
-    let value = S.Dice.chance 0.8
-  end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
     let cap = S.Dice.between 10 30
