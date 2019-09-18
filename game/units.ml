@@ -12,6 +12,7 @@ module Attr = struct
   let can_build = function
     | Men | Dervish -> true
     | _ -> false
+  let can_heal = (=) Templar
   let is_cavalry = function
     | Cavalry | Knight -> true
     | _ -> false
@@ -302,7 +303,7 @@ module Dist = struct
       let roll acc kind cap input =
         let cap = Map.find kind input |> min cap |> Dice.rollf in
         let acc', sub =
-          if kind = Templar
+          if Attr.can_heal kind
           then heal kind cap acc
           else acc, cap
         in acc', cap, sub

@@ -7,6 +7,7 @@ val attacks : kind list
 module Attr : sig
   val can_barrage : kind -> bool
   val can_build : kind -> bool
+  val can_heal : kind -> bool
   val is_cavalry : kind -> bool
   val is_holy : kind -> bool
   val is_infantry : kind -> bool
