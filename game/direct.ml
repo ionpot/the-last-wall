@@ -103,19 +103,24 @@ module Combat = struct
 end
 
 module Facilities = struct
-  type t = (Build.kind * Defs.supply) list
+  type t = (Build.kind * Resource.t) list
   let kinds = Build.([Foundry; Market; Sawmill; Tavern])
   module Apply (S : State.S) = struct
-    let value t = List.map snd t |> Listx.sum |> S.Supply.add
+    module Add = Event.AddRes(S)
+    let value t = List.map snd t |> List.iter Add.value
   end
   module Make (S : State.S) = struct
     let is_ready kind = S.Build.check Build.(ready kind)
-    let kinds' = List.filter is_ready kinds
+    let disease = S.Disease.get ()
+    let to_mnp k = Build.manpwr_range k |> S.Dice.range
+    let to_sup k = Build.supply_range k |> S.Dice.range
+    let to_res k =
+      Resource.bonus_to
+      Resource.(empty <+ Supply (to_sup k) <+ Manpwr (to_mnp k))
+      Resource.Bonus.(Sub (Both disease))
     let value =
-      List.map Build.supply_range kinds'
-      |> List.map S.Dice.range
-      |> List.map (S.Disease.return Number.reduce_by)
-      |> List.combine kinds'
+      List.filter is_ready kinds
+      |> List.map (fun k -> k, to_res k)
   end
 end
 
