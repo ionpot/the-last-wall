@@ -19,8 +19,10 @@ module With (S : State.S) = struct
 
   let supply_limit kind cap =
     let cost = Base.supply_cost kind in
-    let supp = S.Supply.get () in
-    min cap (Number.div supp cost)
+    if cost > 0 then
+      let supp = S.Supply.get () in
+      min cap (supp / cost)
+    else cap
 
   let exclude () =
     let n = S.Dervish.get () in
