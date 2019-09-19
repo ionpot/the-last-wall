@@ -123,7 +123,7 @@ let bld_q2str ls =
 
 let facs2str ls =
   ls
-  |> List.map (fun (k, s) -> sprintf "%s (%s)" (bld2str k) (sup2str s))
+  |> List.map (fun (k, r) -> sprintf "%s (%s)" (bld2str k) (res2str r))
   |> commas
 
 let deity2str = function
