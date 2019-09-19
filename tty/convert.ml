@@ -87,6 +87,7 @@ let trade_suffix trade =
   else sprintf " (%s)" str
 
 let bld2str = function
+  | Build.Arena -> "arena"
   | Build.Engrs -> "engineers guild"
   | Build.Fort -> "fort"
   | Build.Foundry -> "iron foundry"
