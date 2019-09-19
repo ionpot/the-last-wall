@@ -140,8 +140,7 @@ let deity_text = function
   | Deity.Sekrefir -> "leader of gods, envoy of order and justice"
 
 let unit_order =
-  Units.([Men; Cavalry; Knight; Ranger; Templar; Dervish;
-  Skeleton; Orc; Demon; Harpy; Cyclops])
+  Units.([Men; Cavalry; Knight; Ranger; Templar; Dervish; Ballista; Skeleton; Orc; Demon; Harpy; Cyclops])
 
 let unit_cmp = Listx.compare unit_order
 
