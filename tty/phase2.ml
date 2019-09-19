@@ -40,7 +40,7 @@ module Make (S : Game.State.S) = struct
       | Disease x -> Print.disease x |> S.Leader.return
       | Facilities ls -> Tty.ifpairln "facilities" (facs2str ls)
       | Market sup -> Tty.pairln "market" (sup2str sup)
-      | Starvation units -> Tty.pairln "starvation" (units2str units)
+      | Starvation units -> Tty.ifpairln "starvation" (units2str units)
       | Support s -> Print.support s
       | Turn t -> Tty.lnwriteln (turn2str t)
       | Upkeep sup -> Tty.pairln "upkeep" (sup2str sup)

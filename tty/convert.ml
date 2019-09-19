@@ -174,13 +174,12 @@ let unit_pairs2str ls =
 
 let units2str t =
   unit_pairs2str (Units.report t)
-  |> str2none
 
 let units2mnpstr t =
   Units.power t
   |> truncate
   |> manp2str
-  |> sprintf "%s -> %s" (units2str t)
+  |> sprintf "%s -> %s" (units2str t |> if_empty "no units")
 
 let report_type2str = function
   | Attack.Accurate ls -> unit_pairs2str ls

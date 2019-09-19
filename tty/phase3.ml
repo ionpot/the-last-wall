@@ -17,7 +17,7 @@ module Make (S : Game.State.S) = struct
           |> S.Enemy.return
           |> S.Leader.return
       | Ballista x -> Print.ballista x
-      | Barraged x -> Tty.pairln "barraged" (barrage2str x)
+      | Barraged x -> Tty.pairln "barraged" (barrage2str x |> str2none)
       | CanBarrage x -> (S.Weather.return Print.can_barrage) x
       | Combat x ->
           Print.Combat.outcome x
@@ -27,8 +27,8 @@ module Make (S : Game.State.S) = struct
       | LevelUp -> S.Leader.return Print.Leader.lvup
       | NoAttack -> ()
       | NoEnemies -> Tty.writeln "no enemies left"
-      | Revive x -> Tty.pairln "revived" (units2str x)
-      | Smite x -> Tty.pairln "smite" (smite2str x)
+      | Revive x -> Tty.pairln "revived" (units2str x |> str2none)
+      | Smite x -> Tty.pairln "smite" (smite2str x |> str2none)
       | Victory -> ()
 end
 

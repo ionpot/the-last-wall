@@ -43,9 +43,9 @@ module Leader = struct
   let to_fled t units =
     let units = units2str units in
     match to_first t, units with
-    | "", "none" -> ""
+    | "", "" -> ""
     | "", str
-    | str, "none" -> sprintf "%s has fled" str
+    | str, "" -> sprintf "%s has fled" str
     | ldr, units -> sprintf "%s has fled with %s" ldr units
 
   let lvup t =
@@ -56,7 +56,7 @@ end
 module Combat = struct
   let begins units enemies ldr =
     Tty.lnwriteln "combat phase";
-    Tty.pairln "attacking" (units2str enemies);
+    Tty.pairln "attacking" (units2str enemies |> str2none);
     Tty.pairln "defending" (units2mnpstr units);
     Tty.ifpairln "leader" (Leader.to_full ldr)
 
@@ -68,10 +68,10 @@ module Combat = struct
 
   let retreat ldr units enemies =
     Tty.writeln (Leader.to_fled ldr units);
-    Tty.pairln "remaining enemies" (units2str enemies)
+    Tty.pairln "remaining enemies" (units2str enemies |> str2none)
 
   let win ldr casualty died =
-    Tty.pairln "casualty" (units2str casualty);
+    Tty.pairln "casualty" (units2str casualty |> str2none);
     if died then Leader.died ldr
 
   let outcome (module O : Combat.Outcome) ldr =
@@ -85,7 +85,7 @@ end
 
 let ballista (n, enemies) =
   if n > 0 then
-  sprintf "%d ballista kills %s" n (units2str enemies)
+  sprintf "%d ballista kills %s" n (units2str enemies |> if_empty "nothing")
   |> Tty.writeln
 
 let can_barrage w =
@@ -97,12 +97,12 @@ let can_barrage w =
 
 let cyclops (n, units) =
   if n > 0 then
-  sprintf "%d cyclops kills %s" n (units2str units)
+  sprintf "%d cyclops kills %s" n (units2str units |> if_empty "nothing")
   |> Tty.writeln
 
 let disease (units, died) ldr =
   Tty.writeln "!!! disease outbreak !!!";
-  Tty.pairln "died" (units2str units);
+  Tty.pairln "died" (units2str units |> str2none);
   if died then Leader.died ldr
 
 let support ls =
