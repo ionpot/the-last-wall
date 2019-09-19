@@ -32,6 +32,23 @@ module Barrage = struct
   end
 end
 
+module Berserker = struct
+  type t = bool * Defs.count
+  let kind = Units.Berserker
+  module Apply (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value (accepted, n) =
+      if accepted
+      then Recruit.promote kind n
+      else S.Units.map Units.(add n Men)
+  end
+  module Make (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let cap = Recruit.(Missing.arena () |> affordable kind)
+    let value = false, S.Dice.roll 4 |> min cap
+  end
+end
+
 module BuildAvlb = struct
   type t = Build.kind list
   module Apply (S : State.S) = struct
@@ -117,13 +134,10 @@ end
 
 module Mercs = struct
   type t = Defs.count
-  let kind = Units.Men
+  let kind = Units.Merc
   module Apply (S : State.S) = struct
     module Recruit = Recruit.With(S)
     let value = Recruit.promote kind
-  end
-  module Check (S : State.S) = struct
-    let value = S.Dice.chance 0.8
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
@@ -203,12 +217,9 @@ module Volunteers = struct
   type t = Defs.count
   let kind = Units.Men
   module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
+    let value n = S.Units.map (Units.add n kind)
   end
   module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let cap = S.Dice.between 3 9
-    let value = Recruit.supply_limit kind cap
+    let value = S.Dice.between 3 9
   end
 end

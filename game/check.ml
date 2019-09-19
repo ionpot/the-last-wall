@@ -3,6 +3,12 @@ module Not (Check : Event.Check) (State : State.S) = struct
   let value = not Result.value
 end
 
+module Fog (State : State.S) = struct
+  let value = State.Weather.is Weather.Fog
+end
+
+module NoFog = Not(Fog)
+
 module LevelUp (State : State.S) = struct
   let value = State.Leader.check Leader.lvup
 end

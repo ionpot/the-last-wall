@@ -17,11 +17,11 @@ end
 module Output = struct
   type event =
     | Attack
-    | Ballista of Direct.Ballista.t
+    | Ballista of Cond.Ballista.t
     | Barraged of Cond.Barraged.t
     | CanBarrage of Direct.CanBarrage.t
     | Combat of Direct.Combat.t
-    | Cyclops of Direct.Cyclops.t
+    | Cyclops of Cond.Cyclops.t
     | Defeat
     | LevelUp
     | NoAttack
@@ -61,8 +61,12 @@ module Convert = struct
           let value = Output.NoEnemies end)
 
     let cond : Convert.cond = function
+      | Steps.Ballista -> (module struct module Event = Cond.Ballista
+          let make x = Output.Ballista x end)
       | Steps.Barraged -> (module struct module Event = Cond.Barraged
           let make x = Output.Barraged x end)
+      | Steps.Cyclops -> (module struct module Event = Cond.Cyclops
+          let make x = Output.Cyclops x end)
       | Steps.Defeat -> (module struct module Event = Cond.Defeat
           let make () = Output.Defeat end)
       | Steps.Revive -> (module struct module Event = Cond.Revive
@@ -71,14 +75,10 @@ module Convert = struct
           let make x = Output.Smite x end)
 
     let direct : Convert.direct = function
-      | Steps.Ballista -> (module struct module Event = Direct.Ballista
-          let make x = Output.Ballista x end)
       | Steps.CanBarrage -> (module struct module Event = Direct.CanBarrage
           let make x = Output.CanBarrage x end)
       | Steps.Combat -> (module struct module Event = Direct.Combat
           let make x = Output.Combat x end)
-      | Steps.Cyclops -> (module struct module Event = Direct.Cyclops
-          let make x = Output.Cyclops x end)
       | Steps.Victory -> (module struct module Event = Direct.Victory
           let make () = Output.Victory end)
   end

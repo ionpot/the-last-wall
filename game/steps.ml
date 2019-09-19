@@ -61,13 +61,13 @@ end
 
 module Phase2 = struct
   module Input = struct
-    type cond = LeaderNew | Mercs | Ranger | Templar | Trade
-    type direct = Ballista | Build | Dervish | Knight | Nations | Volunteers
+    type cond = LeaderNew | Ranger | Templar | Trade
+    type direct = Ballista | Berserker | Build | Dervish | Knight | Mercs | Nations | Volunteers
     type t = (cond, direct) input
   end
   module Output = struct
     type check = unit
-    type cond = Defeat | Disease | Market | Starvation
+    type cond = Defeat | Disease | Starvation
     type direct = Attack | Blessing | BuildManp | BuildStatus | BuildSupply | Cavalry | Facilities | Support | Turn | Upkeep
     type t = (check, cond, direct) output
   end
@@ -83,7 +83,6 @@ module Phase2 = struct
       Do (Cond Output.Disease);
       Do (Direct Output.Attack);
       Do (Direct Output.Blessing);
-      Do (Cond Output.Market);
       Do (Direct Output.Facilities);
       Ask (Direct Input.Nations);
       Do (Direct Output.Support);
@@ -91,13 +90,14 @@ module Phase2 = struct
       Ask (Cond Input.Trade);
       Ask (Direct Input.Build);
       Do (Direct Output.BuildSupply);
+      Ask (Direct Input.Berserker);
       Ask (Direct Input.Ballista);
       Do (Direct Output.Cavalry);
       Ask (Direct Input.Knight);
       Ask (Direct Input.Dervish);
       Ask (Cond Input.Templar);
       Ask (Cond Input.Ranger);
-      Ask (Cond Input.Mercs)
+      Ask (Direct Input.Mercs)
     ]
 end
 
@@ -109,8 +109,8 @@ module Phase3 = struct
   end
   module Output = struct
     type check = Attack | LevelUp | NoAttack | NoEnemies
-    type cond = Barraged | Defeat | Revive | Smite
-    type direct = Ballista | CanBarrage | Combat | Cyclops | Victory
+    type cond = Ballista | Barraged | Cyclops | Defeat | Revive | Smite
+    type direct = CanBarrage | Combat | Victory
     type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
@@ -126,10 +126,10 @@ module Phase3 = struct
     [ Do (Cond Output.Smite);
       check_enemies;
       Shuffle ([
-        Do (Direct Output.Ballista);
+        Do (Cond Output.Ballista);
         check_enemies
       ], [
-        Do (Direct Output.Cyclops);
+        Do (Cond Output.Cyclops);
         Do (Cond Output.Defeat)
       ]);
       Do (Direct Output.CanBarrage);
