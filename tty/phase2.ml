@@ -7,6 +7,10 @@ module Make (S : Game.State.S) = struct
     function
       | Ballista (avlb, have) ->
           Ballista (check (Prompt.ballista have) avlb, have)
+      | Berserker (_, avlb) ->
+          let accept =
+            if avlb > 0 then Prompt.berserker avlb else false
+          in Berserker (accept, avlb)
       | Build avlb ->
           let module Prompt = Prompt.Build(S) in
           S.Build.return Print.Build.all;
