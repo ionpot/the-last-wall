@@ -325,11 +325,13 @@ module Dist = struct
         in acc', cap, sub
     end)
 
-    let from power t =
+    let from cap t =
       let acc = empty_acc in
       let input = Ops.powers t in
-      let output = Map.map (fun _ -> 0.) t in
-      Pick.from acc power input output
+      let output = Map.empty in
+      if cap > Ops.sumf input
+      then acc, output, input
+      else Pick.from acc cap input output
   end
 end
 
