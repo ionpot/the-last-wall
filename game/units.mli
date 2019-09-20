@@ -23,6 +23,8 @@ module Base : sig
   val supply_cost : kind -> Defs.supply
 end
 
+val translate : kind -> kind -> Defs.count -> Defs.count
+
 type t
 
 val empty : t

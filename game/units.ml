@@ -107,6 +107,10 @@ let heal kind n =
   let pwr = Base.power kind in
   Float.floor_by pwr n, mod_float n pwr
 
+let translate kind_in kind_out n =
+  to_power kind_in n
+  |> from_power kind_out
+
 module Map = Map.Make(struct
   type t = kind
   let compare = compare

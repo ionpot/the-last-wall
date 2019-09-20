@@ -104,9 +104,14 @@ end
 
 module Facilities = struct
   type t = (Build.kind * Resource.t) list
+  let arena = Build.Arena
   module Apply (S : State.S) = struct
     module Add = Event.AddRes(S)
-    let value t = List.map snd t |> List.iter Add.value
+    let value t =
+      List.map snd t |> List.iter Add.value;
+      if List.mem_assoc arena t
+      then List.assoc arena t |> Resource.manp_of |> S.Arena.set
+      else S.Arena.clear ()
   end
   module Make (S : State.S) = struct
     let disease = S.Disease.get ()
