@@ -47,8 +47,8 @@ let barrage () =
   Tty.prompt_yn "arrow barrage? y/n"
 
 let berserker avlb =
-  Tty.writeln (sprintf "%d berserker available" avlb);
-  Tty.prompt_yn "accept? y/n"
+  Tty.writeln (sprintf "can train %d berserker" avlb);
+  Tty.prompt_amount avlb
 
 module Build (S : Game.State.S) = struct
   module Bonus = Game.Build_bonus.From(S)

@@ -7,10 +7,7 @@ module Make (S : Game.State.S) = struct
     function
       | Ballista (avlb, have) ->
           Ballista (check (Prompt.ballista have) avlb, have)
-      | Berserker (_, avlb) ->
-          let accept =
-            if avlb > 0 then Prompt.berserker avlb else false
-          in Berserker (accept, avlb)
+      | Berserker avlb -> Berserker (check Prompt.berserker avlb)
       | Build avlb ->
           let module Prompt = Prompt.Build(S) in
           S.Build.return Print.Build.all;
@@ -54,7 +51,7 @@ module After (S : Status.S) = struct
     let open Phase.Input in
     function
       | Ballista (n, _) -> if n > 0 then S.res ()
-      | Berserker (ok, n) -> if n > 0 then begin if ok then S.berserker (); S.res () end
+      | Berserker n -> if n > 0 then begin S.berserker (); S.res () end
       | Dervish n -> if n > 0 then begin S.dervish (); S.res () end
       | LeaderNew ls -> S.new_leader ls
       | Knight n -> if n > 0 then S.res ()
