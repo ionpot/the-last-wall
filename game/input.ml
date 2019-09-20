@@ -139,7 +139,7 @@ module Mercs = struct
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
-    let cap = S.Dice.between 10 30
+    let cap = S.Dice.between 10 20
     let value = Recruit.supply_limit kind cap
   end
 end
