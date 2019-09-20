@@ -236,8 +236,11 @@ let degree2str = function
   | Weather.Heavy -> "heavy"
 
 let weather2str = function
+  | Weather.Breeze -> "breeze"
   | Weather.Clear -> "clear sky"
   | Weather.Cloudy -> "cloudy"
+  | Weather.Fog -> "fog"
+  | Weather.Heat -> "scorching heat"
   | Weather.Wind -> "strong wind"
   | Weather.Rain d -> sprintf "%s rain" (degree2str d)
   | Weather.Snow d -> sprintf "%s snow" (degree2str d)
