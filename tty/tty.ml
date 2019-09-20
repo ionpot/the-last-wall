@@ -12,6 +12,9 @@ let writeln str =
   Log.writeln log str;
   print_endline str
 
+let ifwriteln str =
+  if str <> "" then writeln str
+
 let writelns = List.iter writeln
 
 let pairln s1 s2 =

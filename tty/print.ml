@@ -13,8 +13,7 @@ module Build = struct
 
   let manp need units =
     if need > 0 then
-    Units.workforce units
-    |> truncate
+    units2work units
     |> min need
     |> manp2str
     |> sprintf "%s for construction"
@@ -66,21 +65,21 @@ module Combat = struct
     let damage = sprintf "%s damage" (power2str dmg) in
     sprintf "%s -> %s -> %s" attack defense damage
 
-  let retreat ldr units enemies =
-    Tty.writeln (Leader.to_fled ldr units);
-    Tty.pairln "remaining enemies" (units2str enemies |> str2none)
-
-  let win ldr casualty died =
-    Tty.pairln "casualty" (units2str casualty |> str2none);
-    if died then Leader.died ldr
+  let retreat ldr fled casualty =
+    Tty.writeln (Leader.to_fled ldr fled);
+    let str = result2remaining casualty in
+    if str <> "" then sprintf "%s went rogue" str |> Tty.writeln
 
   let outcome (module O : Combat.Outcome) ldr =
     Tty.writeln "enemies attack";
     if O.cav_too_many
     then Tty.writeln "too many cavalry, defense reduced";
     Tty.writeln (stats O.attack O.defense O.damage);
-    if O.retreat then retreat ldr O.units O.enemies
-    else win ldr O.units O.ldr_died
+    Tty.ifwriteln (result2stats O.casualty);
+    Tty.pairln "casualty" (result2outcome O.casualty |> str2none);
+    if O.retreat then retreat ldr O.fled O.casualty;
+    if O.ldr_died then Leader.died ldr;
+    Tty.ifpairln "enemies remaining" (result2remaining O.enemies)
 end
 
 let ballista (n, enemies) =

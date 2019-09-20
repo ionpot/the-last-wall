@@ -46,6 +46,6 @@ module After (S : Status.S) = struct
       | Barraged _ -> S.enemies ()
       | Cyclops (n, _) -> if n > 0 then S.units ()
       | Smite _ -> S.enemies ()
-      | Victory -> S.units (); S.enemies_remaining ()
+      | Victory -> S.units ()
       | _ -> ()
 end

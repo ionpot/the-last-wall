@@ -87,6 +87,7 @@ let trade_suffix trade =
   else sprintf " (%s)" str
 
 let bld2str = function
+  | Build.Arena -> "arena"
   | Build.Engrs -> "engineers guild"
   | Build.Fort -> "fort"
   | Build.Foundry -> "iron foundry"
@@ -122,7 +123,7 @@ let bld_q2str ls =
 
 let facs2str ls =
   ls
-  |> List.map (fun (k, s) -> sprintf "%s (%s)" (bld2str k) (sup2str s))
+  |> List.map (fun (k, r) -> sprintf "%s (%s)" (bld2str k) (res2str r))
   |> commas
 
 let deity2str = function
@@ -140,12 +141,13 @@ let deity_text = function
   | Deity.Sekrefir -> "leader of gods, envoy of order and justice"
 
 let unit_order =
-  Units.([Men; Cavalry; Knight; Ranger; Templar; Dervish; Ballista; Skeleton; Orc; Demon; Harpy; Cyclops])
+  Units.([Men; Merc; Berserker; Cavalry; Knight; Ranger; Templar; Dervish; Ballista; Skeleton; Orc; Demon; Harpy; Cyclops])
 
 let unit_cmp = Listx.compare unit_order
 
 let unit2str = function
   | Units.Ballista -> "ballista"
+  | Units.Berserker -> "berserker"
   | Units.Cavalry -> "cavalry"
   | Units.Cyclops -> "cyclops"
   | Units.Demon -> "demon"
@@ -153,6 +155,7 @@ let unit2str = function
   | Units.Harpy -> "harpy"
   | Units.Knight -> "knight"
   | Units.Men -> "men"
+  | Units.Merc -> "merc"
   | Units.Orc -> "orc"
   | Units.Ranger -> "ranger"
   | Units.Skeleton -> "skeleton"
@@ -180,6 +183,11 @@ let units2mnpstr t =
   |> manp2str
   |> sprintf "%s -> %s" (units2str t |> if_empty "no units")
 
+let units2work t =
+  Units.(filter Attr.can_build) t
+  |> Units.power
+  |> truncate
+
 let report_type2str = function
   | Attack.Accurate ls -> unit_pairs2str ls
   | Attack.Vague (count, kinds) ->
@@ -190,6 +198,18 @@ let report_type2str = function
 let report2str rp =
   report_type2str rp
   |> if_empty "no enemies"
+
+let result2outcome r =
+  Units.Dist.outcome r |> units2str
+
+let result2remaining r =
+  Units.Dist.remaining r |> units2str
+
+let result2stats r =
+  Units.Dist.(["absorbed", absorbed r; "healed", healed r; "reflected", reflected r])
+  |> List.filter (fun (_, n) -> n > 0.)
+  |> List.map (fun (s, n) -> sprintf "%s %s" (power2str n) s)
+  |> commas
 
 let barrage2str x =
   units2str Units.(make x Orc)
@@ -216,8 +236,11 @@ let degree2str = function
   | Weather.Heavy -> "heavy"
 
 let weather2str = function
+  | Weather.Breeze -> "breeze"
   | Weather.Clear -> "clear sky"
   | Weather.Cloudy -> "cloudy"
+  | Weather.Fog -> "fog"
+  | Weather.Heat -> "scorching heat"
   | Weather.Wind -> "strong wind"
   | Weather.Rain d -> sprintf "%s rain" (degree2str d)
   | Weather.Snow d -> sprintf "%s snow" (degree2str d)

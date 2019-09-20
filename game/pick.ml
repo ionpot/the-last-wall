@@ -13,51 +13,72 @@ module Float = struct
   type t = float let zero = 0. let add = (+.) let sub = (-.)
 end
 
+module type OpsBase = sig
+  module Cap : Num
+  module Map : Map.S
+  module Type : Num
+  type map = Type.t Map.t
+end
+
 module type Ops = sig
-  module Num : Num
-  module Total : Num
-  type key
-  type pair = key * Num.t
-  val choose : pair list -> pair
-  val roll : pair -> Total.t * Num.t
-  val trim : Total.t -> pair -> Num.t
+  include OpsBase
+  type step = Cap.t * Type.t
+  val choose : map -> Map.key
+  val roll : Map.key -> Cap.t -> map -> step
+end
+
+module type OpsAcc = sig
+  include OpsBase
+  type acc
+  type step = acc * Cap.t * Type.t
+  val choose : map -> Map.key
+  val roll : acc -> Map.key -> Cap.t -> map -> step
+end
+
+module Base (S : OpsBase) = struct
+  let add key v output =
+    let f = function
+      | Some x -> Some (S.Type.add v x)
+      | None -> Some v
+    in
+    S.Map.update key f output
+
+  let check cap input =
+    cap <= S.Cap.zero || S.Map.is_empty input
+
+  let sub key v input =
+    let f = function
+      | Some x ->
+          if x > v then Some (S.Type.sub x v) else None
+      | None -> None
+    in
+    S.Map.update key f input
 end
 
 module With (S : Ops) = struct
-  let zero = S.Num.zero
+  module Base = Base(S)
 
-  let add = Pair.eq_map S.Num.add
-  let sub = Pair.eq_map (Fn.flip S.Num.sub)
+  let rec from cap input output =
+    if Base.check cap input
+    then output
+    else
+      let key = S.choose input in
+      let cap', n = S.roll key cap input in
+      from (S.Cap.sub cap cap')
+        (Base.sub key n input)
+        (Base.add key n output)
+end
 
-  let clean = List.filter (fun (_, x) -> x > zero)
+module WithAcc (S : OpsAcc) = struct
+  module Base = Base(S)
 
-  let picked pair pairs output =
-    List.map (sub pair) pairs,
-    List.map (add pair) output
-
-  let pick cap pairs output =
-    let pair = S.choose pairs in
-    let key = fst pair in
-    let pwr, num = S.roll pair in
-    let pairs', output' =
-      if num > zero
-      then picked (key, num) pairs output
-      else pairs, output
-    in
-    S.Total.sub cap pwr, pairs', output'
-
-  let trim pairs cap =
-    pairs
-    |> List.map (fun pair -> fst pair, S.trim cap pair)
-    |> clean
-
-  let rec start (cap, pairs, output) =
-    match trim pairs cap with
-    | [] -> output
-    | pairs' -> start (pick cap pairs' output)
-
-  let from cap pairs =
-    let output = List.map (Pair.snd_set zero) pairs in
-    start (cap, pairs, output)
-    |> clean
+  let rec from acc cap input output =
+    if Base.check cap input
+    then acc, input, output
+    else
+      let key = S.choose input in
+      let acc', cap', n = S.roll acc key cap input in
+      from acc' (S.Cap.sub cap cap')
+        (Base.sub key n input)
+        (Base.add key n output)
 end
