@@ -183,6 +183,11 @@ let units2mnpstr t =
   |> manp2str
   |> sprintf "%s -> %s" (units2str t |> if_empty "no units")
 
+let units2work t =
+  Units.(filter Attr.can_build) t
+  |> Units.power
+  |> truncate
+
 let report_type2str = function
   | Attack.Accurate ls -> unit_pairs2str ls
   | Attack.Vague (count, kinds) ->

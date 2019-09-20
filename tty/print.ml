@@ -13,8 +13,7 @@ module Build = struct
 
   let manp need units =
     if need > 0 then
-    Units.workforce units
-    |> truncate
+    units2work units
     |> min need
     |> manp2str
     |> sprintf "%s for construction"

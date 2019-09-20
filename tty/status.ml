@@ -54,7 +54,7 @@ module With (S : State.S) = struct
   let res () =
     let m = S.Units.return Units.power |> truncate in
     let s = S.Supply.get () in
-    let w = S.Units.return Units.workforce |> truncate in
+    let w = S.Units.return Convert.units2work in
     Printf.sprintf "status: %s, %s (%s)"
       (Convert.sup2str s)
       (Convert.manp2str m)
