@@ -15,7 +15,6 @@ end
 
 module Barraged = struct
   type t = Defs.count
-  let coefficient = 0.05
   module Apply (S : State.S) = struct
     let value n = S.Enemy.map Units.(sub n Orc)
   end
@@ -23,11 +22,7 @@ module Barraged = struct
     let value = S.Barraging.get ()
   end
   module Make (S : State.S) = struct
-    let n =
-      Units.(filter_power Attr.can_barrage)
-      |> S.Units.return
-      |> ( *. ) coefficient
-      |> truncate
+    let n = S.Units.return Units.barrage_power |> truncate
     let value = S.Enemy.return Units.(find n Orc)
   end
 end

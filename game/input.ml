@@ -43,7 +43,7 @@ module Berserker = struct
     module Recruit = Recruit.With(S)
     let n = Units.(translate Men) kind |> S.Arena.return
     let cap = Recruit.(Missing.arena () |> affordable kind)
-    let value = S.Dice.roll n |> min cap
+    let value = min n cap
   end
 end
 
@@ -139,7 +139,7 @@ module Mercs = struct
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
-    let cap = S.Dice.between 10 30
+    let cap = S.Dice.between 10 20
     let value = Recruit.supply_limit kind cap
   end
 end

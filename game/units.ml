@@ -130,7 +130,8 @@ let make n kind =
   Map.singleton kind n
 
 let promotion_cost = function
-  | Ballista -> make 2 Men
+  | Ballista
+  | Berserker -> make 2 Men
   | Cavalry -> make 1 Men
   | Knight -> make 1 Cavalry
   | Ranger
@@ -222,6 +223,11 @@ let power t =
 
 let filter_power attr t =
   filter attr t |> power
+
+let barrage_power t =
+  let power = filter_power Attr.can_barrage t in
+  let bonus = Defs.to_power (count Ranger t) 1. in
+  (power +. bonus) *. 0.05
 
 let max_base_power t =
   Map.fold (fun k _ acc -> Base.power k |> max acc) t 0.
