@@ -130,7 +130,8 @@ let make n kind =
   Map.singleton kind n
 
 let promotion_cost = function
-  | Ballista -> make 2 Men
+  | Ballista
+  | Berserker -> make 2 Men
   | Cavalry -> make 1 Men
   | Knight -> make 1 Cavalry
   | Ranger
