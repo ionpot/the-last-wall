@@ -84,8 +84,7 @@ let deity () =
 
 let dervish cap =
   Tty.writeln (sprintf "%d dervish available" cap);
-  Tty.prompt_yn "accept? y/n"
-  |> either cap 0
+  Tty.prompt_amount cap
 
 let leader () =
   let ls = Game.Leader.kinds in
