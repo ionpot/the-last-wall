@@ -1,3 +1,6 @@
+let ceil_by ratio x =
+  ratio *. ceil (x /. ratio)
+
 let div a b =
   if b > 0. then a /. b else a
 

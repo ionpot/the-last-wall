@@ -103,6 +103,9 @@ let from_upkeep kind sup =
 let to_upkeep kind n =
   n * Base.upkeep_cost kind
 
+let ceil_power kind =
+  Base.power kind |> Float.ceil_by
+
 let mod_power kind n =
   Base.power kind |> mod_float n
 
@@ -297,10 +300,7 @@ module Dist = struct
   let no_remaining (_, m, _) = Map.is_empty m
   let outcome (_, _, m) = Map.mapi from_power m
   let reflected (a, _, _) = a.reflected
-  let remaining (_, m, _) =
-    m |> Map.mapi (fun kind n ->
-      from_power kind n +
-      if mod_power kind n > 0. then 1 else 0)
+  let remaining (_, m, _) = Map.(mapi ceil_power m |> mapi from_power)
 
   let heal kind n acc =
     let n', healed = heal kind n in
