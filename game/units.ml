@@ -87,8 +87,11 @@ let can_hit kind pwr =
 let to_dr kind n =
   Defs.to_power n (Base.dr kind)
 
+let from_powerf kind p =
+  p /. (Base.power kind)
+
 let from_power kind p =
-  Float.div p (Base.power kind)
+  from_powerf kind p
   |> truncate
 
 let to_power kind n =
