@@ -33,19 +33,17 @@ module Barrage = struct
 end
 
 module Berserker = struct
-  type t = bool * Defs.count
+  type t = Defs.count
   let kind = Units.Berserker
   module Apply (S : State.S) = struct
     module Recruit = Recruit.With(S)
-    let value (accepted, n) =
-      if accepted
-      then Recruit.promote kind n
-      else S.Units.map Units.(add n Men)
+    let value = Recruit.promote kind
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
+    let n = Units.(translate Men) kind |> S.Arena.return
     let cap = Recruit.(Missing.arena () |> affordable kind)
-    let value = false, S.Dice.roll 4 |> min cap
+    let value = S.Dice.roll n |> min cap
   end
 end
 

@@ -61,7 +61,9 @@ let base_cost_of kind =
   let a, b = base_cost kind in
   Resource.(empty <+ a <+ b)
 
-let manpwr_range _ = 0, 0
+let manpwr_range = function
+  | Arena -> (2, 8)
+  | _ -> (0, 0)
 
 let supply_range = function
   | Foundry -> (9, 15)
