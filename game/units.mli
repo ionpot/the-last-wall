@@ -33,6 +33,7 @@ val make : Defs.count -> kind -> t
 val cost : Defs.count -> kind -> t
 
 val affordable : kind -> Defs.count -> t -> Defs.count
+val barrage_power : t -> Defs.power
 val count : kind -> t -> Defs.count
 val count_all : t -> Defs.count
 val dr : t -> Defs.power
