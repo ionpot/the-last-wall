@@ -164,7 +164,7 @@ module Ops = struct
   let sub t_a t_b =
     let f _ a_opt = function
       | Some b -> Number.(sub_opt (maybe 0 a_opt) b)
-      | None -> None
+      | None -> a_opt
     in
     Map.merge f t_a t_b
 
@@ -290,7 +290,10 @@ module Dist = struct
   let no_remaining (_, m, _) = Map.is_empty m
   let outcome (_, _, m) = Map.mapi from_power m
   let reflected (a, _, _) = a.reflected
-  let remaining (_, m, _) = Map.mapi from_power m
+  let remaining (_, m, _) =
+    m |> Map.mapi (fun kind n ->
+      from_power kind n +
+      if mod_power kind n > 0. then 1 else 0)
 
   let heal kind n acc =
     let n', healed = heal kind n in
