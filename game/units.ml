@@ -164,7 +164,7 @@ module Ops = struct
   let sub t_a t_b =
     let f _ a_opt = function
       | Some b -> Number.(sub_opt (maybe 0 a_opt) b)
-      | None -> None
+      | None -> a_opt
     in
     Map.merge f t_a t_b
 
