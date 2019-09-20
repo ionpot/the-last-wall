@@ -54,6 +54,7 @@ module After (S : Status.S) = struct
     let open Phase.Input in
     function
       | Ballista (n, _) -> if n > 0 then S.res ()
+      | Berserker (ok, n) -> if n > 0 then begin if ok then S.berserker (); S.res () end
       | Dervish n -> if n > 0 then begin S.dervish (); S.res () end
       | LeaderNew ls -> S.new_leader ls
       | Knight n -> if n > 0 then S.res ()

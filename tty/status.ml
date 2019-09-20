@@ -1,6 +1,7 @@
 open Game
 
 module type S = sig
+  val berserker : unit -> unit
   val cavalry : Defs.count -> unit
   val dervish : unit -> unit
   val enemies : unit -> unit
@@ -16,6 +17,11 @@ module With (S : State.S) = struct
 
   let count kind =
     Units.count kind |> S.Units.return
+
+  let berserker () =
+    count Units.Berserker
+    |> sprintf "%d berserker in total"
+    |> Tty.writeln
 
   let cavalry n =
     count Units.Cavalry

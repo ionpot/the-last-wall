@@ -1,4 +1,5 @@
 module type S = sig
+  val berserker : unit -> unit
   val cavalry : Game.Defs.count -> unit
   val dervish : unit -> unit
   val enemies : unit -> unit
