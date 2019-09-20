@@ -124,6 +124,7 @@ module Facilities = struct
     let value =
       S.Build.return Build.ls_ready
       |> List.map (fun k -> k, to_res k)
+      |> List.filter (fun (_, r) -> r <> Resource.empty)
   end
 end
 
