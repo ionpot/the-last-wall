@@ -87,8 +87,11 @@ let can_hit kind pwr =
 let to_dr kind n =
   Defs.to_power n (Base.dr kind)
 
+let from_powerf kind p =
+  p /. (Base.power kind)
+
 let from_power kind p =
-  Float.div p (Base.power kind)
+  from_powerf kind p
   |> truncate
 
 let to_power kind n =
@@ -100,12 +103,19 @@ let from_upkeep kind sup =
 let to_upkeep kind n =
   n * Base.upkeep_cost kind
 
+let ceil_power kind =
+  Base.power kind |> Float.ceil_by
+
 let mod_power kind n =
   Base.power kind |> mod_float n
 
 let heal kind n =
   let pwr = Base.power kind in
   Float.floor_by pwr n, mod_float n pwr
+
+let translate kind_in kind_out n =
+  to_power kind_in n
+  |> from_power kind_out
 
 module Map = Map.Make(struct
   type t = kind
@@ -290,10 +300,7 @@ module Dist = struct
   let no_remaining (_, m, _) = Map.is_empty m
   let outcome (_, _, m) = Map.mapi from_power m
   let reflected (a, _, _) = a.reflected
-  let remaining (_, m, _) =
-    m |> Map.mapi (fun kind n ->
-      from_power kind n +
-      if mod_power kind n > 0. then 1 else 0)
+  let remaining (_, m, _) = Map.(mapi ceil_power m |> mapi from_power)
 
   let heal kind n acc =
     let n', healed = heal kind n in
@@ -325,11 +332,13 @@ module Dist = struct
         in acc', cap, sub
     end)
 
-    let from power t =
+    let from cap t =
       let acc = empty_acc in
       let input = Ops.powers t in
-      let output = Map.map (fun _ -> 0.) t in
-      Pick.from acc power input output
+      let output = Map.empty in
+      if cap > Ops.sumf input
+      then acc, output, input
+      else Pick.from acc cap input output
   end
 end
 
