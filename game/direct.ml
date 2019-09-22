@@ -146,6 +146,19 @@ module Starting = struct
   end
 end
 
+module Starvation = struct
+  type t = Units.t
+  module Apply (S : State.S) = struct
+    let value units =
+      S.Units.map Units.(reduce units);
+      S.Supply.map (max 0)
+  end
+  module Make (S : State.S) = struct
+    let cost = S.Supply.get () |> Number.sub 0
+    let value = S.Units.return (Units.starve cost)
+  end
+end
+
 module Support = struct
   type t = Support.t
   module Apply (S : State.S) = struct
