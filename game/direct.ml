@@ -147,21 +147,18 @@ module Starting = struct
 end
 
 module Support = struct
-  type t = Nation.support
+  type t = Support.t
   module Apply (S : State.S) = struct
     module AddRes = Event.AddRes(S)
     let value ls =
-      AddRes.value (Nation.sum ls);
-      S.Nation.map (Nation.update_chances ls)
+      AddRes.value (Support.sum ls);
+      Support.update_chances ls
+      |> Nation.map_chances
+      |> S.Nation.map
   end
   module Make (S : State.S) = struct
-    module Roll = Nation.Roll(S.Dice)
-    let bonus = S.Leader.return Leader.res_bonus_of
-    let trade = S.Build.return Build.trade
-    let value =
-      Roll.support trade
-      |> S.Nation.return
-      |> Nation.add bonus
+    module Roll = Support.Roll(S)
+    let value = S.Nation.return Roll.from
   end
 end
 

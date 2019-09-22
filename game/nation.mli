@@ -1,20 +1,26 @@
-type kind = Clan | Hekatium | Numendor | Sodistan | Tulron
-type support = (kind * Resource.t) list
-type trade = Boost of kind | Certain of kind | NoTrade
-type t
+open Defs
 
-val empty : t
+type kind = Clan | Hekatium | Numendor | Sodistan | Tulron
+type trade = Boost of kind | Certain of kind | NoTrade
+
 val kinds : kind list
 val max_allowed : int
 
-val add : Resource.t -> support -> support
-val sum : support -> Resource.t
+val ranges_of : kind -> manpower range * supply range
 
+module Chance : sig
+  type t
+  val of_kind : kind -> t -> float
+  val deduct : kind -> t -> t
+  val reset : kind -> t -> t
+end
+
+type t
+
+val empty : t
+
+val chances : t -> Chance.t
 val which : t -> kind list
 
 val chosen : kind list -> t -> t
-val update_chances : support -> t -> t
-
-module Roll : Dice.S -> sig
-  val support : trade -> t -> support
-end
+val map_chances : (Chance.t -> Chance.t) -> t -> t
