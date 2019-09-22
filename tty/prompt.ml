@@ -104,14 +104,24 @@ let mercs cap =
   Tty.writeln (sprintf "%d mercenaries available" cap);
   Tty.prompt_amount cap
 
-let nations chosen =
-  let ls = Game.Nation.kinds in
-  List.map (highlight chosen nation2str) ls
-  |> horizontal "nations";
-  Tty.prompt "choose"
-  |> choose_from ls
-  |> Listx.pick_first Game.Nation.max_allowed
-  |> swap_empty chosen
+module Nations (S : Game.State.S) = struct
+  module Support = Game.Support.Roll(S)
+
+  let to_str kind =
+    Support.chance_of kind
+    |> S.Nation.return
+    |> percent2intstr
+    |> sprintf "%s (%s)" (nation2str kind)
+
+  let from chosen =
+    let ls = Game.Nation.kinds in
+    List.map (highlight chosen to_str) ls
+    |> horizontal "nations";
+    Tty.prompt "choose"
+    |> choose_from ls
+    |> Listx.pick_first Game.Nation.max_allowed
+    |> swap_empty chosen
+end
 
 let ranger cap =
   Tty.writeln (sprintf "can promote %d dervish to ranger" cap);

@@ -16,7 +16,9 @@ module Make (S : Game.State.S) = struct
       | LeaderNew ls -> LeaderNew (Prompt.new_leader ls)
       | Knight count -> Knight (check Prompt.knight count)
       | Mercs count -> Mercs (Prompt.mercs count)
-      | Nations chosen -> Nations (Prompt.nations chosen)
+      | Nations chosen ->
+          let module Prompt = Prompt.Nations(S) in
+          Nations (Prompt.from chosen)
       | Ranger count -> Ranger (check Prompt.ranger count)
       | Templar count -> Templar (check Prompt.templar count)
       | Trade _ -> Trade (Prompt.trade ())

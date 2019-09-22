@@ -17,6 +17,10 @@ let str2chars str =
   in
   next (String.length str) []
 
+let percent2intstr x =
+  truncate (x *. 100.)
+  |> sprintf "%d%%"
+
 let percent2str x =
   sprintf "%.2f%%" (x *. 100.)
 
