@@ -104,12 +104,12 @@ let disease (units, died) ldr =
   Tty.pairln "died" (units2str units |> str2none);
   if died then Leader.died ldr
 
-let support ls =
+let support s =
   let f res =
     if res = Resource.empty then "nothing"
     else res2str res
   in
-  ls
+  Support.ls s
   |> List.map (fun (nat, res) -> (nation2str nat, f res))
   |> List.map (fun (nat, res) -> sprintf "%s sent %s" nat res)
   |> Tty.writelns

@@ -4,6 +4,10 @@ let ls = [Jan; Feb; Mar; Apr; May; Jun; Jul; Aug; Sep; Oct; Nov; Dec]
 
 let empty = Jan
 
+let is_winter = function
+  | Jan | Feb | Dec -> true
+  | _ -> false
+
 let next = function
   | Jan -> Feb
   | Feb -> Mar
