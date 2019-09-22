@@ -150,7 +150,9 @@ module Support = struct
   type t = Nation.support
   module Apply (S : State.S) = struct
     module AddRes = Event.AddRes(S)
-    let value ls = AddRes.value (Nation.sum ls)
+    let value ls =
+      AddRes.value (Nation.sum ls);
+      S.Nation.map (Nation.update_chances ls)
   end
   module Make (S : State.S) = struct
     module Roll = Nation.Roll(S.Dice)

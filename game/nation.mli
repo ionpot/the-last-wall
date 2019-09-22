@@ -13,6 +13,7 @@ val sum : support -> Resource.t
 val which : t -> kind list
 
 val chosen : kind list -> t -> t
+val update_chances : support -> t -> t
 
 module Roll : Dice.S -> sig
   val support : trade -> t -> support
