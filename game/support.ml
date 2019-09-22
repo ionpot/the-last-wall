@@ -30,21 +30,23 @@ module Roll (S : State.S) = struct
 
   let roll (a, b) = S.Dice.between a b
 
-  let roll_chance kind nats =
+  let chance_of kind nats =
     let starved = Defs.to_power starved 0.01 in
     let winter = S.Month.check Month.is_winter in
-    Nation.chances nats
-    |> Chance.of_kind kind
-    |> Float.sub_if winter 0.1
-    |> Float.sub_by starved
-    |> S.Dice.chance
+    if trade = Nation.Certain kind
+    then 1.0
+    else
+      Nation.chances nats
+      |> Chance.of_kind kind
+      |> Float.sub_if winter 0.1
+      |> Float.sub_by starved
 
   let roll_res kind =
     let (a, b) = Nation.ranges_of kind in
     Resource.(of_manp (roll a) <+ Supply (roll b))
 
   let to_res kind nats =
-    if trade = Certain kind || roll_chance kind nats
+    if chance_of kind nats |> S.Dice.chance
     then roll_res kind |> bonuses kind
     else Resource.empty
 
