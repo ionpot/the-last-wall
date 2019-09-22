@@ -27,16 +27,13 @@ module Roll (S : State.S) = struct
     let trade = if trade = Nation.Boost kind then 10 else 0 in
     Resource.(res ++ leader ++ of_supp trade)
 
-  let chances chance =
-    let winter = S.Month.check Month.is_winter in
-    chance -. if winter then 0.1 else 0.
-
   let roll (a, b) = S.Dice.between a b
 
   let roll_chance kind nats =
+    let winter = S.Month.check Month.is_winter in
     Nation.chances nats
     |> Chance.of_kind kind
-    |> chances
+    |> Float.sub_if winter 0.1
     |> S.Dice.chance
 
   let roll_res kind =

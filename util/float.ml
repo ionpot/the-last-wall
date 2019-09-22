@@ -1,3 +1,6 @@
+let add_if cond a b =
+  if cond then a +. b else b
+
 let ceil_by ratio x =
   ratio *. ceil (x /. ratio)
 
@@ -7,6 +10,12 @@ let div a b =
 let floor_by ratio x =
   ratio *. floor (x /. ratio)
 
+let if_ok x cond =
+  if cond then x else 0.
+
+let if_not x cond =
+  if cond then 0. else x
+
 let increase x ratio =
   x +. x *. ratio
 
@@ -15,6 +24,11 @@ let reduce x ratio =
 
 let sub a b =
   if a < b then 0. else a -. b
+
+let sub_by a b = sub b a
+
+let sub_if cond a b =
+  if cond then b -. a else b
 
 let sub_opt a b =
   if a > b then Some (a -. b) else None
