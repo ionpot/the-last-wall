@@ -102,22 +102,6 @@ module Revive = struct
   end
 end
 
-module Starvation = struct
-  type t = Units.t
-  module Apply (S : State.S) = struct
-    let value units =
-      S.Units.map Units.(reduce units);
-      S.Supply.clear ()
-  end
-  module Check (S : State.S) = struct
-    let value = S.Supply.ngv ()
-  end
-  module Make (S : State.S) = struct
-    let cost = -S.Supply.get ()
-    let value = S.Units.return (Units.starve cost)
-  end
-end
-
 module Smite = struct
   type t = Defs.count
   module Apply (S : State.S) = struct

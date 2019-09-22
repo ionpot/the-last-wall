@@ -146,20 +146,33 @@ module Starting = struct
   end
 end
 
-module Support = struct
-  type t = Nation.support
+module Starvation = struct
+  type t = Units.t
   module Apply (S : State.S) = struct
-    module AddRes = Event.AddRes(S)
-    let value ls = AddRes.value (Nation.sum ls)
+    let value units =
+      S.Units.map Units.(reduce units);
+      S.Starved.set units;
+      S.Supply.map (max 0)
   end
   module Make (S : State.S) = struct
-    module Roll = Nation.Roll(S.Dice)
-    let bonus = S.Leader.return Leader.res_bonus_of
-    let trade = S.Build.return Build.trade
-    let value =
-      Roll.support trade
-      |> S.Nation.return
-      |> Nation.add bonus
+    let cost = S.Supply.get () |> Number.sub 0
+    let value = S.Units.return (Units.starve cost)
+  end
+end
+
+module Support = struct
+  type t = Support.t
+  module Apply (S : State.S) = struct
+    module AddRes = Event.AddRes(S)
+    let value ls =
+      AddRes.value (Support.sum ls);
+      Support.update_chances ls
+      |> Nation.map_chances
+      |> S.Nation.map
+  end
+  module Make (S : State.S) = struct
+    module Roll = Support.Roll(S)
+    let value = S.Nation.return Roll.from
   end
 end
 
