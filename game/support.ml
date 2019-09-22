@@ -20,6 +20,7 @@ let update_chances t chances =
   List.fold_left f chances t
 
 module Roll (S : State.S) = struct
+  let starved = S.Starved.return Units.count_all
   let trade = S.Build.return Build.trade
 
   let bonuses kind res =
@@ -30,10 +31,12 @@ module Roll (S : State.S) = struct
   let roll (a, b) = S.Dice.between a b
 
   let roll_chance kind nats =
+    let starved = Defs.to_power starved 0.01 in
     let winter = S.Month.check Month.is_winter in
     Nation.chances nats
     |> Chance.of_kind kind
     |> Float.sub_if winter 0.1
+    |> Float.sub_by starved
     |> S.Dice.chance
 
   let roll_res kind =

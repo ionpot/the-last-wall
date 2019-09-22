@@ -151,6 +151,7 @@ module Starvation = struct
   module Apply (S : State.S) = struct
     let value units =
       S.Units.map Units.(reduce units);
+      S.Starved.set units;
       S.Supply.map (max 0)
   end
   module Make (S : State.S) = struct
