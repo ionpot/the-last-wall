@@ -240,6 +240,11 @@ let promotable kind t =
   if Map.is_empty m then 0
   else Ops.min m
 
+let ratio_of kind t =
+  let n = count kind t in
+  let sum = Ops.sum t in
+  Float.div (float n) (float sum)
+
 let report = Map.bindings
 
 let untouchable t_atk t_dfn =
@@ -285,6 +290,9 @@ let pick_w t n =
   Map.fold f t (key, n) |> fst
 
 module Dist = struct
+  let ceil_count m =
+    Map.(mapi ceil_power m |> mapi from_power)
+
   type acc =
     { absorbed : Defs.power;
       healed : Defs.power;
@@ -306,7 +314,7 @@ module Dist = struct
   let no_remaining (_, m, _) = Map.is_empty m
   let outcome (_, _, m) = Map.mapi from_power m
   let reflected (a, _, _) = a.reflected
-  let remaining (_, m, _) = Map.(mapi ceil_power m |> mapi from_power)
+  let remaining (_, m, _) = ceil_count m
 
   let heal kind n acc =
     let n', healed = heal kind n in
@@ -325,9 +333,15 @@ module Dist = struct
       else acc, dmg
     in acc', dmg, sub
 
+  let pick kind input cap =
+    let ratio = ceil_count input |> ratio_of kind in
+    max (ratio *. cap) 0.1
+    |> min (Map.find kind input)
+
   module Roll (Dice : Dice.S) = struct
-    let rollf x =
-      if x > 1. then Dice.rollf (x -. 1.) +. 1. else x
+    let ratio cap =
+      let x = 8. in
+      if cap > x then Dice.ratio x *. cap else cap
 
     module Pick = Pick.WithAcc(struct
       module Cap = Pick.Float
@@ -340,7 +354,7 @@ module Dist = struct
         let probs = Map.mapi (fun k _ -> Base.hit_chance k) input in
         Ops.sumf probs |> Dice.rollf |> pick_w probs
       let roll acc kind cap input =
-        Map.find kind input |> min cap |> rollf |> handle kind acc
+        ratio cap |> pick kind input |> handle kind acc
     end)
 
     let from cap t =
