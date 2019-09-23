@@ -1,6 +1,9 @@
 let add_if cond a b =
   if cond then a +. b else b
 
+let add_if_ptv a b =
+  add_if (b > 0.) a b
+
 let ceil_by ratio x =
   ratio *. ceil (x /. ratio)
 

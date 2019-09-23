@@ -12,12 +12,13 @@ let sum =
   List.fold_left f Resource.empty
 
 let update_chances t chances =
-  let f cmap (kind, res) =
-    if res = Resource.empty
-    then Chance.deduct kind cmap
-    else Chance.reset kind cmap
+  let empty = List.filter (fun (_, res) -> res = Resource.empty) t in
+  let f cmap kind =
+    if List.mem_assoc kind empty
+    then Chance.reduce kind cmap
+    else Chance.increase kind cmap
   in
-  List.fold_left f chances t
+  List.fold_left f chances Nation.kinds
 
 module Roll (S : State.S) = struct
   let starved = S.Starved.return Units.count_all

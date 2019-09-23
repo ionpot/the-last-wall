@@ -24,15 +24,14 @@ let ranges_of =
 module Chance = struct
   type t = float Map.t
   let base = 0.8
+  let step = 0.1
   let base_map : t =
     let f m k = Map.add k base m in
     List.fold_left f Map.empty kinds
   let of_kind = Map.find
-  let deduct k map =
-    let c = of_kind k map -. 0.1 in
-    Map.add k c map
-  let reset k map =
-    Map.add k base map
+  let map f k t = Map.add k (of_kind k t |> f) t
+  let increase = map (fun c -> Float.add_if_ptv step c |> min base)
+  let reduce = map (Float.sub_by step)
 end
 
 type t =
