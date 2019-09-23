@@ -316,6 +316,15 @@ module Dist = struct
     let n' = mod_power kind n in
     { acc with reflected = acc.reflected +. n' }, n
 
+  let handle kind acc dmg =
+    let acc', sub =
+      if Attr.can_heal kind
+      then heal kind dmg acc
+      else if Attr.can_reflect kind
+      then reflect kind dmg acc
+      else acc, dmg
+    in acc', dmg, sub
+
   module Roll (Dice : Dice.S) = struct
     let rollf x =
       if x > 1. then Dice.rollf (x -. 1.) +. 1. else x
@@ -331,14 +340,7 @@ module Dist = struct
         let probs = Map.mapi (fun k _ -> Base.hit_chance k) input in
         Ops.sumf probs |> Dice.rollf |> pick_w probs
       let roll acc kind cap input =
-        let cap = Map.find kind input |> min cap |> rollf in
-        let acc', sub =
-          if Attr.can_heal kind
-          then heal kind cap acc
-          else if Attr.can_reflect kind
-          then reflect kind cap acc
-          else acc, cap
-        in acc', cap, sub
+        Map.find kind input |> min cap |> rollf |> handle kind acc
     end)
 
     let from cap t =
