@@ -10,9 +10,9 @@ val ranges_of : kind -> manpower range * supply range
 
 module Chance : sig
   type t
+  val increase : kind -> t -> t
   val of_kind : kind -> t -> float
-  val deduct : kind -> t -> t
-  val reset : kind -> t -> t
+  val reduce : kind -> t -> t
 end
 
 type t
