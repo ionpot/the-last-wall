@@ -19,6 +19,7 @@ module type S = sig
   val pop : 'a list -> 'a * 'a list
   val range : int * int -> int
   val rangef_times_try : int -> float * float -> float
+  val ratio : float -> float
   val roll : int -> int
   val rollf : float -> float
   val round : float -> int
