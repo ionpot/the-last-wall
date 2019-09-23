@@ -317,6 +317,9 @@ module Dist = struct
     { acc with reflected = acc.reflected +. n' }, n
 
   module Roll (Dice : Dice.S) = struct
+    let rollf x =
+      if x > 1. then Dice.rollf (x -. 1.) +. 1. else x
+
     module Pick = Pick.WithAcc(struct
       module Cap = Pick.Float
       module Map = Map
@@ -328,7 +331,7 @@ module Dist = struct
         let probs = Map.mapi (fun k _ -> Base.hit_chance k) input in
         Ops.sumf probs |> Dice.rollf |> pick_w probs
       let roll acc kind cap input =
-        let cap = Map.find kind input |> min cap |> Dice.rollf in
+        let cap = Map.find kind input |> min cap |> rollf in
         let acc', sub =
           if Attr.can_heal kind
           then heal kind cap acc
