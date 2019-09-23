@@ -335,6 +335,7 @@ module Dist = struct
 
   let pick kind input cap =
     let ratio = ceil_count input |> ratio_of kind in
+    Printf.printf " -> %.3f uratio" ratio;
     max (ratio *. cap) 0.1
     |> min (Map.find kind input)
 
@@ -354,7 +355,10 @@ module Dist = struct
         let probs = Map.mapi (fun k _ -> Base.hit_chance k) input in
         Ops.sumf probs |> Dice.rollf |> pick_w probs
       let roll acc kind cap input =
-        ratio cap |> pick kind input |> handle kind acc
+        ratio cap
+        |> (fun r -> Printf.printf "%.3f cap -> %.3f ratio" cap r; r)
+        |> pick kind input |> handle kind acc
+        |> (fun (a, d, s) -> Printf.printf " -> %.3f out\n" d;a,d,s)
     end)
 
     let from cap t =
