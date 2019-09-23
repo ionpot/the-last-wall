@@ -1,4 +1,5 @@
 module type S = sig
+  module Arena : Value.Num
   module Ballista : Value.Num
   module Barraging : Value.Bit
   module Build : Value.S with type t = Build.t
@@ -14,6 +15,7 @@ module type S = sig
   module Month : Value.S with type t = Month.t
   module Nation : Value.S with type t = Nation.t
   module Scout : Value.Bit
+  module Starved : Value.S with type t = Units.t
   module Supply : Value.Num
   module Turn : Value.Num
   module Units : Value.S with type t = Units.t
@@ -21,6 +23,7 @@ module type S = sig
 end
 
 module Make (D : Dice.From) : S = struct
+  module Arena = Value.Num(Value.Zero)
   module Ballista = Value.Num(Value.Zero)
   module Barraging = Value.Bit(Value.False)
   module Build = Value.From(Build)
@@ -36,6 +39,7 @@ module Make (D : Dice.From) : S = struct
   module Month = Value.From(Month)
   module Nation = Value.From(Nation)
   module Scout = Value.Bit(Value.False)
+  module Starved = Value.From(Units)
   module Supply = Value.Num(Value.Zero)
   module Turn = Value.Num(Value.Zero)
   module Units = Value.From(Units)

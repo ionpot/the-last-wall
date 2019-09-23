@@ -6,6 +6,11 @@ module With (S : State.S) = struct
     then 3, 12 else 2, 8
 
   module Missing = struct
+    let arena () =
+      Units.(count Berserker)
+      |> S.Units.return
+      |> Number.sub (S.Build.return Build.arena_cap)
+
     let stable () =
       Units.(filter_count Attr.is_cavalry)
       |> S.Units.return
@@ -19,8 +24,10 @@ module With (S : State.S) = struct
 
   let supply_limit kind cap =
     let cost = Base.supply_cost kind in
-    let supp = S.Supply.get () in
-    min cap (Number.div supp cost)
+    if cost > 0 then
+      let supp = S.Supply.get () in
+      min cap (supp / cost)
+    else cap
 
   let exclude () =
     let n = S.Dervish.get () in

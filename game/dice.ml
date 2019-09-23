@@ -31,8 +31,7 @@ module From (M : From) : S = struct
   let roll i =
     if i > 0 then index i + 1 else 0
 
-  let rollf x =
-    if x > 1. then M.float (x -. 1.) +. 1. else x
+  let rollf = M.float
 
   let between x y =
     let d = y - x in

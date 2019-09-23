@@ -1,5 +1,6 @@
 module With : State.S -> sig
   module Missing : sig
+    val arena : unit -> Defs.count
     val stable : unit -> Defs.count
     val temple : unit -> Defs.count
   end

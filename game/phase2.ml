@@ -5,6 +5,7 @@ module Input = struct
 
   type event =
     | Ballista of Event.Ballista.t
+    | Berserker of Event.Berserker.t
     | Build of Event.BuildAvlb.t
     | Dervish of Event.Dervish.t
     | Knight of Event.Knight.t
@@ -20,6 +21,7 @@ module Input = struct
     module Apply = Phase.Apply(State)
     let event = function
       | Ballista x -> Apply.value x (module Event.Ballista)
+      | Berserker x -> Apply.value x (module Event.Berserker)
       | Build x -> Apply.value x (module Event.BuildAvlb)
       | Dervish x -> Apply.value x (module Event.Dervish)
       | Knight x -> Apply.value x (module Event.Knight)
@@ -44,8 +46,7 @@ module Output = struct
     | Defeat
     | Disease of Cond.Disease.t
     | Facilities of Direct.Facilities.t
-    | Market of Cond.Market.t
-    | Starvation of Cond.Starvation.t
+    | Starvation of Direct.Starvation.t
     | Support of Direct.Support.t
     | Turn of Direct.Turn.t
     | Upkeep of Direct.Upkeep.t
@@ -60,12 +61,16 @@ module Convert = struct
     let direct : Convert.direct = function
       | Steps.Ballista -> (module struct module Event = Event.Ballista
           let make x = Input.Ballista x end)
+      | Steps.Berserker -> (module struct module Event = Event.Berserker
+          let make x = Input.Berserker x end)
       | Steps.Build -> (module struct module Event = Event.BuildAvlb
           let make x = Input.Build x end)
       | Steps.Dervish -> (module struct module Event = Event.Dervish
           let make x = Input.Dervish x end)
       | Steps.Knight -> (module struct module Event = Event.Knight
           let make x = Input.Knight x end)
+      | Steps.Mercs -> (module struct module Event = Event.Mercs
+          let make x = Input.Mercs x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)
       | Steps.Volunteers -> (module struct module Event = Event.Volunteers
@@ -74,8 +79,6 @@ module Convert = struct
     let cond : Convert.cond = function
       | Steps.LeaderNew -> (module struct module Event = Event.LeaderNew
           let make x = Input.LeaderNew x end)
-      | Steps.Mercs -> (module struct module Event = Event.Mercs
-          let make x = Input.Mercs x end)
       | Steps.Ranger -> (module struct module Event = Event.Ranger
           let make x = Input.Ranger x end)
       | Steps.Templar -> (module struct module Event = Event.Templar
@@ -95,10 +98,6 @@ module Convert = struct
           let make () = Output.Defeat end)
       | Steps.Disease -> (module struct module Event = Cond.Disease
           let make x = Output.Disease x end)
-      | Steps.Market -> (module struct module Event = Cond.Market
-          let make x = Output.Market x end)
-      | Steps.Starvation -> (module struct module Event = Cond.Starvation
-          let make x = Output.Starvation x end)
 
     let direct : Convert.direct = function
       | Steps.Attack -> (module struct module Event = Direct.Attack
@@ -115,6 +114,8 @@ module Convert = struct
           let make x = Output.Cavalry x end)
       | Steps.Facilities -> (module struct module Event = Direct.Facilities
           let make x = Output.Facilities x end)
+      | Steps.Starvation -> (module struct module Event = Direct.Starvation
+          let make x = Output.Starvation x end)
       | Steps.Support -> (module struct module Event = Direct.Support
           let make x = Output.Support x end)
       | Steps.Turn -> (module struct module Event = Direct.Turn

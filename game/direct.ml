@@ -16,20 +16,6 @@ module Attack = struct
   end
 end
 
-module Ballista = struct
-  type t = Defs.count * Units.t
-  let power = 2.
-  module Apply (S : State.S) = struct
-    let value (_, enemies) = S.Enemy.map (Units.reduce enemies)
-  end
-  module Make (S : State.S) = struct
-    module Roll = Units.Fill(S.Dice)
-    let count = S.Units.return Units.(count Ballista)
-    let power' = Defs.to_power count power
-    let value = count, S.Enemy.return (Roll.from power')
-  end
-end
-
 module Blessing = struct
   type t = Resource.t
   module Apply = Event.AddRes
@@ -116,36 +102,29 @@ module Combat = struct
   module Make = Combat.Make
 end
 
-module Cyclops = struct
-  type t = Defs.count * Units.t
-  let power = 2.
-  module Apply (S : State.S) = struct
-    let value (_, loss) =
-      S.Casualty.map (Units.combine loss);
-      S.Units.map (Units.reduce loss)
-  end
-  module Make (S : State.S) = struct
-    module Roll = Units.Fill(S.Dice)
-    let count = S.Enemy.return Units.(count Cyclops)
-    let power' = Defs.to_power count power
-    let value = count, S.Units.return (Roll.from power')
-  end
-end
-
 module Facilities = struct
-  type t = (Build.kind * Defs.supply) list
-  let kinds = Build.([Foundry; Sawmill; Tavern])
+  type t = (Build.kind * Resource.t) list
+  let arena = Build.Arena
   module Apply (S : State.S) = struct
-    let value t = List.map snd t |> Listx.sum |> S.Supply.add
+    module Add = Event.AddRes(S)
+    let value t =
+      List.map snd t |> List.iter Add.value;
+      if List.mem_assoc arena t
+      then List.assoc arena t |> Resource.manp_of |> S.Arena.set
+      else S.Arena.clear ()
   end
   module Make (S : State.S) = struct
-    let is_ready kind = S.Build.check Build.(ready kind)
-    let kinds' = List.filter is_ready kinds
+    let disease = S.Disease.get ()
+    let to_mnp k = Build.manpwr_range k |> S.Dice.range
+    let to_sup k = Build.supply_range k |> S.Dice.range
+    let to_res k =
+      Resource.bonus_to
+      Resource.(empty <+ Supply (to_sup k) <+ Manpwr (to_mnp k))
+      Resource.Bonus.(Sub (Both disease))
     let value =
-      List.map Build.supply_range kinds'
-      |> List.map S.Dice.range
-      |> List.map (S.Disease.return Number.reduce_by)
-      |> List.combine kinds'
+      S.Build.return Build.ls_ready
+      |> List.map (fun k -> k, to_res k)
+      |> List.filter (fun (_, r) -> r <> Resource.empty)
   end
 end
 
@@ -167,20 +146,33 @@ module Starting = struct
   end
 end
 
-module Support = struct
-  type t = Nation.support
+module Starvation = struct
+  type t = Units.t
   module Apply (S : State.S) = struct
-    module AddRes = Event.AddRes(S)
-    let value ls = AddRes.value (Nation.sum ls)
+    let value units =
+      S.Units.map Units.(reduce units);
+      S.Starved.set units;
+      S.Supply.map (max 0)
   end
   module Make (S : State.S) = struct
-    module Roll = Nation.Roll(S.Dice)
-    let bonus = S.Leader.return Leader.res_bonus_of
-    let trade = S.Build.return Build.trade
-    let value =
-      Roll.support trade
-      |> S.Nation.return
-      |> Nation.add bonus
+    let cost = S.Supply.get () |> Number.sub 0
+    let value = S.Units.return (Units.starve cost)
+  end
+end
+
+module Support = struct
+  type t = Support.t
+  module Apply (S : State.S) = struct
+    module AddRes = Event.AddRes(S)
+    let value ls =
+      AddRes.value (Support.sum ls);
+      Support.update_chances ls
+      |> Nation.map_chances
+      |> S.Nation.map
+  end
+  module Make (S : State.S) = struct
+    module Roll = Support.Roll(S)
+    let value = S.Nation.return Roll.from
   end
 end
 

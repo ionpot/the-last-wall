@@ -1,6 +1,20 @@
+module Ballista = struct
+  type t = Defs.count * Units.t
+  let power = 2.
+  module Apply (S : State.S) = struct
+    let value (_, enemies) = S.Enemy.map (Units.reduce enemies)
+  end
+  module Check = Check.NoFog
+  module Make (S : State.S) = struct
+    module Roll = Units.Fill(S.Dice)
+    let count = S.Units.return Units.(count Ballista)
+    let power' = Defs.to_power count power
+    let value = count, S.Enemy.return (Roll.from power')
+  end
+end
+
 module Barraged = struct
   type t = Defs.count
-  let coefficient = 0.05
   module Apply (S : State.S) = struct
     let value n = S.Enemy.map Units.(sub n Orc)
   end
@@ -8,12 +22,25 @@ module Barraged = struct
     let value = S.Barraging.get ()
   end
   module Make (S : State.S) = struct
-    let n =
-      Units.(filter_power Attr.can_barrage)
-      |> S.Units.return
-      |> ( *. ) coefficient
-      |> truncate
+    let n = S.Units.return Units.barrage_power |> truncate
     let value = S.Enemy.return Units.(find n Orc)
+  end
+end
+
+module Cyclops = struct
+  type t = Defs.count * Units.t
+  let power = 2.
+  module Apply (S : State.S) = struct
+    let value (_, loss) =
+      S.Casualty.map (Units.combine loss);
+      S.Units.map (Units.reduce loss)
+  end
+  module Check = Check.NoFog
+  module Make (S : State.S) = struct
+    module Roll = Units.Fill(S.Dice)
+    let count = S.Enemy.return Units.(count Cyclops)
+    let power' = Defs.to_power count power
+    let value = count, S.Units.return (Roll.from power')
   end
 end
 
@@ -57,22 +84,6 @@ module Disease = struct
   end
 end
 
-module Market = struct
-  type t = Defs.supply
-  module Apply (S : State.S) = struct
-    let value = S.Supply.add
-  end
-  module Check (S : State.S) = struct
-    let value = S.Build.check Build.(ready Market)
-  end
-  module Make (S : State.S) = struct
-    let value =
-      Build.(supply_range Market)
-      |> S.Dice.range
-      |> S.Disease.return Number.reduce_by
-  end
-end
-
 module Revive = struct
   type t = Units.t
   module Apply (S : State.S) = struct
@@ -88,22 +99,6 @@ module Revive = struct
       Units.(filter Attr.is_revivable)
       |> S.Casualty.return
       |> Fill.from pwr
-  end
-end
-
-module Starvation = struct
-  type t = Units.t
-  module Apply (S : State.S) = struct
-    let value units =
-      S.Units.map Units.(reduce units);
-      S.Supply.clear ()
-  end
-  module Check (S : State.S) = struct
-    let value = S.Supply.ngv ()
-  end
-  module Make (S : State.S) = struct
-    let cost = -S.Supply.get ()
-    let value = S.Units.return (Units.starve cost)
   end
 end
 

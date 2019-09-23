@@ -11,7 +11,9 @@ module Make (S : Game.State.S) = struct
           Build (S.Build.return (Prompt.from avlb))
       | Deity _ -> Deity (Prompt.deity ())
       | Leader _ -> Leader (Prompt.leader ())
-      | Nations chosen -> Nations (Prompt.nations chosen)
+      | Nations chosen ->
+          let module Prompt = Prompt.Nations(S) in
+          Nations (Prompt.from chosen)
       | Scout _ -> Scout (Prompt.scout ())
       | Volunteers n -> Volunteers (check Prompt.volunteers n)
 

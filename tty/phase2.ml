@@ -7,6 +7,7 @@ module Make (S : Game.State.S) = struct
     function
       | Ballista (avlb, have) ->
           Ballista (check (Prompt.ballista have) avlb, have)
+      | Berserker avlb -> Berserker (check Prompt.berserker avlb)
       | Build avlb ->
           let module Prompt = Prompt.Build(S) in
           S.Build.return Print.Build.all;
@@ -15,7 +16,9 @@ module Make (S : Game.State.S) = struct
       | LeaderNew ls -> LeaderNew (Prompt.new_leader ls)
       | Knight count -> Knight (check Prompt.knight count)
       | Mercs count -> Mercs (Prompt.mercs count)
-      | Nations chosen -> Nations (Prompt.nations chosen)
+      | Nations chosen ->
+          let module Prompt = Prompt.Nations(S) in
+          Nations (Prompt.from chosen)
       | Ranger count -> Ranger (check Prompt.ranger count)
       | Templar count -> Templar (check Prompt.templar count)
       | Trade _ -> Trade (Prompt.trade ())
@@ -39,8 +42,7 @@ module Make (S : Game.State.S) = struct
       | Defeat -> Tty.writeln "defeat"
       | Disease x -> Print.disease x |> S.Leader.return
       | Facilities ls -> Tty.ifpairln "facilities" (facs2str ls)
-      | Market sup -> Tty.pairln "market" (sup2str sup)
-      | Starvation units -> Tty.pairln "starvation" (units2str units)
+      | Starvation units -> Tty.ifpairln "starvation" (units2str units)
       | Support s -> Print.support s
       | Turn t -> Tty.lnwriteln (turn2str t)
       | Upkeep sup -> Tty.pairln "upkeep" (sup2str sup)
@@ -51,6 +53,7 @@ module After (S : Status.S) = struct
     let open Phase.Input in
     function
       | Ballista (n, _) -> if n > 0 then S.res ()
+      | Berserker n -> if n > 0 then begin S.berserker (); S.res () end
       | Dervish n -> if n > 0 then begin S.dervish (); S.res () end
       | LeaderNew ls -> S.new_leader ls
       | Knight n -> if n > 0 then S.res ()
@@ -67,7 +70,6 @@ module After (S : Status.S) = struct
       | BuildSupply s -> if s > 0 then S.res ()
       | Cavalry n -> if n > 0 then begin S.cavalry n; S.res () end
       | Facilities ls -> if ls <> [] then S.res ()
-      | Market _
       | Starvation _
       | Support _
       | Upkeep _ -> S.res ()

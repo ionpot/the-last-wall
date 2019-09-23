@@ -1,7 +1,10 @@
 type degree = Light | Heavy
 type t =
+  | Breeze
   | Clear
   | Cloudy
+  | Fog
+  | Heat
   | Wind
   | Rain of degree
   | Snow of degree
