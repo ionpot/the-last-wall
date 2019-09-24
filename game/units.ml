@@ -290,6 +290,8 @@ let pick_w t n =
   Map.fold f t (key, n) |> fst
 
 module Dist = struct
+  let threshold = 8.
+
   let ceil_count m =
     Map.(mapi ceil_power m |> mapi from_power)
 
@@ -333,15 +335,19 @@ module Dist = struct
       else acc, dmg
     in acc', dmg, sub
 
-  let pick kind input cap =
+  let mitigate kind input cap =
     let ratio = ceil_count input |> ratio_of kind in
     max (ratio *. cap) 0.1
+
+  let pick kind input cap =
+    (if cap > threshold then mitigate kind input cap else cap)
     |> min (Map.find kind input)
 
   module Roll (Dice : Dice.S) = struct
     let ratio cap =
-      let x = 8. in
-      if cap > x then Dice.ratio x *. cap else cap
+      if cap > threshold
+      then Dice.ratio threshold *. cap
+      else cap
 
     module Pick = Pick.WithAcc(struct
       module Cap = Pick.Float
