@@ -290,6 +290,8 @@ let pick_w t n =
   Map.fold f t (key, n) |> fst
 
 module Dist = struct
+  let threshold = 8.
+
   let ceil_count m =
     Map.(mapi ceil_power m |> mapi from_power)
 
@@ -349,16 +351,21 @@ module Dist = struct
     | Skeleton -> "skeleton"
     | Templar -> "templar"
 
-  let pick kind input cap =
+  let mitigate kind input cap =
     let ratio = ceil_count input |> ratio_of kind in
-    Printf.printf " -> %.3f %s" ratio (unit2str kind);
+    Printf.printf " -> %.3f ratio" ratio;
     max (ratio *. cap) 0.1
+
+  let pick kind input cap =
+    (if cap > threshold then mitigate kind input cap else cap)
     |> min (Map.find kind input)
 
   module Roll (Dice : Dice.S) = struct
     let ratio cap =
-      let x = 8. in
-      if cap > x then Dice.ratio x *. cap else cap
+      if cap > threshold
+      then (Dice.ratio threshold *. cap)
+        |> (fun r -> Printf.printf " -> %.3f divided" r;r)
+      else cap
 
     module Pick = Pick.WithAcc(struct
       module Cap = Pick.Float
@@ -371,10 +378,10 @@ module Dist = struct
         let probs = Map.mapi (fun k _ -> Base.hit_chance k) input in
         Ops.sumf probs |> Dice.rollf |> pick_w probs
       let roll acc kind cap input =
+        Printf.printf "%.3f cap" cap;
         ratio cap
-        |> (fun r -> Printf.printf "%.3f cap -> %.3f ratio" cap r; r)
         |> pick kind input |> handle kind acc
-        |> (fun (a, d, s) -> Printf.printf " -> %.3f out\n" d;a,d,s)
+        |> (fun (a, d, s) -> Printf.printf " -> %.3f %s\n" d (unit2str kind);a,d,s)
     end)
 
     let from cap t =
