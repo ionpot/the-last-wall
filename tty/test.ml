@@ -12,7 +12,7 @@ let cap = float_of_string Sys.argv.(1)
 let cap' = truncate cap
 
 let units =
-  Units.(make 10 Men |> add 10 Cavalry |> add 10 Templar |> add 10 Knight)
+  Units.(make 60 Men |> add 20 Cavalry |> add 10 Templar |> add 10 Dervish)
 
 let () =
   Random.self_init ();
