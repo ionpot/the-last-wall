@@ -19,6 +19,7 @@ module type S = sig
   val pop : 'a list -> 'a * 'a list
   val range : int * int -> int
   val rangef_times_try : int -> float * float -> float
+  val ratio : float -> float
   val roll : int -> int
   val rollf : float -> float
   val round : float -> int
@@ -41,7 +42,7 @@ module From (M : From) : S = struct
     if y > x then between x y else y
 
   let betweenf x y =
-    x +. M.float (y -. x)
+    min y (x +. M.float (y -. x))
 
   let betweenf_try x y =
     if y > x then betweenf x y else y
@@ -59,6 +60,9 @@ module From (M : From) : S = struct
 
   let rangef_times_try n (x, y) =
     betweenf_times_try n x y
+
+  let ratio x =
+    betweenf (1. /. x) 1.
 
   let chance fl =
     if fl >= 1. then true

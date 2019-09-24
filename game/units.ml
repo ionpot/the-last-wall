@@ -240,6 +240,11 @@ let promotable kind t =
   if Map.is_empty m then 0
   else Ops.min m
 
+let ratio_of kind t =
+  let n = count kind t in
+  let sum = Ops.sum t in
+  Float.div (float n) (float sum)
+
 let report = Map.bindings
 
 let untouchable t_atk t_dfn =
@@ -285,6 +290,11 @@ let pick_w t n =
   Map.fold f t (key, n) |> fst
 
 module Dist = struct
+  let threshold = 4.
+
+  let ceil_count m =
+    Map.(mapi ceil_power m |> mapi from_power)
+
   type acc =
     { absorbed : Defs.power;
       healed : Defs.power;
@@ -306,7 +316,7 @@ module Dist = struct
   let no_remaining (_, m, _) = Map.is_empty m
   let outcome (_, _, m) = Map.mapi from_power m
   let reflected (a, _, _) = a.reflected
-  let remaining (_, m, _) = Map.(mapi ceil_power m |> mapi from_power)
+  let remaining (_, m, _) = ceil_count m
 
   let heal kind n acc =
     let n', healed = heal kind n in
@@ -316,9 +326,28 @@ module Dist = struct
     let n' = mod_power kind n in
     { acc with reflected = acc.reflected +. n' }, n
 
+  let handle kind acc dmg =
+    let acc', sub =
+      if Attr.can_heal kind
+      then heal kind dmg acc
+      else if Attr.can_reflect kind
+      then reflect kind dmg acc
+      else acc, dmg
+    in acc', dmg, sub
+
+  let mitigate kind input cap =
+    let ratio = ceil_count input |> ratio_of kind in
+    max (ratio *. cap) 0.1
+
+  let pick kind input cap =
+    (if cap > threshold then mitigate kind input cap else cap)
+    |> min (Map.find kind input)
+
   module Roll (Dice : Dice.S) = struct
-    let rollf x =
-      if x > 1. then Dice.rollf (x -. 1.) +. 1. else x
+    let ratio cap =
+      if cap > threshold
+      then Dice.ratio threshold *. cap
+      else cap
 
     module Pick = Pick.WithAcc(struct
       module Cap = Pick.Float
@@ -331,23 +360,14 @@ module Dist = struct
         let probs = Map.mapi (fun k _ -> Base.hit_chance k) input in
         Ops.sumf probs |> Dice.rollf |> pick_w probs
       let roll acc kind cap input =
-        let cap = Map.find kind input |> min cap |> rollf in
-        let acc', sub =
-          if Attr.can_heal kind
-          then heal kind cap acc
-          else if Attr.can_reflect kind
-          then reflect kind cap acc
-          else acc, cap
-        in acc', cap, sub
+        ratio cap |> pick kind input |> handle kind acc
     end)
 
     let from cap t =
       let acc = empty_acc in
       let input = Ops.powers t in
       let output = Map.empty in
-      if cap > Ops.sumf input
-      then acc, output, input
-      else Pick.from acc cap input output
+      Pick.from acc cap input output
   end
 end
 
