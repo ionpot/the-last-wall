@@ -367,9 +367,7 @@ module Dist = struct
       let acc = empty_acc in
       let input = Ops.powers t in
       let output = Map.empty in
-      if cap > Ops.sumf input
-      then acc, output, input
-      else Pick.from acc cap input output
+      Pick.from acc cap input output
   end
 end
 
