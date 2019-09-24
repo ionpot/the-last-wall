@@ -290,7 +290,7 @@ let pick_w t n =
   Map.fold f t (key, n) |> fst
 
 module Dist = struct
-  let threshold = 8.
+  let threshold = 4.
 
   let ceil_count m =
     Map.(mapi ceil_power m |> mapi from_power)
