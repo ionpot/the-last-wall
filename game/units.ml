@@ -333,9 +333,25 @@ module Dist = struct
       else acc, dmg
     in acc', dmg, sub
 
+  let unit2str = function
+    | Ballista -> "ballista"
+    | Berserker -> "berserker"
+    | Cavalry -> "cavalry"
+    | Cyclops -> "cyclops"
+    | Demon -> "demon"
+    | Dervish -> "dervish"
+    | Harpy -> "harpy"
+    | Knight -> "knight"
+    | Men -> "men"
+    | Merc -> "merc"
+    | Orc -> "orc"
+    | Ranger -> "ranger"
+    | Skeleton -> "skeleton"
+    | Templar -> "templar"
+
   let pick kind input cap =
     let ratio = ceil_count input |> ratio_of kind in
-    Printf.printf " -> %.3f uratio" ratio;
+    Printf.printf " -> %.3f %s" ratio (unit2str kind);
     max (ratio *. cap) 0.1
     |> min (Map.find kind input)
 
