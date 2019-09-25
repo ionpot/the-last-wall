@@ -298,25 +298,30 @@ module Dist = struct
   type acc =
     { absorbed : Defs.power;
       healed : Defs.power;
-      reflected : Defs.power
+      reflected : Defs.power;
+      untouchable : kind list
     }
   type result = acc * Defs.power Map.t * Defs.power Map.t
 
-  let empty_acc = { absorbed = 0.; healed = 0.; reflected = 0. }
+  let empty_acc =
+    { absorbed = 0.;
+      healed = 0.;
+      reflected = 0.;
+      untouchable = []
+    }
   let empty : result = empty_acc, Map.empty, Map.empty
 
   let absorbed (a, _, m) =
     Map.mapi mod_power m |> Ops.sumf |> (+.) a.absorbed
   let healed (a, _, _) = a.healed
-  let move_back k (a, i, o) =
-    let n = try Map.find k o with _ -> 0. in
-    { a with absorbed = n +. a.absorbed },
-    Map.update k (function Some x -> Some (x +. n) | None -> Some n) i,
-    Map.remove k o
   let no_remaining (_, m, _) = Map.is_empty m
   let outcome (_, _, m) = Map.mapi from_power m
   let reflected (a, _, _) = a.reflected
   let remaining (_, m, _) = ceil_count m
+
+  let absorb kind n acc =
+    let n', healed = heal kind n in
+    { acc with absorbed = acc.absorbed +. healed }, n'
 
   let heal kind n acc =
     let n', healed = heal kind n in
@@ -328,7 +333,9 @@ module Dist = struct
 
   let handle kind acc dmg =
     let acc', sub =
-      if Attr.can_heal kind
+      if List.mem kind acc.untouchable
+      then absorb kind dmg acc
+      else if Attr.can_heal kind
       then heal kind dmg acc
       else if Attr.can_reflect kind
       then reflect kind dmg acc
@@ -363,8 +370,8 @@ module Dist = struct
         ratio cap |> pick kind input |> handle kind acc
     end)
 
-    let from cap t =
-      let acc = empty_acc in
+    let from cap untouchable t =
+      let acc = { empty_acc with untouchable } in
       let input = Ops.powers t in
       let output = Map.empty in
       Pick.from acc cap input output

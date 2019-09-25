@@ -26,15 +26,10 @@ end
 
 let fort_cap = 20.
 
-let move_back kinds dist =
-  List.fold_left (fun d k -> Dist.move_back k d) dist kinds
-
 module Units (S : State.S) = struct
   module DistRoll = Dist.Roll(S.Dice)
   module Fill = Units.Fill(S.Dice)
-  let dist dmg a b =
-    DistRoll.from dmg a
-    |> move_back (Units.untouchable b a)
+  let dist dmg a b = DistRoll.from dmg (Units.untouchable b a) a
   let enemies = S.Enemy.get ()
   let power = Units.power
   let attack = power enemies
