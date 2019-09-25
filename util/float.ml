@@ -31,7 +31,7 @@ let sub a b =
 let sub_by a b = sub b a
 
 let sub_if cond a b =
-  if cond then b -. a else b
+  if cond then sub b a else b
 
 let sub_opt a b =
   if a > b then Some (a -. b) else None
