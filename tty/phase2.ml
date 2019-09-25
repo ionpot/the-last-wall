@@ -70,7 +70,7 @@ module After (S : Status.S) = struct
       | BuildSupply s -> if s > 0 then S.res ()
       | Cavalry n -> if n > 0 then begin S.cavalry n; S.res () end
       | Facilities ls -> if ls <> [] then S.res ()
-      | Starvation _
+      | Starvation u -> if u <> Game.Units.empty then S.res ()
       | Support _
       | Upkeep _ -> S.res ()
       | _ -> ()
