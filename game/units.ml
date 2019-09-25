@@ -77,7 +77,7 @@ module Base = struct
 
   let upkeep_cost = function
     | Knight -> 3
-    | Ballista -> 2
+    | Ballista | Merc -> 2
     | _ -> 1
 end
 
