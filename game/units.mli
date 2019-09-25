@@ -64,13 +64,12 @@ module Dist : sig
   val empty : result
   val absorbed : result -> Defs.power
   val healed : result -> Defs.power
-  val move_back : kind -> result -> result
   val no_remaining : result -> bool
   val outcome : result -> t
   val reflected : result -> Defs.power
   val remaining : result -> t
   module Roll : Dice.S -> sig
-    val from : Defs.power -> t -> result
+    val from : Defs.power -> kind list -> t -> result
   end
 end
 
