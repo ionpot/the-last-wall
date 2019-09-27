@@ -198,16 +198,15 @@ end
 
 module Trade = struct
   type t = Nation.trade
-  let none = Nation.NoTrade
   module Apply (S : State.S) = struct
     let value trade =
       S.Build.map (Build.set_trade trade)
   end
   module Check (S : State.S) = struct
-    let value = S.Build.check Build.(built (Trade none))
+    let value = S.Build.check Build.trade_not_set
   end
   module Make (S : State.S) = struct
-    let value = none
+    let value = Nation.NoTrade
   end
 end
 
