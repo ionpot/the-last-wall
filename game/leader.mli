@@ -1,6 +1,6 @@
 type charisma = Defs.count
 type gender = Female | Male
-type kind = Aristocrat | Expert | Warrior
+type kind = Aristocrat | Engineer | Merchant
 type level = Defs.count
 type t
 
