@@ -50,8 +50,8 @@ let res2str res =
 
 let ldr2kind = function
   | Leader.Aristocrat -> "aristocrat"
-  | Leader.Expert -> "expert"
-  | Leader.Warrior -> "warrior"
+  | Leader.Engineer -> "engineer"
+  | Leader.Merchant -> "merchant"
 
 let ldr2gender ldr =
   match Leader.gender_of ldr with
