@@ -17,8 +17,8 @@ type t
 val empty : t
 
 val cost_of : kind -> Bonus.t list -> cost
-val manpwr_range : kind -> manpower * manpower
-val supply_range : kind -> supply * supply
+val manpwr_range : kind -> manpower range
+val supply_range : kind -> supply range
 val multiple : kind -> bool
 
 val arena_cap : t -> count
