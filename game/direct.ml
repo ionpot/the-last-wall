@@ -201,7 +201,12 @@ module Upkeep = struct
   module Make (S : State.S) = struct
     let cost = S.Units.return Units.upkeep
     let scouts = S.Scout.either 10 0
-    let value = cost + scouts
+    let ldr = S.Leader.get ()
+    let cha = Leader.cha_mod_of ldr
+    let ratio =
+      Float.if_ok (float cha *. 0.02)
+      Leader.(is_alive ldr && kind_of ldr = Engineer)
+    let value = Number.reduce_by ratio (cost + scouts)
   end
 end
 
