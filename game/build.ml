@@ -4,6 +4,12 @@ type bonus = To of kind | ToAll
 type queued = kind * cost
 type status = kind list * kind list * queued list
 
+let starting ldr =
+  match Leader.kind_of ldr with
+  | Leader.Aristocrat -> Stable
+  | Leader.Engineer -> Engrs
+  | Leader.Merchant -> Trade Nation.NoTrade
+
 module Bonus = struct
   type t = bonus * Resource.Bonus.t
   let apply_to = List.fold_left Resource.bonus_to
@@ -126,6 +132,9 @@ let trade t =
   let f x = function Trade x -> x | _ -> x in
   List.fold_left f Nation.NoTrade t.ready
 
+let trade_not_set t =
+  List.mem (Trade Nation.NoTrade) (t.built @ t.ready)
+
 let map_queue f need avlb t =
   let f' acc (kind, cost) =
     let acc', cost' = f acc cost in
@@ -162,6 +171,12 @@ let enqueue kinds bonuses t =
 let raze kind t =
   { t with ready = Listx.rm kind t.ready }
   |> to_avlb kind
+
+let set_ready kind t =
+  { t with
+    avlb = enables [kind] t.avlb |> rm_ls [kind];
+    ready = kind :: t.ready
+  }
 
 let set_trade trade t =
   let f = List.map (function Trade _ -> Trade trade | x -> x) in
