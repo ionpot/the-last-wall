@@ -30,6 +30,7 @@ module After (S : Status.S) = struct
   let input =
     let open Phase.Input in
     function
+      | Leader _ -> S.leader ()
       | Volunteers n -> if n > 0 then S.res ()
       | _ -> ()
 
