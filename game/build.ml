@@ -59,6 +59,9 @@ let unlocks = function
   | Temple -> [Guesthouse; Observatory]
   | _ -> []
 
+let fn_ls f ls t =
+  List.fold_left (Fn.flip f) t ls
+
 module Avlb = struct
   module Set = Set.Make(struct type t = kind let compare = compare end)
 
@@ -66,8 +69,7 @@ module Avlb = struct
 
   let add = Set.add
 
-  let add_ls ls t =
-    List.fold_left (Fn.flip add) t ls
+  let add_ls = fn_ls add
 
   let from = Set.of_list
 
@@ -75,15 +77,13 @@ module Avlb = struct
     if is_multiple kind then t
     else Set.remove kind t
 
-  let rm_ls ls t =
-    List.fold_left (Fn.flip rm) t ls
+  let rm_ls = fn_ls rm
 
   let unlock kind t =
     add_ls (unlocks kind) t
     |> rm kind
 
-  let unlock_ls ls t =
-    List.fold_left (Fn.flip unlock) t ls
+  let unlock_ls = fn_ls unlock
 end
 
 module Built = struct
@@ -141,8 +141,7 @@ module Ready = struct
     in
     Map.update kind f t
 
-  let bump_ls ls t =
-    List.fold_left (Fn.flip bump) t ls
+  let bump_ls = fn_ls bump
 
   let count kind t =
     if Map.mem kind t
@@ -257,8 +256,7 @@ let set_ready kind t =
   ; ready = Ready.bump kind t.ready
   }
 
-let set_ready_ls kinds t =
-  List.fold_left (Fn.flip set_ready) t kinds
+let set_ready_ls = fn_ls set_ready
 
 let set_trade nation_opt t =
   let trade = Trade nation_opt in
