@@ -2,7 +2,7 @@ module With (S : State.S) = struct
   module Base = Units.Base
 
   let dervish_range () =
-    if S.Build.check Build.(ready Guesthouse)
+    if S.Build.check Build.(is_ready Guesthouse)
     then 3, 12 else 2, 8
 
   module Missing = struct

@@ -22,7 +22,7 @@ module Blessing = struct
   module Make (S : State.S) = struct
     module Roll = Deity.Roll(S.Dice)
     let bless =
-      if S.Build.check Build.(ready Observatory)
+      if S.Build.check Build.(is_ready Observatory)
       then Roll.boosted
       else Roll.blessing
     let value = S.Deity.return bless

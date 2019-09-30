@@ -51,7 +51,7 @@ module Make (S : State.S) = struct
     |> Defs.to_power Units.harpies
 
   let have_fort =
-    S.Build.check Build.(ready Fort)
+    S.Build.check Build.(is_ready Fort)
 
   let value = (module struct
     let cav_too_many = Dr.cav_too_many
