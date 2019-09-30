@@ -12,6 +12,8 @@ module type Outcome = sig
   val retreat : bool
 end
 
+type t = (module Outcome)
+
 module Apply (S : State.S) = struct
   let value (module O : Outcome) =
     S.Casualty.map (O.casualty |> Dist.outcome |> Units.combine);
@@ -51,7 +53,7 @@ module Make (S : State.S) = struct
     |> Defs.to_power Units.harpies
 
   let have_fort =
-    S.Build.check Build.(ready Fort)
+    S.Build.check Build.(is_ready Fort)
 
   let value = (module struct
     let cav_too_many = Dr.cav_too_many
