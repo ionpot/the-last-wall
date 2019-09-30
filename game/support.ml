@@ -22,7 +22,7 @@ let update_chances t chances =
 
 module Roll (S : State.S) = struct
   let starved = S.Starved.return Units.count_all
-  let trade = S.Build.return Build.trade
+  let trade = S.Build.return Build.trade_type
 
   let bonuses kind res =
     let leader = S.Leader.return Leader.res_bonus_of in
