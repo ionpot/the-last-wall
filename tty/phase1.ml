@@ -22,9 +22,7 @@ module Make (S : Game.State.S) = struct
     function
       | BuildSupply s -> S.Supply.return (Print.Build.supply s)
       | Facilities ls -> Tty.ifpairln "facilities" (Convert.facs2str ls)
-      | Starting (ldr, _, res) ->
-          Tty.pairln "leader" (Convert.ldr2full ldr);
-          Tty.pairln "starting" (Convert.res2str res)
+      | Starting s -> Print.starting s
       | Support s -> Print.support s
 end
 

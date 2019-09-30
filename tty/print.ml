@@ -104,6 +104,11 @@ let disease (units, died) ldr =
   Tty.pairln "died" (units2str units |> str2none);
   if died then Leader.died ldr
 
+let starting (module S : Starting.S) =
+  Tty.ifpairln "buildings" (bld_ls2str S.buildings);
+  Tty.pairln "supply" (sup2str S.supply);
+  Tty.ifpairln "units" (units2str S.units)
+
 let support s =
   let f res =
     if res = Resource.empty then "nothing"
