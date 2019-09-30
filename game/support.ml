@@ -15,7 +15,7 @@ module Apply (S : State.S) = struct
   let boost chances =
     let f cmap kind =
       if S.Build.check Build.(has_trade kind)
-      then Chance.increase kind cmap
+      then Chance.increase_by 0.05 kind cmap
       else cmap
     in
     List.fold_left f chances Nation.kinds
@@ -23,9 +23,9 @@ module Apply (S : State.S) = struct
   let chances t chances =
     let empty = List.filter (fun (_, res) -> res = Resource.empty) t in
     let f cmap kind =
-      if List.mem_assoc kind empty
-      then Chance.reduce kind cmap
-      else Chance.increase kind cmap
+      (if List.mem_assoc kind empty
+      then Chance.reduce_by
+      else Chance.increase_by) 0.1 kind cmap
     in
     List.fold_left f chances Nation.kinds
 end
