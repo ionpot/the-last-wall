@@ -59,7 +59,7 @@ module Build (S : Game.State.S) = struct
 
   let choose avlb ls =
     List.fold_right (add_from avlb) ls []
-    |> Listx.dedupe_if (fun k -> not (Game.Build.multiple k))
+    |> Listx.dedupe_if (fun k -> not (Game.Build.is_multiple k))
 
   let from avlb t =
     let avlb' = sort_by_str bld2str avlb in
