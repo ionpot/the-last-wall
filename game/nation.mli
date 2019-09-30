@@ -1,7 +1,6 @@
 open Defs
 
 type kind = Clan | Hekatium | Numendor | Sodistan | Tulron
-type trade = Boost of kind | Certain of kind | NoTrade
 
 val kinds : kind list
 val max_allowed : int

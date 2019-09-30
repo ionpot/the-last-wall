@@ -1,5 +1,4 @@
 type kind = Clan | Hekatium | Numendor | Sodistan | Tulron
-type trade = Boost of kind | Certain of kind | NoTrade
 
 module Map = Map.Make(struct
   type t = kind

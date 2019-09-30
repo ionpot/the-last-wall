@@ -1,5 +1,5 @@
 type cost = Resource.t
-type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.trade
+type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.kind option
 type bonus = To of kind | ToAll
 
 module Bonus = struct
@@ -12,7 +12,7 @@ module Bonus = struct
   let find kind ls = filter kind ls |> List.map snd
 end
 
-let trade_default = Trade Nation.NoTrade
+let trade_default = Trade None
 let avlb_default =
   [Arena; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; trade_default]
 let prebuilt = [Tavern]
@@ -100,8 +100,8 @@ module Built = struct
 
   let has = List.mem
 
-  let set_trade x t =
-    List.map (fun k -> if k = trade_default then Trade x else k) t
+  let set_trade trade t =
+    List.map (fun k -> if k = trade_default then trade else k) t
 end
 
 module Queue = struct
@@ -168,9 +168,9 @@ module Ready = struct
 
   let has = Map.mem
 
-  let set_trade x t =
+  let set_trade trade t =
     Map.remove trade_default t
-    |> add (Trade x)
+    |> add trade
 
   let sum t =
     Map.fold (fun _ -> (+)) t 0
@@ -178,10 +178,6 @@ module Ready = struct
   let mausoleums t =
     Map.filter (fun k _ -> match k with Mausoleum _ -> true | _ -> false) t
     |> sum
-
-  let trade_type t =
-    let f key _ acc = match key with Trade x -> x | _ -> acc in
-    Map.fold f t Nation.NoTrade
 end
 
 type status = Built.t * Built.t * Queue.t
@@ -207,6 +203,9 @@ let count kind t =
 
 let arena_cap t =
   count Arena t * 10
+
+let has_trade nation t =
+  Ready.has (Trade (Some nation)) t.ready
 
 let is_built kind t =
   Built.has kind t.built
@@ -244,9 +243,6 @@ let temple_cap t =
   else if is_ready Temple t then 20
   else 0
 
-let trade_type t =
-  Ready.trade_type t.ready
-
 let died ldr t =
   { t with avlb = Avlb.add (Mausoleum ldr) t.avlb }
 
@@ -270,7 +266,8 @@ let set_ready kind t =
     ready = Ready.bump kind t.ready
   }
 
-let set_trade trade t =
+let set_trade nation_opt t =
+  let trade = Trade nation_opt in
   { t with built = Built.set_trade trade t.built;
     ready = Ready.set_trade trade t.ready
   }

@@ -166,9 +166,10 @@ module Support = struct
   type t = Support.t
   module Apply (S : State.S) = struct
     module AddRes = Event.AddRes(S)
-    let value ls =
-      AddRes.value (Support.sum ls);
-      Support.update_chances ls
+    module Apply = Support.Apply(S)
+    let value t =
+      AddRes.value (Support.sum t);
+      Apply.chances t
       |> Nation.map_chances
       |> S.Nation.map
   end

@@ -197,7 +197,7 @@ module Templar = struct
 end
 
 module Trade = struct
-  type t = Nation.trade
+  type t = Nation.kind option
   module Apply (S : State.S) = struct
     let value trade =
       S.Build.map (Build.set_trade trade)
@@ -206,7 +206,7 @@ module Trade = struct
     let value = S.Build.check Build.need_trade
   end
   module Make (S : State.S) = struct
-    let value = Nation.NoTrade
+    let value = None
   end
 end
 

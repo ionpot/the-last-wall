@@ -1,7 +1,7 @@
 open Defs
 
 type cost = Resource.t
-type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.trade
+type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.kind option
 type bonus = To of kind | ToAll
 
 val starting : Leader.t -> kind
@@ -43,6 +43,7 @@ val arena_cap : t -> count
 val available : t -> Avlb.t
 val ballista_cap : t -> count
 val count : kind -> t -> count
+val has_trade : Nation.kind -> t -> bool
 val is_built : kind -> t -> bool
 val is_ready : kind -> t -> bool
 val mausoleums : t -> count
@@ -53,13 +54,12 @@ val ready : t -> Ready.t
 val stable_cap : t -> count
 val status : t -> status
 val temple_cap : t -> count
-val trade_type : t -> Nation.trade
 
 val died : Leader.t -> t -> t
 val manp : manpower -> manpower -> t -> t
 val raze : kind -> t -> t
 val set_ready : kind -> t -> t
-val set_trade : Nation.trade -> t -> t
+val set_trade : Nation.kind option -> t -> t
 val start : kind list -> Bonus.t list -> t -> t
 val supp : supply -> supply -> t -> t
 val update : status -> t -> t
