@@ -183,17 +183,17 @@ end
 type status = Built.t * Built.t * Queue.t
 
 type t =
-  { avlb : Avlb.t;
-    built : Built.t;
-    queue : Queue.t;
-    ready : Ready.t
+  { avlb : Avlb.t
+  ; built : Built.t
+  ; queue : Queue.t
+  ; ready : Ready.t
   }
 
 let empty =
-  { avlb = Avlb.from avlb_default;
-    built = Built.empty;
-    queue = Queue.empty;
-    ready = Ready.from prebuilt
+  { avlb = Avlb.from avlb_default
+  ; built = Built.empty
+  ; queue = Queue.empty
+  ; ready = Ready.from prebuilt
   }
 
 let available t = t.avlb
@@ -255,26 +255,24 @@ let manp need avlb t =
   { t with queue = Queue.map f need avlb t.queue }
 
 let raze kind t =
-  { t with
-    avlb = Avlb.add kind t.avlb;
-    ready = Ready.decr kind t.ready
+  { t with avlb = Avlb.add kind t.avlb
+  ; ready = Ready.decr kind t.ready
   }
 
 let set_ready kind t =
-  { t with
-    avlb = Avlb.unlock kind t.avlb;
-    ready = Ready.bump kind t.ready
+  { t with avlb = Avlb.unlock kind t.avlb
+  ; ready = Ready.bump kind t.ready
   }
 
 let set_trade nation_opt t =
   let trade = Trade nation_opt in
-  { t with built = Built.set_trade trade t.built;
-    ready = Ready.set_trade trade t.ready
+  { t with built = Built.set_trade trade t.built
+  ; ready = Ready.set_trade trade t.ready
   }
 
 let start kinds bonuses t =
-  { t with avlb = Avlb.rm_ls kinds t.avlb;
-    queue = Queue.from kinds bonuses @ t.queue
+  { t with avlb = Avlb.rm_ls kinds t.avlb
+  ; queue = Queue.from kinds bonuses @ t.queue
   }
 
 let supp need avlb t =
@@ -282,8 +280,8 @@ let supp need avlb t =
   { t with queue = Queue.map f need avlb t.queue }
 
 let update (ready, built, queue) t =
-  { avlb = Avlb.unlock_ls built t.avlb;
-    built;
-    queue;
-    ready = Ready.bump_ls ready t.ready
+  { avlb = Avlb.unlock_ls built t.avlb
+  ; built
+  ; queue
+  ; ready = Ready.bump_ls ready t.ready
   }

@@ -34,13 +34,13 @@ module Chance = struct
 end
 
 type t =
-  { chances : Chance.t;
-    chosen : kind list
+  { chances : Chance.t
+  ; chosen : kind list
   }
 
 let empty =
-  { chances = Chance.base_map;
-    chosen = []
+  { chances = Chance.base_map
+  ; chosen = []
   }
 
 let chances t = t.chances
