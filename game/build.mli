@@ -4,7 +4,7 @@ type cost = Resource.t
 type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.kind option
 type bonus = To of kind | ToAll
 
-val starting : Leader.t -> kind
+val trade_default : kind
 
 module Avlb : sig
   module Set : Set.S with type elt = kind
@@ -59,6 +59,7 @@ val died : Leader.t -> t -> t
 val manp : manpower -> manpower -> t -> t
 val raze : kind -> t -> t
 val set_ready : kind -> t -> t
+val set_ready_ls : kind list -> t -> t
 val set_trade : Nation.kind option -> t -> t
 val start : kind list -> Bonus.t list -> t -> t
 val supp : supply -> supply -> t -> t

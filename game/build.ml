@@ -15,7 +15,6 @@ end
 let trade_default = Trade None
 let avlb_default =
   [Arena; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; trade_default]
-let prebuilt = [Tavern]
 
 let base_cost =
   let open Resource in
@@ -48,12 +47,6 @@ let is_multiple kind =
 let manpwr_range = function
   | Arena -> (2, 8)
   | _ -> (0, 0)
-
-let starting ldr =
-  match Leader.kind_of ldr with
-  | Leader.Aristocrat -> Stable
-  | Leader.Engineer -> Engrs
-  | Leader.Merchant -> trade_default
 
 let supply_range = function
   | Foundry -> (9, 15)
@@ -193,7 +186,7 @@ let empty =
   { avlb = Avlb.from avlb_default
   ; built = Built.empty
   ; queue = Queue.empty
-  ; ready = Ready.from prebuilt
+  ; ready = Ready.empty
   }
 
 let available t = t.avlb
@@ -263,6 +256,9 @@ let set_ready kind t =
   { t with avlb = Avlb.unlock kind t.avlb
   ; ready = Ready.bump kind t.ready
   }
+
+let set_ready_ls kinds t =
+  List.fold_left (Fn.flip set_ready) t kinds
 
 let set_trade nation_opt t =
   let trade = Trade nation_opt in

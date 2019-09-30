@@ -125,24 +125,7 @@ module Facilities = struct
   end
 end
 
-module Starting = struct
-  type t = Leader.t * Month.t * Resource.t
-  module Apply (S : State.S) = struct
-    module AddRes = Event.AddRes(S)
-    let value (l, m, r) =
-      S.Build.map Build.(starting l |> set_ready);
-      S.Month.set m;
-      AddRes.value r
-  end
-  module Make (S : State.S) = struct
-    module Deity = Deity.Roll(S.Dice)
-    module Month = Month.Roll(S.Dice)
-    let value =
-      S.Leader.get (),
-      Month.random (),
-      S.Deity.return Deity.starting
-  end
-end
+module Starting = Starting
 
 module Starvation = struct
   type t = Units.t
