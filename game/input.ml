@@ -54,7 +54,7 @@ module BuildAvlb = struct
     let value ls = S.Build.map (Build.start ls Bonus.value)
   end
   module Make (S : State.S) = struct
-    let value = S.Build.return Build.ls_avlb
+    let value = []
   end
 end
 
