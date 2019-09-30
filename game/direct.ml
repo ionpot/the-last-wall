@@ -96,11 +96,7 @@ module Cavalry = struct
   end
 end
 
-module Combat = struct
-  type t = (module Combat.Outcome)
-  module Apply = Combat.Apply
-  module Make = Combat.Make
-end
+module Combat = Combat
 
 module Facilities = struct
   type t = (Build.kind * Resource.t) list

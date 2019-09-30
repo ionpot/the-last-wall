@@ -12,6 +12,8 @@ module type Outcome = sig
   val retreat : bool
 end
 
+type t = (module Outcome)
+
 module Apply (S : State.S) = struct
   let value (module O : Outcome) =
     S.Casualty.map (O.casualty |> Dist.outcome |> Units.combine);
