@@ -54,7 +54,7 @@ module BuildAvlb = struct
     let value ls = S.Build.map (Build.start ls Bonus.value)
   end
   module Make (S : State.S) = struct
-    let value = S.Build.return Build.ls_avlb
+    let value = []
   end
 end
 
@@ -203,7 +203,7 @@ module Trade = struct
       S.Build.map (Build.set_trade trade)
   end
   module Check (S : State.S) = struct
-    let value = S.Build.check Build.trade_not_set
+    let value = S.Build.check Build.need_trade
   end
   module Make (S : State.S) = struct
     let value = Nation.NoTrade

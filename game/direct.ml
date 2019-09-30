@@ -22,7 +22,7 @@ module Blessing = struct
   module Make (S : State.S) = struct
     module Roll = Deity.Roll(S.Dice)
     let bless =
-      if S.Build.check Build.(ready Observatory)
+      if S.Build.check Build.(is_ready Observatory)
       then Roll.boosted
       else Roll.blessing
     let value = S.Deity.return bless
@@ -122,8 +122,9 @@ module Facilities = struct
       Resource.(empty <+ Supply (to_sup k) <+ Manpwr (to_mnp k))
       Resource.Bonus.(Sub (Both disease))
     let value =
-      S.Build.return Build.ls_ready
-      |> List.map (fun k -> k, to_res k)
+      S.Build.return Build.ready
+      |> Build.Ready.Map.bindings
+      |> List.map (fun (k, _) -> k, to_res k)
       |> List.filter (fun (_, r) -> r <> Resource.empty)
   end
 end
