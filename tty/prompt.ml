@@ -135,21 +135,13 @@ let templar cap =
   Tty.writeln (sprintf "can promote %d dervish to templar" cap);
   Tty.prompt_amount cap
 
-let trade_nation () =
+let trade () =
   let ls = Game.Nation.kinds in
   List.map nation2str ls
   |> horizontal "trade guild nation";
   Tty.prompt "choose"
   |> choose_one ls (List.hd ls)
-
-let trade () =
-  let nation = trade_nation () in
-  let boost, certain = Game.Nation.(Boost nation, Certain nation) in
-  [boost; certain]
-  |> List.map trade2str
-  |> horizontal "trade type";
-  if Tty.prompt_int "choose" = 2 then certain else boost
-  |> echo (fun x -> Tty.pairln "chosen" (trade2str x))
+  |> (fun nat -> Tty.writeln (trade2str nat); Some nat)
 
 let volunteers cap =
   Tty.writeln (sprintf "%d volunteers want to join" cap);

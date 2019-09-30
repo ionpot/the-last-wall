@@ -80,15 +80,12 @@ let nation2str = function
   | Nation.Sodistan -> "sodistan"
   | Nation.Tulron -> "tulron"
 
-let trade2str = function
-  | Nation.Boost kind -> "extra with " ^ nation2str kind
-  | Nation.Certain kind -> "certain with " ^ nation2str kind
-  | Nation.NoTrade -> ""
+let trade2str nation =
+  sprintf "trading with %s" (nation2str nation)
 
-let trade_suffix trade =
-  let str = trade2str trade in
-  if str = "" then str
-  else sprintf " (%s)" str
+let trade_suffix = function
+  | Some nation -> sprintf " (%s)" (nation2str nation)
+  | None -> ""
 
 let bld2str = function
   | Build.Arena -> "arena"
