@@ -108,6 +108,7 @@ let disease (units, died) ldr =
 
 let starting (module S : Starting.S) =
   Tty.ifpairln "buildings" (bld_ls2str S.buildings);
+  Tty.pairln "month" (month2str S.month);
   Tty.pairln "supply" (sup2str S.supply);
   Tty.ifpairln "units" (units2str S.units)
 
