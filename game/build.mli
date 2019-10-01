@@ -42,6 +42,7 @@ val supply_range : kind -> supply range
 val arena_cap : t -> count
 val available : t -> Avlb.t
 val ballista_cap : t -> count
+val built : t -> Built.t
 val count : kind -> t -> count
 val has_trade : Nation.kind -> t -> bool
 val is_built : kind -> t -> bool
@@ -50,6 +51,7 @@ val mausoleums : t -> count
 val need_manp : t -> manpower
 val need_supp : t -> supply
 val need_trade : t -> bool
+val queue : t -> Queue.t
 val ready : t -> Ready.t
 val stable_cap : t -> count
 val status : t -> status
