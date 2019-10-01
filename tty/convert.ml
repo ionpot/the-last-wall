@@ -80,15 +80,12 @@ let nation2str = function
   | Nation.Sodistan -> "sodistan"
   | Nation.Tulron -> "tulron"
 
-let trade2str = function
-  | Nation.Boost kind -> "extra with " ^ nation2str kind
-  | Nation.Certain kind -> "certain with " ^ nation2str kind
-  | Nation.NoTrade -> ""
+let trade2str nation =
+  sprintf "trading with %s" (nation2str nation)
 
-let trade_suffix trade =
-  let str = trade2str trade in
-  if str = "" then str
-  else sprintf " (%s)" str
+let trade_suffix = function
+  | Some nation -> sprintf " (%s)" (nation2str nation)
+  | None -> ""
 
 let bld2str = function
   | Build.Arena -> "arena"
@@ -107,17 +104,24 @@ let bld2str = function
   | Build.Trade trade ->
       sprintf "trade guild%s" (trade_suffix trade)
 
-let bld_n2str (n, kind) =
+let bld_n2str (kind, n) =
   let str = bld2str kind in
   if n < 1 then ""
   else if n = 1 then str
   else sprintf "%s (%d)" str n
 
-let bld_ls2str ls =
-  Listx.group ls
-  |> List.map bld_n2str
+let bld_pairs2str ls =
+  List.map bld_n2str ls
   |> sort_str
   |> commas
+
+let bld_ls2str ls =
+  Listx.group ls
+  |> bld_pairs2str
+
+let bld_map2str map =
+  Build.Map.bindings map
+  |> bld_pairs2str
 
 let bld_q2str ls =
   ls

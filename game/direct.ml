@@ -22,7 +22,7 @@ module Blessing = struct
   module Make (S : State.S) = struct
     module Roll = Deity.Roll(S.Dice)
     let bless =
-      if S.Build.check Build.(ready Observatory)
+      if S.Build.check Build.(is_ready Observatory)
       then Roll.boosted
       else Roll.blessing
     let value = S.Deity.return bless
@@ -96,11 +96,7 @@ module Cavalry = struct
   end
 end
 
-module Combat = struct
-  type t = (module Combat.Outcome)
-  module Apply = Combat.Apply
-  module Make = Combat.Make
-end
+module Combat = Combat
 
 module Facilities = struct
   type t = (Build.kind * Resource.t) list
@@ -122,30 +118,14 @@ module Facilities = struct
       Resource.(empty <+ Supply (to_sup k) <+ Manpwr (to_mnp k))
       Resource.Bonus.(Sub (Both disease))
     let value =
-      S.Build.return Build.ls_ready
-      |> List.map (fun k -> k, to_res k)
+      S.Build.return Build.ready
+      |> Build.Map.bindings
+      |> List.map (fun (k, _) -> k, to_res k)
       |> List.filter (fun (_, r) -> r <> Resource.empty)
   end
 end
 
-module Starting = struct
-  type t = Leader.t * Month.t * Resource.t
-  module Apply (S : State.S) = struct
-    module AddRes = Event.AddRes(S)
-    let value (l, m, r) =
-      S.Build.map Build.(starting l |> set_ready);
-      S.Month.set m;
-      AddRes.value r
-  end
-  module Make (S : State.S) = struct
-    module Deity = Deity.Roll(S.Dice)
-    module Month = Month.Roll(S.Dice)
-    let value =
-      S.Leader.get (),
-      Month.random (),
-      S.Deity.return Deity.starting
-  end
-end
+module Starting = Starting
 
 module Starvation = struct
   type t = Units.t
@@ -165,9 +145,10 @@ module Support = struct
   type t = Support.t
   module Apply (S : State.S) = struct
     module AddRes = Event.AddRes(S)
-    let value ls =
-      AddRes.value (Support.sum ls);
-      Support.update_chances ls
+    module Apply = Support.Apply(S)
+    let value t =
+      AddRes.value (Support.sum t);
+      Apply.chances t
       |> Nation.map_chances
       |> S.Nation.map
   end

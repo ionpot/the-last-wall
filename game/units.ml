@@ -296,18 +296,18 @@ module Dist = struct
     Map.(mapi ceil_power m |> mapi from_power)
 
   type acc =
-    { absorbed : Defs.power;
-      healed : Defs.power;
-      reflected : Defs.power;
-      untouchable : kind list
+    { absorbed : Defs.power
+    ; healed : Defs.power
+    ; reflected : Defs.power
+    ; untouchable : kind list
     }
   type result = acc * Defs.power Map.t * Defs.power Map.t
 
   let empty_acc =
-    { absorbed = 0.;
-      healed = 0.;
-      reflected = 0.;
-      untouchable = []
+    { absorbed = 0.
+    ; healed = 0.
+    ; reflected = 0.
+    ; untouchable = []
     }
   let empty : result = empty_acc, Map.empty, Map.empty
 

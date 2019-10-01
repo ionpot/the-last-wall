@@ -1,14 +1,10 @@
-type cost = Resource.t
-type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.trade
-type bonus = To of kind | ToAll
-type queued = kind * cost
-type status = kind list * kind list * queued list
+type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.kind option
 
-let starting ldr =
-  match Leader.kind_of ldr with
-  | Leader.Aristocrat -> Stable
-  | Leader.Engineer -> Engrs
-  | Leader.Merchant -> Trade Nation.NoTrade
+module Map = Map.Make(struct type t = kind let compare = compare end)
+
+type bonus = To of kind | ToAll
+type cost = Resource.t
+type cost_map = cost Map.t
 
 module Bonus = struct
   type t = bonus * Resource.Bonus.t
@@ -20,31 +16,11 @@ module Bonus = struct
   let find kind ls = filter kind ls |> List.map snd
 end
 
-type t =
-  { avlb : kind list;
-    built : kind list;
-    queue : queued list;
-    ready : kind list
-  }
+type bonuses = Bonus.t list
 
-let enables built avlb =
-  if List.mem Temple built
-  then Guesthouse :: Observatory :: avlb
-  else avlb
-
-let multiple kind =
-  kind = Stable
-
-let rm_ls kinds ls =
-  Listx.discard multiple kinds
-  |> Listx.rm_from ls
-
-let empty =
-  { avlb = [Arena; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; Trade Nation.NoTrade];
-    built = [];
-    queue = [];
-    ready = [Tavern]
-  }
+let trade_default = Trade None
+let avlb_default =
+  [Arena; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; trade_default]
 
 let base_cost =
   let open Resource in
@@ -67,6 +43,13 @@ let base_cost_of kind =
   let a, b = base_cost kind in
   Resource.(empty <+ a <+ b)
 
+let cost_of kind bonuses =
+  Bonus.find kind bonuses
+  |> Bonus.apply_to (base_cost_of kind)
+
+let is_multiple kind =
+  kind = Stable
+
 let manpwr_range = function
   | Arena -> (2, 8)
   | _ -> (0, 0)
@@ -78,71 +61,199 @@ let supply_range = function
   | Tavern -> (6, 12)
   | _ -> (0, 0)
 
-let built kind t =
-  List.mem kind t.built
+let unlocks = function
+  | Temple -> [Guesthouse; Observatory]
+  | _ -> []
+
+let fn_ls f ls t =
+  List.fold_left (Fn.flip f) t ls
+
+module Avlb = struct
+  module Set = Set.Make(struct type t = kind let compare = compare end)
+
+  type t = Set.t
+
+  let add = Set.add
+
+  let add_ls = fn_ls add
+
+  let from = Set.of_list
+
+  let rm kind t =
+    if is_multiple kind then t
+    else Set.remove kind t
+
+  let rm_ls = fn_ls rm
+
+  let unlock kind t =
+    add_ls (unlocks kind) t
+    |> rm kind
+
+  let unlock_ls = fn_ls unlock
+end
+
+module Built = struct
+  type t = kind list
+
+  let empty : t = []
+
+  let has = List.mem
+
+  let set_trade trade t =
+    List.map (fun k -> if k = trade_default then trade else k) t
+end
+
+module Queue = struct
+  type t = (kind * cost) list
+
+  let empty : t = []
+
+  let built t =
+    let f (_, cost) = cost = Resource.empty in
+    let built, ongoing = List.partition f t in
+    List.map fst built, ongoing
+
+  let cost_of kind costs =
+    if Map.mem kind costs
+    then Map.find kind costs
+    else base_cost_of kind
+
+  let from kinds costs =
+    let f kind = kind, cost_of kind costs in
+    List.rev_map f kinds
+
+  let map f need avlb t =
+    let f' acc (kind, cost) =
+      let acc', cost' = f acc cost in
+      acc', (kind, cost')
+    in
+    let x = Number.sub need avlb in
+    Listx.map_with f' x t
+
+  let sum_fn fn t =
+    let f acc (_, res) = acc + fn res in
+    List.fold_left f 0 t
+end
+
+module Ready = struct
+  type t = Defs.count Map.t
+
+  let empty : t = Map.empty
+
+  let add kind t =
+    Map.add kind 1 t
+
+  let bump kind t =
+    let f = function
+      | Some x -> Some (succ x)
+      | None -> Some 1
+    in
+    Map.update kind f t
+
+  let bump_ls = fn_ls bump
+
+  let count kind t =
+    if Map.mem kind t
+    then Map.find kind t
+    else 0
+
+  let decr kind t =
+    let f = function
+      | Some x -> Number.sub_opt x 1
+      | None -> None
+    in
+    Map.update kind f t
+
+  let from ls =
+    bump_ls ls empty
+
+  let has = Map.mem
+
+  let set_trade trade t =
+    Map.remove trade_default t
+    |> add trade
+
+  let sum t =
+    Map.fold (fun _ -> (+)) t 0
+
+  let mausoleums t =
+    Map.filter (fun k _ -> match k with Mausoleum _ -> true | _ -> false) t
+    |> sum
+end
+
+type status = Built.t * Built.t * Queue.t
+
+type t =
+  { avlb : Avlb.t
+  ; built : Built.t
+  ; queue : Queue.t
+  ; ready : Ready.t
+  }
+
+let empty =
+  { avlb = Avlb.from avlb_default
+  ; built = Built.empty
+  ; queue = Queue.empty
+  ; ready = Ready.empty
+  }
+
+let available t = t.avlb
+
+let cost_map bonuses t =
+  let f kind = Map.add kind (cost_of kind bonuses) in
+  Avlb.Set.fold f t.avlb (Map.empty : cost_map)
 
 let count kind t =
-  Listx.count kind t.ready
-
-let ls_avlb t = t.avlb
-let ls_built t = t.built
-let ls_queue t = t.queue
-let ls_ready t = t.ready
-
-let mausoleums t =
-  t.ready
-  |> List.filter (function Mausoleum _ -> true | _ -> false)
-  |> List.length
-
-let need_manp t =
-  let f acc (_, res) = acc + Resource.manp_of res in
-  List.fold_left f 0 t.queue
-
-let need_supp t =
-  let f acc (_, res) = acc + Resource.supp_of res in
-  List.fold_left f 0 t.queue
-
-let ready kind t =
-  List.mem kind t.ready
-
-let cost_of kind bonuses =
-  Bonus.find kind bonuses
-  |> Bonus.apply_to (base_cost_of kind)
+  Ready.count kind t.ready
 
 let arena_cap t =
   count Arena t * 10
 
+let has_trade nation t =
+  Ready.has (Trade (Some nation)) t.ready
+
+let is_built kind t =
+  Built.has kind t.built
+
+let is_ready kind t =
+  Ready.has kind t.ready
+
 let ballista_cap t =
-  if ready Engrs t then 5 else 0
+  if is_ready Engrs t then 5 else 0
+
+let built t = t.built
+
+let mausoleums t =
+  Ready.mausoleums t.ready
+
+let need_manp t =
+  Queue.sum_fn Resource.manp_of t.queue
+
+let need_supp t =
+  Queue.sum_fn Resource.supp_of t.queue
+
+let need_trade t =
+  Built.has trade_default t.built
+  || Ready.has trade_default t.ready
+
+let queue t = t.queue
+
+let ready t = t.ready
 
 let stable_cap t =
   count Stable t * 10
 
 let status t =
-  let f (_, cost) = cost = Resource.empty in
-  let built, ongoing = List.partition f t.queue in
-  t.built, List.map fst built, ongoing
+  let built, ongoing = Queue.built t.queue in
+  t.built, built, ongoing
 
 let temple_cap t =
-  if ready Guesthouse t then 40
-  else if ready Temple t then 20
+  if is_ready Guesthouse t then 40
+  else if is_ready Temple t then 20
   else 0
 
-let trade t =
-  let f x = function Trade x -> x | _ -> x in
-  List.fold_left f Nation.NoTrade t.ready
-
-let trade_not_set t =
-  List.mem (Trade Nation.NoTrade) (t.built @ t.ready)
-
-let map_queue f need avlb t =
-  let f' acc (kind, cost) =
-    let acc', cost' = f acc cost in
-    acc', (kind, cost')
-  in
-  let x = Number.sub need avlb in
-  let queue = Listx.map_with f' x t.queue in
-  { t with queue }
+let died ldr t =
+  { t with avlb = Avlb.add (Mausoleum ldr) t.avlb }
 
 let manp need avlb t =
   let f mp cost =
@@ -150,48 +261,38 @@ let manp need avlb t =
     then mp, cost
     else Resource.take_manp mp cost
   in
-  map_queue f need avlb t
-
-let to_avlb kind t =
-  let ls = t.avlb in
-  let avlb =
-    if multiple kind then ls
-    else kind :: ls
-  in
-  { t with avlb }
-
-let died ldr t =
-  to_avlb (Mausoleum ldr) t
-
-let enqueue kinds bonuses t =
-  let f kind = kind, cost_of kind bonuses in
-  let ls = List.rev_map f kinds in
-  { t with queue = ls @ t.queue }
+  { t with queue = Queue.map f need avlb t.queue }
 
 let raze kind t =
-  { t with ready = Listx.rm kind t.ready }
-  |> to_avlb kind
-
-let set_ready kind t =
-  { t with
-    avlb = enables [kind] t.avlb |> rm_ls [kind];
-    ready = kind :: t.ready
+  { t with avlb = Avlb.add kind t.avlb
+  ; ready = Ready.decr kind t.ready
   }
 
-let set_trade trade t =
-  let f = List.map (function Trade _ -> Trade trade | x -> x) in
-  { t with built = f t.built; ready = f t.ready }
+let set_ready kind t =
+  { t with avlb = Avlb.unlock kind t.avlb
+  ; ready = Ready.bump kind t.ready
+  }
 
-let start kinds bonuses t =
-  { t with avlb = rm_ls kinds t.avlb }
-  |> enqueue kinds bonuses
+let set_ready_ls = fn_ls set_ready
+
+let set_trade nation_opt t =
+  let trade = Trade nation_opt in
+  { t with built = Built.set_trade trade t.built
+  ; ready = Ready.set_trade trade t.ready
+  }
+
+let start kinds costs t =
+  { t with avlb = Avlb.rm_ls kinds t.avlb
+  ; queue = Queue.from kinds costs @ t.queue
+  }
 
 let supp need avlb t =
-  map_queue Resource.take_supp need avlb t
+  let f = Resource.take_supp in
+  { t with queue = Queue.map f need avlb t.queue }
 
 let update (ready, built, queue) t =
-  { avlb = enables built t.avlb;
-    built;
-    queue;
-    ready = ready @ t.ready
+  { avlb = Avlb.unlock_ls built t.avlb
+  ; built
+  ; queue
+  ; ready = Ready.bump_ls ready t.ready
   }

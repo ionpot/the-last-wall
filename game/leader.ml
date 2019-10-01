@@ -4,25 +4,25 @@ type kind = Aristocrat | Engineer | Merchant
 type level = Defs.count
 
 type t =
-  { cha : charisma;
-    died : Defs.turn;
-    gender : gender;
-    kind : kind;
-    level : level;
-    name : Name.t;
-    noble : bool;
-    xp : Defs.count
+  { cha : charisma
+  ; died : Defs.turn
+  ; gender : gender
+  ; kind : kind
+  ; level : level
+  ; name : Name.t
+  ; noble : bool
+  ; xp : Defs.count
   }
 
 let empty =
-  { cha = 0;
-    died = 0;
-    gender = Female;
-    kind = Aristocrat;
-    level = 0;
-    name = Name.empty;
-    noble = true;
-    xp = 0
+  { cha = 0
+  ; died = 0
+  ; gender = Female
+  ; kind = Aristocrat
+  ; level = 0
+  ; name = Name.empty
+  ; noble = true
+  ; xp = 0
   }
 
 let kinds = [Aristocrat; Engineer; Merchant]
@@ -82,12 +82,11 @@ module Roll (Dice : Dice.S) = struct
     | Merchant -> Dice.chance 0.4
 
   let from kind =
-    { empty with
-      cha = Dice.between 10 15;
-      gender = if Dice.yes () then Male else Female;
-      kind;
-      level = Dice.between 3 5;
-      noble = noble kind
+    { empty with cha = Dice.between 10 15
+    ; gender = if Dice.yes () then Male else Female
+    ; kind
+    ; level = Dice.between 3 5
+    ; noble = noble kind
     } |> name
 
   let random () =

@@ -5,6 +5,7 @@ module type S = sig
   val cavalry : Defs.count -> unit
   val dervish : unit -> unit
   val enemies : unit -> unit
+  val leader : unit -> unit
   val new_leader : Leader.t list -> unit
   val ranger : unit -> unit
   val res : unit -> unit
@@ -62,6 +63,10 @@ module With (S : State.S) = struct
       (Convert.manp2str m)
       (Convert.work2str w)
     |> Tty.writeln
+
+  let leader () =
+    S.Leader.return Convert.ldr2full
+    |> Tty.pairln "leader"
 
   let new_leader = function
     | [] -> ()

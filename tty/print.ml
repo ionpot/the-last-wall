@@ -9,7 +9,9 @@ module Build = struct
     Tty.ifpairln "build queue" (bld_q2str queued)
 
   let all t =
-    status Build.(ls_ready t, ls_built t, ls_queue t)
+    bld_map2str (Build.ready t)
+    |> Tty.ifpairln "buildings ready";
+    status Build.([], built t, queue t)
 
   let manp need units =
     if need > 0 then
@@ -103,6 +105,12 @@ let disease (units, died) ldr =
   Tty.writeln "!!! disease outbreak !!!";
   Tty.pairln "died" (units2str units |> str2none);
   if died then Leader.died ldr
+
+let starting (module S : Starting.S) =
+  Tty.ifpairln "buildings" (bld_ls2str S.buildings);
+  Tty.pairln "month" (month2str S.month);
+  Tty.pairln "supply" (sup2str S.supply);
+  Tty.ifpairln "units" (units2str S.units)
 
 let support s =
   let f res =
