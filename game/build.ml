@@ -208,6 +208,8 @@ let is_ready kind t =
 let ballista_cap t =
   if is_ready Engrs t then 5 else 0
 
+let built t = t.built
+
 let mausoleums t =
   Ready.mausoleums t.ready
 
@@ -220,6 +222,8 @@ let need_supp t =
 let need_trade t =
   Built.has trade_default t.built
   || Ready.has trade_default t.ready
+
+let queue t = t.queue
 
 let ready t = t.ready
 
