@@ -9,7 +9,9 @@ module Build = struct
     Tty.ifpairln "build queue" (bld_q2str queued)
 
   let all t =
-    status Build.(ls_ready t, ls_built t, ls_queue t)
+    bld_map2str (Build.ready t)
+    |> Tty.ifpairln "buildings ready";
+    status Build.([], built t, queue t)
 
   let manp need units =
     if need > 0 then

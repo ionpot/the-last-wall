@@ -104,17 +104,24 @@ let bld2str = function
   | Build.Trade trade ->
       sprintf "trade guild%s" (trade_suffix trade)
 
-let bld_n2str (n, kind) =
+let bld_n2str (kind, n) =
   let str = bld2str kind in
   if n < 1 then ""
   else if n = 1 then str
   else sprintf "%s (%d)" str n
 
-let bld_ls2str ls =
-  Listx.group ls
-  |> List.map bld_n2str
+let bld_pairs2str ls =
+  List.map bld_n2str ls
   |> sort_str
   |> commas
+
+let bld_ls2str ls =
+  Listx.group ls
+  |> bld_pairs2str
+
+let bld_map2str map =
+  Build.Ready.Map.bindings map
+  |> bld_pairs2str
 
 let bld_q2str ls =
   ls

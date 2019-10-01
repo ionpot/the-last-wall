@@ -37,13 +37,14 @@ let filteri f ls =
   next 0 ls
 
 let group ls =
-  let one x = (1, x) in
-  let bump (n, x) = succ n, x in
-  let is x (_, y) = x = y in
-  build (fun out mem ->
+  let one x = (x, 1) in
+  let bump (x, n) = x, succ n in
+  let is x (y, _) = x = y in
+  let f out mem =
     let found, rest = List.partition (is mem) out in
     if found = [] then one mem :: rest
-    else List.map bump found @ rest) ls
+    else List.map bump found @ rest
+  in build f ls
 
 let index_of a ls =
   let rec f i = function
