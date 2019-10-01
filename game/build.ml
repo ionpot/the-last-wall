@@ -1,6 +1,10 @@
-type cost = Resource.t
 type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.kind option
+
+module Map = Map.Make(struct type t = kind let compare = compare end)
+
 type bonus = To of kind | ToAll
+type cost = Resource.t
+type cost_map = cost Map.t
 
 module Bonus = struct
   type t = bonus * Resource.Bonus.t
@@ -11,6 +15,8 @@ module Bonus = struct
   let filter kind = List.filter (is kind)
   let find kind ls = filter kind ls |> List.map snd
 end
+
+type bonuses = Bonus.t list
 
 let trade_default = Trade None
 let avlb_default =
@@ -107,8 +113,13 @@ module Queue = struct
     let built, ongoing = List.partition f t in
     List.map fst built, ongoing
 
-  let from kinds bonuses =
-    let f kind = kind, cost_of kind bonuses in
+  let cost_of kind costs =
+    if Map.mem kind costs
+    then Map.find kind costs
+    else base_cost_of kind
+
+  let from kinds costs =
+    let f kind = kind, cost_of kind costs in
     List.rev_map f kinds
 
   let map f need avlb t =
@@ -125,8 +136,6 @@ module Queue = struct
 end
 
 module Ready = struct
-  module Map = Map.Make(struct type t = kind let compare = compare end)
-
   type t = Defs.count Map.t
 
   let empty : t = Map.empty
@@ -189,6 +198,10 @@ let empty =
   }
 
 let available t = t.avlb
+
+let cost_map bonuses t =
+  let f kind = Map.add kind (cost_of kind bonuses) in
+  Avlb.Set.fold f t.avlb (Map.empty : cost_map)
 
 let count kind t =
   Ready.count kind t.ready
@@ -268,9 +281,9 @@ let set_trade nation_opt t =
   ; ready = Ready.set_trade trade t.ready
   }
 
-let start kinds bonuses t =
+let start kinds costs t =
   { t with avlb = Avlb.rm_ls kinds t.avlb
-  ; queue = Queue.from kinds bonuses @ t.queue
+  ; queue = Queue.from kinds costs @ t.queue
   }
 
 let supp need avlb t =

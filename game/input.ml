@@ -48,13 +48,14 @@ module Berserker = struct
 end
 
 module BuildAvlb = struct
-  type t = Build.kind list
+  type chosen = Build.kind list
+  type t = chosen * Build.cost_map
   module Apply (S : State.S) = struct
-    module Bonus = Build_bonus.From(S)
-    let value ls = S.Build.map (Build.start ls Bonus.value)
+    let value (chosen, costs) = S.Build.map (Build.start chosen costs)
   end
   module Make (S : State.S) = struct
-    let value = []
+    module Bonus = Build_bonus.From(S)
+    let value = [], S.Build.return (Build.cost_map Bonus.value)
   end
 end
 
