@@ -8,9 +8,8 @@ module Make (S : Game.State.S) = struct
       | Ballista (avlb, have) ->
           Ballista (check (Prompt.ballista have) avlb, have)
       | Build avlb ->
-          let module Prompt = Prompt.Build(S) in
           S.Build.return Print.Build.all;
-          Build (S.Build.return (Prompt.from avlb))
+          Build (Prompt.Build.from avlb)
       | Deity _ -> Deity (Prompt.deity ())
       | Knight n -> Knight (check Prompt.knight n)
       | Leader _ -> Leader (Prompt.leader ())

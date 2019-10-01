@@ -120,7 +120,7 @@ let bld_ls2str ls =
   |> bld_pairs2str
 
 let bld_map2str map =
-  Build.Ready.Map.bindings map
+  Build.Map.bindings map
   |> bld_pairs2str
 
 let bld_q2str ls =

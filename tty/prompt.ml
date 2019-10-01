@@ -50,8 +50,8 @@ let berserker avlb =
   Tty.writeln (sprintf "can train %d berserker" avlb);
   Tty.prompt_amount avlb
 
-module Build (S : Game.State.S) = struct
-  module Bonus = Game.Build_bonus.From(S)
+module Build = struct
+  module Map = Game.Build.Map
 
   let add_from avlb ch out =
     try List.nth avlb (ichar2int ch) :: out
@@ -61,16 +61,18 @@ module Build (S : Game.State.S) = struct
     List.fold_right (add_from avlb) ls []
     |> Listx.dedupe_if (fun k -> not (Game.Build.is_multiple k))
 
-  let from avlb t =
-    let avlb' = sort_by_str bld2str avlb in
-    List.map (fun kind ->
-      let cost = Game.Build.cost_of kind Bonus.value in
-      sprintf "%s [%s]" (bld2str kind) (res2str cost)) avlb'
+  let from (_, avlb) =
+    let kinds = Map.bindings avlb |> List.map fst |> sort_by_str bld2str in
+    let to_str kind =
+      Map.find kind avlb |> res2str |> sprintf "%s [%s]" (bld2str kind)
+    in
+    List.map to_str kinds
     |> vertical "buildings available";
     Tty.prompt_chars "build?"
-    |> choose avlb'
-    |> echo (fun ls -> if ls <> []
-      then List.map bld2str ls |> commas |> Tty.pairln "building")
+    |> choose kinds
+    |> echo (fun ls ->
+        List.map bld2str ls |> commas |> Tty.ifpairln "building")
+    |> (fun chosen -> chosen, avlb)
 end
 
 let deity () =

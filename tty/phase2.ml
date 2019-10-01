@@ -9,9 +9,8 @@ module Make (S : Game.State.S) = struct
           Ballista (check (Prompt.ballista have) avlb, have)
       | Berserker avlb -> Berserker (check Prompt.berserker avlb)
       | Build avlb ->
-          let module Prompt = Prompt.Build(S) in
           S.Build.return Print.Build.all;
-          Build (S.Build.return (Prompt.from avlb))
+          Build (Prompt.Build.from avlb)
       | Dervish count -> Dervish (check Prompt.dervish count)
       | LeaderNew ls -> LeaderNew (Prompt.new_leader ls)
       | Knight count -> Knight (check Prompt.knight count)
