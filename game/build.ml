@@ -170,8 +170,9 @@ module Ready = struct
   let has = Map.mem
 
   let set_trade trade t =
-    Map.remove trade_default t
-    |> add trade
+    if Map.mem trade_default t
+    then Map.remove trade_default t |> add trade
+    else t
 
   let sum t =
     Map.fold (fun _ -> (+)) t 0

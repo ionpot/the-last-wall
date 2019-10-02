@@ -28,6 +28,7 @@ module Apply (S : State.S) = struct
       else Chance.increase_by) 0.1 kind cmap
     in
     List.fold_left f chances Nation.kinds
+    |> boost
 end
 
 module Roll (S : State.S) = struct
