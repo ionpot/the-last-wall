@@ -50,12 +50,19 @@ end
 module BuildAvlb = struct
   type chosen = Build.kind list
   type t = chosen * Build.cost_map
+  module Bonus = Build.Bonus
   module Apply (S : State.S) = struct
     let value (chosen, costs) = S.Build.map (Build.start chosen costs)
   end
   module Make (S : State.S) = struct
-    module Bonus = Build_bonus.From(S)
-    let value = [], S.Build.return (Build.cost_map Bonus.value)
+    let has_engrs = S.Build.check Build.(is_ready Engrs)
+    let elanis = S.Deity.is Deity.Elanis
+    let costs = S.Build.return Build.cost_map
+      |> Bonus.to_cost_if has_engrs
+          (Bonus.ToAll, Resource.Bonus.(Sub (Sup 0.1)))
+      |> Bonus.to_cost_if elanis
+          (Bonus.To Build.Stable, Resource.Bonus.(Sub (Both 0.2)))
+    let value = [], costs
   end
 end
 
