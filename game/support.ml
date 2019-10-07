@@ -44,7 +44,7 @@ module Roll (S : State.S) = struct
 
   let chance_of kind nats =
     let starved = S.Starved.return Units.count_all in
-    let starvation = Defs.to_power starved 0.01 in
+    let starvation = Float.times starved 0.01 in
     let winter = S.Month.check Month.is_winter in
     Nation.chances nats
     |> Chance.of_kind kind

@@ -35,3 +35,6 @@ let sub_if cond a b =
 
 let sub_opt a b =
   if a > b then Some (a -. b) else None
+
+let times n x =
+  float n *. x

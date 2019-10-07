@@ -4,8 +4,6 @@ let cav_men_ratio = 0.4
 let heat_penalty = 0.02
 let mausoleum_dr = 0.01
 
-let to_power = Defs.to_power
-
 let cav_dr too_many snow units =
   if too_many then -.cav_dr_penalty
   else snow |> Float.if_not Units.(filter Attr.is_cavalry units |> dr)
@@ -29,7 +27,7 @@ module From (S : State.S) = struct
   let mausoleums = S.Build.return Build.mausoleums
   let mausoleum_dr =
     let bonus = if S.Deity.is Deity.Lerota then 2 else 1 in
-    to_power (mausoleums * bonus) mausoleum_dr
+    Float.times (mausoleums * bonus) mausoleum_dr
 
   let enemy_dr =
     let harpy, rest = S.Enemy.return Units.(split Harpy) in

@@ -85,7 +85,7 @@ let can_hit kind pwr =
   Base.power kind < pwr +. 4.
 
 let to_dr kind n =
-  Defs.to_power n (Base.dr kind)
+  Float.times n (Base.dr kind)
 
 let from_powerf kind p =
   p /. (Base.power kind)
@@ -95,7 +95,7 @@ let from_power kind p =
   |> truncate
 
 let to_power kind n =
-  Defs.to_power n (Base.power kind)
+  Float.times n (Base.power kind)
 
 let from_upkeep kind sup =
   Number.div sup (Base.upkeep_cost kind)
@@ -226,7 +226,7 @@ let filter_power attr t =
 
 let barrage_power t =
   let power = filter_power Attr.can_barrage t in
-  let bonus = Defs.to_power (count Ranger t) 1. in
+  let bonus = Float.times (count Ranger t) 1. in
   (power +. bonus) *. 0.05
 
 let max_base_power t =

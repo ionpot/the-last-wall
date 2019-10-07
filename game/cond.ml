@@ -8,7 +8,7 @@ module Ballista = struct
   module Make (S : State.S) = struct
     module Roll = Units.Fill(S.Dice)
     let count = S.Units.return Units.(count Ballista)
-    let power' = Defs.to_power count power
+    let power' = Float.times count power
     let value = count, S.Enemy.return (Roll.from power')
   end
 end
@@ -39,7 +39,7 @@ module Cyclops = struct
   module Make (S : State.S) = struct
     module Roll = Units.Fill(S.Dice)
     let count = S.Enemy.return Units.(count Cyclops)
-    let power' = Defs.to_power count power
+    let power' = Float.times count power
     let value = count, S.Units.return (Roll.from power')
   end
 end
