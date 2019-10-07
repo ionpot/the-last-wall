@@ -121,7 +121,6 @@ module Facilities = struct
       S.Build.return Build.ready
       |> Build.Map.bindings
       |> List.map (fun (k, _) -> k, to_res k)
-      |> List.filter (fun (_, r) -> r <> Resource.empty)
   end
 end
 
