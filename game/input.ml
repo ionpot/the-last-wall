@@ -153,12 +153,12 @@ module Mercs = struct
 end
 
 module Nations = struct
-  type t = Nation.kind list
+  type t = Nation.Set.t
   module Apply (S : State.S) = struct
-    let value ls = S.Nation.map (Nation.chosen ls)
+    let value x = S.Nation.map (Nation.set_chosen x)
   end
   module Make (S : State.S) = struct
-    let value = S.Nation.return Nation.which
+    let value = S.Nation.return Nation.chosen
   end
 end
 

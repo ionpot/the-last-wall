@@ -1,9 +1,12 @@
 type kind = Clan | Hekatium | Numendor | Sodistan | Tulron
 
-module Map = Map.Make(struct
+module Kind = struct
   type t = kind
   let compare = compare
-end)
+end
+
+module Map = Map.Make(Kind)
+module Set = Set.Make(Kind)
 
 let kinds = [Tulron; Sodistan; Hekatium; Numendor; Clan]
 let max_allowed = 3
@@ -20,6 +23,10 @@ let ranges_of =
     | Numendor -> (low, f high)
     | Clan -> (mid, f mid)
 
+let set2map f set =
+  let g kind map = Map.add kind (f kind) map in
+  Set.fold g set Map.empty
+
 module Chance = struct
   type t = float Map.t
   let base = 0.8
@@ -34,19 +41,19 @@ end
 
 type t =
   { chances : Chance.t
-  ; chosen : kind list
+  ; chosen : Set.t
   }
 
 let empty =
   { chances = Chance.base_map
-  ; chosen = []
+  ; chosen = Set.empty
   }
 
 let chances t = t.chances
-let which t = t.chosen
+let chosen t = t.chosen
 
-let chosen ls t =
-  { t with chosen = Listx.pick_first max_allowed ls }
+let set_chosen chosen t =
+  { t with chosen }
 
 let map_chances f t =
   { t with chances = f t.chances }

@@ -1,15 +1,15 @@
 module Chance = Nation.Chance
+module Map = Nation.Map
 
 type chances = Chance.t
-type t = (Nation.kind * Resource.t) list
+type t = Resource.t Nation.Map.t
 
-let ls t = t
+let is_empty k t =
+  Map.mem k t && Map.find k t = Resource.empty
 
-let sum =
-  let f total (_, res) =
-    Resource.(total ++ res)
-  in
-  List.fold_left f Resource.empty
+let sum t =
+  let f _ = Resource.(++) in
+  Map.fold f t Resource.empty
 
 module Apply (S : State.S) = struct
   let boost chances =
@@ -21,9 +21,8 @@ module Apply (S : State.S) = struct
     List.fold_left f chances Nation.kinds
 
   let chances t chances =
-    let empty = List.filter (fun (_, res) -> res = Resource.empty) t in
     let f cmap kind =
-      (if List.mem_assoc kind empty
+      (if is_empty kind t
       then Chance.reduce_by
       else Chance.increase_by) 0.1 kind cmap
     in
@@ -55,12 +54,11 @@ module Roll (S : State.S) = struct
     let (a, b) = Nation.ranges_of kind in
     Resource.(of_manp (roll a) <+ Supply (roll b))
 
-  let to_res kind nats =
+  let to_res nats kind =
     if chance_of kind nats |> S.Dice.chance
     then roll_res kind |> bonuses kind
     else Resource.empty
 
   let from nats =
-    Nation.which nats
-    |> List.map (fun kind -> kind, to_res kind nats)
+    Nation.(chosen nats |> set2map (to_res nats))
 end
