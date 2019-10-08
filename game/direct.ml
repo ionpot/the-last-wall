@@ -180,7 +180,7 @@ module Upkeep = struct
   end
   module Make (S : State.S) = struct
     let cost = S.Units.return Units.upkeep
-    let scouts = S.Scout.either 10 0
+    let scouts = S.Scout.return (Number.if_ok 10)
     let ldr = S.Leader.get ()
     let cha = Leader.cha_mod_of ldr
     let bonus = Float.times cha 0.03
