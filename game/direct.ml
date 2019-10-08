@@ -183,9 +183,10 @@ module Upkeep = struct
     let scouts = S.Scout.either 10 0
     let ldr = S.Leader.get ()
     let cha = Leader.cha_mod_of ldr
+    let bonus = Float.times cha 0.02
     let ratio =
-      Float.if_ok (float cha *. 0.02)
       Leader.(is_alive ldr && kind_of ldr = Engineer)
+      |> Float.if_ok bonus
     let value = Number.reduce_by ratio (cost + scouts)
   end
 end
