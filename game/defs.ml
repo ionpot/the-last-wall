@@ -1,3 +1,4 @@
+type chance = float
 type count = int
 type manpower = int
 type power = float
