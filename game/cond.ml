@@ -22,7 +22,10 @@ module Barraged = struct
     let value = S.Barraging.get ()
   end
   module Make (S : State.S) = struct
-    let n = S.Units.return Units.barrage_power |> truncate
+    let clear = S.Weather.is Weather.Clear
+    let n = S.Units.return Units.barrage_power
+      |> Float.add_if clear 0.02
+      |> truncate
     let value = S.Enemy.return Units.(find n Orc)
   end
 end
