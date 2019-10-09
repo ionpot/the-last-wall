@@ -11,41 +11,54 @@ let sum t =
   let f _ = Resource.(++) in
   Map.fold f t Resource.empty
 
+module Check (S : State.S) = struct
+  let starved = S.Starved.return Units.count_all
+  let starvation = Float.times starved 0.01
+  let winter = S.Month.check Month.is_winter
+  let has_trade kind =
+    S.Build.check Build.(has_trade kind)
+end
+
 module Apply (S : State.S) = struct
+  module Check = Check(S)
+
   let adjust kind t cmap =
     (if is_empty kind t
     then Chance.reduce_by
     else Chance.increase_by) 0.1 kind cmap
 
   let boost kind cmap =
-    if S.Build.check Build.(has_trade kind)
+    if Check.has_trade kind
     then Chance.increase_by 0.05 kind cmap
     else cmap
 
+  let starved =
+    Chance.reduce_by Check.starvation
+
   let chances t cmap =
-    let f cmap kind = adjust kind t cmap |> boost kind in
+    let f cmap kind =
+      adjust kind t cmap
+      |> boost kind
+      |> starved kind
+    in
     List.fold_left f cmap Nation.kinds
 end
 
 module Roll (S : State.S) = struct
-  let has_trade kind =
-    S.Build.check Build.(has_trade kind)
+  module Check = Check(S)
 
   let bonuses kind res =
     let leader = S.Leader.return Leader.res_bonus_of in
-    let trade = has_trade kind |> Number.if_ok 10 in
+    let trade = Check.has_trade kind |> Number.if_ok 10 in
     Resource.(res ++ leader ++ of_supp trade)
 
   let roll (a, b) = S.Dice.between a b
 
   let chance_of kind nats =
-    let starved = S.Starved.return Units.count_all in
-    let starvation = Float.times starved 0.01 in
-    let winter = S.Month.check Month.is_winter in
     Nation.chances nats
     |> Chance.of_kind kind
-    |> Float.sub_if winter 0.1
-    |> Float.sub_by starvation
+    |> Float.sub_if Check.winter 0.1
+    |> Float.sub_by Check.starvation
 
   let roll_res kind =
     let (a, b) = Nation.ranges_of kind in
