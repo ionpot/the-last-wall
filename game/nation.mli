@@ -13,9 +13,11 @@ val set2map : (Set.elt -> 'a) -> Set.t -> 'a Map.t
 
 module Chance : sig
   type t
-  val increase_by : chance -> kind -> t -> t
+  val base : chance
+  val add : chance -> kind -> t -> t
+  val cap_at : chance -> kind -> t -> t
   val of_kind : kind -> t -> chance
-  val reduce_by : chance -> kind -> t -> t
+  val sub : chance -> kind -> t -> t
 end
 
 type t

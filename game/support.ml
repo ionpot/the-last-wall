@@ -24,21 +24,29 @@ module Apply (S : State.S) = struct
 
   let adjust kind t cmap =
     (if is_empty kind t
-    then Chance.reduce_by
-    else Chance.increase_by) 0.1 kind cmap
+    then Chance.sub
+    else Chance.add) 0.1 kind cmap
 
   let boost kind cmap =
     if Check.has_trade kind
-    then Chance.increase_by 0.05 kind cmap
+    then Chance.add 0.05 kind cmap
     else cmap
 
+  let cap_of kind =
+    Chance.base
+    |> Float.add_if (Check.has_trade kind) 0.1
+
+  let cap kind =
+    Chance.cap_at (cap_of kind) kind
+
   let starved =
-    Chance.reduce_by Check.starvation
+    Chance.sub Check.starvation
 
   let chances t cmap =
     let f cmap kind =
       adjust kind t cmap
       |> boost kind
+      |> cap kind
       |> starved kind
     in
     List.fold_left f cmap Nation.kinds

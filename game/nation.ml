@@ -35,8 +35,9 @@ module Chance = struct
     List.fold_left f Map.empty kinds
   let of_kind = Map.find
   let map f k t = Map.add k (of_kind k t |> f) t
-  let increase_by step = map (fun c -> Float.add_if_ptv step c |> min base)
-  let reduce_by step = map (Float.sub_by step)
+  let add step = map (Float.add_if_ptv step)
+  let cap_at cap = map (min cap)
+  let sub step = map (Float.sub_by step)
 end
 
 type t =
