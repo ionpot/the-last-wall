@@ -127,16 +127,23 @@ end
 module Starting = Starting
 
 module Starvation = struct
-  type t = Units.t
+  type deserted = Units.t
+  type starved = Units.t
+  type t = starved * deserted
   module Apply (S : State.S) = struct
-    let value units =
-      S.Units.map Units.(reduce units);
-      S.Starved.set units;
+    let value (starved, deserted) =
+      S.Units.map Units.(reduce starved);
+      S.Units.map Units.(reduce deserted);
+      S.Starved.set starved;
       S.Supply.map (max 0)
   end
   module Make (S : State.S) = struct
+    module Fill = Units.FillCount(S.Dice)
     let cost = S.Supply.get () |> Number.sub 0
-    let value = S.Units.return (Units.starve cost)
+    let starved = S.Units.return (Units.starve cost)
+    let portion = S.Dice.rollf 0.75 |> Float.times cost |> truncate
+    let deserted = Fill.from portion starved
+    let value = Units.reduce deserted starved, deserted
   end
 end
 
