@@ -36,7 +36,7 @@ module Convert = struct
     module Event = Input.Event
     module Convert = Phase.Convert.Input(Steps)(Input)
 
-    let cond _ = failwith "no phase3 cond input"
+    let cond () = failwith "no phase3 input cond"
 
     let direct : Convert.direct = function
       | Steps.Barrage -> (module struct module Event = Event.Barrage

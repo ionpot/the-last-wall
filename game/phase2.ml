@@ -95,7 +95,7 @@ module Convert = struct
     module Steps = Steps.Output
     module Convert = Phase.Convert.Output(Steps)(Output)
 
-    let check () = failwith "no phase2 check"
+    let check () = failwith "no phase2 output check"
 
     let cond : Convert.cond = function
       | Steps.Defeat -> (module struct module Event = Cond.Defeat
