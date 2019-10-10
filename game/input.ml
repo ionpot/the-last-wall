@@ -19,6 +19,21 @@ module Ballista = struct
   end
 end
 
+module BarrageTrain = struct
+  type cost = Defs.supply
+  type t = bool * cost
+  module Apply (S : State.S) = struct
+    let value (ok, cost) =
+      S.Barrage.map (Barrage.set_trained ok);
+      if ok then S.Supply.sub cost
+  end
+  module Make (S : State.S) = struct
+    let power = S.Units.return Units.(filter_power Attr.can_barrage)
+    let cost = (power *. 0.05) |> ceil |> truncate
+    let value = S.Supply.has cost, cost
+  end
+end
+
 module Barrage = struct
   type t = bool * Barrage.status
   module Apply (S : State.S) = struct

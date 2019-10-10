@@ -5,6 +5,7 @@ module Input = struct
 
   type event =
     | Ballista of Event.Ballista.t
+    | BarrageTrain of Event.BarrageTrain.t
     | Berserker of Event.Berserker.t
     | Build of Event.BuildAvlb.t
     | Dervish of Event.Dervish.t
@@ -21,6 +22,7 @@ module Input = struct
     module Apply = Phase.Apply(State)
     let event = function
       | Ballista x -> Apply.value x (module Event.Ballista)
+      | BarrageTrain x -> Apply.value x (module Event.BarrageTrain)
       | Berserker x -> Apply.value x (module Event.Berserker)
       | Build x -> Apply.value x (module Event.BuildAvlb)
       | Dervish x -> Apply.value x (module Event.Dervish)
@@ -61,6 +63,8 @@ module Convert = struct
     let direct : Convert.direct = function
       | Steps.Ballista -> (module struct module Event = Event.Ballista
           let make x = Input.Ballista x end)
+      | Steps.BarrageTrain -> (module struct module Event = Event.BarrageTrain
+          let make x = Input.BarrageTrain x end)
       | Steps.Berserker -> (module struct module Event = Event.Berserker
           let make x = Input.Berserker x end)
       | Steps.Build -> (module struct module Event = Event.BuildAvlb
