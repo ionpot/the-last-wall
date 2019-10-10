@@ -239,12 +239,17 @@ module Trade = struct
 end
 
 module Volunteers = struct
+  module Range = Range.Int
   type t = Defs.count
   let kind = Units.Men
+  let base = 3, 9
   module Apply (S : State.S) = struct
     let value n = S.Units.map (Units.add n kind)
   end
   module Make (S : State.S) = struct
-    let value = S.Dice.between 3 9
+    let noble = S.Leader.check Leader.(is Aristocrat)
+    let cha = S.Leader.return Leader.cha_mod_of
+    let bonus = Range.times cha (1, 3)
+    let value = Range.combine_if noble bonus base |> S.Dice.range
   end
 end

@@ -32,7 +32,7 @@ let mod_of cha =
   (cha - 10) / 2
 
 let resource_of cha = function
-  | Aristocrat -> Resource.of_manp (2 * cha)
+  | Aristocrat
   | Engineer
   | Merchant -> Resource.empty
 
