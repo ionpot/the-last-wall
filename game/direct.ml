@@ -68,20 +68,6 @@ module BuildSupply = struct
   end
 end
 
-module CanBarrage = struct
-  type reason = Leader | Weather
-  type t = Yes | No of reason
-  module Apply (S : State.S) = struct
-    let value t = S.Barraging.set_to (t = Yes)
-  end
-  module Make (S : State.S) = struct
-    let value =
-      if S.Leader.check Leader.is_dead then No Leader
-      else if S.Weather.check Weather.is_bad then No Weather
-      else Yes
-  end
-end
-
 module Cavalry = struct
   type t = Defs.count
   let kind = Units.Cavalry

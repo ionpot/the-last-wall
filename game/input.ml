@@ -20,15 +20,21 @@ module Ballista = struct
 end
 
 module Barrage = struct
-  type t = bool
+  type reason = Leader | Weather
+  type status = Available | Disabled of reason
+  type t = bool * status
   module Apply (S : State.S) = struct
-    let value = S.Barraging.set_to
-  end
-  module Check (S : State.S) = struct
-    let value = S.Barraging.get ()
+    let value (ok, status) =
+      (status = Available && ok)
+      |> S.Barraging.set_to
   end
   module Make (S : State.S) = struct
-    let value = S.Barraging.get ()
+    let value = false,
+      if S.Leader.check Leader.is_dead
+      then Disabled Leader
+      else if S.Weather.check Weather.is_bad
+      then Disabled Weather
+      else Available
   end
 end
 

@@ -107,14 +107,14 @@ end
 
 module Phase3 = struct
   module Input = struct
-    type cond = Barrage
-    type direct = Scout
+    type cond = unit
+    type direct = Barrage | Scout
     type t = (cond, direct) input
   end
   module Output = struct
     type check = Attack | LevelUp | NoAttack | NoEnemies
     type cond = Ballista | Barraged | Cyclops | Defeat | Revive | Smite
-    type direct = CanBarrage | Combat | Victory
+    type direct = Combat | Victory
     type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
@@ -136,8 +136,7 @@ module Phase3 = struct
         Do (Cond Output.Cyclops);
         Do (Cond Output.Defeat)
       ]);
-      Do (Direct Output.CanBarrage);
-      Ask (Cond Input.Barrage);
+      Ask (Direct Input.Barrage);
       Do (Cond Output.Barraged);
       check_enemies;
       Do (Direct Output.Combat);
