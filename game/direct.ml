@@ -85,14 +85,15 @@ end
 module Combat = Combat
 
 module Facilities = struct
-  type t = (Build.kind * Resource.t) list
+  module Map = Build.Map
+  type t = Resource.t Map.t
   let arena = Build.Arena
   module Apply (S : State.S) = struct
     module Add = Event.AddRes(S)
     let value t =
-      List.map snd t |> List.iter Add.value;
-      if List.mem_assoc arena t
-      then List.assoc arena t |> Resource.manp_of |> S.Arena.set
+      Map.iter (fun _ -> Add.value) t;
+      if Map.mem arena t
+      then Map.find arena t |> Resource.manp_of |> S.Arena.set
       else S.Arena.clear ()
   end
   module Make (S : State.S) = struct
@@ -105,8 +106,7 @@ module Facilities = struct
       Resource.Bonus.(Sub (Both disease))
     let value =
       S.Build.return Build.ready
-      |> Build.Map.bindings
-      |> List.map (fun (k, _) -> k, to_res k)
+      |> Map.mapi (fun k _ -> to_res k)
   end
 end
 
