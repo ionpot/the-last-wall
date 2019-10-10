@@ -19,7 +19,7 @@ module Barraged = struct
     let value n = S.Enemy.map Units.(sub n Orc)
   end
   module Check (S : State.S) = struct
-    let value = S.Barraging.get ()
+    let value = S.Barrage.check Barrage.is_chosen
   end
   module Make (S : State.S) = struct
     let clear = S.Weather.is Weather.Clear

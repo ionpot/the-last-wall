@@ -9,7 +9,7 @@ let cav_dr too_many snow units =
   else snow |> Float.if_not Units.(filter Attr.is_cavalry units |> dr)
 
 module From (S : State.S) = struct
-  let barraging = S.Barraging.get ()
+  let barraging = S.Barrage.check Barrage.is_chosen
   let heat = S.Weather.is Weather.Heat
   let snow = S.Weather.is Weather.(Snow Heavy)
   let wind = S.Weather.is Weather.Wind

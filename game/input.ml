@@ -20,21 +20,20 @@ module Ballista = struct
 end
 
 module Barrage = struct
-  type reason = Leader | Weather
-  type status = Available | Disabled of reason
-  type t = bool * status
+  type t = bool * Barrage.status
   module Apply (S : State.S) = struct
     let value (ok, status) =
-      (status = Available && ok)
-      |> S.Barraging.set_to
+      (status = Barrage.Available && ok)
+      |> Barrage.set_choice
+      |> S.Barrage.map
   end
   module Make (S : State.S) = struct
     let value = false,
       if S.Leader.check Leader.is_dead
-      then Disabled Leader
+      then Barrage.(Disabled Leader)
       else if S.Weather.check Weather.is_bad
-      then Disabled Weather
-      else Available
+      then Barrage.(Disabled Weather)
+      else Barrage.Available
   end
 end
 
