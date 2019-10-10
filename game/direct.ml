@@ -98,12 +98,17 @@ module Facilities = struct
   end
   module Make (S : State.S) = struct
     let disease = S.Disease.get ()
+    let merchant = S.Leader.check Leader.(is Merchant)
+    let cha = S.Leader.return Leader.cha_mod_of
+    let ratio = Float.if_ok (Float.times cha 0.1) merchant
+    let bonus = Resource.Bonus.(Add (Sup ratio))
     let to_mnp k = Build.manpwr_range k |> S.Dice.range
     let to_sup k = Build.supply_range k |> S.Dice.range
     let to_res k =
       Resource.bonus_to
       Resource.(empty <+ Supply (to_sup k) <+ Manpwr (to_mnp k))
       Resource.Bonus.(Sub (Both disease))
+      |> Resource.bonus_if (k = Build.Market) bonus
     let value =
       S.Build.return Build.ready
       |> Map.mapi (fun k _ -> to_res k)

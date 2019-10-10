@@ -63,6 +63,9 @@ let bonus_to t =
   | Bonus.Add x -> apply Number.increase_by x t
   | Bonus.Sub x -> apply Number.reduce_by x t
 
+let bonus_if cond bonus t =
+  if cond then bonus_to t bonus else t
+
 let (<+) t = function
   | Empty -> t
   | Manpwr x -> Pair.(+<) x t

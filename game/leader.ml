@@ -33,8 +33,8 @@ let mod_of cha =
 
 let resource_of cha = function
   | Aristocrat -> Resource.of_manp (2 * cha)
-  | Engineer -> Resource.empty
-  | Merchant -> Resource.of_supp (2 * cha)
+  | Engineer
+  | Merchant -> Resource.empty
 
 let gender_of t = t.gender
 let is kind t = t.kind = kind
