@@ -37,6 +37,7 @@ let resource_of cha = function
   | Merchant -> Resource.of_supp (2 * cha)
 
 let gender_of t = t.gender
+let is kind t = t.kind = kind
 let is_alive t = t.died = 0
 let is_dead t = t.died > 0
 let can_respawn turn t =

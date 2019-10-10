@@ -12,6 +12,7 @@ val cha_mod_of : t -> charisma
 val cha_of : t -> charisma
 val defense_of : t -> Defs.power
 val gender_of : t -> gender
+val is : kind -> t -> bool
 val is_alive : t -> bool
 val is_dead : t -> bool
 val is_noble : t -> bool
