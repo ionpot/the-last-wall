@@ -46,20 +46,20 @@ module Phase1 = struct
   end
   type t = (Input.t, Output.t) step
   let list : t list =
-    [ Ask (Direct Input.Deity);
-      Ask (Direct Input.Leader);
-      Do (Direct Output.Starting);
-      Ask (Cond Input.Trade);
-      Do (Direct Output.Facilities);
-      Ask (Direct Input.Nations);
-      Do (Direct Output.Support);
-      Ask (Direct Input.Volunteers);
-      Ask (Direct Input.Build);
-      Do (Direct Output.BuildSupply);
-      Ask (Direct Input.Ballista);
-      Do (Direct Output.Cavalry);
-      Ask (Direct Input.Knight);
-      Ask (Direct Input.Scout)
+    [ Ask (Direct Input.Deity)
+    ; Ask (Direct Input.Leader)
+    ; Do (Direct Output.Starting)
+    ; Ask (Cond Input.Trade)
+    ; Do (Direct Output.Facilities)
+    ; Ask (Direct Input.Nations)
+    ; Do (Direct Output.Support)
+    ; Ask (Direct Input.Volunteers)
+    ; Ask (Direct Input.Build)
+    ; Do (Direct Output.BuildSupply)
+    ; Ask (Direct Input.Ballista)
+    ; Do (Direct Output.Cavalry)
+    ; Ask (Direct Input.Knight)
+    ; Ask (Direct Input.Scout)
     ]
 end
 
@@ -77,32 +77,32 @@ module Phase2 = struct
   end
   type t = (Input.t, Output.t) step
   let list : t list =
-    [ Do (Direct Output.Turn);
-      Do (Direct Output.BuildManp);
-      Do (Direct Output.BuildStatus);
-      Ask (Cond Input.LeaderNew);
-      Do (Direct Output.Upkeep);
-      Do (Direct Output.Starvation);
-      Do (Cond Output.Defeat);
-      Do (Cond Output.Disease);
-      Do (Direct Output.Attack);
-      Do (Direct Output.Blessing);
-      Do (Direct Output.Facilities);
-      Ask (Direct Input.Nations);
-      Do (Direct Output.Support);
-      Ask (Direct Input.Volunteers);
-      Ask (Cond Input.Trade);
-      Ask (Direct Input.Build);
-      Do (Direct Output.BuildSupply);
-      Ask (Direct Input.Berserker);
-      Ask (Direct Input.Ballista);
-      Do (Direct Output.Cavalry);
-      Ask (Direct Input.Knight);
-      Ask (Direct Input.Dervish);
-      Ask (Cond Input.Templar);
-      Ask (Cond Input.Ranger);
-      Ask (Direct Input.Mercs);
-      Ask (Direct Input.BarrageTrain)
+    [ Do (Direct Output.Turn)
+    ; Do (Direct Output.BuildManp)
+    ; Do (Direct Output.BuildStatus)
+    ; Ask (Cond Input.LeaderNew)
+    ; Do (Direct Output.Upkeep)
+    ; Do (Direct Output.Starvation)
+    ; Do (Cond Output.Defeat)
+    ; Do (Cond Output.Disease)
+    ; Do (Direct Output.Attack)
+    ; Do (Direct Output.Blessing)
+    ; Do (Direct Output.Facilities)
+    ; Ask (Direct Input.Nations)
+    ; Do (Direct Output.Support)
+    ; Ask (Direct Input.Volunteers)
+    ; Ask (Cond Input.Trade)
+    ; Ask (Direct Input.Build)
+    ; Do (Direct Output.BuildSupply)
+    ; Ask (Direct Input.Berserker)
+    ; Ask (Direct Input.Ballista)
+    ; Do (Direct Output.Cavalry)
+    ; Ask (Direct Input.Knight)
+    ; Ask (Direct Input.Dervish)
+    ; Ask (Cond Input.Templar)
+    ; Ask (Cond Input.Ranger)
+    ; Ask (Direct Input.Mercs)
+    ; Ask (Direct Input.BarrageTrain)
     ]
 end
 
@@ -121,33 +121,33 @@ module Phase3 = struct
   type t = (Input.t, Output.t) step
   let scout : t = Ask (Direct Input.Scout)
   let victory : t list =
-    [ Do (Direct Output.Victory);
-      Do (Check Output.LevelUp);
-      scout
+    [ Do (Direct Output.Victory)
+    ; Do (Check Output.LevelUp)
+    ; scout
     ]
   let check_enemies : t =
     GoIf (Check Output.NoEnemies, victory)
   let attack : t list =
-    [ Do (Cond Output.Smite);
-      check_enemies;
-      Shuffle ([
-        Do (Cond Output.Ballista);
-        check_enemies
-      ], [
-        Do (Cond Output.Cyclops);
-        Do (Cond Output.Defeat)
-      ]);
-      Ask (Direct Input.Barrage);
-      Do (Cond Output.Barraged);
-      check_enemies;
-      Do (Direct Output.Combat);
-      Do (Cond Output.Revive);
-      Do (Cond Output.Defeat);
-      Go victory
+    [ Do (Cond Output.Smite)
+    ; check_enemies
+    ; Shuffle (
+      [ Do (Cond Output.Ballista)
+      ; check_enemies
+      ],
+      [ Do (Cond Output.Cyclops)
+      ; Do (Cond Output.Defeat)
+      ])
+    ; Ask (Direct Input.Barrage)
+    ; Do (Cond Output.Barraged)
+    ; check_enemies
+    ; Do (Direct Output.Combat)
+    ; Do (Cond Output.Revive)
+    ; Do (Cond Output.Defeat)
+    ; Go victory
     ]
   let list : t list =
-    [ GoIf (Check Output.Attack, attack);
-      Do (Check Output.NoAttack);
-      scout
+    [ GoIf (Check Output.Attack, attack)
+    ; Do (Check Output.NoAttack)
+    ; scout
     ]
 end
