@@ -56,9 +56,8 @@ module Roll (S : State.S) = struct
   module Check = Check(S)
 
   let bonuses kind res =
-    let leader = S.Leader.return Leader.res_bonus_of in
     let trade = Check.has_trade kind |> Number.if_ok 10 in
-    Resource.(res ++ leader ++ of_supp trade)
+    Resource.(res ++ of_supp trade)
 
   let roll (a, b) = S.Dice.between a b
 

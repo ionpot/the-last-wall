@@ -31,11 +31,6 @@ let respawn_time = 2 (* turns *)
 let mod_of cha =
   (cha - 10) / 2
 
-let resource_of cha = function
-  | Aristocrat
-  | Engineer
-  | Merchant -> Resource.empty
-
 let gender_of t = t.gender
 let is kind t = t.kind = kind
 let is_alive t = t.died = 0
@@ -54,11 +49,6 @@ let victories t = t.xp
 let defense_of t =
   let lv = level_of t in
   0.1 +. (0.01 *. float lv)
-
-let res_bonus_of t =
-  let cha = cha_mod_of t in
-  let kind = kind_of t in
-  resource_of cha kind
 
 let died turn t =
   { t with died = turn }
