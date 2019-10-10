@@ -15,7 +15,7 @@ let ranges_of =
   let low = (0, 10) in
   let mid = (10, 20) in
   let high = (20, 30) in
-  let f x = Pair.(x <+> 10) in
+  let f = Range.Int.add 10 in
   function
     | Tulron
     | Sodistan -> (high, f low)
