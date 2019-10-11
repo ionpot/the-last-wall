@@ -18,8 +18,8 @@ end
 
 module Base : sig
   val abundance : kind -> float
-  val chance : kind -> float
-  val chance_growth : kind -> float
+  val chance : kind -> Defs.chance
+  val chance_growth : kind -> Defs.chance
   val supply_cost : kind -> Defs.supply
 end
 

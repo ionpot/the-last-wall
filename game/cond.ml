@@ -8,7 +8,7 @@ module Ballista = struct
   module Make (S : State.S) = struct
     module Roll = Units.Fill(S.Dice)
     let count = S.Units.return Units.(count Ballista)
-    let power' = Defs.to_power count power
+    let power' = Float.times count power
     let value = count, S.Enemy.return (Roll.from power')
   end
 end
@@ -19,10 +19,15 @@ module Barraged = struct
     let value n = S.Enemy.map Units.(sub n Orc)
   end
   module Check (S : State.S) = struct
-    let value = S.Barraging.get ()
+    let value = S.Barrage.check Barrage.is_chosen
   end
   module Make (S : State.S) = struct
-    let n = S.Units.return Units.barrage_power |> truncate
+    let clear = S.Weather.is Weather.Clear
+    let trained = S.Barrage.check Barrage.is_trained
+    let n = S.Units.return Units.barrage_power
+      |> Float.add_if clear 0.02
+      |> Float.add_if trained 0.1
+      |> truncate
     let value = S.Enemy.return Units.(find n Orc)
   end
 end
@@ -39,7 +44,7 @@ module Cyclops = struct
   module Make (S : State.S) = struct
     module Roll = Units.Fill(S.Dice)
     let count = S.Enemy.return Units.(count Cyclops)
-    let power' = Defs.to_power count power
+    let power' = Float.times count power
     let value = count, S.Units.return (Roll.from power')
   end
 end

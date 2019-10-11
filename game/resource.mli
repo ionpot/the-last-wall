@@ -13,6 +13,7 @@ type kind =
 
 val empty : t
 
+val bonus_if : bool -> Bonus.t -> t -> t
 val bonus_to : t -> Bonus.t -> t
 
 val has_manp : t -> bool

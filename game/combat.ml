@@ -49,8 +49,9 @@ module Make (S : State.S) = struct
   module Units = Units(S)
 
   let harpy_weaken =
-    S.Barraging.either 1. 0.
-    |> Defs.to_power Units.harpies
+    S.Barrage.check Barrage.is_chosen
+    |> Float.if_ok 1.
+    |> Float.times Units.harpies
 
   let have_fort =
     S.Build.check Build.(is_ready Fort)

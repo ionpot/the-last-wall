@@ -1,7 +1,6 @@
 type chances = Nation.Chance.t
-type t
+type t = Resource.t Nation.Map.t
 
-val ls : t -> (Nation.kind * Resource.t) list
 val sum : t -> Resource.t
 
 module Apply : State.S -> sig
@@ -9,6 +8,6 @@ module Apply : State.S -> sig
 end
 
 module Roll : State.S -> sig
-  val chance_of : Nation.kind -> Nation.t -> float
+  val chance_of : Nation.kind -> Nation.t -> Defs.chance
   val from : Nation.t -> t
 end
