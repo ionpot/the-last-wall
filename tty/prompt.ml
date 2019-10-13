@@ -46,6 +46,15 @@ let ballista n avlb =
 let barrage () =
   Tty.prompt_yn "arrow barrage? y/n"
 
+let barrage_train ok cost =
+  let sup = sup2str cost in
+  if ok
+  then sprintf "train archers for %s? y/n" sup |> Tty.prompt_yn
+  else begin
+    sprintf "need %s to train archers" sup |> Tty.writeln;
+    false
+  end
+
 let berserker avlb =
   Tty.writeln (sprintf "can train %d berserker" avlb);
   Tty.prompt_amount avlb
