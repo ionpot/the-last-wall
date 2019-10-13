@@ -227,7 +227,7 @@ let filter_power attr t =
 let barrage_power t =
   let power = filter_power Attr.can_barrage t in
   let bonus = Float.times (count Ranger t) 1. in
-  (power +. bonus) *. 0.05
+  power +. bonus
 
 let max_base_power t =
   Map.fold (fun k _ acc -> Base.power k |> max acc) t 0.
