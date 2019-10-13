@@ -41,7 +41,7 @@ module Make (S : Game.State.S) = struct
       | Defeat -> Tty.writeln "defeat"
       | Disease x -> Print.disease x |> S.Leader.return
       | Facilities x -> Print.facilities x
-      | Starvation units -> Tty.ifpairln "starvation" (units2str units)
+      | Starvation x -> Print.starvation x
       | Support s -> Print.support s
       | Turn t -> Tty.lnwriteln (turn2str t)
       | Upkeep sup -> Tty.pairln "upkeep" (sup2str sup)
@@ -69,7 +69,7 @@ module After (S : Status.S) = struct
       | BuildSupply s -> if s > 0 then S.res ()
       | Cavalry n -> if n > 0 then begin S.cavalry n; S.res () end
       | Facilities x -> S.facilities x
-      | Starvation u -> if u <> Game.Units.empty then S.res ()
+      | Starvation x -> if Convert.starve2bool x then S.res ()
       | Support _
       | Upkeep _ -> S.res ()
       | _ -> ()

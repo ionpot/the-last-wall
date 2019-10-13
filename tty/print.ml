@@ -115,6 +115,10 @@ let starting (module S : Starting.S) =
   Tty.pairln "supply" (sup2str S.supply);
   Tty.ifpairln "units" (units2str S.units)
 
+let starvation (starved, fled) =
+  Tty.ifpairln "starved" (units2str starved);
+  Tty.ifpairln "fled" (units2str fled)
+
 let support s =
   let to_str nat res =
     sprintf "%s sent %s" (nation2str nat) (res2nothing res)

@@ -238,6 +238,10 @@ let barrage2str x =
 let smite2str x =
   units2str Units.(make x Skeleton)
 
+let starve2bool (starved, deserted) =
+  let check = (<>) Units.empty in
+  check starved || check deserted
+
 let month2str = function
   | Month.Jan -> "january"
   | Month.Feb -> "february"
