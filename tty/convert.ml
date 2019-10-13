@@ -48,6 +48,11 @@ let res2str res =
   |> List.map (fun (n, f) -> f n)
   |> commas
 
+let res2nothing res =
+  if res = Resource.empty
+  then "nothing"
+  else res2str res
+
 let ldr2kind = function
   | Leader.Aristocrat -> "aristocrat"
   | Leader.Engineer -> "engineer"

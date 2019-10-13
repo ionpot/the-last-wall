@@ -113,11 +113,11 @@ let starting (module S : Starting.S) =
   Tty.ifpairln "units" (units2str S.units)
 
 let support s =
-  let f res =
-    if res = Resource.empty then "nothing"
-    else res2str res
+  let to_str nat res =
+    sprintf "%s sent %s" (nation2str nat) (res2nothing res)
   in
-  Support.ls s
-  |> List.map (fun (nat, res) -> (nation2str nat, f res))
-  |> List.map (fun (nat, res) -> sprintf "%s sent %s" nat res)
+  let module Map = Nation.Map in
+  Nation.kinds
+  |> List.filter (fun k -> Map.mem k s)
+  |> List.map (fun k -> to_str k (Map.find k s))
   |> Tty.writelns
