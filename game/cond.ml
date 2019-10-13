@@ -24,10 +24,10 @@ module Barraged = struct
   module Make (S : State.S) = struct
     let clear = S.Weather.is Weather.Clear
     let trained = S.Barrage.check Barrage.is_trained
-    let n = S.Units.return Units.barrage_power
-      |> Float.add_if clear 0.02
-      |> Float.add_if trained 0.1
-      |> truncate
+    let power = S.Units.return Units.barrage_power
+    let base = if trained then 0.1 else 0.05
+    let ratio = base |> Float.add_if clear 0.02
+    let n = truncate (power *. ratio)
     let value = S.Enemy.return Units.(find n Orc)
   end
 end
