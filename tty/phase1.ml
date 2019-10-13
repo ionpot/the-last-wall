@@ -25,7 +25,7 @@ module Make (S : Game.State.S) = struct
     function
       | BuildSupply s -> S.Supply.return (Print.Build.supply s)
       | Cavalry _ -> ()
-      | Facilities ls -> Tty.ifpairln "facilities" (Convert.facs2str ls)
+      | Facilities x -> Print.facilities x
       | Starting s -> Print.starting s
       | Support s -> Print.support s
 end
@@ -45,7 +45,7 @@ module After (S : Status.S) = struct
     function
       | BuildSupply _ -> ()
       | Cavalry n -> if n > 0 then begin S.cavalry n; S.res () end
-      | Facilities ls -> if ls <> [] then S.res ()
+      | Facilities x -> S.facilities x
       | Support _ -> S.res ()
       | Starting _ -> ()
 end

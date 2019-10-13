@@ -106,6 +106,9 @@ let disease (units, died) ldr =
   Tty.pairln "died" (units2str units |> str2none);
   if died then Leader.died ldr
 
+let facilities map =
+  Tty.ifpairln "facilities" (facs2clean map |> facs2str)
+
 let starting (module S : Starting.S) =
   Tty.ifpairln "buildings" (bld_ls2str S.buildings);
   Tty.pairln "month" (month2str S.month);
