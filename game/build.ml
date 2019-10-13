@@ -2,21 +2,21 @@ type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of 
 
 module Map = Map.Make(struct type t = kind let compare = compare end)
 
-type bonus = To of kind | ToAll
 type cost = Resource.t
 type cost_map = cost Map.t
 
 module Bonus = struct
-  type t = bonus * Resource.Bonus.t
-  let apply_to = List.fold_left Resource.bonus_to
-  let is kind = function
-      | (To k, _) -> k = kind
-      | (ToAll, _) -> true
-  let filter kind = List.filter (is kind)
-  let find kind ls = filter kind ls |> List.map snd
+  type target = To of kind | ToAll
+  type bonus = Resource.Bonus.t
+  type t = target * bonus
+  let is kind = function To k -> k = kind | ToAll -> true
+  let to_cost (target, bonus) =
+    let f k res =
+      if is k target then Resource.bonus_to res bonus else res
+    in Map.mapi f
+  let to_cost_if cond t map =
+    if cond then to_cost t map else map
 end
-
-type bonuses = Bonus.t list
 
 let trade_default = Trade None
 let avlb_default =
@@ -42,10 +42,6 @@ let base_cost =
 let base_cost_of kind =
   let a, b = base_cost kind in
   Resource.(empty <+ a <+ b)
-
-let cost_of kind bonuses =
-  Bonus.find kind bonuses
-  |> Bonus.apply_to (base_cost_of kind)
 
 let is_multiple kind =
   kind = Stable
@@ -200,8 +196,8 @@ let empty =
 
 let available t = t.avlb
 
-let cost_map bonuses t =
-  let f kind = Map.add kind (cost_of kind bonuses) in
+let cost_map t =
+  let f kind = Map.add kind (base_cost_of kind) in
   Avlb.Set.fold f t.avlb (Map.empty : cost_map)
 
 let count kind t =

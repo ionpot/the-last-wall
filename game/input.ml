@@ -19,16 +19,36 @@ module Ballista = struct
   end
 end
 
-module Barrage = struct
-  type t = bool
+module BarrageTrain = struct
+  type cost = Defs.supply
+  type t = bool * cost
   module Apply (S : State.S) = struct
-    let value = S.Barraging.set_to
-  end
-  module Check (S : State.S) = struct
-    let value = S.Barraging.get ()
+    let value (ok, cost) =
+      S.Barrage.map (Barrage.set_trained ok);
+      if ok then S.Supply.sub cost
   end
   module Make (S : State.S) = struct
-    let value = S.Barraging.get ()
+    let power = S.Units.return Units.(filter_power Attr.can_barrage)
+    let cost = (power *. 0.05) |> ceil |> truncate
+    let value = S.Supply.has cost, cost
+  end
+end
+
+module Barrage = struct
+  type t = bool * Barrage.status
+  module Apply (S : State.S) = struct
+    let value (ok, status) =
+      (status = Barrage.Available && ok)
+      |> Barrage.set_choice
+      |> S.Barrage.map
+  end
+  module Make (S : State.S) = struct
+    let value = false,
+      if S.Leader.check Leader.is_dead
+      then Barrage.(Disabled Leader)
+      else if S.Weather.check Weather.is_bad
+      then Barrage.(Disabled Weather)
+      else Barrage.Available
   end
 end
 
@@ -50,12 +70,19 @@ end
 module BuildAvlb = struct
   type chosen = Build.kind list
   type t = chosen * Build.cost_map
+  module Bonus = Build.Bonus
   module Apply (S : State.S) = struct
     let value (chosen, costs) = S.Build.map (Build.start chosen costs)
   end
   module Make (S : State.S) = struct
-    module Bonus = Build_bonus.From(S)
-    let value = [], S.Build.return (Build.cost_map Bonus.value)
+    let has_engrs = S.Build.check Build.(is_ready Engrs)
+    let elanis = S.Deity.is Deity.Elanis
+    let costs = S.Build.return Build.cost_map
+      |> Bonus.to_cost_if has_engrs
+          (Bonus.ToAll, Resource.Bonus.(Sub (Sup 0.1)))
+      |> Bonus.to_cost_if elanis
+          (Bonus.To Build.Stable, Resource.Bonus.(Sub (Both 0.2)))
+    let value = [], costs
   end
 end
 
@@ -146,12 +173,12 @@ module Mercs = struct
 end
 
 module Nations = struct
-  type t = Nation.kind list
+  type t = Nation.Set.t
   module Apply (S : State.S) = struct
-    let value ls = S.Nation.map (Nation.chosen ls)
+    let value x = S.Nation.map (Nation.set_chosen x)
   end
   module Make (S : State.S) = struct
-    let value = S.Nation.return Nation.which
+    let value = S.Nation.return Nation.chosen
   end
 end
 
@@ -212,12 +239,17 @@ module Trade = struct
 end
 
 module Volunteers = struct
+  module Range = Range.Int
   type t = Defs.count
   let kind = Units.Men
+  let base = 3, 9
   module Apply (S : State.S) = struct
     let value n = S.Units.map (Units.add n kind)
   end
   module Make (S : State.S) = struct
-    let value = S.Dice.between 3 9
+    let noble = S.Leader.check Leader.(is Aristocrat)
+    let cha = S.Leader.return Leader.cha_mod_of
+    let bonus = Range.times cha (1, 3)
+    let value = Range.combine_if noble bonus base |> S.Dice.range
   end
 end

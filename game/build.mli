@@ -4,7 +4,6 @@ type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of 
 
 module Map : Map.S with type key = kind
 
-type bonus = To of kind | ToAll
 type cost = Resource.t
 type cost_map = cost Map.t
 
@@ -16,7 +15,10 @@ module Avlb : sig
 end
 
 module Bonus : sig
-  type t = bonus * Resource.Bonus.t
+  type target = To of kind | ToAll
+  type bonus = Resource.Bonus.t
+  type t = target * bonus
+  val to_cost_if : bool -> t -> cost_map -> cost_map
 end
 
 module Built : sig
@@ -31,14 +33,12 @@ module Ready : sig
   type t = count Map.t
 end
 
-type bonuses = Bonus.t list
 type status = Built.t * Built.t * Queue.t
 
 type t
 
 val empty : t
 
-val cost_of : kind -> bonuses -> cost
 val is_multiple : kind -> bool
 val manpwr_range : kind -> manpower range
 val supply_range : kind -> supply range
@@ -47,7 +47,7 @@ val arena_cap : t -> count
 val available : t -> Avlb.t
 val ballista_cap : t -> count
 val built : t -> Built.t
-val cost_map : bonuses -> t -> cost_map
+val cost_map : t -> cost_map
 val count : kind -> t -> count
 val has_trade : Nation.kind -> t -> bool
 val is_built : kind -> t -> bool

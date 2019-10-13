@@ -68,20 +68,6 @@ module BuildSupply = struct
   end
 end
 
-module CanBarrage = struct
-  type reason = Leader | Weather
-  type t = Yes | No of reason
-  module Apply (S : State.S) = struct
-    let value t = S.Barraging.set_to (t = Yes)
-  end
-  module Make (S : State.S) = struct
-    let value =
-      if S.Leader.check Leader.is_dead then No Leader
-      else if S.Weather.check Weather.is_bad then No Weather
-      else Yes
-  end
-end
-
 module Cavalry = struct
   type t = Defs.count
   let kind = Units.Cavalry
@@ -99,45 +85,56 @@ end
 module Combat = Combat
 
 module Facilities = struct
-  type t = (Build.kind * Resource.t) list
+  module Map = Build.Map
+  type t = Resource.t Map.t
   let arena = Build.Arena
   module Apply (S : State.S) = struct
     module Add = Event.AddRes(S)
     let value t =
-      List.map snd t |> List.iter Add.value;
-      if List.mem_assoc arena t
-      then List.assoc arena t |> Resource.manp_of |> S.Arena.set
+      Map.iter (fun _ -> Add.value) t;
+      if Map.mem arena t
+      then Map.find arena t |> Resource.manp_of |> S.Arena.set
       else S.Arena.clear ()
   end
   module Make (S : State.S) = struct
     let disease = S.Disease.get ()
+    let merchant = S.Leader.check Leader.(is Merchant)
+    let cha = S.Leader.return Leader.cha_mod_of
+    let ratio = Float.if_ok (Float.times cha 0.1) merchant
+    let bonus = Resource.Bonus.(Add (Sup ratio))
     let to_mnp k = Build.manpwr_range k |> S.Dice.range
     let to_sup k = Build.supply_range k |> S.Dice.range
     let to_res k =
       Resource.bonus_to
       Resource.(empty <+ Supply (to_sup k) <+ Manpwr (to_mnp k))
       Resource.Bonus.(Sub (Both disease))
+      |> Resource.bonus_if (k = Build.Market) bonus
     let value =
       S.Build.return Build.ready
-      |> Build.Map.bindings
-      |> List.map (fun (k, _) -> k, to_res k)
-      |> List.filter (fun (_, r) -> r <> Resource.empty)
+      |> Map.mapi (fun k _ -> to_res k)
   end
 end
 
 module Starting = Starting
 
 module Starvation = struct
-  type t = Units.t
+  type deserted = Units.t
+  type starved = Units.t
+  type t = starved * deserted
   module Apply (S : State.S) = struct
-    let value units =
-      S.Units.map Units.(reduce units);
-      S.Starved.set units;
+    let value (starved, deserted) =
+      S.Units.map Units.(reduce starved);
+      S.Units.map Units.(reduce deserted);
+      S.Starved.set starved;
       S.Supply.map (max 0)
   end
   module Make (S : State.S) = struct
+    module Fill = Units.FillCount(S.Dice)
     let cost = S.Supply.get () |> Number.sub 0
-    let value = S.Units.return (Units.starve cost)
+    let starved = S.Units.return (Units.starve cost)
+    let portion = S.Dice.rollf 0.75 |> Float.times cost |> truncate
+    let deserted = Fill.from portion starved
+    let value = Units.reduce deserted starved, deserted
   end
 end
 
@@ -181,12 +178,13 @@ module Upkeep = struct
   end
   module Make (S : State.S) = struct
     let cost = S.Units.return Units.upkeep
-    let scouts = S.Scout.either 10 0
+    let scouts = S.Scout.return (Number.if_ok 10)
     let ldr = S.Leader.get ()
     let cha = Leader.cha_mod_of ldr
+    let bonus = Float.times cha 0.03
     let ratio =
-      Float.if_ok (float cha *. 0.02)
-      Leader.(is_alive ldr && kind_of ldr = Engineer)
+      Leader.(is_alive ldr && is Engineer ldr)
+      |> Float.if_ok bonus
     let value = Number.reduce_by ratio (cost + scouts)
   end
 end

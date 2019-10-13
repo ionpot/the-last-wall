@@ -48,6 +48,11 @@ let res2str res =
   |> List.map (fun (n, f) -> f n)
   |> commas
 
+let res2nothing res =
+  if res = Resource.empty
+  then "nothing"
+  else res2str res
+
 let ldr2kind = function
   | Leader.Aristocrat -> "aristocrat"
   | Leader.Engineer -> "engineer"
@@ -129,10 +134,18 @@ let bld_q2str ls =
       sprintf "%s (%s)" (bld2str kind) (res2str cost))
   |> commas
 
-let facs2str ls =
-  ls
-  |> List.map (fun (k, r) -> sprintf "%s (%s)" (bld2str k) (res2str r))
-  |> commas
+let facs2bool map =
+  not @@ Build.Map.is_empty map
+
+let facs2clean map =
+  Build.Map.filter (fun _ -> (<>) Resource.empty) map
+
+let facs2str map =
+  let f k r acc =
+    sprintf "%s (%s)" (bld2str k) (res2str r) :: acc
+  in
+  Build.Map.fold f map []
+  |> sort_str |> commas
 
 let deity2str = function
   | Deity.Arnerula -> "arnerula"
@@ -224,6 +237,10 @@ let barrage2str x =
 
 let smite2str x =
   units2str Units.(make x Skeleton)
+
+let starve2bool (starved, deserted) =
+  let check = (<>) Units.empty in
+  check starved || check deserted
 
 let month2str = function
   | Month.Jan -> "january"

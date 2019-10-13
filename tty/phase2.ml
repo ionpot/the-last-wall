@@ -7,6 +7,8 @@ module Make (S : Game.State.S) = struct
     function
       | Ballista (avlb, have) ->
           Ballista (check (Prompt.ballista have) avlb, have)
+      | BarrageTrain (ok, cost) ->
+          BarrageTrain (Prompt.barrage_train ok cost, cost)
       | Berserker avlb -> Berserker (check Prompt.berserker avlb)
       | Build avlb ->
           S.Build.return Print.Build.all;
@@ -40,8 +42,8 @@ module Make (S : Game.State.S) = struct
       | Cavalry c -> ()
       | Defeat -> Tty.writeln "defeat"
       | Disease x -> Print.disease x |> S.Leader.return
-      | Facilities ls -> Tty.ifpairln "facilities" (facs2str ls)
-      | Starvation units -> Tty.ifpairln "starvation" (units2str units)
+      | Facilities x -> Print.facilities x
+      | Starvation x -> Print.starvation x
       | Support s -> Print.support s
       | Turn t -> Tty.lnwriteln (turn2str t)
       | Upkeep sup -> Tty.pairln "upkeep" (sup2str sup)
@@ -52,6 +54,7 @@ module After (S : Status.S) = struct
     let open Phase.Input in
     function
       | Ballista (n, _) -> if n > 0 then S.res ()
+      | BarrageTrain (ok, _) -> if ok then S.res ()
       | Berserker n -> if n > 0 then begin S.berserker (); S.res () end
       | Dervish n -> if n > 0 then begin S.dervish (); S.res () end
       | LeaderNew ls -> S.new_leader ls
@@ -68,8 +71,8 @@ module After (S : Status.S) = struct
       | Blessing res -> if res <> Game.Resource.empty then S.res ()
       | BuildSupply s -> if s > 0 then S.res ()
       | Cavalry n -> if n > 0 then begin S.cavalry n; S.res () end
-      | Facilities ls -> if ls <> [] then S.res ()
-      | Starvation u -> if u <> Game.Units.empty then S.res ()
+      | Facilities x -> S.facilities x
+      | Starvation x -> if Convert.starve2bool x then S.res ()
       | Support _
       | Upkeep _ -> S.res ()
       | _ -> ()

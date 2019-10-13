@@ -89,12 +89,12 @@ let ballista (n, enemies) =
   sprintf "%d ballista kills %s" n (units2str enemies |> if_empty "nothing")
   |> Tty.writeln
 
-let can_barrage w =
-  let open Direct.CanBarrage in
+let barrage_status w =
+  let open Barrage in
   function
-    | No Leader -> Tty.writeln "no leader to lead arrow barrage"
-    | No Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
-    | Yes -> ()
+    | Available -> ()
+    | Disabled Leader -> Tty.writeln "no leader to lead arrow barrage"
+    | Disabled Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
 
 let cyclops (n, units) =
   if n > 0 then
@@ -106,18 +106,25 @@ let disease (units, died) ldr =
   Tty.pairln "died" (units2str units |> str2none);
   if died then Leader.died ldr
 
+let facilities map =
+  Tty.ifpairln "facilities" (facs2clean map |> facs2str)
+
 let starting (module S : Starting.S) =
   Tty.ifpairln "buildings" (bld_ls2str S.buildings);
   Tty.pairln "month" (month2str S.month);
   Tty.pairln "supply" (sup2str S.supply);
   Tty.ifpairln "units" (units2str S.units)
 
+let starvation (starved, fled) =
+  Tty.ifpairln "starved" (units2str starved);
+  Tty.ifpairln "fled" (units2str fled)
+
 let support s =
-  let f res =
-    if res = Resource.empty then "nothing"
-    else res2str res
+  let to_str nat res =
+    sprintf "%s sent %s" (nation2str nat) (res2nothing res)
   in
-  Support.ls s
-  |> List.map (fun (nat, res) -> (nation2str nat, f res))
-  |> List.map (fun (nat, res) -> sprintf "%s sent %s" nat res)
+  let module Map = Nation.Map in
+  Nation.kinds
+  |> List.filter (fun k -> Map.mem k s)
+  |> List.map (fun k -> to_str k (Map.find k s))
   |> Tty.writelns
