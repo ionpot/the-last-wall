@@ -24,12 +24,6 @@ let swap_empty ls = function
 let indent = List.map (fun str -> "  " ^ str)
 let indices = List.mapi (fun i str -> sprintf "%c) %s" (int2ichar i) str)
 
-let highlight chosen to_str x =
-  let str = to_str x in
-  if List.mem x chosen
-  then brackets str
-  else str
-
 let horizontal prefix = function
   | [] -> ()
   | ls -> Tty.pairln prefix (indices ls |> spaces)
@@ -118,7 +112,14 @@ let mercs cap =
   Tty.prompt_amount cap
 
 module Nations (S : Game.State.S) = struct
+  module Set = Game.Nation.Set
   module Support = Game.Support.Roll(S)
+
+  let highlight chosen to_str x =
+    let str = to_str x in
+    if Set.mem x chosen
+    then brackets str
+    else str
 
   let to_str kind =
     Support.chance_of kind
@@ -133,7 +134,8 @@ module Nations (S : Game.State.S) = struct
     Tty.prompt "choose"
     |> choose_from ls
     |> Listx.pick_first Game.Nation.max_allowed
-    |> swap_empty chosen
+    |> swap_empty (Set.elements chosen)
+    |> Set.of_list
 end
 
 let ranger cap =
