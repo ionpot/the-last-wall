@@ -98,8 +98,9 @@ module Facilities = struct
   end
   module Make (S : State.S) = struct
     let disease = S.Disease.get ()
-    let merchant = S.Leader.check Leader.(is Merchant)
-    let cha = S.Leader.return Leader.cha_mod_of
+    let ldr = S.Leader.get ()
+    let merchant = Leader.(is_alive ldr && is Merchant ldr)
+    let cha = Leader.cha_mod_of ldr
     let ratio = Float.if_ok (Float.times cha 0.1) merchant
     let bonus = Resource.Bonus.(Add (Sup ratio))
     let to_mnp k = Build.manpwr_range k |> S.Dice.range

@@ -247,7 +247,8 @@ module Volunteers = struct
     let value n = S.Units.map (Units.add n kind)
   end
   module Make (S : State.S) = struct
-    let noble = S.Leader.check Leader.(is Aristocrat)
+    let ldr = S.Leader.get ()
+    let noble = Leader.(is_alive ldr && is Aristocrat ldr)
     let cha = S.Leader.return Leader.cha_mod_of
     let bonus = Range.times cha (1, 3)
     let value = Range.combine_if noble bonus base |> S.Dice.range
