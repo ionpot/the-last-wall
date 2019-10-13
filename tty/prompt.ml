@@ -43,8 +43,10 @@ let ballista n avlb =
   |> Tty.writeln;
   Tty.prompt_amount avlb
 
-let barrage () =
-  Tty.prompt_yn "arrow barrage? y/n"
+let barrage status =
+  if status = Game.Barrage.Available
+  then Tty.prompt_yn "arrow barrage? y/n"
+  else false
 
 let barrage_train ok cost =
   let sup = sup2str cost in

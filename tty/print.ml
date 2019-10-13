@@ -89,12 +89,12 @@ let ballista (n, enemies) =
   sprintf "%d ballista kills %s" n (units2str enemies |> if_empty "nothing")
   |> Tty.writeln
 
-let can_barrage w =
-  let open Direct.CanBarrage in
+let barrage_status w =
+  let open Barrage in
   function
-    | No Leader -> Tty.writeln "no leader to lead arrow barrage"
-    | No Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
-    | Yes -> ()
+    | Available -> ()
+    | Disabled Leader -> Tty.writeln "no leader to lead arrow barrage"
+    | Disabled Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
 
 let cyclops (n, units) =
   if n > 0 then

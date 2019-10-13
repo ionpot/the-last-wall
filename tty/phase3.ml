@@ -4,7 +4,9 @@ module Make (S : Game.State.S) = struct
   let input =
     let open Phase.Input in
     function
-      | Barrage _ -> Barrage (Prompt.barrage ())
+      | Barrage (_, status) ->
+          (S.Weather.return Print.barrage_status) status;
+          Barrage (Prompt.barrage status, status)
       | Scout _ -> Scout (Prompt.scout ())
 
   let output =
@@ -18,7 +20,6 @@ module Make (S : Game.State.S) = struct
           |> S.Leader.return
       | Ballista x -> Print.ballista x
       | Barraged x -> Tty.pairln "barraged" (barrage2str x |> str2none)
-      | CanBarrage x -> (S.Weather.return Print.can_barrage) x
       | Combat x ->
           Print.Combat.outcome x
           |> S.Leader.return
