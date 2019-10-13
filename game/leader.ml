@@ -37,6 +37,7 @@ let is_alive t = t.died = 0
 let is_dead t = t.died > 0
 let can_respawn turn t =
   is_dead t && t.died + respawn_time <= turn
+let is_living kind t = is_alive t && is kind t
 let is_noble t = t.noble
 let kind_of t = t.kind
 let level_of t = t.level + t.xp / 2

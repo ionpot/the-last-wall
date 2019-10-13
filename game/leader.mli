@@ -15,6 +15,7 @@ val gender_of : t -> gender
 val is : kind -> t -> bool
 val is_alive : t -> bool
 val is_dead : t -> bool
+val is_living : kind -> t -> bool
 val is_noble : t -> bool
 val kind_of : t -> kind
 val level_of : t -> level
