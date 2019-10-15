@@ -126,7 +126,11 @@ module Starvation = struct
       S.Units.map Units.(reduce starved);
       S.Units.map Units.(reduce deserted);
       S.Starved.set starved;
-      S.Supply.map (max 0)
+      S.Supply.map (max 0);
+      Float.times (Units.count_all starved) 0.01
+      |> Nation.Chance.sub_all
+      |> Nation.map_chances
+      |> S.Nation.map
   end
   module Make (S : State.S) = struct
     module Fill = Units.FillCount(S.Dice)
