@@ -37,7 +37,7 @@ module From (S : State.S) = struct
       cav_dr
       |> Float.add_if ldr_alive ldr_dr
       |> (+.) mausoleum_dr
-      |> Float.sub_if barraging barrage_dr
-      |> Float.sub_by enemy_dr
-      |> Float.sub_if heat heat_penalty
+      |> Float.ssub_if barraging barrage_dr
+      |> Float.ssub_by enemy_dr
+      |> Float.ssub_if heat heat_penalty
 end
