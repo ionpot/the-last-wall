@@ -18,6 +18,7 @@ module Chance : sig
   val cap_at : chance -> kind -> t -> t
   val of_kind : kind -> t -> chance
   val sub : chance -> kind -> t -> t
+  val sub_all : chance -> t -> t
 end
 
 type t

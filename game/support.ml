@@ -12,8 +12,6 @@ let sum t =
   Map.fold f t Resource.empty
 
 module Check (S : State.S) = struct
-  let starved = S.Starved.return Units.count_all
-  let starvation = Float.times starved 0.01
   let winter = S.Month.check Month.is_winter
   let has_trade kind =
     S.Build.check Build.(has_trade kind)
@@ -39,15 +37,11 @@ module Apply (S : State.S) = struct
   let cap kind =
     Chance.cap_at (cap_of kind) kind
 
-  let starved =
-    Chance.sub Check.starvation
-
   let chances t cmap =
     let f cmap kind =
       adjust kind t cmap
       |> boost kind
       |> cap kind
-      |> starved kind
     in
     List.fold_left f cmap Nation.kinds
 end
@@ -65,7 +59,6 @@ module Roll (S : State.S) = struct
     Nation.chances nats
     |> Chance.of_kind kind
     |> Float.sub_if Check.winter 0.1
-    |> Float.sub_by Check.starvation
 
   let roll_res kind =
     let (a, b) = Nation.ranges_of kind in

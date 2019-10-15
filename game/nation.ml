@@ -28,7 +28,7 @@ let set2map f set =
   Set.fold g set Map.empty
 
 module Chance = struct
-  type t = float Map.t
+  type t = Defs.chance Map.t
   let base = 0.8
   let base_map : t =
     let f m k = Map.add k base m in
@@ -38,6 +38,7 @@ module Chance = struct
   let add step = map (Float.add_if_ptv step)
   let cap_at cap = map (min cap)
   let sub step = map (Float.sub_by step)
+  let sub_all step = Map.map (Float.sub_by step)
 end
 
 type t =
