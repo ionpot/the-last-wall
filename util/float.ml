@@ -25,6 +25,11 @@ let increase x ratio =
 let reduce x ratio =
   x -. x *. ratio
 
+let ssub_by a b = b -. a
+
+let ssub_if cond a b =
+  if cond then b -. a else b
+
 let sub a b =
   if a < b then 0. else a -. b
 
