@@ -250,6 +250,9 @@ module Volunteers = struct
   module Apply (S : State.S) = struct
     let value n = S.Units.map (Units.add n kind)
   end
+  module Check (S : State.S) = struct
+    let value = S.Build.check Build.(is_ready Tavern)
+  end
   module Make (S : State.S) = struct
     let noble = S.Leader.check Leader.(is_living Aristocrat)
     let cha = S.Leader.return Leader.cha_mod_of

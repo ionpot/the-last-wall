@@ -77,8 +77,6 @@ module Convert = struct
           let make x = Input.Mercs x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)
-      | Steps.Volunteers -> (module struct module Event = Event.Volunteers
-          let make x = Input.Volunteers x end)
 
     let cond : Convert.cond = function
       | Steps.LeaderNew -> (module struct module Event = Event.LeaderNew
@@ -89,6 +87,8 @@ module Convert = struct
           let make x = Input.Templar x end)
       | Steps.Trade -> (module struct module Event = Event.Trade
           let make x = Input.Trade x end)
+      | Steps.Volunteers -> (module struct module Event = Event.Volunteers
+          let make x = Input.Volunteers x end)
   end
 
   module Output = struct

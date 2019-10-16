@@ -34,8 +34,8 @@ end
 
 module Phase1 = struct
   module Input = struct
-    type cond = Trade
-    type direct = Ballista | Build | Deity | Knight | Leader | Nations | Scout | Volunteers
+    type cond = Trade | Volunteers
+    type direct = Ballista | Build | Deity | Knight | Leader | Nations | Scout
     type t = (cond, direct) input
   end
   module Output = struct
@@ -53,7 +53,7 @@ module Phase1 = struct
     ; Do (Direct Output.Facilities)
     ; Ask (Direct Input.Nations)
     ; Do (Direct Output.Support)
-    ; Ask (Direct Input.Volunteers)
+    ; Ask (Cond Input.Volunteers)
     ; Ask (Direct Input.Build)
     ; Do (Direct Output.BuildSupply)
     ; Ask (Direct Input.Ballista)
@@ -65,8 +65,8 @@ end
 
 module Phase2 = struct
   module Input = struct
-    type cond = LeaderNew | Ranger | Templar | Trade
-    type direct = Ballista | BarrageTrain | Berserker | Build | Dervish | Knight | Mercs | Nations | Volunteers
+    type cond = LeaderNew | Ranger | Templar | Trade | Volunteers
+    type direct = Ballista | BarrageTrain | Berserker | Build | Dervish | Knight | Mercs | Nations
     type t = (cond, direct) input
   end
   module Output = struct
@@ -90,7 +90,7 @@ module Phase2 = struct
     ; Do (Direct Output.Facilities)
     ; Ask (Direct Input.Nations)
     ; Do (Direct Output.Support)
-    ; Ask (Direct Input.Volunteers)
+    ; Ask (Cond Input.Volunteers)
     ; Ask (Cond Input.Trade)
     ; Ask (Direct Input.Build)
     ; Do (Direct Output.BuildSupply)
