@@ -29,5 +29,5 @@ val won : t -> t
 module Roll : Dice.S -> sig
   val death : t -> bool
   val from : kind -> t
-  val random : unit -> t list
+  val pair : unit -> t * t
 end
