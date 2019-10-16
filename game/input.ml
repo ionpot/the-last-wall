@@ -169,6 +169,9 @@ module Mercs = struct
     module Recruit = Recruit.With(S)
     let value = Recruit.promote kind
   end
+  module Check (S : State.S) = struct
+    let value = S.Build.check Build.(is_ready Tavern)
+  end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
     let cap = S.Dice.between 10 20
