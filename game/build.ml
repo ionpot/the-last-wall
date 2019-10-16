@@ -35,7 +35,7 @@ let base_cost =
   | Observatory -> Manpwr 15, Supply 14
   | Sawmill -> Manpwr 23, Supply 25
   | Stable -> Manpwr 49, Supply 54
-  | Tavern -> Manpwr 0, Supply 0
+  | Tavern -> Manpwr 39, Supply 41
   | Temple -> Manpwr 61, Supply 63
   | Trade _ -> Manpwr 51, Supply 49
 
