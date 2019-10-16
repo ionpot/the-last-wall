@@ -151,7 +151,8 @@ module LeaderNew = struct
       | _ -> ()
   end
   module Check (S : State.S) = struct
-    let value = S.Turn.return Leader.can_respawn |> S.Leader.check
+    let value = S.Build.check Build.(is_ready Tavern)
+      && S.Leader.check (S.Turn.return Leader.can_respawn)
   end
   module Make (S : State.S) = struct
     module Roll = Leader.Roll(S.Dice)
