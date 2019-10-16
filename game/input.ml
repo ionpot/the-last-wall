@@ -138,23 +138,27 @@ module LeaderKind = struct
 end
 
 module LeaderNew = struct
-  type t = Leader.t list
+  type leader = Leader.t * bool
+  type t = leader * leader
+  let cost_of = Leader.level_of
   module Apply (S : State.S) = struct
+    let set ldr =
+      S.Supply.sub (cost_of ldr);
+      S.Leader.set ldr
     let value = function
-      | [] -> ()
-      | ldr :: _ ->
-          let level = Leader.level_of ldr in
-          if S.Supply.has level then begin
-            S.Supply.sub level;
-            S.Leader.set ldr
-          end
+      | (a, true), _ -> set a
+      | _, (b, true) -> set b
+      | _ -> ()
   end
   module Check (S : State.S) = struct
-    let value = S.Turn.return Leader.can_respawn |> S.Leader.check
+    let value = S.Build.check Build.(is_ready Tavern)
+      && S.Leader.check (S.Turn.return Leader.can_respawn)
   end
   module Make (S : State.S) = struct
     module Roll = Leader.Roll(S.Dice)
-    let value = Roll.random ()
+    let a, b = Roll.pair ()
+    let check ldr = S.Supply.has (cost_of ldr)
+    let value = (a, check a), (b, check b)
   end
 end
 
@@ -245,6 +249,9 @@ module Volunteers = struct
   let base = 3, 9
   module Apply (S : State.S) = struct
     let value n = S.Units.map (Units.add n kind)
+  end
+  module Check (S : State.S) = struct
+    let value = S.Build.check Build.(is_ready Tavern)
   end
   module Make (S : State.S) = struct
     let noble = S.Leader.check Leader.(is_living Aristocrat)

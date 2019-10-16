@@ -1,6 +1,7 @@
 let barrage_dr = 0.05
 let cav_dr_penalty = 0.05
 let cav_men_ratio = 0.4
+let comet_penalty = 0.05
 let heat_penalty = 0.02
 let mausoleum_dr = 0.01
 
@@ -10,6 +11,7 @@ let cav_dr too_many snow units =
 
 module From (S : State.S) = struct
   let barraging = S.Barrage.check Barrage.is_chosen
+  let comet = S.Mishap.check Mishap.(has Comet)
   let heat = S.Weather.is Weather.Heat
   let snow = S.Weather.is Weather.(Snow Heavy)
   let wind = S.Weather.is Weather.Wind
@@ -39,5 +41,6 @@ module From (S : State.S) = struct
       |> (+.) mausoleum_dr
       |> Float.ssub_if barraging barrage_dr
       |> Float.ssub_by enemy_dr
+      |> Float.ssub_if comet comet_penalty
       |> Float.ssub_if heat heat_penalty
 end
