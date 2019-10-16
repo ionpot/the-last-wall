@@ -242,6 +242,11 @@ let starve2bool (starved, deserted) =
   let check = (<>) Units.empty in
   check starved || check deserted
 
+let mishap2str = function
+  | Mishap.Comet -> "comet sighted"
+  | Mishap.Disease -> "disease outbreak"
+  | Mishap.Tavern -> "tavern burnt down"
+
 let month2str = function
   | Month.Jan -> "january"
   | Month.Feb -> "february"

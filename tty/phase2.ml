@@ -43,6 +43,7 @@ module Make (S : Game.State.S) = struct
       | Defeat -> Tty.writeln "defeat"
       | Disease x -> Print.disease x |> S.Leader.return
       | Facilities x -> Print.facilities x
+      | Mishap x -> Print.mishap x
       | Starvation x -> Print.starvation x
       | Support s -> Print.support s
       | Turn t -> Tty.lnwriteln (turn2str t)

@@ -102,12 +102,20 @@ let cyclops (n, units) =
   |> Tty.writeln
 
 let disease (units, died) ldr =
-  Tty.writeln "!!! disease outbreak !!!";
   Tty.pairln "died" (units2str units |> str2none);
   if died then Leader.died ldr
 
 let facilities map =
   Tty.ifpairln "facilities" (facs2clean map |> facs2str)
+
+let mishap t =
+  let print kind =
+    mishap2str kind
+    |> sprintf "!!! %s !!!"
+    |> Tty.writeln
+  in
+  let f kind = if Mishap.has kind t then print kind in
+  List.iter f Mishap.kinds
 
 let starting (module S : Starting.S) =
   Tty.ifpairln "buildings" (bld_ls2str S.buildings);
