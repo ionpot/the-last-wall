@@ -97,7 +97,8 @@ module Facilities = struct
       else S.Arena.clear ()
   end
   module Make (S : State.S) = struct
-    let disease = S.Disease.get ()
+    let disease = S.Mishap.check Mishap.(has Disease)
+      |> Float.if_ok 0.2
     let merchant = S.Leader.check Leader.(is_living Merchant)
     let cha = S.Leader.return Leader.cha_mod_of
     let ratio = Float.if_ok (Float.times cha 0.1) merchant
@@ -112,6 +113,25 @@ module Facilities = struct
     let value =
       S.Build.return Build.ready
       |> Map.mapi (fun k _ -> to_res k)
+  end
+end
+
+module Mishap = struct
+  type t = Mishap.t
+  module Apply (S : State.S) = struct
+    let value t =
+      S.Mishap.set t;
+      if Mishap.(has Tavern) t
+      then S.Build.map Build.(raze Tavern)
+  end
+  module Make (S : State.S) = struct
+    module Roll = Mishap.Roll(S.Dice)
+    let units = S.Units.return Units.(filter_count Attr.is_infectable)
+    let check = function
+      | Mishap.Comet -> S.Turn.has 5
+      | Mishap.Disease -> units >= 50
+      | Mishap.Tavern -> S.Build.check Build.(is_ready Tavern)
+    let value = Roll.from check
   end
 end
 

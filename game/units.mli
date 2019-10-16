@@ -12,6 +12,7 @@ module Attr : sig
   val is_cavalry : kind -> bool
   val is_holy : kind -> bool
   val is_infantry : kind -> bool
+  val is_infectable : kind -> bool
   val is_revivable : kind -> bool
   val is_siege : kind -> bool
 end
