@@ -93,15 +93,36 @@ let dervish cap =
   Tty.writeln (sprintf "%d dervish available" cap);
   Tty.prompt_amount cap
 
-let leader () =
-  let ls = Game.Leader.kinds in
-  List.map ldr2kind ls |> horizontal "leaders";
-  Tty.prompt "choose"
-  |> choose_one ls Game.Leader.(kind_of empty)
+module Leader = struct
+  let first () =
+    let ls = Game.Leader.kinds in
+    List.map ldr2kind ls |> horizontal "leaders";
+    Tty.prompt "choose"
+    |> choose_one ls Game.Leader.(kind_of empty)
 
-let new_leader ls =
-  List.map ldr2full ls |> vertical "new leader";
-  Tty.prompt "choose" |> choose_from ls
+  let str_of = function
+    | Some ldr -> ldr2first ldr
+    | None -> "new leader"
+
+  let cant_afford ldr_opt =
+    str_of ldr_opt
+    |> sprintf "cannot afford %s"
+    |> Tty.writeln
+
+  let pair pairs =
+    let ((a, a_ok), (b, b_ok)) = pairs in
+    let to_pairs = function
+      | [] -> (a, false), (b, false)
+      | x :: _ -> (a, x = a), (b, x = b)
+    in
+    let ls = [a; b] in
+    List.map ldr2full ls |> vertical "new leader";
+    match a_ok, b_ok with
+    | true, true -> Tty.prompt "choose" |> choose_from ls |> to_pairs
+    | true, false -> cant_afford (Some b); pairs
+    | false, true -> cant_afford (Some a); pairs
+    | false, false -> cant_afford None; pairs
+end
 
 let knight cap =
   Tty.writeln (sprintf "can promote %d cavalry to knight" cap);

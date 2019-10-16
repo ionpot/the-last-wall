@@ -14,7 +14,7 @@ module Make (S : Game.State.S) = struct
           S.Build.return Print.Build.all;
           Build (Prompt.Build.from avlb)
       | Dervish count -> Dervish (check Prompt.dervish count)
-      | LeaderNew ls -> LeaderNew (Prompt.new_leader ls)
+      | LeaderNew x -> LeaderNew (Prompt.Leader.pair x)
       | Knight count -> Knight (check Prompt.knight count)
       | Mercs count -> Mercs (Prompt.mercs count)
       | Nations chosen ->
@@ -58,7 +58,7 @@ module After (S : Status.S) = struct
       | BarrageTrain (ok, _) -> if ok then S.res ()
       | Berserker n -> if n > 0 then begin S.berserker (); S.res () end
       | Dervish n -> if n > 0 then begin S.dervish (); S.res () end
-      | LeaderNew ls -> S.new_leader ls
+      | LeaderNew x -> S.new_leader x
       | Knight n -> if n > 0 then S.res ()
       | Mercs n -> if n > 0 then S.res ()
       | Ranger n -> if n > 0 then begin S.ranger (); S.res () end

@@ -7,7 +7,7 @@ module type S = sig
   val enemies : unit -> unit
   val facilities : Direct.Facilities.t -> unit
   val leader : unit -> unit
-  val new_leader : Leader.t list -> unit
+  val new_leader : Input.LeaderNew.t -> unit
   val ranger : unit -> unit
   val res : unit -> unit
   val templar : unit -> unit
@@ -73,12 +73,15 @@ module With (S : State.S) = struct
     S.Leader.return Convert.ldr2full
     |> Tty.pairln "leader"
 
-  let new_leader = function
-    | [] -> ()
-    | ldr :: _ ->
-        sprintf "%s chosen" (Convert.ldr2first ldr)
-        |> Tty.writeln;
-        res ()
+  let new_leader =
+    let chosen ldr =
+      sprintf "%s chosen" (Convert.ldr2first ldr)
+      |> Tty.writeln
+    in
+    function
+      | (ldr, true), _
+      | _, (ldr, true) -> chosen ldr; res ()
+      | (_, false), (_, false) -> ()
 
   let units () =
     S.Units.return Convert.units2mnpstr

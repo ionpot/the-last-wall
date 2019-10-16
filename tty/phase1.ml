@@ -12,7 +12,7 @@ module Make (S : Game.State.S) = struct
           Build (Prompt.Build.from avlb)
       | Deity _ -> Deity (Prompt.deity ())
       | Knight n -> Knight (check Prompt.knight n)
-      | Leader _ -> Leader (Prompt.leader ())
+      | Leader _ -> Leader (Prompt.Leader.first ())
       | Nations chosen ->
           let module Prompt = Prompt.Nations(S) in
           Nations (Prompt.from chosen)
