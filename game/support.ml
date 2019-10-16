@@ -15,6 +15,10 @@ module Check (S : State.S) = struct
   let winter = S.Month.check Month.is_winter
   let has_trade kind =
     S.Build.check Build.(has_trade kind)
+  let cap_of kind =
+    if has_trade kind
+    then Chance.cap_trading
+    else Chance.cap
 end
 
 module Apply (S : State.S) = struct
@@ -30,12 +34,8 @@ module Apply (S : State.S) = struct
     then Chance.add 0.05 kind cmap
     else cmap
 
-  let cap_of kind =
-    Chance.base
-    |> Float.add_if (Check.has_trade kind) 0.1
-
   let cap kind =
-    Chance.cap_at (cap_of kind) kind
+    Chance.cap_at (Check.cap_of kind) kind
 
   let chances t cmap =
     let f cmap kind =

@@ -234,8 +234,14 @@ end
 module Trade = struct
   type t = Nation.kind option
   module Apply (S : State.S) = struct
+    let set_chance = function
+      | Some kind ->
+          Nation.(Chance.set_trading kind |> map_chances)
+          |> S.Nation.map
+      | None -> ()
     let value trade =
-      S.Build.map (Build.set_trade trade)
+      S.Build.map (Build.set_trade trade);
+      if S.Turn.is 0 then set_chance trade
   end
   module Check (S : State.S) = struct
     let value = S.Build.check Build.need_trade
