@@ -45,6 +45,8 @@ module Convert = struct
     let cond : Convert.cond = function
       | Steps.Trade -> (module struct module Event = Event.Trade
           let make x = Input.Trade x end)
+      | Steps.Volunteers -> (module struct module Event = Event.Volunteers
+          let make x = Input.Volunteers x end)
 
     let direct : Convert.direct = function
       | Steps.Ballista -> (module struct module Event = Event.Ballista
@@ -61,8 +63,6 @@ module Convert = struct
           let make x = Input.Nations x end)
       | Steps.Scout -> (module struct module Event = Event.Scout
           let make x = Input.Scout x end)
-      | Steps.Volunteers -> (module struct module Event = Event.Volunteers
-          let make x = Input.Volunteers x end)
   end
 
   module Output = struct

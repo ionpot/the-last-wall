@@ -81,8 +81,8 @@ module Roll (Dice : Dice.S) = struct
     ; noble = noble kind
     } |> name
 
-  let random () =
+  let pair () =
     let a, kinds' = Dice.pop kinds in
     let b = Dice.pick kinds' in
-    [from a; from b]
+    from a, from b
 end

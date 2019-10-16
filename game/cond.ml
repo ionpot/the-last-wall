@@ -62,26 +62,19 @@ end
 module Disease = struct
   type leader_died = bool
   type t = Units.t * leader_died
-  let chance = 0.05
-  let min_count = 50
   let casualty = 0.1
-  let penalty = 0.2
-  let susceptible = Units.(discard Attr.is_siege)
   module Apply (S : State.S) = struct
     let value (units, died) =
-      S.Disease.set penalty;
       S.Units.map Units.(reduce units);
       if died then Leader.died |> S.Turn.return |> S.Leader.map
   end
   module Check (S : State.S) = struct
-    let _ = S.Disease.clear ()
-    let count = S.Units.return susceptible |> Units.count_all
-    let value = count >= min_count && S.Dice.chance chance
+    let value = S.Mishap.check Mishap.(has Disease)
   end
   module Make (S : State.S) = struct
     module Fill = Units.FillCount(S.Dice)
     module Roll = Leader.Roll(S.Dice)
-    let units = S.Units.return susceptible
+    let units = S.Units.return Units.(filter Attr.is_infectable)
     let loss = Units.count_all units |> Number.portion casualty
     let value =
       Fill.from loss units,

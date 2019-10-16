@@ -23,6 +23,7 @@ module Attr = struct
   let is_infantry = function
     | Berserker | Men | Merc | Dervish | Ranger | Templar -> true
     | _ -> false
+  let is_infectable = (<>) Ballista
   let is_revivable = is_infantry
   let is_siege = (=) Ballista
 end
