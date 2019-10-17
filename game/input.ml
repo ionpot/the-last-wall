@@ -5,9 +5,11 @@ module Ballista = struct
     module Recruit = Recruit.With(S)
     let value (n, _) =
       Recruit.sub_cost kind n;
-      let n' = S.Ballista.get () in
+      let eng = S.Leader.check Leader.(is_living Engineer) in
+      let normal, fast = if eng then 0, n else n, 0 in
+      let n' = S.Ballista.get () + fast in
       S.Units.map (Units.add n' kind);
-      S.Ballista.set n
+      S.Ballista.set normal
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
