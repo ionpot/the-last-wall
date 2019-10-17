@@ -1,6 +1,5 @@
 module Ballista = struct
   type t = Defs.count * Units.t
-  let power = 2.
   module Apply (S : State.S) = struct
     let value (_, enemies) = S.Enemy.map (Units.reduce enemies)
   end
@@ -8,8 +7,11 @@ module Ballista = struct
   module Make (S : State.S) = struct
     module Roll = Units.Fill(S.Dice)
     let count = S.Units.return Units.(count Ballista)
-    let power' = Float.times count power
-    let value = count, S.Enemy.return (Roll.from power')
+    let power = S.Units.return Units.(power_of Ballista)
+    let eng = S.Leader.check Leader.(is_living Engineer)
+    let bonus = float count
+    let damage = Float.add_if eng bonus power
+    let value = count, S.Enemy.return (Roll.from damage)
   end
 end
 
