@@ -5,9 +5,11 @@ module Ballista = struct
     module Recruit = Recruit.With(S)
     let value (n, _) =
       Recruit.sub_cost kind n;
-      let n' = S.Ballista.get () in
+      let eng = S.Leader.check Leader.(is_living Engineer) in
+      let normal, fast = if eng then 0, n else n, 0 in
+      let n' = S.Ballista.get () + fast in
       S.Units.map (Units.add n' kind);
-      S.Ballista.set n
+      S.Ballista.set normal
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
@@ -234,8 +236,14 @@ end
 module Trade = struct
   type t = Nation.kind option
   module Apply (S : State.S) = struct
+    let set_chance = function
+      | Some kind ->
+          Nation.(Chance.set_trading kind |> map_chances)
+          |> S.Nation.map
+      | None -> ()
     let value trade =
-      S.Build.map (Build.set_trade trade)
+      S.Build.map (Build.set_trade trade);
+      if S.Turn.is 0 then set_chance trade
   end
   module Check (S : State.S) = struct
     let value = S.Build.check Build.need_trade

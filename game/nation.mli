@@ -13,10 +13,12 @@ val set2map : (Set.elt -> 'a) -> Set.t -> 'a Map.t
 
 module Chance : sig
   type t
-  val base : chance
+  val cap : chance
+  val cap_trading : chance
   val add : chance -> kind -> t -> t
   val cap_at : chance -> kind -> t -> t
   val of_kind : kind -> t -> chance
+  val set_trading : kind -> t -> t
   val sub : chance -> kind -> t -> t
   val sub_all : chance -> t -> t
 end

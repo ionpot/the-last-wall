@@ -29,14 +29,16 @@ let set2map f set =
 
 module Chance = struct
   type t = Defs.chance Map.t
-  let base = 0.8
+  let cap = 0.8
+  let cap_trading = 0.9
   let base_map : t =
-    let f m k = Map.add k base m in
+    let f m k = Map.add k cap m in
     List.fold_left f Map.empty kinds
   let of_kind = Map.find
   let map f k t = Map.add k (of_kind k t |> f) t
   let add step = map (Float.add_if_ptv step)
   let cap_at cap = map (min cap)
+  let set_trading k = Map.add k cap_trading
   let sub step = map (Float.sub_by step)
   let sub_all step = Map.map (Float.sub_by step)
 end
