@@ -29,6 +29,8 @@ val empty : t
 
 val chances : t -> Chance.t
 val chosen : t -> Set.t
+val has_aided : kind -> t -> bool
 
 val map_chances : (Chance.t -> Chance.t) -> t -> t
+val set_aided : Set.t -> t -> t
 val set_chosen : Set.t -> t -> t

@@ -44,17 +44,25 @@ module Chance = struct
 end
 
 type t =
-  { chances : Chance.t
+  { aided : Set.t
+  ; chances : Chance.t
   ; chosen : Set.t
   }
 
 let empty =
-  { chances = Chance.base_map
+  { aided = Set.empty
+  ; chances = Chance.base_map
   ; chosen = Set.empty
   }
 
 let chances t = t.chances
 let chosen t = t.chosen
+
+let has_aided k t =
+  Set.mem k t.aided
+
+let set_aided aided t =
+  { t with aided }
 
 let set_chosen chosen t =
   { t with chosen }
