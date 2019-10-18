@@ -169,9 +169,7 @@ module Support = struct
     module Apply = Support.Apply(S)
     let value t =
       AddRes.value (Support.sum t);
-      Apply.chances t
-      |> Nation.map_chances
-      |> S.Nation.map
+      Apply.value t
   end
   module Make (S : State.S) = struct
     module Roll = Support.Roll(S)

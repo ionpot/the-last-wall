@@ -4,7 +4,7 @@ type t = Resource.t Nation.Map.t
 val sum : t -> Resource.t
 
 module Apply : State.S -> sig
-  val chances : t -> chances -> chances
+  val value : t -> unit
 end
 
 module Roll : State.S -> sig

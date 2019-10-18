@@ -44,6 +44,9 @@ module Apply (S : State.S) = struct
       |> cap kind
     in
     List.fold_left f cmap Nation.kinds
+
+  let value t =
+    chances t |> Nation.map_chances |> S.Nation.map
 end
 
 module Roll (S : State.S) = struct
