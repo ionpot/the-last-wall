@@ -5,6 +5,8 @@ type kind = Clan | Hekatium | Numendor | Sodistan | Tulron
 module Map : Map.S with type key = kind
 module Set : Set.S with type elt = kind
 
+type support = Resource.t Map.t
+
 val kinds : kind list
 val max_allowed : int
 
@@ -30,7 +32,9 @@ val empty : t
 val chances : t -> Chance.t
 val chosen : t -> Set.t
 val has_aided : kind -> t -> bool
+val mnp_from : kind -> t -> manpower
+val sup_from : kind -> t -> supply
 
 val map_chances : (Chance.t -> Chance.t) -> t -> t
-val set_aided : Set.t -> t -> t
 val set_chosen : Set.t -> t -> t
+val set_support : support -> t -> t

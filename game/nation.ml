@@ -8,6 +8,8 @@ end
 module Map = Map.Make(Kind)
 module Set = Set.Make(Kind)
 
+type support = Resource.t Map.t
+
 let kinds = [Tulron; Sodistan; Hekatium; Numendor; Clan]
 let max_allowed = 3
 
@@ -44,28 +46,38 @@ module Chance = struct
 end
 
 type t =
-  { aided : Set.t
-  ; chances : Chance.t
+  { chances : Chance.t
   ; chosen : Set.t
+  ; support : support
   }
 
 let empty =
-  { aided = Set.empty
-  ; chances = Chance.base_map
+  { chances = Chance.base_map
   ; chosen = Set.empty
+  ; support = Map.empty
   }
 
 let chances t = t.chances
 let chosen t = t.chosen
 
 let has_aided k t =
-  Set.mem k t.aided
+  Map.mem k t.support
 
-let set_aided aided t =
-  { t with aided }
+let mnp_from k t =
+  if has_aided k t
+  then Map.find k t.support |> Resource.manp_of
+  else 0
+
+let sup_from k t =
+  if has_aided k t
+  then Map.find k t.support |> Resource.supp_of
+  else 0
 
 let set_chosen chosen t =
   { t with chosen }
 
 let map_chances f t =
   { t with chances = f t.chances }
+
+let set_support m t =
+  { t with support = Map.filter (fun _ -> (<>) Resource.empty) m }

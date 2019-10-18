@@ -1,5 +1,5 @@
 type chances = Nation.Chance.t
-type t = Resource.t Nation.Map.t
+type t = Nation.support
 
 val sum : t -> Resource.t
 

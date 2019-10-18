@@ -1,9 +1,8 @@
 module Chance = Nation.Chance
 module Map = Nation.Map
-module Set = Nation.Set
 
 type chances = Chance.t
-type t = Resource.t Nation.Map.t
+type t = Nation.support
 
 let is_empty k t =
   Map.mem k t && Map.find k t = Resource.empty
@@ -11,10 +10,6 @@ let is_empty k t =
 let sum t =
   let f _ = Resource.(++) in
   Map.fold f t Resource.empty
-
-let to_set t =
-  let m = Map.filter (fun _ -> (<>) Resource.empty) t in
-  Map.fold (fun k _ s -> Set.add k s) m Set.empty
 
 module Check (S : State.S) = struct
   let winter = S.Month.check Month.is_winter
@@ -54,7 +49,7 @@ module Apply (S : State.S) = struct
 
   let value t =
     chances t |> Nation.map_chances |> S.Nation.map;
-    to_set t |> Nation.set_aided |> S.Nation.map
+    Nation.set_support t |> S.Nation.map
 end
 
 module Roll (S : State.S) = struct
