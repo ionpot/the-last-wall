@@ -50,7 +50,7 @@ module Output = struct
     | Facilities of Direct.Facilities.t
     | Mishap of Direct.Mishap.t
     | Starvation of Direct.Starvation.t
-    | Support of Direct.Support.t
+    | Support of Direct.NationSupport.t
     | Turn of Direct.Turn.t
     | Upkeep of Direct.Upkeep.t
 end
@@ -123,7 +123,7 @@ module Convert = struct
           let make x = Output.Mishap x end)
       | Steps.Starvation -> (module struct module Event = Direct.Starvation
           let make x = Output.Starvation x end)
-      | Steps.Support -> (module struct module Event = Direct.Support
+      | Steps.Support -> (module struct module Event = Direct.NationSupport
           let make x = Output.Support x end)
       | Steps.Turn -> (module struct module Event = Direct.Turn
           let make x = Output.Turn x end)

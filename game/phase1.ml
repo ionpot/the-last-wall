@@ -33,7 +33,7 @@ module Output = struct
     | Cavalry of Direct.Cavalry.t
     | Facilities of Direct.Facilities.t
     | Starting of Direct.Starting.t
-    | Support of Direct.Support.t
+    | Support of Direct.NationSupport.t
 end
 
 module Convert = struct
@@ -81,7 +81,7 @@ module Convert = struct
           let make x = Output.Facilities x end)
       | Steps.Starting -> (module struct module Event = Direct.Starting
           let make x = Output.Starting x end)
-      | Steps.Support -> (module struct module Event = Direct.Support
+      | Steps.Support -> (module struct module Event = Direct.NationSupport
           let make x = Output.Support x end)
   end
 end

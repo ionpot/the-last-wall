@@ -135,6 +135,21 @@ module Mishap = struct
   end
 end
 
+module NationSupport = struct
+  type t = Support.t
+  module Apply (S : State.S) = struct
+    module AddRes = Event.AddRes(S)
+    module Apply = Support.Apply(S)
+    let value t =
+      AddRes.value (Support.sum t);
+      Apply.value t
+  end
+  module Make (S : State.S) = struct
+    module Roll = Support.Roll(S)
+    let value = S.Nation.return Roll.from
+  end
+end
+
 module Starting = Starting
 
 module Starvation = struct
@@ -159,21 +174,6 @@ module Starvation = struct
     let portion = S.Dice.rollf 0.75 |> Float.times cost |> truncate
     let deserted = Fill.from portion starved
     let value = Units.reduce deserted starved, deserted
-  end
-end
-
-module Support = struct
-  type t = Support.t
-  module Apply (S : State.S) = struct
-    module AddRes = Event.AddRes(S)
-    module Apply = Support.Apply(S)
-    let value t =
-      AddRes.value (Support.sum t);
-      Apply.value t
-  end
-  module Make (S : State.S) = struct
-    module Roll = Support.Roll(S)
-    let value = S.Nation.return Roll.from
   end
 end
 
