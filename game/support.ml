@@ -65,7 +65,7 @@ module Roll (S : State.S) = struct
     let trade = Check.has_trade kind |> Number.if_ok 10 in
     Resource.(res ++ of_supp trade)
 
-  let roll (a, b) = S.Dice.between a b
+  let roll = S.Dice.range
 
   let chance_of kind nats =
     Nation.chances nats
