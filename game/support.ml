@@ -62,8 +62,13 @@ module Roll (S : State.S) = struct
   module Check = Check(S)
 
   let bonuses kind res =
-    let trade = Check.has_trade kind |> Number.if_ok 10 in
-    Resource.(res ++ of_supp trade)
+    let trade = Check.has_trade kind in
+    let hekatium = kind = Nation.Hekatium in
+    let sup = Number.if_ok 10 trade in
+    Resource.bonus_if
+      (trade && hekatium)
+      Resource.Bonus.(Add (Both 0.1))
+      Resource.(res ++ of_supp sup)
 
   let roll = S.Dice.range
 
