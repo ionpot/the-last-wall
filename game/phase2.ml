@@ -14,6 +14,7 @@ module Input = struct
     | Mercs of Event.Mercs.t
     | Nations of Event.Nations.t
     | Ranger of Event.Ranger.t
+    | Sodistan of Event.Sodistan.t
     | Templar of Event.Templar.t
     | Trade of Event.Trade.t
     | Volunteers of Event.Volunteers.t
@@ -31,6 +32,7 @@ module Input = struct
       | Mercs x -> Apply.value x (module Event.Mercs)
       | Nations x -> Apply.value x (module Event.Nations)
       | Ranger x -> Apply.value x (module Event.Ranger)
+      | Sodistan x -> Apply.value x (module Event.Sodistan)
       | Templar x -> Apply.value x (module Event.Templar)
       | Trade x -> Apply.value x (module Event.Trade)
       | Volunteers x -> Apply.value x (module Event.Volunteers)
@@ -76,6 +78,8 @@ module Convert = struct
           let make x = Input.Knight x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)
+      | Steps.Sodistan -> (module struct module Event = Event.Sodistan
+          let make x = Input.Sodistan x end)
 
     let cond : Convert.cond = function
       | Steps.LeaderNew -> (module struct module Event = Event.LeaderNew

@@ -21,6 +21,12 @@ module Check (S : State.S) = struct
     else Chance.cap
   let has_traded kind =
     has_trade kind && S.Nation.check (Nation.has_aided kind)
+  let traded_mnp kind =
+    let mnp = S.Nation.return (Nation.mnp_from kind) in
+    has_trade kind |> Number.if_ok mnp
+  let traded_sup kind =
+    let sup = S.Nation.return (Nation.sup_from kind) in
+    has_trade kind |> Number.if_ok sup
 end
 
 module Apply (S : State.S) = struct

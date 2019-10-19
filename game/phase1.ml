@@ -10,6 +10,7 @@ module Input = struct
     | Leader of Event.LeaderKind.t
     | Nations of Event.Nations.t
     | Scout of Event.Scout.t
+    | Sodistan of Event.Sodistan.t
     | Trade of Event.Trade.t
     | Volunteers of Event.Volunteers.t
   module Apply (State : State.S) = struct
@@ -22,6 +23,7 @@ module Input = struct
       | Leader x -> Apply.value x (module Event.LeaderKind)
       | Nations x -> Apply.value x (module Event.Nations)
       | Scout x -> Apply.value x (module Event.Scout)
+      | Sodistan x -> Apply.value x (module Event.Sodistan)
       | Trade x -> Apply.value x (module Event.Trade)
       | Volunteers x -> Apply.value x (module Event.Volunteers)
   end
@@ -63,6 +65,8 @@ module Convert = struct
           let make x = Input.Nations x end)
       | Steps.Scout -> (module struct module Event = Event.Scout
           let make x = Input.Scout x end)
+      | Steps.Sodistan -> (module struct module Event = Event.Sodistan
+          let make x = Input.Sodistan x end)
   end
 
   module Output = struct

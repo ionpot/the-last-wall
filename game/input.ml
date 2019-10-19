@@ -217,6 +217,21 @@ module Scout = struct
   end
 end
 
+module Sodistan = struct
+  type t = Defs.supply
+  module Apply (S : State.S) = struct
+    let value t =
+      S.Units.map Units.(sub (t * 2) Men);
+      S.Supply.add t
+  end
+  module Make (S : State.S) = struct
+    module Check = Support.Check(S)
+    let mnp = Check.traded_mnp Nation.Sodistan
+    let men = S.Units.return Units.(count Men)
+    let value = min mnp men / 2
+  end
+end
+
 module Templar = struct
   type t = Defs.count
   let kind = Units.Templar
