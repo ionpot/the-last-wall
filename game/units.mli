@@ -56,8 +56,9 @@ val combine : t -> t -> t
 val discard : Attr.t -> t -> t
 val filter : Attr.t -> t -> t
 val only : kind -> t -> t
+val pop : kind -> t -> t * t
 val reduce : t -> t -> t
-val split : kind -> t -> t * t
+val split : Attr.t -> t -> t * t
 val starve : Defs.supply -> t -> t
 val sub : Defs.count -> kind -> t -> t
 

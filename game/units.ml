@@ -265,11 +265,14 @@ let only kind t =
   let n = count kind t in
   if n > 0 then Map.add kind n empty else empty
 
+let pop kind t =
+  Map.partition (fun k _ -> k = kind) t
+
 let reduce t t' =
   Ops.sub t' t
 
-let split kind t =
-  Map.partition (fun k _ -> k = kind) t
+let split attr t =
+  Map.partition (fun k _ -> attr k) t
 
 let starve supply t =
   let f (sup, t') k =
