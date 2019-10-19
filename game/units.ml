@@ -6,6 +6,7 @@ let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops]
 let starve_order = [Men; Dervish; Berserker; Cavalry; Ranger; Templar; Merc; Ballista; Knight]
 
 module Attr = struct
+  type t = kind -> bool
   let can_barrage = function
     | Men | Merc | Ranger -> true
     | _ -> false
