@@ -1,6 +1,15 @@
 type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Harpy | Knight | Men | Merc | Orc | Ranger | Skeleton | Templar
+
+module Kind = struct
+  type t = kind
+  let compare = compare
+end
+
+module Map = Map.Make(Kind)
+module Set = Set.Make(Kind)
+
 type report = (kind * Defs.count) list
-type sum_report = (Defs.count * kind list)
+type sum_report = (Defs.count * Set.t)
 
 let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops]
 let starve_order = [Men; Dervish; Berserker; Cavalry; Ranger; Templar; Merc; Ballista; Knight]
@@ -119,11 +128,6 @@ let translate kind_in kind_out n =
   to_power kind_in n
   |> from_power kind_out
 
-module Map = Map.Make(struct
-  type t = kind
-  let compare = compare
-end)
-
 type t = Defs.count Map.t
 
 let empty : t = Map.empty
@@ -217,8 +221,8 @@ let has kind t =
   count kind t > 0
 
 let kinds_of t =
-  Map.bindings t
-  |> List.map fst
+  let f k _ s = Set.add k s in
+  Map.fold f t Set.empty
 
 let power t =
   Ops.(powers t |> sumf)

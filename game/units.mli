@@ -1,6 +1,9 @@
 type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Harpy | Knight | Men | Merc | Orc | Ranger | Skeleton | Templar
+
+module Set : Set.S with type elt = kind
+
 type report = (kind * Defs.count) list
-type sum_report = (Defs.count * kind list)
+type sum_report = (Defs.count * Set.t)
 
 val attacks : kind list
 
@@ -43,7 +46,7 @@ val filter_count : Attr.t -> t -> Defs.count
 val filter_power : Attr.t -> t -> Defs.power
 val find : Defs.count -> kind -> t -> Defs.count
 val has : kind -> t -> bool
-val kinds_of : t -> kind list
+val kinds_of : t -> Set.t
 val power : t -> Defs.power
 val power_of : kind -> t -> Defs.power
 val promotable : kind -> t -> Defs.count
