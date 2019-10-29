@@ -29,14 +29,20 @@ end
 let fort_cap = 20.
 
 module Units (S : State.S) = struct
+  module Check = Support.Check(S)
   module DistRoll = Dist.Roll(S.Dice)
   module Fill = Units.Fill(S.Dice)
+  let clan =
+    Check.has_traded Nation.Clan
+    |> Float.if_ok 1.
   let dist = DistRoll.from
   let enemies = S.Enemy.get ()
   let power = Units.power
   let attack = power enemies
   let harpies = Units.(count Harpy) enemies
-  let units = S.Units.get ()
+  let units =
+    Units.(boost Ballista) clan
+    |> S.Units.return
   let defending = Units.(discard Attr.is_siege) units
   let fled () =
     let fled = Fill.from fort_cap defending in
