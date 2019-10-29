@@ -63,7 +63,9 @@ module Berserker = struct
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
-    let n = Units.(translate Men) kind |> S.Arena.return
+    let arena = S.Arena.get ()
+    let base = Units.Power.base
+    let n = Units.(Power.translate Men) kind arena base
     let cap = Recruit.(Missing.arena () |> affordable kind)
     let value = min n cap
   end

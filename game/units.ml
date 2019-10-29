@@ -92,48 +92,61 @@ module Base = struct
     | _ -> 1
 end
 
-let can_hit kind pwr =
-  Base.power kind < pwr +. 4.
+let from_upkeep kind sup =
+  Number.div sup (Base.upkeep_cost kind)
 
 let to_dr kind n =
   Float.times n (Base.dr kind)
 
-let from_powerf kind p =
-  p /. (Base.power kind)
-
-let from_power kind p =
-  from_powerf kind p
-  |> truncate
-
-let to_power kind n =
-  Float.times n (Base.power kind)
-
-let from_upkeep kind sup =
-  Number.div sup (Base.upkeep_cost kind)
-
 let to_upkeep kind n =
   n * Base.upkeep_cost kind
 
-let ceil_power kind =
-  Base.power kind |> Float.ceil_by
+module Power = struct
+  type t = kind -> Defs.power
 
-let mod_power kind n =
-  Base.power kind |> mod_float n
+  let base = Base.power
 
-let heal kind n =
-  let pwr = Base.power kind in
-  Float.floor_by pwr n, mod_float n pwr
+  let boost kind p t =
+    fun k -> Float.add_if (k = kind) p (t k)
 
-let translate kind_in kind_out n =
-  to_power kind_in n
-  |> from_power kind_out
+  let can_hit t kind pwr =
+    t kind < pwr +. 4.
 
-type t = Defs.count Map.t
+  let ceil t kind =
+    Float.ceil_by (t kind)
 
-let empty : t = Map.empty
+  let div t kind p =
+    p /. t kind
+
+  let heal t kind p =
+    let pwr = t kind in
+    Float.floor_by pwr p, mod_float p pwr
+
+  let modulo t kind p =
+    mod_float p (t kind)
+
+  let mul t kind n =
+    Float.times n (t kind)
+
+  let to_count t kind p =
+    truncate (div t kind p)
+
+  let translate ki ko n t =
+    mul t ki n |> to_count t ko
+end
+
+type t =
+  { map : Defs.count Map.t
+  ; power : Power.t
+  }
+
+let empty =
+  { map = Map.empty
+  ; power = Power.base
+  }
 
 let make n kind =
-  Map.singleton kind n
+  { empty with map = Map.singleton kind n }
 
 let promotion_cost = function
   | Ballista
@@ -144,15 +157,24 @@ let promotion_cost = function
   | Templar -> make 1 Dervish
   | _ -> empty
 
+let set_map t map =
+  { t with map }
+
+let set_power t power =
+  { t with power }
+
 let discard attr t =
-  Map.filter (fun k _ -> not (attr k)) t
+  Map.filter (fun k _ -> not (attr k)) t.map
+  |> set_map t
 
 let filter attr t =
-  Map.filter (fun k _ -> attr k) t
+  Map.filter (fun k _ -> attr k) t.map
+  |> set_map t
 
 module Ops = struct
   let add t_a t_b =
-    Map.union (fun _ a b -> Some (a + b)) t_a t_b
+    Map.union (fun _ a b -> Some (a + b)) t_a.map t_b.map
+    |> set_map t_b
 
   let div t_a t_b =
     let f _ a_opt = function
@@ -162,52 +184,59 @@ module Ops = struct
           else None
       | None -> None
     in
-    Map.merge f t_a t_b
+    Map.merge f t_a.map t_b.map
+    |> set_map t_b
+
+  let is_empty t =
+    Map.is_empty t.map
 
   let min t =
     let cmp n = function
       | Some x -> Some (min x n)
       | None -> Some n
     in
-    Map.fold (fun _ -> cmp) t None
+    Map.fold (fun _ -> cmp) t.map None
     |> Number.maybe 0
 
   let mul n t =
-    Map.map (( * ) n) t
+    Map.map (( * ) n) t.map
+    |> set_map t
 
   let powers t =
-    Map.mapi to_power t
+    Map.mapi (Power.mul t.power) t.map
 
   let sub t_a t_b =
     let f _ a_opt = function
       | Some b -> Number.(sub_opt (maybe 0 a_opt) b)
       | None -> a_opt
     in
-    Map.merge f t_a t_b
+    Map.merge f t_a.map t_b.map
+    |> set_map t_b
 
   let sum t =
-    Map.fold (fun _ -> (+)) t 0
+    Map.fold (fun _ -> (+)) t.map 0
 
-  let sumf t =
-    Map.fold (fun _ -> (+.)) t 0.
+  let sumf m =
+    Map.fold (fun _ -> (+.)) m 0.
 end
 
 let affordable kind cap t =
-  let m = Ops.div t (promotion_cost kind) in
-  if Map.is_empty m then cap
-  else Ops.min m |> min cap
+  let u = Ops.div t (promotion_cost kind) in
+  if Ops.is_empty u then cap
+  else Ops.min u |> min cap
 
 let cost n kind =
   promotion_cost kind |> Ops.mul n
 
 let count kind t =
-  try Map.find kind t with
-  | Not_found -> 0
+  if Map.mem kind t.map
+  then Map.find kind t.map
+  else 0
 
 let count_all = Ops.sum
 
 let dr t =
-  Map.mapi to_dr t
+  Map.mapi to_dr t.map
   |> Ops.sumf
 
 let filter_count attr t =
@@ -222,7 +251,10 @@ let has kind t =
 
 let kinds_of t =
   let f k _ s = Set.add k s in
-  Map.fold f t Set.empty
+  Map.fold f t.map Set.empty
+
+let max_base t =
+  Map.fold (fun k _ acc -> t.power k |> max acc) t.map 0.
 
 let power t =
   Ops.(powers t |> sumf)
@@ -235,48 +267,55 @@ let barrage_power t =
   let bonus = Float.times (count Ranger t) 1. in
   power +. bonus
 
-let max_base_power t =
-  Map.fold (fun k _ acc -> Base.power k |> max acc) t 0.
-
 let power_of kind t =
-  to_power kind (count kind t)
+  Power.mul t.power kind (count kind t)
 
 let promotable kind t =
-  let m = Ops.div t (promotion_cost kind) in
-  if Map.is_empty m then 0
-  else Ops.min m
+  let u = Ops.div t (promotion_cost kind) in
+  if Ops.is_empty u then 0
+  else Ops.min u
 
 let ratio_of kind t =
   let n = count kind t in
   let sum = Ops.sum t in
   Float.div (float n) (float sum)
 
-let report = Map.bindings
+let report t =
+  Map.bindings t.map
 
 let untouchable t_atk t_dfn =
-  let pwr = max_base_power t_atk in
-  Map.fold (fun k _ ls -> if can_hit k pwr then ls else k :: ls) t_dfn []
+  let pwr = max_base t_atk in
+  let f k _ s = if Power.can_hit t_dfn.power k pwr then s else Set.add k s in
+  Map.fold f t_dfn.map Set.empty
 
 let upkeep t =
-  Map.mapi to_upkeep t |> count_all
+  Map.mapi to_upkeep t.map |> set_map t |> count_all
 
 let add n kind t =
-  Map.add kind (n + count kind t) t
+  Map.add kind (n + count kind t) t.map
+  |> set_map t
+
+let boost kind p t =
+  Power.boost kind p t.power
+  |> set_power t
 
 let combine = Ops.add
 
 let only kind t =
   let n = count kind t in
-  if n > 0 then Map.add kind n empty else empty
+  (if n > 0 then Map.singleton kind n else Map.empty)
+  |> set_map t
 
 let pop kind t =
-  Map.partition (fun k _ -> k = kind) t
+  let x, rest = Map.partition (fun k _ -> k = kind) t.map in
+  set_map t x, set_map t rest
 
 let reduce t t' =
   Ops.sub t' t
 
 let split attr t =
-  Map.partition (fun k _ -> attr k) t
+  let a, b = Map.partition (fun k _ -> attr k) t.map in
+  set_map t a, set_map t b
 
 let starve supply t =
   let f (sup, t') k =
@@ -289,60 +328,72 @@ let starve supply t =
   |> snd
 
 let sub n kind t =
-  Map.update kind (function Some x -> Number.sub_opt x n | x -> x) t
+  Map.update kind (function Some x -> Number.sub_opt x n | x -> x) t.map
+  |> set_map t
 
-let pick_w t n =
-  let key, _ = Map.min_binding t in
+let pick_w m n =
+  let key, _ = Map.min_binding m in
   let f k hit (k', n') =
     if n' > 0. then k, n' -. hit else k', n'
   in
-  Map.fold f t (key, n) |> fst
+  Map.fold f m (key, n) |> fst
 
 module Dist = struct
   let threshold = 4.
 
-  let ceil_count m =
-    Map.(mapi ceil_power m |> mapi from_power)
-
   type acc =
     { absorbed : Defs.power
     ; healed : Defs.power
+    ; power : Power.t
     ; reflected : Defs.power
-    ; untouchable : kind list
+    ; untouchable : Set.t
     }
+
+  let to_t a m =
+    { map = m
+    ; power = a.power
+    }
+
+  let ceil_count a m =
+    Map.mapi (Power.ceil a.power) m
+    |> Map.mapi (Power.to_count a.power)
+    |> to_t a
+
   type result = acc * Defs.power Map.t * Defs.power Map.t
 
   let empty_acc =
     { absorbed = 0.
     ; healed = 0.
+    ; power = Power.base
     ; reflected = 0.
-    ; untouchable = []
+    ; untouchable = Set.empty
     }
+
   let empty : result = empty_acc, Map.empty, Map.empty
 
   let absorbed (a, _, m) =
-    Map.mapi mod_power m |> Ops.sumf |> (+.) a.absorbed
+    Map.mapi (Power.modulo a.power) m |> Ops.sumf |> (+.) a.absorbed
   let healed (a, _, _) = a.healed
   let no_remaining (_, m, _) = Map.is_empty m
-  let outcome (_, _, m) = Map.mapi from_power m
+  let outcome (a, _, m) = Map.mapi (Power.to_count a.power) m |> to_t a
   let reflected (a, _, _) = a.reflected
-  let remaining (_, m, _) = ceil_count m
+  let remaining (a, m, _) = ceil_count a m
 
   let absorb kind n acc =
-    let n', healed = heal kind n in
+    let n', healed = Power.heal acc.power kind n in
     { acc with absorbed = acc.absorbed +. healed }, n'
 
   let heal kind n acc =
-    let n', healed = heal kind n in
+    let n', healed = Power.heal acc.power kind n in
     { acc with healed = acc.healed +. healed }, n'
 
   let reflect kind n acc =
-    let n' = mod_power kind n in
+    let n' = Power.modulo acc.power kind n in
     { acc with reflected = acc.reflected +. n' }, n
 
   let handle kind acc dmg =
     let acc', sub =
-      if List.mem kind acc.untouchable
+      if Set.mem kind acc.untouchable
       then absorb kind dmg acc
       else if Attr.can_heal kind
       then heal kind dmg acc
@@ -351,12 +402,12 @@ module Dist = struct
       else acc, dmg
     in acc', dmg, sub
 
-  let mitigate kind input cap =
-    let ratio = ceil_count input |> ratio_of kind in
+  let mitigate kind input acc cap =
+    let ratio = ceil_count acc input |> ratio_of kind in
     max (ratio *. cap) 0.1
 
-  let pick kind input cap =
-    (if cap > threshold then mitigate kind input cap else cap)
+  let pick kind input acc cap =
+    (if cap > threshold then mitigate kind input acc cap else cap)
     |> min (Map.find kind input)
 
   module Roll (Dice : Dice.S) = struct
@@ -376,11 +427,12 @@ module Dist = struct
         let probs = Map.mapi (fun k _ -> Base.hit_chance k) input in
         Ops.sumf probs |> Dice.rollf |> pick_w probs
       let roll acc kind cap input =
-        ratio cap |> pick kind input |> handle kind acc
+        ratio cap |> pick kind input acc |> handle kind acc
     end)
 
-    let from cap untouchable t =
-      let acc = { empty_acc with untouchable } in
+    let from cap t' t =
+      let untouchable = untouchable t' t in
+      let acc = { empty_acc with power = t.power; untouchable } in
       let input = Ops.powers t in
       let output = Map.empty in
       Pick.from acc cap input output
@@ -396,21 +448,25 @@ let random_key roll t =
   Map.fold f t (key, n) |> fst
 
 module Fill (Dice : Dice.S) = struct
-  module Pick = Pick.With(struct
+  module Pick = Pick.WithAcc(struct
     module Cap = Pick.Float
     module Map = Map
     module Type = Pick.Int
+    type acc = Power.t
     type map = Type.t Map.t
-    type step = Cap.t * Type.t
+    type step = acc * Cap.t * Type.t
     let choose = random_key Dice.roll
-    let roll kind cap t =
-      let n = Map.find kind t |> min (from_power kind cap) |> Dice.roll in
-      to_power kind n, n
+    let roll power kind cap t =
+      let n = Map.find kind t |> min (Power.to_count power kind cap) |> Dice.roll in
+      power, Power.mul power kind n, n
   end)
 
-  let from pwr t =
-    if pwr > power t then t
-    else Pick.from pwr t empty
+  let to_t power (_, _, map) =
+    { map; power }
+
+  let from cap t =
+    if cap > power t then t
+    else Pick.from t.power cap t.map Map.empty |> to_t t.power
 end
 
 module FillCount (Dice : Dice.S) = struct
@@ -428,7 +484,7 @@ module FillCount (Dice : Dice.S) = struct
 
   let from total t =
     if total > count_all t then t
-    else Pick.from total t empty
+    else Pick.from total t.map Map.empty |> set_map t
 end
 
 module Report (Dice : Dice.S) = struct
@@ -436,7 +492,8 @@ module Report (Dice : Dice.S) = struct
     if x > 10 then 10 * Dice.round (0.1 *. float x) else x
 
   let from t =
-    Map.map try_round t
+    Map.map try_round t.map
+    |> set_map t
     |> report
 
   let sum_from t =

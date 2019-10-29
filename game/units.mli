@@ -28,7 +28,12 @@ module Base : sig
   val supply_cost : kind -> Defs.supply
 end
 
-val translate : kind -> kind -> Defs.count -> Defs.count
+module Power : sig
+  type t
+  val base : t
+  val boost : kind -> Defs.power -> t -> t
+  val translate : kind -> kind -> Defs.count -> t -> Defs.count
+end
 
 type t
 
@@ -51,10 +56,11 @@ val power : t -> Defs.power
 val power_of : kind -> t -> Defs.power
 val promotable : kind -> t -> Defs.count
 val report : t -> report
-val untouchable : t -> t -> kind list
+val untouchable : t -> t -> Set.t
 val upkeep : t -> Defs.supply
 
 val add : Defs.count -> kind -> t -> t
+val boost : kind -> Defs.power -> t -> t
 val combine : t -> t -> t
 val discard : Attr.t -> t -> t
 val filter : Attr.t -> t -> t
@@ -75,7 +81,7 @@ module Dist : sig
   val reflected : result -> Defs.power
   val remaining : result -> t
   module Roll : Dice.S -> sig
-    val from : Defs.power -> kind list -> t -> result
+    val from : Defs.power -> t -> t -> result
   end
 end
 

@@ -31,7 +31,7 @@ let fort_cap = 20.
 module Units (S : State.S) = struct
   module DistRoll = Dist.Roll(S.Dice)
   module Fill = Units.Fill(S.Dice)
-  let dist dmg a b = DistRoll.from dmg (Units.untouchable b a) a
+  let dist = DistRoll.from
   let enemies = S.Enemy.get ()
   let power = Units.power
   let attack = power enemies
@@ -61,7 +61,7 @@ module Make (S : State.S) = struct
     let attack = Units.attack -. harpy_weaken
     let defense = Dr.value
     let damage = Float.reduce attack defense
-    let units = Units.(dist damage units enemies)
+    let units = Units.(dist damage enemies units)
     let retreat = Dist.no_remaining units && have_fort
     let fled, fought =
       if retreat then Units.fled ()
@@ -69,12 +69,12 @@ module Make (S : State.S) = struct
     let power = Units.power fought
     let casualty =
       if retreat
-      then Units.dist power fought Units.enemies
+      then Units.dist power Units.enemies fought
       else units
     let enemies =
-      let ref = Dist.reflected casualty in
+      let refl = Dist.reflected casualty in
       let dmg = Float.increase power defense in
-      Units.(dist (dmg +. ref) enemies) fought
+      Units.dist (dmg +. refl) fought Units.enemies
     let ldr_died =
       if retreat then false
       else S.Leader.check LdrRoll.death
