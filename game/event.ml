@@ -56,7 +56,7 @@ module AddRes (S : State.S) = struct
 end
 
 module LdrDied (S : State.S) = struct
-  let value () =
-    S.Leader.map (S.Turn.return Leader.died);
+  let value respawn =
+    S.Leader.map (S.Turn.return Leader.died respawn);
     S.Build.map (S.Leader.return Build.died)
 end

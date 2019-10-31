@@ -73,7 +73,7 @@ module Disease = struct
     module LdrDied = Event.LdrDied(S)
     let value (units, died) =
       S.Units.map Units.(reduce units);
-      if died then LdrDied.value ()
+      if died then LdrDied.value 1
   end
   module Check (S : State.S) = struct
     let value = S.Mishap.check Mishap.(has Disease)

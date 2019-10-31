@@ -21,7 +21,7 @@ module Apply (S : State.S) = struct
     S.Enemy.set (Dist.remaining O.enemies);
     S.Units.set O.fled;
     if O.retreat then S.Build.map Build.(raze Fort);
-    if O.ldr_died then LdrDied.value ()
+    if O.ldr_died then LdrDied.value 2
 end
 
 let fort_cap = 20.

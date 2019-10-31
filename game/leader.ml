@@ -11,6 +11,7 @@ type t =
   ; level : level
   ; name : Name.t
   ; noble : bool
+  ; respawn : Defs.count
   ; xp : Defs.count
   }
 
@@ -22,11 +23,11 @@ let empty =
   ; level = 0
   ; name = Name.empty
   ; noble = true
+  ; respawn = 0
   ; xp = 0
   }
 
 let kinds = [Aristocrat; Engineer; Merchant]
-let respawn_time = 2 (* turns *)
 
 let mod_of cha =
   (cha - 10) / 2
@@ -36,7 +37,7 @@ let is kind t = t.kind = kind
 let is_alive t = t.died = 0
 let is_dead t = t.died > 0
 let can_respawn turn t =
-  is_dead t && t.died + respawn_time <= turn
+  is_dead t && t.died + t.respawn <= turn
 let is_living kind t = is_alive t && is kind t
 let is_noble t = t.noble
 let kind_of t = t.kind
@@ -51,8 +52,8 @@ let defense_of t =
   let lv = level_of t in
   0.1 +. (0.01 *. float lv)
 
-let died turn t =
-  { t with died = turn }
+let died respawn died t =
+  { t with died; respawn }
 
 let won t =
   { t with xp = t.xp + 1 }

@@ -23,7 +23,7 @@ val lvup : t -> bool
 val name_of : t -> Name.t
 val victories : t -> Defs.count
 
-val died : Defs.turn -> t -> t
+val died : Defs.count -> Defs.turn -> t -> t
 val won : t -> t
 
 module Roll : Dice.S -> sig
