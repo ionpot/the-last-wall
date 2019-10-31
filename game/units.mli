@@ -1,20 +1,24 @@
 type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Harpy | Knight | Men | Merc | Orc | Ranger | Skeleton | Templar
+
+module Set : Set.S with type elt = kind
+
 type report = (kind * Defs.count) list
-type sum_report = (Defs.count * kind list)
+type sum_report = (Defs.count * Set.t)
 
 val attacks : kind list
 
 module Attr : sig
-  val can_barrage : kind -> bool
-  val can_build : kind -> bool
-  val can_heal : kind -> bool
-  val can_reflect : kind -> bool
-  val is_cavalry : kind -> bool
-  val is_holy : kind -> bool
-  val is_infantry : kind -> bool
-  val is_infectable : kind -> bool
-  val is_revivable : kind -> bool
-  val is_siege : kind -> bool
+  type t = kind -> bool
+  val can_barrage : t
+  val can_build : t
+  val can_heal : t
+  val can_reflect : t
+  val is_cavalry : t
+  val is_holy : t
+  val is_infantry : t
+  val is_infectable : t
+  val is_revivable : t
+  val is_siege : t
 end
 
 module Base : sig
@@ -24,7 +28,12 @@ module Base : sig
   val supply_cost : kind -> Defs.supply
 end
 
-val translate : kind -> kind -> Defs.count -> Defs.count
+module Power : sig
+  type t
+  val base : t
+  val boost : kind -> Defs.power -> t -> t
+  val translate : kind -> kind -> Defs.count -> t -> Defs.count
+end
 
 type t
 
@@ -38,25 +47,27 @@ val barrage_power : t -> Defs.power
 val count : kind -> t -> Defs.count
 val count_all : t -> Defs.count
 val dr : t -> Defs.power
-val filter_count : (kind -> bool) -> t -> Defs.count
-val filter_power : (kind -> bool) -> t -> Defs.power
+val filter_count : Attr.t -> t -> Defs.count
+val filter_power : Attr.t -> t -> Defs.power
 val find : Defs.count -> kind -> t -> Defs.count
 val has : kind -> t -> bool
-val kinds_of : t -> kind list
+val kinds_of : t -> Set.t
 val power : t -> Defs.power
 val power_of : kind -> t -> Defs.power
 val promotable : kind -> t -> Defs.count
 val report : t -> report
-val untouchable : t -> t -> kind list
+val untouchable : t -> t -> Set.t
 val upkeep : t -> Defs.supply
 
 val add : Defs.count -> kind -> t -> t
+val boost : kind -> Defs.power -> t -> t
 val combine : t -> t -> t
-val discard : (kind -> bool) -> t -> t
-val filter : (kind -> bool) -> t -> t
+val discard : Attr.t -> t -> t
+val filter : Attr.t -> t -> t
 val only : kind -> t -> t
+val pop : kind -> t -> t * t
 val reduce : t -> t -> t
-val split : kind -> t -> t * t
+val split : Attr.t -> t -> t * t
 val starve : Defs.supply -> t -> t
 val sub : Defs.count -> kind -> t -> t
 
@@ -70,7 +81,7 @@ module Dist : sig
   val reflected : result -> Defs.power
   val remaining : result -> t
   module Roll : Dice.S -> sig
-    val from : Defs.power -> kind list -> t -> result
+    val from : Defs.power -> t -> t -> result
   end
 end
 

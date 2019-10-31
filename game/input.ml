@@ -63,7 +63,9 @@ module Berserker = struct
   end
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
-    let n = Units.(translate Men) kind |> S.Arena.return
+    let arena = S.Arena.get ()
+    let base = Units.Power.base
+    let n = Units.(Power.translate Men) kind arena base
     let cap = Recruit.(Missing.arena () |> affordable kind)
     let value = min n cap
   end
@@ -214,6 +216,21 @@ module Scout = struct
   end
   module Make (S : State.S) = struct
     let value = S.Scout.get ()
+  end
+end
+
+module Sodistan = struct
+  type t = Defs.supply
+  module Apply (S : State.S) = struct
+    let value t =
+      S.Units.map Units.(sub (t * 2) Men);
+      S.Supply.add t
+  end
+  module Make (S : State.S) = struct
+    module Check = Support.Check(S)
+    let mnp = Check.traded_mnp Nation.Sodistan
+    let men = S.Units.return Units.(count Men)
+    let value = min mnp men / 2
   end
 end
 

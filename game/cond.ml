@@ -24,11 +24,15 @@ module Barraged = struct
     let value = S.Barrage.check Barrage.is_chosen
   end
   module Make (S : State.S) = struct
+    module Check = Support.Check(S)
     let clear = S.Weather.is Weather.Clear
+    let numendor = Check.has_traded Nation.Numendor
     let trained = S.Barrage.check Barrage.is_trained
     let power = S.Units.return Units.barrage_power
     let base = if trained then 0.1 else 0.05
-    let ratio = base |> Float.add_if clear 0.02
+    let ratio = base
+      |> Float.add_if clear 0.02
+      |> Float.add_if numendor 0.02
     let n = truncate (power *. ratio)
     let value = S.Enemy.return Units.(find n Orc)
   end
@@ -66,9 +70,10 @@ module Disease = struct
   type t = Units.t * leader_died
   let casualty = 0.1
   module Apply (S : State.S) = struct
+    module LdrDied = Event.LdrDied(S)
     let value (units, died) =
       S.Units.map Units.(reduce units);
-      if died then Leader.died |> S.Turn.return |> S.Leader.map
+      if died then LdrDied.value 1
   end
   module Check (S : State.S) = struct
     let value = S.Mishap.check Mishap.(has Disease)
