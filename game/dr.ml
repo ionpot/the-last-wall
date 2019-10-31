@@ -32,7 +32,7 @@ module From (S : State.S) = struct
     Float.times (mausoleums * bonus) mausoleum_dr
 
   let enemy_dr =
-    let harpy, rest = S.Enemy.return Units.(split Harpy) in
+    let harpy, rest = S.Enemy.return Units.(pop Harpy) in
     Units.dr rest |> Float.add_if (not wind) (Units.dr harpy)
 
   let value =

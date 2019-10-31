@@ -15,28 +15,32 @@ end
 type t = (module Outcome)
 
 module Apply (S : State.S) = struct
+  module LdrDied = Event.LdrDied(S)
   let value (module O : Outcome) =
     S.Casualty.map (O.casualty |> Dist.outcome |> Units.combine);
     S.Enemy.set (Dist.remaining O.enemies);
     S.Units.set O.fled;
     if O.retreat then S.Build.map Build.(raze Fort);
-    if O.ldr_died then begin
-      S.Leader.map (S.Turn.return Leader.died);
-      S.Build.map (S.Leader.return Build.died)
-    end
+    if O.ldr_died then LdrDied.value 2
 end
 
 let fort_cap = 20.
 
 module Units (S : State.S) = struct
+  module Check = Support.Check(S)
   module DistRoll = Dist.Roll(S.Dice)
   module Fill = Units.Fill(S.Dice)
-  let dist dmg a b = DistRoll.from dmg (Units.untouchable b a) a
+  let clan =
+    Check.has_traded Nation.Clan
+    |> Float.if_ok 1.
+  let dist = DistRoll.from
   let enemies = S.Enemy.get ()
   let power = Units.power
   let attack = power enemies
   let harpies = Units.(count Harpy) enemies
-  let units = S.Units.get ()
+  let units =
+    Units.(boost Ballista) clan
+    |> S.Units.return
   let defending = Units.(discard Attr.is_siege) units
   let fled () =
     let fled = Fill.from fort_cap defending in
@@ -61,7 +65,7 @@ module Make (S : State.S) = struct
     let attack = Units.attack -. harpy_weaken
     let defense = Dr.value
     let damage = Float.reduce attack defense
-    let units = Units.(dist damage units enemies)
+    let units = Units.(dist damage enemies units)
     let retreat = Dist.no_remaining units && have_fort
     let fled, fought =
       if retreat then Units.fled ()
@@ -69,12 +73,12 @@ module Make (S : State.S) = struct
     let power = Units.power fought
     let casualty =
       if retreat
-      then Units.dist power fought Units.enemies
+      then Units.dist power Units.enemies fought
       else units
     let enemies =
-      let ref = Dist.reflected casualty in
+      let refl = Dist.reflected casualty in
       let dmg = Float.increase power defense in
-      Units.(dist (dmg +. ref) enemies) fought
+      Units.dist (dmg +. refl) fought Units.enemies
     let ldr_died =
       if retreat then false
       else S.Leader.check LdrRoll.death

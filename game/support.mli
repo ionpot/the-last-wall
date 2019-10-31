@@ -1,10 +1,16 @@
 type chances = Nation.Chance.t
-type t = Resource.t Nation.Map.t
+type t = Nation.support
 
 val sum : t -> Resource.t
 
 module Apply : State.S -> sig
-  val chances : t -> chances -> chances
+  val value : t -> unit
+end
+
+module Check : State.S -> sig
+  val has_traded : Nation.kind -> bool
+  val traded_mnp : Nation.kind -> Defs.manpower
+  val traded_sup : Nation.kind -> Defs.supply
 end
 
 module Roll : State.S -> sig

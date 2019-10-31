@@ -26,7 +26,7 @@ let base_cost =
   let open Resource in
   function
   | Arena -> Manpwr 43, Supply 49
-  | Engrs -> Manpwr 66, Supply 67
+  | Engrs -> Manpwr 60, Supply 62
   | Fort -> Manpwr 124, Supply 136
   | Foundry -> Manpwr 28, Supply 30
   | Guesthouse -> Manpwr 21, Supply 23

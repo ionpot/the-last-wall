@@ -135,6 +135,21 @@ module Mishap = struct
   end
 end
 
+module NationSupport = struct
+  type t = Support.t
+  module Apply (S : State.S) = struct
+    module AddRes = Event.AddRes(S)
+    module Apply = Support.Apply(S)
+    let value t =
+      AddRes.value (Support.sum t);
+      Apply.value t
+  end
+  module Make (S : State.S) = struct
+    module Roll = Support.Roll(S)
+    let value = S.Nation.return Roll.from
+  end
+end
+
 module Starting = Starting
 
 module Starvation = struct
@@ -162,23 +177,6 @@ module Starvation = struct
   end
 end
 
-module Support = struct
-  type t = Support.t
-  module Apply (S : State.S) = struct
-    module AddRes = Event.AddRes(S)
-    module Apply = Support.Apply(S)
-    let value t =
-      AddRes.value (Support.sum t);
-      Apply.chances t
-      |> Nation.map_chances
-      |> S.Nation.map
-  end
-  module Make (S : State.S) = struct
-    module Roll = Support.Roll(S)
-    let value = S.Nation.return Roll.from
-  end
-end
-
 module Turn = struct
   type t = Defs.turn * Month.t * Weather.t
   module Apply (S : State.S) = struct
@@ -201,13 +199,18 @@ module Upkeep = struct
     let value = S.Supply.sub
   end
   module Make (S : State.S) = struct
-    let cost = S.Units.return Units.upkeep
+    module Check = Support.Check(S)
+    let cav, rest = S.Units.return Units.(split Attr.is_cavalry)
+    let tulron = Check.has_traded Nation.Tulron
+    let cav_bonus = Float.if_ok 0.1 tulron
+    let cavs = Units.upkeep cav |> Number.reduce_by cav_bonus
     let scouts = S.Scout.return (Number.if_ok 10)
+    let total = cavs + Units.upkeep rest + scouts
     let engineer = S.Leader.check Leader.(is_living Engineer)
     let cha = S.Leader.return Leader.cha_mod_of
     let bonus = Float.times cha 0.03
     let ratio = Float.if_ok bonus engineer
-    let value = Number.reduce_by ratio (cost + scouts)
+    let value = Number.reduce_by ratio total
   end
 end
 

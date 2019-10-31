@@ -10,6 +10,7 @@ module Input = struct
     | Leader of Event.LeaderKind.t
     | Nations of Event.Nations.t
     | Scout of Event.Scout.t
+    | Sodistan of Event.Sodistan.t
     | Trade of Event.Trade.t
     | Volunteers of Event.Volunteers.t
   module Apply (State : State.S) = struct
@@ -22,6 +23,7 @@ module Input = struct
       | Leader x -> Apply.value x (module Event.LeaderKind)
       | Nations x -> Apply.value x (module Event.Nations)
       | Scout x -> Apply.value x (module Event.Scout)
+      | Sodistan x -> Apply.value x (module Event.Sodistan)
       | Trade x -> Apply.value x (module Event.Trade)
       | Volunteers x -> Apply.value x (module Event.Volunteers)
   end
@@ -33,7 +35,7 @@ module Output = struct
     | Cavalry of Direct.Cavalry.t
     | Facilities of Direct.Facilities.t
     | Starting of Direct.Starting.t
-    | Support of Direct.Support.t
+    | Support of Direct.NationSupport.t
 end
 
 module Convert = struct
@@ -63,6 +65,8 @@ module Convert = struct
           let make x = Input.Nations x end)
       | Steps.Scout -> (module struct module Event = Event.Scout
           let make x = Input.Scout x end)
+      | Steps.Sodistan -> (module struct module Event = Event.Sodistan
+          let make x = Input.Sodistan x end)
   end
 
   module Output = struct
@@ -81,7 +85,7 @@ module Convert = struct
           let make x = Output.Facilities x end)
       | Steps.Starting -> (module struct module Event = Direct.Starting
           let make x = Output.Starting x end)
-      | Steps.Support -> (module struct module Event = Direct.Support
+      | Steps.Support -> (module struct module Event = Direct.NationSupport
           let make x = Output.Support x end)
   end
 end

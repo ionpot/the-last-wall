@@ -2,7 +2,7 @@ module Chance = Nation.Chance
 module Map = Nation.Map
 
 type chances = Chance.t
-type t = Resource.t Nation.Map.t
+type t = Nation.support
 
 let is_empty k t =
   Map.mem k t && Map.find k t = Resource.empty
@@ -19,6 +19,14 @@ module Check (S : State.S) = struct
     if has_trade kind
     then Chance.cap_trading
     else Chance.cap
+  let has_traded kind =
+    has_trade kind && S.Nation.check (Nation.has_aided kind)
+  let traded_mnp kind =
+    let mnp = S.Nation.return (Nation.mnp_from kind) in
+    has_trade kind |> Number.if_ok mnp
+  let traded_sup kind =
+    let sup = S.Nation.return (Nation.sup_from kind) in
+    has_trade kind |> Number.if_ok sup
 end
 
 module Apply (S : State.S) = struct
@@ -44,16 +52,25 @@ module Apply (S : State.S) = struct
       |> cap kind
     in
     List.fold_left f cmap Nation.kinds
+
+  let value t =
+    chances t |> Nation.map_chances |> S.Nation.map;
+    Nation.set_support t |> S.Nation.map
 end
 
 module Roll (S : State.S) = struct
   module Check = Check(S)
 
   let bonuses kind res =
-    let trade = Check.has_trade kind |> Number.if_ok 10 in
-    Resource.(res ++ of_supp trade)
+    let trade = Check.has_trade kind in
+    let hekatium = kind = Nation.Hekatium in
+    let sup = Number.if_ok 10 trade in
+    Resource.bonus_if
+      (trade && hekatium)
+      Resource.Bonus.(Add (Both 0.1))
+      Resource.(res ++ of_supp sup)
 
-  let roll (a, b) = S.Dice.between a b
+  let roll = S.Dice.range
 
   let chance_of kind nats =
     Nation.chances nats
