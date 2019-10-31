@@ -17,7 +17,7 @@ module Make (S : Game.State.S) = struct
           let module Prompt = Prompt.Nations(S) in
           Nations (Prompt.from chosen)
       | Scout _ -> Scout (Prompt.scout ())
-      | Sodistan sup -> Sodistan (Prompt.sodistan sup)
+      | Sodistan sup -> Sodistan (check Prompt.sodistan sup)
       | Trade _ -> Trade (Prompt.trade ())
       | Volunteers n -> Volunteers (check Prompt.volunteers n)
 

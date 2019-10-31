@@ -21,7 +21,7 @@ module Make (S : Game.State.S) = struct
           let module Prompt = Prompt.Nations(S) in
           Nations (Prompt.from chosen)
       | Ranger count -> Ranger (check Prompt.ranger count)
-      | Sodistan sup -> Sodistan (Prompt.sodistan sup)
+      | Sodistan sup -> Sodistan (check Prompt.sodistan sup)
       | Templar count -> Templar (check Prompt.templar count)
       | Trade _ -> Trade (Prompt.trade ())
       | Volunteers count -> Volunteers (check Prompt.volunteers count)
