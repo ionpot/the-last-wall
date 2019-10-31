@@ -54,3 +54,9 @@ module AddRes (S : State.S) = struct
     S.Supply.add (Resource.supp_of res);
     S.Units.map Units.(add (Resource.manp_of res) Men)
 end
+
+module LdrDied (S : State.S) = struct
+  let value () =
+    S.Leader.map (S.Turn.return Leader.died);
+    S.Build.map (S.Leader.return Build.died)
+end

@@ -70,9 +70,10 @@ module Disease = struct
   type t = Units.t * leader_died
   let casualty = 0.1
   module Apply (S : State.S) = struct
+    module LdrDied = Event.LdrDied(S)
     let value (units, died) =
       S.Units.map Units.(reduce units);
-      if died then Leader.died |> S.Turn.return |> S.Leader.map
+      if died then LdrDied.value ()
   end
   module Check (S : State.S) = struct
     let value = S.Mishap.check Mishap.(has Disease)

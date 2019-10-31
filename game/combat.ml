@@ -15,15 +15,13 @@ end
 type t = (module Outcome)
 
 module Apply (S : State.S) = struct
+  module LdrDied = Event.LdrDied(S)
   let value (module O : Outcome) =
     S.Casualty.map (O.casualty |> Dist.outcome |> Units.combine);
     S.Enemy.set (Dist.remaining O.enemies);
     S.Units.set O.fled;
     if O.retreat then S.Build.map Build.(raze Fort);
-    if O.ldr_died then begin
-      S.Leader.map (S.Turn.return Leader.died);
-      S.Build.map (S.Leader.return Build.died)
-    end
+    if O.ldr_died then LdrDied.value ()
 end
 
 let fort_cap = 20.
