@@ -212,8 +212,9 @@ let units2work t =
 let report_type2str = function
   | Attack.Accurate ls -> unit_pairs2str ls
   | Attack.Vague (count, kinds) ->
+      let str = Units.Set.elements kinds |> unit_ls2str in
       if count > 0
-      then sprintf "about %d (%s)" count (unit_ls2str kinds)
+      then sprintf "about %d (%s)" count str
       else ""
 
 let report2str rp =
