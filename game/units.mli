@@ -51,6 +51,7 @@ val filter_count : Attr.t -> t -> Defs.count
 val filter_power : Attr.t -> t -> Defs.power
 val find : Defs.count -> kind -> t -> Defs.count
 val has : kind -> t -> bool
+val is_empty : t -> bool
 val kinds_of : t -> Set.t
 val power : t -> Defs.power
 val power_of : kind -> t -> Defs.power
