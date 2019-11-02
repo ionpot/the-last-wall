@@ -131,6 +131,12 @@ module Power = struct
   let to_count t kind p =
     truncate (div t kind p)
 
+  let reset kind t =
+    fun k -> if k = kind then base k else t k
+
+  let set kind p t =
+    fun k -> if k = kind then p else t k
+
   let translate ki ko n t =
     mul t ki n |> to_count t ko
 end
@@ -297,10 +303,6 @@ let add n kind t =
   Map.add kind (n + count kind t) t.map
   |> set_map t
 
-let boost kind p t =
-  Power.boost kind p t.power
-  |> set_power t
-
 let combine = Ops.add
 
 let only kind t =
@@ -311,6 +313,14 @@ let only kind t =
 let pop kind t =
   let x, rest = Map.partition (fun k _ -> k = kind) t.map in
   set_map t x, set_map t rest
+
+let power_reset kind t =
+  Power.reset kind t.power
+  |> set_power t
+
+let power_set p kind t =
+  Power.set kind p t.power
+  |> set_power t
 
 let reduce t t' =
   Ops.sub t' t
