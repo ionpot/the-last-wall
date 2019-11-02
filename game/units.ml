@@ -102,40 +102,38 @@ let to_upkeep kind n =
   n * Base.upkeep_cost kind
 
 module Power = struct
-  type t = kind -> Defs.power
+  type t = Defs.power Map.t
 
-  let base = Base.power
+  let base : t = Map.empty
 
-  let boost kind p t =
-    fun k -> Float.add_if (k = kind) p (t k)
+  let find k t =
+    if Map.mem k t then Map.find k t else Base.power k
 
   let can_hit t kind pwr =
-    t kind < pwr +. 4.
+    find kind t < pwr +. 4.
 
   let ceil t kind =
-    Float.ceil_by (t kind)
+    Float.ceil_by (find kind t)
 
   let div t kind p =
-    p /. t kind
+    p /. find kind t
 
   let heal t kind p =
-    let pwr = t kind in
+    let pwr = find kind t in
     Float.floor_by pwr p, mod_float p pwr
 
   let modulo t kind p =
-    mod_float p (t kind)
+    mod_float p (find kind t)
 
   let mul t kind n =
-    Float.times n (t kind)
+    Float.times n (find kind t)
 
   let to_count t kind p =
     truncate (div t kind p)
 
-  let reset kind t =
-    fun k -> if k = kind then base k else t k
+  let reset = Map.remove
 
-  let set kind p t =
-    fun k -> if k = kind then p else t k
+  let set = Map.add
 
   let translate ki ko n t =
     mul t ki n |> to_count t ko
@@ -262,7 +260,7 @@ let kinds_of t =
   Map.fold f t.map Set.empty
 
 let max_base t =
-  Map.fold (fun k _ acc -> t.power k |> max acc) t.map 0.
+  Map.fold (fun k _ acc -> Power.find k t.power |> max acc) t.map 0.
 
 let power t =
   Ops.(powers t |> sumf)
