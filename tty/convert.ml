@@ -240,7 +240,7 @@ let smite2str x =
   units2str Units.(make x Skeleton)
 
 let starve2bool (starved, deserted) =
-  Units.is_empty starved || Units.is_empty deserted
+  not (Units.is_empty starved && Units.is_empty deserted)
 
 let mishap2str = function
   | Mishap.Comet -> "comet sighted"
