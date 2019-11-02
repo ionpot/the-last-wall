@@ -25,13 +25,13 @@ module Base : sig
   val abundance : kind -> float
   val chance : kind -> Defs.chance
   val chance_growth : kind -> Defs.chance
+  val power : kind -> Defs.power
   val supply_cost : kind -> Defs.supply
 end
 
 module Power : sig
   type t
   val base : t
-  val boost : kind -> Defs.power -> t -> t
   val translate : kind -> kind -> Defs.count -> t -> Defs.count
 end
 
@@ -61,12 +61,13 @@ val untouchable : t -> t -> Set.t
 val upkeep : t -> Defs.supply
 
 val add : Defs.count -> kind -> t -> t
-val boost : kind -> Defs.power -> t -> t
 val combine : t -> t -> t
 val discard : Attr.t -> t -> t
 val filter : Attr.t -> t -> t
 val only : kind -> t -> t
 val pop : kind -> t -> t * t
+val power_reset : kind -> t -> t
+val power_set : Defs.power -> kind -> t -> t
 val reduce : t -> t -> t
 val split : Attr.t -> t -> t * t
 val starve : Defs.supply -> t -> t

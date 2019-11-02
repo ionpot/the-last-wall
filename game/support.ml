@@ -53,9 +53,15 @@ module Apply (S : State.S) = struct
     in
     List.fold_left f cmap Nation.kinds
 
+  let set_ballista () =
+    if Check.has_traded Nation.Clan
+    then S.Units.map Units.(power_set 3. Ballista)
+    else S.Units.map Units.(power_reset Ballista)
+
   let value t =
     chances t |> Nation.map_chances |> S.Nation.map;
-    Nation.set_support t |> S.Nation.map
+    Nation.set_support t |> S.Nation.map;
+    set_ballista ()
 end
 
 module Roll (S : State.S) = struct
