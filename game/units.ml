@@ -249,8 +249,7 @@ let find n kind t =
 let has kind t =
   count kind t > 0
 
-let is_empty t =
-  Map.is_empty t.map
+let is_empty = Ops.is_empty
 
 let kinds_of t =
   let f k _ s = Set.add k s in
