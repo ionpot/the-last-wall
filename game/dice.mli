@@ -15,6 +15,7 @@ module type S = sig
   val chance : chance -> bool
   val deviate : int -> int -> int
   val index : int -> int
+  val percent : int -> bool
   val pick : 'a list -> 'a
   val pick_w : chance list -> 'a list -> 'a
   val pop : 'a list -> 'a * 'a list

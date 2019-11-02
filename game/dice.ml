@@ -15,6 +15,7 @@ module type S = sig
   val chance : chance -> bool
   val deviate : int -> int -> int
   val index : int -> int
+  val percent : int -> bool
   val pick : 'a list -> 'a
   val pick_w : chance list -> 'a list -> 'a
   val pop : 'a list -> 'a * 'a list
@@ -51,6 +52,9 @@ module From (M : From) : S = struct
   let betweenf_times n x y =
     let n' = float n in
     betweenf (x *. n') (y *. n')
+
+  let percent x =
+    index 100 < x
 
   let betweenf_times_try n x y =
     let n' = float n in

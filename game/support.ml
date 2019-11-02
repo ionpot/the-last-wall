@@ -35,11 +35,11 @@ module Apply (S : State.S) = struct
   let adjust kind t cmap =
     (if is_empty kind t
     then Chance.sub
-    else Chance.add) 0.1 kind cmap
+    else Chance.add) 10 kind cmap
 
   let boost kind cmap =
     if Check.has_trade kind
-    then Chance.add 0.05 kind cmap
+    then Chance.add 5 kind cmap
     else cmap
 
   let cap kind =
@@ -81,14 +81,14 @@ module Roll (S : State.S) = struct
   let chance_of kind nats =
     Nation.chances nats
     |> Chance.of_kind kind
-    |> Float.sub_if Check.winter 0.1
+    |> Number.sub_if Check.winter 10
 
   let roll_res kind =
     let (a, b) = Nation.ranges_of kind in
     Resource.(of_manp (roll a) <+ Supply (roll b))
 
   let to_res nats kind =
-    if chance_of kind nats |> S.Dice.chance
+    if chance_of kind nats |> S.Dice.percent
     then roll_res kind |> bonuses kind
     else Resource.empty
 
