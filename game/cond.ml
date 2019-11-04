@@ -7,10 +7,10 @@ module Ballista = struct
   module Make (S : State.S) = struct
     module Roll = Units.Fill(S.Dice)
     let count = S.Units.return Units.(count Ballista)
-    let power = Units.(Base.power Ballista)
+    let base = Units.(Base.power Ballista)
     let eng = S.Leader.check Leader.(is_living Engineer)
-    let bonus = float count
-    let damage = Float.add_if eng bonus power
+    let power = Float.add_if eng 1. base
+    let damage = Float.times count power
     let value = count, S.Enemy.return (Roll.from damage)
   end
 end

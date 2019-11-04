@@ -162,7 +162,7 @@ module Starvation = struct
       S.Units.map Units.(reduce deserted);
       S.Starved.set starved;
       S.Supply.map (max 0);
-      Float.times (Units.count_all starved) 0.01
+      Units.count_all starved
       |> Nation.Chance.sub_all
       |> Nation.map_chances
       |> S.Nation.map

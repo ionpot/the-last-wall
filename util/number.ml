@@ -1,3 +1,6 @@
+let add_if_ptv x n =
+  if n > 0 then n + x else n
+
 let div a b =
   a / max b 1
 
@@ -27,6 +30,12 @@ let deduce a b =
   if a < 1
   then a, b
   else sub a b, sub b a
+
+let sub_by x n =
+  sub n x
+
+let sub_if cond x n =
+  if cond then sub n x else n
 
 let sub_opt a b =
   let x = a - b in

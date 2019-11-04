@@ -150,8 +150,8 @@ module LeaderNew = struct
       S.Supply.sub (cost_of ldr);
       S.Leader.set ldr
     let value = function
-      | (a, true), _ -> set a
-      | _, (b, true) -> set b
+      | (ldr, true), _
+      | _, (ldr, true) -> set ldr
       | _ -> ()
   end
   module Check (S : State.S) = struct

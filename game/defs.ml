@@ -1,6 +1,7 @@
 type chance = float
 type count = int
 type manpower = int
+type percent = int
 type power = float
 type 'a range = 'a * 'a
 type scouting = bool

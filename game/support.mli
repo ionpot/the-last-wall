@@ -14,6 +14,6 @@ module Check : State.S -> sig
 end
 
 module Roll : State.S -> sig
-  val chance_of : Nation.kind -> Nation.t -> Defs.chance
+  val chance_of : Nation.kind -> Nation.t -> Defs.percent
   val from : Nation.t -> t
 end
