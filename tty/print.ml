@@ -98,7 +98,7 @@ let barrage_status w =
     | Disabled Leader -> Tty.writeln "no leader to lead arrow barrage"
     | Disabled Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
 
-let cyclops (n, units) =
+let cyclops (n, units, _) =
   if n > 0 then
   sprintf "%d cyclops kills %s" n (units2str units |> if_empty "nothing")
   |> Tty.writeln

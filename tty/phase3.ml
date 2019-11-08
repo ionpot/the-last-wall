@@ -46,7 +46,7 @@ module After (S : Status.S) = struct
     function
       | Ballista (n, _, _) -> if n > 0 then S.enemies ()
       | Barraged _ -> S.enemies ()
-      | Cyclops (n, _) -> if n > 0 then S.units ()
+      | Cyclops (n, _, _) -> if n > 0 then S.units ()
       | Smite _ -> S.enemies ()
       | Victory -> S.units ()
       | _ -> ()
