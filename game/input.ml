@@ -30,7 +30,9 @@ module BarrageTrain = struct
       if ok then S.Supply.sub cost
   end
   module Make (S : State.S) = struct
-    let power = S.Units.return Units.(filter_power Attr.can_barrage)
+    let units = S.Units.return Units.(filter Attr.can_barrage)
+    let base = S.Bonus.return Power.base
+    let power = Power.of_units units base
     let cost = (power *. 0.05) |> ceil |> truncate
     let value = S.Supply.has cost, cost
   end
@@ -40,9 +42,9 @@ module Barrage = struct
   type t = bool * Barrage.status
   module Apply (S : State.S) = struct
     let value (ok, status) =
-      (status = Barrage.Available && ok)
-      |> Barrage.set_choice
-      |> S.Barrage.map
+      let ok' = status = Barrage.Available && ok in
+      S.Barrage.map (Barrage.set_choice ok');
+      S.Bonus.map Bonus.(set Barrage ok')
   end
   module Make (S : State.S) = struct
     let value = false,
@@ -64,8 +66,7 @@ module Berserker = struct
   module Make (S : State.S) = struct
     module Recruit = Recruit.With(S)
     let arena = S.Arena.get ()
-    let base = Units.Power.base
-    let n = Units.(Power.translate Men) kind arena base
+    let n = Power.translate Units.Men kind arena Power.empty
     let cap = Recruit.(Missing.arena () |> affordable kind)
     let value = min n cap
   end

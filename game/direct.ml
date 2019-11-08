@@ -32,10 +32,9 @@ end
 module BuildManp = struct
   type t = Defs.manpower
   module Apply (S : State.S) = struct
-    let avlb =
-      Units.(filter_power Attr.can_build)
-      |> S.Units.return
-      |> truncate
+    let units = S.Units.return Units.(filter Attr.can_build)
+    let base = S.Bonus.return Power.base
+    let avlb = Power.of_units units base |> truncate
     let value need =
       S.Build.map (Build.manp need avlb)
   end
@@ -155,9 +154,9 @@ module Starting = Starting
 module Starvation = struct
   type deserted = Units.t
   type starved = Units.t
-  type t = starved * deserted
+  type t = deserted * starved
   module Apply (S : State.S) = struct
-    let value (starved, deserted) =
+    let value (deserted, starved) =
       S.Units.map Units.(reduce starved);
       S.Units.map Units.(reduce deserted);
       S.Starved.set starved;
@@ -168,12 +167,11 @@ module Starvation = struct
       |> S.Nation.map
   end
   module Make (S : State.S) = struct
-    module Fill = Units.FillCount(S.Dice)
+    module Fill = Units.Fill(S.Dice)
     let cost = S.Supply.get () |> Number.sub 0
     let starved = S.Units.return (Units.starve cost)
     let portion = S.Dice.rollf 0.75 |> Float.times cost |> truncate
-    let deserted = Fill.from portion starved
-    let value = Units.reduce deserted starved, deserted
+    let value = Fill.from portion starved
   end
 end
 

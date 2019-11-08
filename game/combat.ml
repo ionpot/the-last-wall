@@ -1,12 +1,10 @@
-module Dist = Units.Dist
-
 module type Outcome = sig
   val attack : Defs.power
-  val casualty : Dist.result
+  val casualty : Dist.t
   val cav_too_many : bool
   val damage : Defs.power
   val defense : Defs.power
-  val enemies : Dist.result
+  val enemies : Dist.t
   val fled : Units.t
   val ldr_died : bool
   val retreat : bool
@@ -26,54 +24,44 @@ end
 
 let fort_cap = 20.
 
-module Units (S : State.S) = struct
-  module Check = Support.Check(S)
-  module DistRoll = Dist.Roll(S.Dice)
-  module Fill = Units.Fill(S.Dice)
-  let dist = DistRoll.from
-  let enemies = S.Enemy.get ()
-  let power = Units.power
-  let attack = power enemies
-  let harpies = Units.(count Harpy) enemies
-  let units = S.Units.get ()
-  let defending = Units.(discard Attr.is_siege) units
-  let fled () =
-    let fled = Fill.from fort_cap defending in
-    fled, Units.reduce fled units
-end
-
 module Make (S : State.S) = struct
+  module Damage = Dist.Damage(S.Dice)
   module Dr = Dr.From(S)
+  module Fill = Dist.Fill(S.Dice)
   module LdrRoll = Leader.Roll(S.Dice)
-  module Units = Units(S)
 
-  let harpy_weaken =
-    S.Barrage.check Barrage.is_chosen
-    |> Float.if_ok 1.
-    |> Float.times Units.harpies
+  let base = S.Bonus.return Power.base
+  let enemies = S.Enemy.get ()
+  let have_fort = S.Build.check Build.(is_ready Fort)
+  let units = S.Units.get ()
+  let mobile = Units.(discard Attr.is_siege) units
 
-  let have_fort =
-    S.Build.check Build.(is_ready Fort)
+  let dist dmg a b =
+    Damage.from dmg base a b
+
+  let power_of u =
+    Power.of_units u base
 
   let value = (module struct
     let cav_too_many = Dr.cav_too_many
-    let attack = Units.attack -. harpy_weaken
+    let attack = power_of enemies
     let defense = Dr.value
     let damage = Float.reduce attack defense
-    let units = Units.(dist damage enemies units)
-    let retreat = Dist.no_remaining units && have_fort
+    let result = dist damage enemies units
+    let retreat = Dist.no_remaining result && have_fort
     let fled, fought =
-      if retreat then Units.fled ()
-      else Dist.remaining units, Units.units
-    let power = Units.power fought
+      if retreat
+      then Fill.from fort_cap base mobile
+      else Dist.remaining result, units
+    let power = power_of fought
     let casualty =
       if retreat
-      then Units.dist power Units.enemies fought
-      else units
+      then dist power enemies fought
+      else result
     let enemies =
       let refl = Dist.reflected casualty in
       let dmg = Float.increase power defense in
-      Units.dist (dmg +. refl) fought Units.enemies
+      dist (dmg +. refl) fought enemies
     let ldr_died =
       if retreat then false
       else S.Leader.check LdrRoll.death

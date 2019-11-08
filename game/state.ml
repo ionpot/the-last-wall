@@ -2,6 +2,7 @@ module type S = sig
   module Arena : Value.Num
   module Ballista : Value.Num
   module Barrage : Value.S with type t = Barrage.t
+  module Bonus : Value.S with type t = Bonus.t
   module Build : Value.S with type t = Build.t
   module Casualty : Value.S with type t = Units.t
   module Deity : Value.S with type t = Deity.t
@@ -26,6 +27,7 @@ module Make (D : Dice.From) : S = struct
   module Arena = Value.Num(Value.Zero)
   module Ballista = Value.Num(Value.Zero)
   module Barrage = Value.From(Barrage)
+  module Bonus = Value.From(Bonus)
   module Build = Value.From(Build)
   module Casualty = Value.From(Units)
   module Deity = Value.From(Deity)
