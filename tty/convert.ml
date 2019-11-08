@@ -221,13 +221,13 @@ let report2str rp =
   |> if_empty "no enemies"
 
 let result2outcome r =
-  Units.Dist.outcome r |> units2str
+  Dist.outcome r |> units2str
 
 let result2remaining r =
-  Units.Dist.remaining r |> units2str
+  Dist.remaining r |> units2str
 
 let result2stats r =
-  Units.Dist.(["absorbed", absorbed r; "healed", healed r; "reflected", reflected r])
+  Dist.(["absorbed", absorbed r; "healed", healed r; "reflected", reflected r])
   |> List.filter (fun (_, n) -> n > 0.)
   |> List.map (fun (s, n) -> sprintf "%s %s" (power2str n) s)
   |> commas
