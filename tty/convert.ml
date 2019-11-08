@@ -238,7 +238,7 @@ let barrage2str x =
 let smite2str x =
   units2str Units.(make x Skeleton)
 
-let starve2bool (starved, deserted) =
+let starve2bool (deserted, starved) =
   not (Units.is_empty starved && Units.is_empty deserted)
 
 let mishap2str = function
