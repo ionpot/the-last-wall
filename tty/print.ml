@@ -86,7 +86,7 @@ module Combat = struct
     Tty.ifpairln "enemies remaining" (result2remaining O.enemies)
 end
 
-let ballista (n, enemies) =
+let ballista (n, enemies, _) =
   if n > 0 then
   sprintf "%d ballista kills %s" n (units2str enemies |> if_empty "nothing")
   |> Tty.writeln
