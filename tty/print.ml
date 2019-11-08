@@ -103,9 +103,9 @@ let cyclops (n, units, _) =
   sprintf "%d cyclops kills %s" n (units2str units |> if_empty "nothing")
   |> Tty.writeln
 
-let disease (units, died) ldr =
-  Tty.pairln "died" (units2str units |> str2none);
-  if died then Leader.died ldr
+let disease (died, _, ldr_died) ldr =
+  Tty.pairln "died" (units2str died |> str2none);
+  if ldr_died then Leader.died ldr
 
 let facilities map =
   Tty.ifpairln "facilities" (facs2clean map |> facs2str)
