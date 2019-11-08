@@ -1,17 +1,22 @@
 module Ballista = struct
-  type t = Defs.count * Units.t
+  type t = Defs.count * Units.t * Units.t
+  let kind = Units.Ballista
+  let power = 2.
   module Apply (S : State.S) = struct
-    let value (_, enemies) = S.Enemy.map (Units.reduce enemies)
+    let value (_, _, remaining) = S.Enemy.set remaining
   end
   module Check = Check.NoFog
   module Make (S : State.S) = struct
-    module Roll = Units.Fill(S.Dice)
-    let count = S.Units.return Units.(count Ballista)
-    let base = Units.(Base.power Ballista)
+    module Fill = Dist.Fill(S.Dice)
+    let count = S.Units.return (Units.count kind)
     let eng = S.Leader.check Leader.(is_living Engineer)
-    let power = Float.add_if eng 1. base
+    let power = Float.add_if eng 1. power
     let damage = Float.times count power
-    let value = count, S.Enemy.return (Roll.from damage)
+    let base = S.Bonus.return Power.base
+    let killed, rem =
+      Fill.from damage base
+      |> S.Enemy.return
+    let value = count, killed, rem
   end
 end
 
@@ -28,30 +33,37 @@ module Barraged = struct
     let clear = S.Weather.is Weather.Clear
     let numendor = Check.has_traded Nation.Numendor
     let trained = S.Barrage.check Barrage.is_trained
-    let power = S.Units.return Units.barrage_power
-    let base = if trained then 0.1 else 0.05
-    let ratio = base
+    let units = S.Units.return Units.(filter Attr.can_barrage)
+    let bonus = S.Bonus.return Bonus.(set Training trained)
+    let base = Power.base bonus
+    let n =
+      (if trained then 0.1 else 0.05)
       |> Float.add_if clear 0.02
       |> Float.add_if numendor 0.02
-    let n = truncate (power *. ratio)
+      |> ( *. ) (Power.of_units units base)
+      |> truncate
     let value = S.Enemy.return Units.(find n Orc)
   end
 end
 
 module Cyclops = struct
-  type t = Defs.count * Units.t
+  type t = Defs.count * Units.t * Units.t
   let power = 2.
   module Apply (S : State.S) = struct
-    let value (_, loss) =
-      S.Casualty.map (Units.combine loss);
-      S.Units.map (Units.reduce loss)
+    let value (_, killed, rem) =
+      S.Casualty.map (Units.combine killed);
+      S.Units.set rem
   end
   module Check = Check.NoFog
   module Make (S : State.S) = struct
-    module Roll = Units.Fill(S.Dice)
+    module Fill = Dist.Fill(S.Dice)
     let count = S.Enemy.return Units.(count Cyclops)
-    let power' = Float.times count power
-    let value = count, S.Units.return (Roll.from power')
+    let damage = Float.times count power
+    let base = S.Bonus.return Power.base
+    let killed, rem =
+      Fill.from damage base
+      |> S.Units.return
+    let value = count, killed, rem
   end
 end
 
@@ -67,43 +79,47 @@ end
 
 module Disease = struct
   type leader_died = bool
-  type t = Units.t * leader_died
+  type t = Units.t * Units.t * leader_died
   let casualty = 0.1
   module Apply (S : State.S) = struct
     module LdrDied = Event.LdrDied(S)
-    let value (units, died) =
-      S.Units.map Units.(reduce units);
-      if died then LdrDied.value 1
+    let value (_, rem, ldr_died) =
+      S.Units.set rem;
+      if ldr_died then LdrDied.value 1
   end
   module Check (S : State.S) = struct
     let value = S.Mishap.check Mishap.(has Disease)
   end
   module Make (S : State.S) = struct
-    module Fill = Units.FillCount(S.Dice)
+    module Fill = Units.Fill(S.Dice)
     module Roll = Leader.Roll(S.Dice)
     let units = S.Units.return Units.(filter Attr.is_infectable)
     let loss = Units.count_all units |> Number.portion casualty
-    let value =
-      Fill.from loss units,
-      S.Leader.return Roll.death
+    let died, rem = Fill.from loss units
+    let value = died, rem, S.Leader.return Roll.death
   end
 end
 
 module Revive = struct
-  type t = Units.t
+  type t = Units.t * Units.t
+  let kind = Units.Dervish
   module Apply (S : State.S) = struct
-    let value revived = S.Units.map (Units.combine revived)
+    let value (revived, rem) =
+      S.Units.map (Units.combine revived);
+      S.Casualty.set rem
   end
   module Check (S : State.S) = struct
-    let value = S.Units.check Units.(has Dervish)
+    let value = S.Units.check (Units.has kind)
   end
   module Make (S : State.S) = struct
-    module Fill = Units.Fill(S.Dice)
-    let pwr = S.Units.return Units.(power_of Dervish)
+    module Fill = Dist.Fill(S.Dice)
+    let units = S.Units.get ()
+    let base = S.Bonus.return Power.base
+    let pwr = Power.of_unit kind units base
     let value =
       Units.(filter Attr.is_revivable)
       |> S.Casualty.return
-      |> Fill.from pwr
+      |> Fill.from pwr base
   end
 end
 
