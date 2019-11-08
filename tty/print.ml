@@ -13,9 +13,10 @@ module Build = struct
     |> Tty.ifpairln "buildings ready";
     status Build.([], built t, queue t)
 
-  let manp need units =
+  let manp need bonus units =
+    let base = Power.base bonus in
     if need > 0 then
-    units2work units
+    units2work base units
     |> min need
     |> manp2str
     |> sprintf "%s for construction"

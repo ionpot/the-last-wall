@@ -203,9 +203,9 @@ let units2mnpstr base t =
   |> manp2str
   |> sprintf "%s -> %s" (units2str t |> if_empty "no units")
 
-let units2work t =
-  Units.(filter Attr.can_build) t
-  |> Units.power
+let units2work base t =
+  let u = Units.(filter Attr.can_build) t in
+  Power.of_units u base
   |> truncate
 
 let report_type2str = function
