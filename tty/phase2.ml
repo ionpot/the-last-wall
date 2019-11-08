@@ -37,7 +37,10 @@ module Make (S : Game.State.S) = struct
               then (fun x -> x)
               else str2none)
           |> Tty.ifpairln "blessing"
-      | BuildManp m -> S.Units.return (Print.Build.manp m)
+      | BuildManp m ->
+          Print.Build.manp m
+          |> S.Bonus.return
+          |> S.Units.return
       | BuildStatus s -> ()
       | BuildSupply s -> S.Supply.return (Print.Build.supply s)
       | Cavalry c -> ()

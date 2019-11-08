@@ -197,15 +197,15 @@ let unit_pairs2str ls =
 let units2str t =
   unit_pairs2str (Units.report t)
 
-let units2mnpstr t =
-  Units.power t
+let units2mnpstr base t =
+  Power.of_units t base
   |> truncate
   |> manp2str
   |> sprintf "%s -> %s" (units2str t |> if_empty "no units")
 
-let units2work t =
-  Units.(filter Attr.can_build) t
-  |> Units.power
+let units2work base t =
+  let u = Units.(filter Attr.can_build) t in
+  Power.of_units u base
   |> truncate
 
 let report_type2str = function
@@ -221,13 +221,13 @@ let report2str rp =
   |> if_empty "no enemies"
 
 let result2outcome r =
-  Units.Dist.outcome r |> units2str
+  Dist.outcome r |> units2str
 
 let result2remaining r =
-  Units.Dist.remaining r |> units2str
+  Dist.remaining r |> units2str
 
 let result2stats r =
-  Units.Dist.(["absorbed", absorbed r; "healed", healed r; "reflected", reflected r])
+  Dist.(["absorbed", absorbed r; "healed", healed r; "reflected", reflected r])
   |> List.filter (fun (_, n) -> n > 0.)
   |> List.map (fun (s, n) -> sprintf "%s %s" (power2str n) s)
   |> commas
@@ -238,7 +238,7 @@ let barrage2str x =
 let smite2str x =
   units2str Units.(make x Skeleton)
 
-let starve2bool (starved, deserted) =
+let starve2bool (deserted, starved) =
   not (Units.is_empty starved && Units.is_empty deserted)
 
 let mishap2str = function

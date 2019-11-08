@@ -56,9 +56,11 @@ module With (S : State.S) = struct
     print_enemies "enemies"
 
   let res () =
-    let m = S.Units.return Units.power |> truncate in
+    let base = S.Bonus.return Power.base in
+    let units =  S.Units.get () in
+    let m = Power.of_units units base |> truncate in
     let s = S.Supply.get () in
-    let w = S.Units.return Convert.units2work in
+    let w = Convert.units2work base units in
     Printf.sprintf "status: %s, %s (%s)"
       (Convert.sup2str s)
       (Convert.manp2str m)
@@ -84,6 +86,7 @@ module With (S : State.S) = struct
       | (_, false), (_, false) -> ()
 
   let units () =
-    S.Units.return Convert.units2mnpstr
+    let base = S.Bonus.return Power.base in
+    S.Units.return (Convert.units2mnpstr base)
     |> Tty.pairln "status"
 end

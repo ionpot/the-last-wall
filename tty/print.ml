@@ -13,9 +13,10 @@ module Build = struct
     |> Tty.ifpairln "buildings ready";
     status Build.([], built t, queue t)
 
-  let manp need units =
+  let manp need bonus units =
+    let base = Power.base bonus in
     if need > 0 then
-    units2work units
+    units2work base units
     |> min need
     |> manp2str
     |> sprintf "%s for construction"
@@ -55,10 +56,11 @@ module Leader = struct
 end
 
 module Combat = struct
-  let begins units enemies ldr =
+  let begins bonus units enemies ldr =
+    let base = Power.base bonus in
     Tty.lnwriteln "combat phase";
     Tty.pairln "attacking" (units2str enemies |> str2none);
-    Tty.pairln "defending" (units2mnpstr units);
+    Tty.pairln "defending" (units2mnpstr base units);
     Tty.ifpairln "leader" (Leader.to_full ldr)
 
   let stats atk def dmg =
@@ -84,7 +86,7 @@ module Combat = struct
     Tty.ifpairln "enemies remaining" (result2remaining O.enemies)
 end
 
-let ballista (n, enemies) =
+let ballista (n, enemies, _) =
   if n > 0 then
   sprintf "%d ballista kills %s" n (units2str enemies |> if_empty "nothing")
   |> Tty.writeln
@@ -96,14 +98,14 @@ let barrage_status w =
     | Disabled Leader -> Tty.writeln "no leader to lead arrow barrage"
     | Disabled Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
 
-let cyclops (n, units) =
+let cyclops (n, units, _) =
   if n > 0 then
   sprintf "%d cyclops kills %s" n (units2str units |> if_empty "nothing")
   |> Tty.writeln
 
-let disease (units, died) ldr =
-  Tty.pairln "died" (units2str units |> str2none);
-  if died then Leader.died ldr
+let disease (died, _, ldr_died) ldr =
+  Tty.pairln "died" (units2str died |> str2none);
+  if ldr_died then Leader.died ldr
 
 let facilities map =
   Tty.ifpairln "facilities" (facs2clean map |> facs2str)
@@ -123,7 +125,7 @@ let starting (module S : Starting.S) =
   Tty.pairln "supply" (sup2str S.supply);
   Tty.ifpairln "units" (units2str S.units)
 
-let starvation (starved, fled) =
+let starvation (fled, starved) =
   Tty.ifpairln "starved" (units2str starved);
   Tty.ifpairln "fled" (units2str fled)
 

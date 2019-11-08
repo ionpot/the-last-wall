@@ -15,6 +15,7 @@ module Make (S : Game.State.S) = struct
     function
       | Attack ->
           Print.Combat.begins
+          |> S.Bonus.return
           |> S.Units.return
           |> S.Enemy.return
           |> S.Leader.return
@@ -28,7 +29,7 @@ module Make (S : Game.State.S) = struct
       | LevelUp -> S.Leader.return Print.Leader.lvup
       | NoAttack -> ()
       | NoEnemies -> Tty.writeln "no enemies left"
-      | Revive x -> Tty.pairln "revived" (units2str x |> str2none)
+      | Revive (x, _) -> Tty.pairln "revived" (units2str x |> str2none)
       | Smite x -> Tty.pairln "smite" (smite2str x |> str2none)
       | Victory -> ()
 end
@@ -43,9 +44,9 @@ module After (S : Status.S) = struct
   let output =
     let open Phase.Output in
     function
-      | Ballista (n, _) -> if n > 0 then S.enemies ()
+      | Ballista (n, _, _) -> if n > 0 then S.enemies ()
       | Barraged _ -> S.enemies ()
-      | Cyclops (n, _) -> if n > 0 then S.units ()
+      | Cyclops (n, _, _) -> if n > 0 then S.units ()
       | Smite _ -> S.enemies ()
       | Victory -> S.units ()
       | _ -> ()

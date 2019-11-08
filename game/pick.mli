@@ -31,7 +31,7 @@ module type OpsAcc = sig
 end
 
 module With (S : Ops) : sig
-  val from : S.Cap.t -> S.map -> S.map -> S.map
+  val from : S.Cap.t -> S.map -> S.map -> S.map * S.map
 end
 
 module WithAcc (S : OpsAcc) : sig

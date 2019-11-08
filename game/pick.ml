@@ -60,7 +60,7 @@ module With (S : Ops) = struct
 
   let rec from cap input output =
     if Base.check cap input
-    then output
+    then output, input
     else
       let key = S.choose input in
       let cap', n = S.roll key cap input in
