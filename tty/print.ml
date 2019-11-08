@@ -55,10 +55,11 @@ module Leader = struct
 end
 
 module Combat = struct
-  let begins units enemies ldr =
+  let begins bonus units enemies ldr =
+    let base = Power.base bonus in
     Tty.lnwriteln "combat phase";
     Tty.pairln "attacking" (units2str enemies |> str2none);
-    Tty.pairln "defending" (units2mnpstr units);
+    Tty.pairln "defending" (units2mnpstr base units);
     Tty.ifpairln "leader" (Leader.to_full ldr)
 
   let stats atk def dmg =

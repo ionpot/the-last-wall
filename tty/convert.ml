@@ -197,8 +197,8 @@ let unit_pairs2str ls =
 let units2str t =
   unit_pairs2str (Units.report t)
 
-let units2mnpstr t =
-  Units.power t
+let units2mnpstr base t =
+  Power.of_units t base
   |> truncate
   |> manp2str
   |> sprintf "%s -> %s" (units2str t |> if_empty "no units")

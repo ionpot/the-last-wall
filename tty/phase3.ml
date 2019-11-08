@@ -15,6 +15,7 @@ module Make (S : Game.State.S) = struct
     function
       | Attack ->
           Print.Combat.begins
+          |> S.Bonus.return
           |> S.Units.return
           |> S.Enemy.return
           |> S.Leader.return

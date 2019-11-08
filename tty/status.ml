@@ -84,6 +84,7 @@ module With (S : State.S) = struct
       | (_, false), (_, false) -> ()
 
   let units () =
-    S.Units.return Convert.units2mnpstr
+    let base = S.Bonus.return Power.base in
+    S.Units.return (Convert.units2mnpstr base)
     |> Tty.pairln "status"
 end
