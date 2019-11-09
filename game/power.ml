@@ -45,8 +45,12 @@ let heal kind p t =
   let pwr = Fn.find kind t in
   Float.floor_by pwr p, mod_float p pwr
 
-let max_base u t =
-  Map.fold (fun k _ acc -> Fn.find k t |> max acc) u 0.
+let min t =
+  Map.min_binding t |> snd
+  |> Map.fold (fun _ -> min) t
+
+let max t =
+  Map.fold (fun k -> max) t 0.
 
 let sum t =
   Map.fold (fun _ -> (+.)) t 0.
@@ -60,11 +64,6 @@ let of_units u t =
 let translate ki ko n t =
   Fn.mul t ki n |> Fn.count t ko
 
-let untouchable atk dfn t =
-  let pwr = max_base atk t in
-  let f k _ s = if Fn.can_hit t k pwr then s else Set.add k s in
-  Map.fold f dfn Set.empty
-
 let add kind pwr t =
   let p = Fn.find kind t +. pwr in
   Map.add kind p t
@@ -74,6 +73,9 @@ let ceil base t =
 
 let ceil_count base t =
   ceil base t |> count base
+
+let map_units u t =
+  Map.mapi (fun k _ -> Fn.find k t) u
 
 let modulo base t =
   Map.mapi (Fn.modulo base) t
@@ -94,3 +96,8 @@ let base bonus =
   |> apply Bonus.Barrage Units.Harpy ~-.1.
   |> apply Bonus.Clan Units.Ballista 1.
   |> apply Bonus.Training Units.Ranger 1.
+
+let untouchable atk dfn t =
+  let pwr = map_units atk t |> max in
+  let f k _ s = if Fn.can_hit t k pwr then s else Set.add k s in
+  Map.fold f dfn Set.empty

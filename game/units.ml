@@ -253,7 +253,7 @@ module Fill (Dice : Dice.S) = struct
     type map = Type.t Map.t
     type step = Cap.t * Type.t
     let choose = Roll.kind
-    let roll kind cap t =
+    let roll cap kind t =
       let n = Map.find kind t |> min cap |> Dice.roll in
       n, n
   end)

@@ -83,11 +83,11 @@ module Damage (Dice : Dice.S) = struct
     type nonrec acc = acc
     type map = Type.t Map.t
     type step = acc * Cap.t * Type.t
-    let choose input =
+    let choose acc cap input =
       let f k _ = Units.Base.hit_chance k in
       let probs = Map.mapi f input in
-      Power.sum probs |> Dice.rollf |> pick probs
-    let roll acc kind cap input =
+      Some (Power.sum probs |> Dice.rollf |> pick probs)
+    let roll acc cap kind input =
       ratio cap |> picked kind input acc |> handle kind acc
   end)
 
@@ -108,9 +108,14 @@ module Fill (Dice : Dice.S) = struct
     type acc = Power.t
     type map = Type.t Map.t
     type step = acc * Cap.t * Type.t
-    let choose = Roll.kind
-    let roll base kind cap t =
-      let p = Map.find kind t |> min (Power.Fn.count base kind cap) |> Dice.roll in
+    let choose base cap input =
+      let p = Power.map_units input base |> Power.min in
+      if p > cap then None else Some (Roll.kind input)
+    let roll base cap kind t =
+      let p = Map.find kind t
+        |> min (Power.Fn.count base kind cap)
+        |> Dice.roll
+      in
       base, Power.Fn.mul base kind p, p
   end)
 
