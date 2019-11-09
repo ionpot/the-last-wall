@@ -26,7 +26,7 @@ module type OpsAcc = sig
   include OpsBase
   type acc
   type step = acc * Cap.t * Type.t
-  val choose : map -> Map.key
+  val choose : acc -> Cap.t -> map -> Map.key option
   val roll : acc -> Map.key -> Cap.t -> map -> step
 end
 
