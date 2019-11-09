@@ -103,7 +103,7 @@ let cyclops (n, units, _) =
   sprintf "%d cyclops kills %s" n (units2str units |> if_empty "nothing")
   |> Tty.writeln
 
-let disease (died, _, ldr_died) ldr =
+let disease (died, ldr_died) ldr =
   Tty.pairln "died" (units2str died |> str2none);
   if ldr_died then Leader.died ldr
 
