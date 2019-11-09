@@ -79,12 +79,12 @@ end
 
 module Disease = struct
   type leader_died = bool
-  type t = Units.t * Units.t * leader_died
+  type t = Units.t * leader_died
   let casualty = 0.1
   module Apply (S : State.S) = struct
     module LdrDied = Event.LdrDied(S)
-    let value (_, rem, ldr_died) =
-      S.Units.set rem;
+    let value (died, ldr_died) =
+      S.Units.map (Units.reduce died);
       if ldr_died then LdrDied.value 1
   end
   module Check (S : State.S) = struct
@@ -95,8 +95,8 @@ module Disease = struct
     module Roll = Leader.Roll(S.Dice)
     let units = S.Units.return Units.(filter Attr.is_infectable)
     let loss = Units.count_all units |> Number.portion casualty
-    let died, rem = Fill.from loss units
-    let value = died, rem, S.Leader.return Roll.death
+    let died, _ = Fill.from loss units
+    let value = died, S.Leader.return Roll.death
   end
 end
 
