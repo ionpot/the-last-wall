@@ -19,7 +19,7 @@ module type Ops = sig
   include OpsBase
   type step = Cap.t * Type.t
   val choose : map -> Map.key
-  val roll : Map.key -> Cap.t -> map -> step
+  val roll : Cap.t -> Map.key -> map -> step
 end
 
 module type OpsAcc = sig
@@ -27,7 +27,7 @@ module type OpsAcc = sig
   type acc
   type step = acc * Cap.t * Type.t
   val choose : acc -> Cap.t -> map -> Map.key option
-  val roll : acc -> Map.key -> Cap.t -> map -> step
+  val roll : acc -> Cap.t -> Map.key -> map -> step
 end
 
 module With (S : Ops) : sig
