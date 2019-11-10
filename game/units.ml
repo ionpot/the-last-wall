@@ -12,7 +12,7 @@ type report = (kind * Defs.count) list
 type sum_report = (Defs.count * Set.t)
 
 let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops]
-let starve_order = [Men; Dervish; Berserker; Cavalry; Ranger; Templar; Merc; Ballista; Knight]
+let starve_order = [Men; Dervish; Berserker; Cavalry; Veteran; Ranger; Templar; Merc; Ballista; Knight]
 
 module Attr = struct
   type t = kind -> bool
