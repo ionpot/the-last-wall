@@ -1,4 +1,4 @@
-type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Harpy | Knight | Men | Merc | Orc | Ranger | Skeleton | Templar | Veteran
+type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harpy | Knight | Men | Merc | Orc | Ranger | Skeleton | Templar | Veteran
 
 module Map : Map.S with type key = kind
 module Set : Set.S with type elt = kind
@@ -12,6 +12,7 @@ module Attr : sig
   type t = kind -> bool
   val can_barrage : t
   val can_build : t
+  val can_fear : t
   val can_heal : t
   val can_reflect : t
   val is_cavalry : t

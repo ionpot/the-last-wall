@@ -29,3 +29,7 @@ val from_units : Units.t -> t -> t
 val map_units : Units.t -> t -> t
 val modulo : t -> t -> t
 val sub : Units.kind -> Defs.power -> t -> t
+
+module Roll : Dice.S -> sig
+  val fear : Units.t -> t -> Defs.power
+end

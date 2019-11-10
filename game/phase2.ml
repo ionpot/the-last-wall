@@ -54,6 +54,7 @@ module Output = struct
     | Defeat
     | Disease of Cond.Disease.t
     | Facilities of Direct.Facilities.t
+    | FearEnd of Direct.FearEnd.t
     | Mishap of Direct.Mishap.t
     | Starvation of Direct.Starvation.t
     | Support of Direct.NationSupport.t
@@ -131,6 +132,8 @@ module Convert = struct
           let make x = Output.Cavalry x end)
       | Steps.Facilities -> (module struct module Event = Direct.Facilities
           let make x = Output.Facilities x end)
+      | Steps.FearEnd -> (module struct module Event = Direct.FearEnd
+          let make x = Output.FearEnd x end)
       | Steps.Mishap -> (module struct module Event = Direct.Mishap
           let make x = Output.Mishap x end)
       | Steps.Starvation -> (module struct module Event = Direct.Starvation

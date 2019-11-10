@@ -1,4 +1,4 @@
-type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Harpy | Knight | Men | Merc | Orc | Ranger | Skeleton | Templar | Veteran
+type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harpy | Knight | Men | Merc | Orc | Ranger | Skeleton | Templar | Veteran
 
 module Kind = struct
   type t = kind
@@ -11,7 +11,7 @@ module Set = Set.Make(Kind)
 type report = (kind * Defs.count) list
 type sum_report = (Defs.count * Set.t)
 
-let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops]
+let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops; Dullahan]
 let starve_order = [Men; Dervish; Berserker; Cavalry; Veteran; Ranger; Templar; Merc; Ballista; Knight]
 
 module Attr = struct
@@ -22,6 +22,7 @@ module Attr = struct
   let can_build = function
     | Men | Dervish | Veteran -> true
     | _ -> false
+  let can_fear = (=) Dullahan
   let can_heal = (=) Templar
   let can_reflect = (=) Berserker
   let is_cavalry = function
@@ -59,6 +60,7 @@ module Base = struct
     | _ -> 0.05
 
   let dr = function
+    | Dullahan -> 0.01
     | Knight -> 0.004
     | Cavalry | Harpy -> 0.002
     | _ -> 0.
@@ -72,6 +74,7 @@ module Base = struct
     | _ -> 1.
 
   let power = function
+    | Dullahan -> 7.
     | Cyclops -> 5.
     | Harpy | Knight -> 4.
     | Ballista | Berserker | Cavalry | Demon | Merc | Ranger | Templar | Veteran -> 2.

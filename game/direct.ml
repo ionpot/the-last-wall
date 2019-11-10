@@ -115,6 +115,36 @@ module Facilities = struct
   end
 end
 
+module Fear = struct
+  type t = Units.t * Units.t
+  module Apply (S : State.S) = struct
+    let value (fled, rem) =
+      S.Feared.set fled;
+      S.Units.set rem
+  end
+  module Make (S : State.S) = struct
+    module Fill = Dist.Fill(S.Dice)
+    module Roll = Power.Roll(S.Dice)
+    let e = S.Enemy.return Units.(filter Attr.can_fear)
+    let base = S.Bonus.return Power.base
+    let cap = Roll.fear e base
+    let units = S.Units.return Units.(discard Attr.is_siege)
+    let value = Fill.from cap base units
+  end
+end
+
+module FearEnd = struct
+  type t = Units.t
+  module Apply (S : State.S) = struct
+    let value t =
+      S.Units.map (Units.combine t);
+      S.Feared.clear ()
+  end
+  module Make (S : State.S) = struct
+    let value = S.Feared.get ()
+  end
+end
+
 module Mishap = struct
   type t = Mishap.t
   module Apply (S : State.S) = struct
