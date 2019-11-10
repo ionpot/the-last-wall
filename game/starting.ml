@@ -18,7 +18,7 @@ end
 let building_of = function
   | Leader.Aristocrat -> Build.Stable
   | Leader.Engineer -> Build.Engrs
-  | Leader.Merchant -> Build.trade_default
+  | Leader.Merchant -> Build.Trade
 
 let units_of = function
   | Leader.Aristocrat -> Units.(make 10 Cavalry)

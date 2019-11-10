@@ -1,4 +1,4 @@
-type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.kind option
+type kind = Arena | Barracks | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade
 
 module Map = Map.Make(struct type t = kind let compare = compare end)
 
@@ -18,14 +18,14 @@ module Bonus = struct
     if cond then to_cost t map else map
 end
 
-let trade_default = Trade None
 let avlb_default =
-  [Arena; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; trade_default]
+  [Arena; Barracks; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; Trade]
 
 let base_cost =
   let open Resource in
   function
   | Arena -> Manpwr 43, Supply 49
+  | Barracks -> Manpwr 65, Supply 70
   | Engrs -> Manpwr 60, Supply 62
   | Fort -> Manpwr 124, Supply 136
   | Foundry -> Manpwr 28, Supply 30
@@ -37,7 +37,7 @@ let base_cost =
   | Stable -> Manpwr 49, Supply 54
   | Tavern -> Manpwr 39, Supply 41
   | Temple -> Manpwr 61, Supply 63
-  | Trade _ -> Manpwr 51, Supply 49
+  | Trade -> Manpwr 51, Supply 49
 
 let base_cost_of kind =
   let a, b = base_cost kind in
@@ -94,9 +94,6 @@ module Built = struct
   let empty : t = []
 
   let has = List.mem
-
-  let set_trade trade t =
-    List.map (fun k -> if k = trade_default then trade else k) t
 end
 
 module Queue = struct
@@ -165,11 +162,6 @@ module Ready = struct
 
   let has = Map.mem
 
-  let set_trade trade t =
-    if Map.mem trade_default t
-    then Map.remove trade_default t |> add trade
-    else t
-
   let sum t =
     Map.fold (fun _ -> (+)) t 0
 
@@ -206,14 +198,14 @@ let count kind t =
 let arena_cap t =
   count Arena t * 10
 
-let has_trade nation t =
-  Ready.has (Trade (Some nation)) t.ready
-
 let is_built kind t =
   Built.has kind t.built
 
 let is_ready kind t =
   Ready.has kind t.ready
+
+let is_complete kind t =
+  is_built kind t || is_ready kind t
 
 let ballista_cap t =
   if is_ready Engrs t then 5 else 0
@@ -228,10 +220,6 @@ let need_manp t =
 
 let need_supp t =
   Queue.sum_fn Resource.supp_of t.queue
-
-let need_trade t =
-  Built.has trade_default t.built
-  || Ready.has trade_default t.ready
 
 let queue t = t.queue
 
@@ -271,12 +259,6 @@ let set_ready kind t =
   }
 
 let set_ready_ls = fn_ls set_ready
-
-let set_trade nation_opt t =
-  let trade = Trade nation_opt in
-  { t with built = Built.set_trade trade t.built
-  ; ready = Ready.set_trade trade t.ready
-  }
 
 let start kinds costs t =
   { t with avlb = Avlb.rm_ls kinds t.avlb

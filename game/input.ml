@@ -21,6 +21,22 @@ module Ballista = struct
   end
 end
 
+module Barracks = struct
+  type t = Nation.kind option
+  module Apply (S : State.S) = struct
+    let value choice =
+      S.Nation.map (Nation.set_barracks choice)
+  end
+  module Check (S : State.S) = struct
+    let value =
+      S.Build.check Build.(is_complete Barracks)
+      && S.Nation.check Nation.no_barracks
+  end
+  module Make (S : State.S) = struct
+    let value = None
+  end
+end
+
 module BarrageTrain = struct
   type cost = Defs.supply
   type t = bool * cost
@@ -260,14 +276,32 @@ module Trade = struct
           |> S.Nation.map
       | None -> ()
     let value trade =
-      S.Build.map (Build.set_trade trade);
+      S.Nation.map (Nation.set_trade trade);
       if S.Turn.is 0 then set_chance trade
   end
   module Check (S : State.S) = struct
-    let value = S.Build.check Build.need_trade
+    let value =
+      S.Build.check Build.(is_complete Trade)
+      && S.Nation.check Nation.no_trade
   end
   module Make (S : State.S) = struct
     let value = None
+  end
+end
+
+module Veteran = struct
+  type t = Defs.count
+  let kind = Units.Veteran
+  module Apply (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value = Recruit.promote kind
+  end
+  module Check (S : State.S) = struct
+    let value = S.Build.check Build.(is_ready Barracks)
+  end
+  module Make (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value = Recruit.promotable kind
   end
 end
 

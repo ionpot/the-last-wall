@@ -7,12 +7,14 @@ module Make (S : Game.State.S) = struct
     function
       | Ballista (avlb, have) ->
           Ballista (check (Prompt.ballista have) avlb, have)
+      | Barracks _ -> Barracks (Prompt.barracks ())
       | BarrageTrain (ok, cost) ->
           BarrageTrain (Prompt.barrage_train ok cost, cost)
       | Berserker avlb -> Berserker (check Prompt.berserker avlb)
       | Build avlb ->
-          S.Build.return Print.Build.all;
-          Build (Prompt.Build.from avlb)
+          let nat = S.Nation.get () in
+          S.Build.return (Print.Build.all nat);
+          Build (Prompt.Build.from nat avlb)
       | Dervish count -> Dervish (check Prompt.dervish count)
       | LeaderNew x -> LeaderNew (Prompt.Leader.pair x)
       | Knight count -> Knight (check Prompt.knight count)
@@ -24,6 +26,7 @@ module Make (S : Game.State.S) = struct
       | Sodistan sup -> Sodistan (check Prompt.sodistan sup)
       | Templar count -> Templar (check Prompt.templar count)
       | Trade _ -> Trade (Prompt.trade ())
+      | Veteran count -> Veteran (check Prompt.veteran count)
       | Volunteers count -> Volunteers (check Prompt.volunteers count)
 
   let output =
@@ -46,7 +49,9 @@ module Make (S : Game.State.S) = struct
       | Cavalry c -> ()
       | Defeat -> Tty.writeln "defeat"
       | Disease x -> Print.disease x |> S.Leader.return
-      | Facilities x -> Print.facilities x
+      | Facilities x ->
+          let nat = S.Nation.get () in
+          Print.facilities nat x
       | Mishap x -> Print.mishap x
       | Starvation x -> Print.starvation x
       | Support s -> Print.support s
@@ -68,6 +73,7 @@ module After (S : Status.S) = struct
       | Ranger n -> if n > 0 then begin S.ranger (); S.res () end
       | Sodistan n -> if n > 0 then S.res ()
       | Templar n -> if n > 0 then begin S.templar (); S.res () end
+      | Veteran n
       | Volunteers n -> if n > 0 then S.res ()
       | _ -> ()
 

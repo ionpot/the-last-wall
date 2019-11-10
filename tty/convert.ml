@@ -87,12 +87,16 @@ let nation2str = function
 let trade2str nation =
   sprintf "trading with %s" (nation2str nation)
 
-let trade_suffix = function
+let nation_suffix = function
   | Some nation -> sprintf " (%s)" (nation2str nation)
   | None -> ""
 
-let bld2str = function
+let bld2str nat = function
   | Build.Arena -> "arena"
+  | Build.Barracks ->
+      Nation.barracks nat
+      |> nation_suffix
+      |> sprintf "barracks%s"
   | Build.Engrs -> "engineers guild"
   | Build.Fort -> "fort"
   | Build.Foundry -> "iron foundry"
@@ -105,32 +109,34 @@ let bld2str = function
   | Build.Stable -> "stable"
   | Build.Tavern -> "tavern"
   | Build.Temple -> "temple"
-  | Build.Trade trade ->
-      sprintf "trade guild%s" (trade_suffix trade)
+  | Build.Trade ->
+      Nation.trade nat
+      |> nation_suffix
+      |> sprintf "trade guild%s"
 
-let bld_n2str (kind, n) =
-  let str = bld2str kind in
+let bld_n2str nat (kind, n) =
+  let str = bld2str nat kind in
   if n < 1 then ""
   else if n = 1 then str
   else sprintf "%s (%d)" str n
 
-let bld_pairs2str ls =
-  List.map bld_n2str ls
+let bld_pairs2str nat ls =
+  List.map (bld_n2str nat) ls
   |> sort_str
   |> commas
 
-let bld_ls2str ls =
+let bld_ls2str nat ls =
   Listx.group ls
-  |> bld_pairs2str
+  |> bld_pairs2str nat
 
-let bld_map2str map =
+let bld_map2str nat map =
   Build.Map.bindings map
-  |> bld_pairs2str
+  |> bld_pairs2str nat
 
-let bld_q2str ls =
+let bld_q2str nat ls =
   ls
   |> List.rev_map (fun (kind, cost) ->
-      sprintf "%s (%s)" (bld2str kind) (res2str cost))
+      sprintf "%s (%s)" (bld2str nat kind) (res2str cost))
   |> commas
 
 let facs2bool map =
@@ -139,9 +145,9 @@ let facs2bool map =
 let facs2clean map =
   Build.Map.filter (fun _ -> (<>) Resource.empty) map
 
-let facs2str map =
+let facs2str nat map =
   let f k r acc =
-    sprintf "%s (%s)" (bld2str k) (res2str r) :: acc
+    sprintf "%s (%s)" (bld2str nat k) (res2str r) :: acc
   in
   Build.Map.fold f map []
   |> sort_str |> commas
@@ -161,7 +167,7 @@ let deity_text = function
   | Deity.Sekrefir -> "leader of gods, envoy of order and justice"
 
 let unit_order =
-  Units.([Men; Merc; Berserker; Cavalry; Knight; Ranger; Templar; Dervish; Ballista; Skeleton; Orc; Demon; Harpy; Cyclops])
+  Units.([Men; Veteran; Merc; Berserker; Cavalry; Knight; Ranger; Templar; Dervish; Ballista; Skeleton; Orc; Demon; Harpy; Cyclops])
 
 let unit_cmp = Listx.compare unit_order
 
@@ -180,6 +186,7 @@ let unit2str = function
   | Units.Ranger -> "ranger"
   | Units.Skeleton -> "skeleton"
   | Units.Templar -> "templar"
+  | Units.Veteran -> "veteran"
 
 let party2str (kind, n) =
   if n > 0
