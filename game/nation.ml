@@ -46,13 +46,15 @@ module Chance = struct
 end
 
 type t =
-  { chances : Chance.t
+  { barracks : kind option
+  ; chances : Chance.t
   ; chosen : Set.t
   ; support : support
   }
 
 let empty =
-  { chances = Chance.base_map
+  { barracks = None
+  ; chances = Chance.base_map
   ; chosen = Set.empty
   ; support = Map.empty
   }
@@ -63,6 +65,12 @@ let chosen t = t.chosen
 let has_aided k t =
   Map.mem k t.support
 
+let has_barracks k t =
+  t.barracks = Some k
+
+let no_barracks t =
+  t.barracks = None
+
 let mnp_from k t =
   if has_aided k t
   then Map.find k t.support |> Resource.manp_of
@@ -72,6 +80,9 @@ let sup_from k t =
   if has_aided k t
   then Map.find k t.support |> Resource.supp_of
   else 0
+
+let set_barracks barracks t =
+  { t with barracks }
 
 let set_chosen chosen t =
   { t with chosen }

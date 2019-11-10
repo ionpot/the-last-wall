@@ -32,9 +32,12 @@ val empty : t
 val chances : t -> Chance.t
 val chosen : t -> Set.t
 val has_aided : kind -> t -> bool
+val has_barracks : kind -> t -> bool
+val no_barracks : t -> bool
 val mnp_from : kind -> t -> manpower
 val sup_from : kind -> t -> supply
 
+val set_barracks : kind option -> t -> t
 val map_chances : (Chance.t -> Chance.t) -> t -> t
 val set_chosen : Set.t -> t -> t
 val set_support : support -> t -> t

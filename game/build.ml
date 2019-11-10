@@ -1,4 +1,4 @@
-type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.kind option
+type kind = Arena | Barracks | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.kind option
 
 module Map = Map.Make(struct type t = kind let compare = compare end)
 
@@ -20,12 +20,13 @@ end
 
 let trade_default = Trade None
 let avlb_default =
-  [Arena; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; trade_default]
+  [Arena; Barracks; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; trade_default]
 
 let base_cost =
   let open Resource in
   function
   | Arena -> Manpwr 43, Supply 49
+  | Barracks -> Manpwr 65, Supply 70
   | Engrs -> Manpwr 60, Supply 62
   | Fort -> Manpwr 124, Supply 136
   | Foundry -> Manpwr 28, Supply 30
@@ -214,6 +215,9 @@ let is_built kind t =
 
 let is_ready kind t =
   Ready.has kind t.ready
+
+let is_complete kind t =
+  is_built kind t || is_ready kind t
 
 let ballista_cap t =
   if is_ready Engrs t then 5 else 0

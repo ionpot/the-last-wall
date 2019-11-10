@@ -1,6 +1,6 @@
 open Defs
 
-type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.kind option
+type kind = Arena | Barracks | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.kind option
 
 module Map : Map.S with type key = kind
 
@@ -51,6 +51,7 @@ val cost_map : t -> cost_map
 val count : kind -> t -> count
 val has_trade : Nation.kind -> t -> bool
 val is_built : kind -> t -> bool
+val is_complete : kind -> t -> bool
 val is_ready : kind -> t -> bool
 val mausoleums : t -> count
 val need_manp : t -> manpower

@@ -5,6 +5,7 @@ module Input = struct
 
   type event =
     | Ballista of Event.Ballista.t
+    | Barracks of Event.Barracks.t
     | BarrageTrain of Event.BarrageTrain.t
     | Berserker of Event.Berserker.t
     | Build of Event.BuildAvlb.t
@@ -17,12 +18,14 @@ module Input = struct
     | Sodistan of Event.Sodistan.t
     | Templar of Event.Templar.t
     | Trade of Event.Trade.t
+    | Veteran of Event.Veteran.t
     | Volunteers of Event.Volunteers.t
 
   module Apply (State : State.S) = struct
     module Apply = Phase.Apply(State)
     let event = function
       | Ballista x -> Apply.value x (module Event.Ballista)
+      | Barracks x -> Apply.value x (module Event.Barracks)
       | BarrageTrain x -> Apply.value x (module Event.BarrageTrain)
       | Berserker x -> Apply.value x (module Event.Berserker)
       | Build x -> Apply.value x (module Event.BuildAvlb)
@@ -35,6 +38,7 @@ module Input = struct
       | Sodistan x -> Apply.value x (module Event.Sodistan)
       | Templar x -> Apply.value x (module Event.Templar)
       | Trade x -> Apply.value x (module Event.Trade)
+      | Veteran x -> Apply.value x (module Event.Veteran)
       | Volunteers x -> Apply.value x (module Event.Volunteers)
   end
 end
@@ -82,6 +86,8 @@ module Convert = struct
           let make x = Input.Sodistan x end)
 
     let cond : Convert.cond = function
+      | Steps.Barracks -> (module struct module Event = Event.Barracks
+          let make x = Input.Barracks x end)
       | Steps.LeaderNew -> (module struct module Event = Event.LeaderNew
           let make x = Input.LeaderNew x end)
       | Steps.Mercs -> (module struct module Event = Event.Mercs
@@ -92,6 +98,8 @@ module Convert = struct
           let make x = Input.Templar x end)
       | Steps.Trade -> (module struct module Event = Event.Trade
           let make x = Input.Trade x end)
+      | Steps.Veteran -> (module struct module Event = Event.Veteran
+          let make x = Input.Veteran x end)
       | Steps.Volunteers -> (module struct module Event = Event.Volunteers
           let make x = Input.Volunteers x end)
   end

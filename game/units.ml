@@ -1,4 +1,4 @@
-type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Harpy | Knight | Men | Merc | Orc | Ranger | Skeleton | Templar
+type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Harpy | Knight | Men | Merc | Orc | Ranger | Skeleton | Templar | Veteran
 
 module Kind = struct
   type t = kind
@@ -17,10 +17,10 @@ let starve_order = [Men; Dervish; Berserker; Cavalry; Ranger; Templar; Merc; Bal
 module Attr = struct
   type t = kind -> bool
   let can_barrage = function
-    | Men | Merc | Ranger -> true
+    | Men | Merc | Ranger | Veteran -> true
     | _ -> false
   let can_build = function
-    | Men | Dervish -> true
+    | Men | Dervish | Veteran -> true
     | _ -> false
   let can_heal = (=) Templar
   let can_reflect = (=) Berserker
@@ -31,7 +31,7 @@ module Attr = struct
     | Dervish | Ranger | Templar -> true
     | _ -> false
   let is_infantry = function
-    | Berserker | Men | Merc | Dervish | Ranger | Templar -> true
+    | Berserker | Men | Merc | Dervish | Ranger | Templar | Veteran -> true
     | _ -> false
   let is_infectable = (<>) Ballista
   let is_revivable = is_infantry
@@ -74,7 +74,7 @@ module Base = struct
   let power = function
     | Cyclops -> 5.
     | Harpy | Knight -> 4.
-    | Ballista | Berserker | Cavalry | Demon | Merc | Ranger | Templar -> 2.
+    | Ballista | Berserker | Cavalry | Demon | Merc | Ranger | Templar | Veteran -> 2.
     | Dervish | Men | Orc -> 1.
     | Skeleton -> 0.5
 
@@ -88,7 +88,7 @@ module Base = struct
 
   let upkeep_cost = function
     | Knight -> 3
-    | Ballista | Merc -> 2
+    | Ballista | Merc | Veteran -> 2
     | _ -> 1
 end
 
@@ -156,6 +156,7 @@ let promotion_cost = function
   | Knight -> make 1 Cavalry
   | Ranger
   | Templar -> make 1 Dervish
+  | Veteran -> make 1 Men
   | _ -> empty
 
 let affordable kind cap t =
