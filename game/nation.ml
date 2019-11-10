@@ -61,8 +61,10 @@ let empty =
   ; trade = None
   }
 
+let barracks t = t.barracks
 let chances t = t.chances
 let chosen t = t.chosen
+let trade t = t.trade
 
 let has_aided k t =
   Map.mem k t.support
