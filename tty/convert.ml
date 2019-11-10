@@ -178,6 +178,7 @@ let unit2str = function
   | Units.Cyclops -> "cyclops"
   | Units.Demon -> "demon"
   | Units.Dervish -> "dervish"
+  | Units.Dullahan -> "dullahan"
   | Units.Harpy -> "harpy"
   | Units.Knight -> "knight"
   | Units.Men -> "men"

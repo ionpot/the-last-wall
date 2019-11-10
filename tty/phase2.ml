@@ -52,6 +52,7 @@ module Make (S : Game.State.S) = struct
       | Facilities x ->
           let nat = S.Nation.get () in
           Print.facilities nat x
+      | FearEnd x -> Print.fear_end x
       | Mishap x -> Print.mishap x
       | Starvation x -> Print.starvation x
       | Support s -> Print.support s
@@ -84,6 +85,7 @@ module After (S : Status.S) = struct
       | BuildSupply s -> if s > 0 then S.res ()
       | Cavalry n -> if n > 0 then begin S.cavalry n; S.res () end
       | Facilities x -> S.facilities x
+      | FearEnd x -> if not (Game.Units.is_empty x) then S.res ()
       | Starvation x -> if Convert.starve2bool x then S.res ()
       | Support _
       | Upkeep _ -> S.res ()

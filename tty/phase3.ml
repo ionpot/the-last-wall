@@ -26,6 +26,7 @@ module Make (S : Game.State.S) = struct
           |> S.Leader.return
       | Cyclops x -> Print.cyclops x
       | Defeat -> Tty.writeln "defeat"
+      | Fear x -> Print.fear x
       | LevelUp -> S.Leader.return Print.Leader.lvup
       | NoAttack -> ()
       | NoEnemies -> Tty.writeln "no enemies left"
@@ -47,6 +48,7 @@ module After (S : Status.S) = struct
       | Ballista (n, _, _) -> if n > 0 then S.enemies ()
       | Barraged _ -> S.enemies ()
       | Cyclops (n, _, _) -> if n > 0 then S.units ()
+      | Fear (x, _) -> if not (Game.Units.is_empty x) then S.units ()
       | Smite _ -> S.enemies ()
       | Victory -> S.units ()
       | _ -> ()
