@@ -7,6 +7,7 @@ module Make (S : Game.State.S) = struct
     function
       | Ballista (avlb, have) ->
           Ballista (check (Prompt.ballista have) avlb, have)
+      | Barracks _ -> Barracks (Prompt.barracks ())
       | BarrageTrain (ok, cost) ->
           BarrageTrain (Prompt.barrage_train ok cost, cost)
       | Berserker avlb -> Berserker (check Prompt.berserker avlb)
@@ -25,6 +26,7 @@ module Make (S : Game.State.S) = struct
       | Sodistan sup -> Sodistan (check Prompt.sodistan sup)
       | Templar count -> Templar (check Prompt.templar count)
       | Trade _ -> Trade (Prompt.trade ())
+      | Veteran count -> Veteran (check Prompt.veteran count)
       | Volunteers count -> Volunteers (check Prompt.volunteers count)
 
   let output =
@@ -71,6 +73,7 @@ module After (S : Status.S) = struct
       | Ranger n -> if n > 0 then begin S.ranger (); S.res () end
       | Sodistan n -> if n > 0 then S.res ()
       | Templar n -> if n > 0 then begin S.templar (); S.res () end
+      | Veteran n
       | Volunteers n -> if n > 0 then S.res ()
       | _ -> ()
 

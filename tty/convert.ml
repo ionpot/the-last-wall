@@ -93,6 +93,10 @@ let nation_suffix = function
 
 let bld2str nat = function
   | Build.Arena -> "arena"
+  | Build.Barracks ->
+      Nation.barracks nat
+      |> nation_suffix
+      |> sprintf "barracks%s"
   | Build.Engrs -> "engineers guild"
   | Build.Fort -> "fort"
   | Build.Foundry -> "iron foundry"
@@ -163,7 +167,7 @@ let deity_text = function
   | Deity.Sekrefir -> "leader of gods, envoy of order and justice"
 
 let unit_order =
-  Units.([Men; Merc; Berserker; Cavalry; Knight; Ranger; Templar; Dervish; Ballista; Skeleton; Orc; Demon; Harpy; Cyclops])
+  Units.([Men; Veteran; Merc; Berserker; Cavalry; Knight; Ranger; Templar; Dervish; Ballista; Skeleton; Orc; Demon; Harpy; Cyclops])
 
 let unit_cmp = Listx.compare unit_order
 
@@ -182,6 +186,7 @@ let unit2str = function
   | Units.Ranger -> "ranger"
   | Units.Skeleton -> "skeleton"
   | Units.Templar -> "templar"
+  | Units.Veteran -> "veteran"
 
 let party2str (kind, n) =
   if n > 0

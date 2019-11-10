@@ -44,6 +44,11 @@ let ballista n avlb =
   |> Tty.writeln;
   Tty.prompt_amount avlb
 
+let barracks () =
+  let chosen nat = sprintf "%s chosen for barracks" (nation2str nat) in
+  one_nation "barracks nation"
+  |> (fun nat -> Tty.writeln (chosen nat); Some nat)
+
 let barrage status =
   if status = Game.Barrage.Available
   then Tty.prompt_yn "arrow barrage? y/n"
@@ -187,6 +192,10 @@ let templar cap =
 let trade () =
   one_nation "trade guild nation"
   |> (fun nat -> Tty.writeln (trade2str nat); Some nat)
+
+let veteran cap =
+  Tty.writeln (sprintf "can promote %d men to veteran" cap);
+  Tty.prompt_amount cap
 
 let volunteers cap =
   Tty.writeln (sprintf "%d volunteers want to join" cap);
