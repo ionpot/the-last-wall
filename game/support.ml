@@ -16,7 +16,7 @@ module Check (S : State.S) = struct
   let has_barracks kind =
     S.Nation.check Nation.(has_barracks kind)
   let has_trade kind =
-    S.Build.check Build.(has_trade kind)
+    S.Nation.check Nation.(has_trade kind)
   let cap_of kind =
     if has_trade kind
     then Chance.cap_trading

@@ -50,6 +50,7 @@ type t =
   ; chances : Chance.t
   ; chosen : Set.t
   ; support : support
+  ; trade : kind option
   }
 
 let empty =
@@ -57,6 +58,7 @@ let empty =
   ; chances = Chance.base_map
   ; chosen = Set.empty
   ; support = Map.empty
+  ; trade = None
   }
 
 let chances t = t.chances
@@ -68,8 +70,14 @@ let has_aided k t =
 let has_barracks k t =
   t.barracks = Some k
 
+let has_trade k t =
+  t.trade = Some k
+
 let no_barracks t =
   t.barracks = None
+
+let no_trade t =
+  t.trade = None
 
 let mnp_from k t =
   if has_aided k t
@@ -81,14 +89,17 @@ let sup_from k t =
   then Map.find k t.support |> Resource.supp_of
   else 0
 
-let set_barracks barracks t =
-  { t with barracks }
-
 let set_chosen chosen t =
   { t with chosen }
+
+let set_barracks barracks t =
+  { t with barracks }
 
 let map_chances f t =
   { t with chances = f t.chances }
 
 let set_support m t =
   { t with support = Map.filter (fun _ -> (<>) Resource.empty) m }
+
+let set_trade trade t =
+  { t with trade }

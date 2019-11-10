@@ -276,11 +276,13 @@ module Trade = struct
           |> S.Nation.map
       | None -> ()
     let value trade =
-      S.Build.map (Build.set_trade trade);
+      S.Nation.map (Nation.set_trade trade);
       if S.Turn.is 0 then set_chance trade
   end
   module Check (S : State.S) = struct
-    let value = S.Build.check Build.need_trade
+    let value =
+      S.Build.check Build.(is_complete Trade)
+      && S.Nation.check Nation.no_trade
   end
   module Make (S : State.S) = struct
     let value = None
