@@ -1,13 +1,11 @@
 open Defs
 
-type kind = Arena | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade of Nation.kind option
+type kind = Arena | Barracks | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade
 
 module Map : Map.S with type key = kind
 
 type cost = Resource.t
 type cost_map = cost Map.t
-
-val trade_default : kind
 
 module Avlb : sig
   module Set : Set.S with type elt = kind
@@ -49,13 +47,12 @@ val ballista_cap : t -> count
 val built : t -> Built.t
 val cost_map : t -> cost_map
 val count : kind -> t -> count
-val has_trade : Nation.kind -> t -> bool
 val is_built : kind -> t -> bool
+val is_complete : kind -> t -> bool
 val is_ready : kind -> t -> bool
 val mausoleums : t -> count
 val need_manp : t -> manpower
 val need_supp : t -> supply
-val need_trade : t -> bool
 val queue : t -> Queue.t
 val ready : t -> Ready.t
 val stable_cap : t -> count
@@ -67,7 +64,6 @@ val manp : manpower -> manpower -> t -> t
 val raze : kind -> t -> t
 val set_ready : kind -> t -> t
 val set_ready_ls : kind list -> t -> t
-val set_trade : Nation.kind option -> t -> t
 val start : kind list -> cost_map -> t -> t
 val supp : supply -> supply -> t -> t
 val update : status -> t -> t

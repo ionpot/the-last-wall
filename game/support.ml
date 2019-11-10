@@ -13,8 +13,10 @@ let sum t =
 
 module Check (S : State.S) = struct
   let winter = S.Month.check Month.is_winter
+  let has_barracks kind =
+    S.Nation.check Nation.(has_barracks kind)
   let has_trade kind =
-    S.Build.check Build.(has_trade kind)
+    S.Nation.check Nation.(has_trade kind)
   let cap_of kind =
     if has_trade kind
     then Chance.cap_trading
@@ -64,13 +66,15 @@ module Roll (S : State.S) = struct
   module Check = Check(S)
 
   let bonuses kind res =
+    let barracks = Check.has_barracks kind in
     let trade = Check.has_trade kind in
     let hekatium = kind = Nation.Hekatium in
+    let mnp = Number.if_ok 10 barracks in
     let sup = Number.if_ok 10 trade in
     Resource.bonus_if
       (trade && hekatium)
       Resource.Bonus.(Add (Both 0.1))
-      Resource.(res ++ of_supp sup)
+      Resource.(res <+ Supply sup <+ Manpwr mnp)
 
   let roll = S.Dice.range
 
