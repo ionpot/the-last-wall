@@ -10,6 +10,7 @@ module type S = sig
   module Dice : Dice.S
   module Ended : Value.Bit
   module Enemy : Value.S with type t = Units.t
+  module Feared : Value.S with type t = Units.t
   module Harpy : Value.Float
   module Leader : Value.S with type t = Leader.t
   module Mishap : Value.S with type t = Mishap.t
@@ -35,6 +36,7 @@ module Make (D : Dice.From) : S = struct
   module Dice = Dice.From(D)
   module Ended = Value.Bit(Value.False)
   module Enemy = Value.From(Units)
+  module Feared = Value.From(Units)
   module Harpy = Value.Float(Value.ZeroF)
   module Leader = Value.From(Leader)
   module Mishap = Value.From(Mishap)

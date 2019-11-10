@@ -22,6 +22,7 @@ module Output = struct
     | Combat of Direct.Combat.t
     | Cyclops of Cond.Cyclops.t
     | Defeat
+    | Fear of Direct.Fear.t
     | LevelUp
     | NoAttack
     | NoEnemies
@@ -76,6 +77,8 @@ module Convert = struct
     let direct : Convert.direct = function
       | Steps.Combat -> (module struct module Event = Direct.Combat
           let make x = Output.Combat x end)
+      | Steps.Fear -> (module struct module Event = Direct.Fear
+          let make x = Output.Fear x end)
       | Steps.Victory -> (module struct module Event = Direct.Victory
           let make () = Output.Victory end)
   end

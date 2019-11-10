@@ -73,12 +73,13 @@ module Phase2 = struct
   module Output = struct
     type check = unit
     type cond = Defeat | Disease
-    type direct = Attack | Blessing | BuildManp | BuildStatus | BuildSupply | Cavalry | Facilities | Mishap | Starvation | Support | Turn | Upkeep
+    type direct = Attack | Blessing | BuildManp | BuildStatus | BuildSupply | Cavalry | Facilities | FearEnd | Mishap | Starvation | Support | Turn | Upkeep
     type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
   let list : t list =
     [ Do (Direct Output.Turn)
+    ; Do (Direct Output.FearEnd)
     ; Do (Direct Output.BuildManp)
     ; Do (Direct Output.BuildStatus)
     ; Ask (Cond Input.LeaderNew)
@@ -120,7 +121,7 @@ module Phase3 = struct
   module Output = struct
     type check = Attack | LevelUp | NoAttack | NoEnemies
     type cond = Ballista | Barraged | Cyclops | Defeat | Revive | Smite
-    type direct = Combat | Victory
+    type direct = Combat | Fear | Victory
     type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
@@ -145,6 +146,7 @@ module Phase3 = struct
     ; Ask (Direct Input.Barrage)
     ; Do (Cond Output.Barraged)
     ; check_enemies
+    ; Do (Direct Output.Fear)
     ; Do (Direct Output.Combat)
     ; Do (Cond Output.Revive)
     ; Do (Cond Output.Defeat)
