@@ -32,6 +32,13 @@ let vertical prefix ls =
   Tty.writeln (prefix ^ ":");
   indices ls |> indent |> Tty.writelns
 
+let one_nation str =
+  let ls = Game.Nation.kinds in
+  List.map nation2str ls
+  |> horizontal str;
+  Tty.prompt "choose"
+  |> choose_one ls (List.hd ls)
+
 let ballista n avlb =
   sprintf "have %d ballista, build more? (max %d)" n avlb
   |> Tty.writeln;
@@ -66,17 +73,19 @@ module Build = struct
     List.fold_right (add_from avlb) ls []
     |> Listx.dedupe_if (fun k -> not (Game.Build.is_multiple k))
 
-  let from (_, avlb) =
-    let kinds = Map.bindings avlb |> List.map fst |> sort_by_str bld2str in
+  let from nat (_, avlb) =
+    let bldstr = bld2str nat in
+    let kinds =
+      Map.bindings avlb |> List.map fst |> sort_by_str bldstr in
     let to_str kind =
-      Map.find kind avlb |> res2str |> sprintf "%s [%s]" (bld2str kind)
+      Map.find kind avlb |> res2str |> sprintf "%s [%s]" (bldstr kind)
     in
     List.map to_str kinds
     |> vertical "buildings available";
     Tty.prompt_chars "build?"
     |> choose kinds
     |> echo (fun ls ->
-        List.map bld2str ls |> commas |> Tty.ifpairln "building")
+        List.map bldstr ls |> commas |> Tty.ifpairln "building")
     |> (fun chosen -> chosen, avlb)
 end
 
@@ -176,11 +185,7 @@ let templar cap =
   Tty.prompt_amount cap
 
 let trade () =
-  let ls = Game.Nation.kinds in
-  List.map nation2str ls
-  |> horizontal "trade guild nation";
-  Tty.prompt "choose"
-  |> choose_one ls (List.hd ls)
+  one_nation "trade guild nation"
   |> (fun nat -> Tty.writeln (trade2str nat); Some nat)
 
 let volunteers cap =

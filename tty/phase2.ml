@@ -11,8 +11,9 @@ module Make (S : Game.State.S) = struct
           BarrageTrain (Prompt.barrage_train ok cost, cost)
       | Berserker avlb -> Berserker (check Prompt.berserker avlb)
       | Build avlb ->
-          S.Build.return Print.Build.all;
-          Build (Prompt.Build.from avlb)
+          let nat = S.Nation.get () in
+          S.Build.return (Print.Build.all nat);
+          Build (Prompt.Build.from nat avlb)
       | Dervish count -> Dervish (check Prompt.dervish count)
       | LeaderNew x -> LeaderNew (Prompt.Leader.pair x)
       | Knight count -> Knight (check Prompt.knight count)
@@ -46,7 +47,9 @@ module Make (S : Game.State.S) = struct
       | Cavalry c -> ()
       | Defeat -> Tty.writeln "defeat"
       | Disease x -> Print.disease x |> S.Leader.return
-      | Facilities x -> Print.facilities x
+      | Facilities x ->
+          let nat = S.Nation.get () in
+          Print.facilities nat x
       | Mishap x -> Print.mishap x
       | Starvation x -> Print.starvation x
       | Support s -> Print.support s

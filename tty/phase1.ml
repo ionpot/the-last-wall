@@ -8,8 +8,9 @@ module Make (S : Game.State.S) = struct
       | Ballista (avlb, have) ->
           Ballista (check (Prompt.ballista have) avlb, have)
       | Build avlb ->
-          S.Build.return Print.Build.all;
-          Build (Prompt.Build.from avlb)
+          let nat = S.Nation.get () in
+          S.Build.return (Print.Build.all nat);
+          Build (Prompt.Build.from nat avlb)
       | Deity _ -> Deity (Prompt.deity ())
       | Knight n -> Knight (check Prompt.knight n)
       | Leader _ -> Leader (Prompt.Leader.first ())
@@ -26,8 +27,12 @@ module Make (S : Game.State.S) = struct
     function
       | BuildSupply s -> S.Supply.return (Print.Build.supply s)
       | Cavalry _ -> ()
-      | Facilities x -> Print.facilities x
-      | Starting s -> Print.starting s
+      | Facilities x ->
+          let nat = S.Nation.get () in
+          Print.facilities nat x
+      | Starting s ->
+          let nat = S.Nation.get () in
+          Print.starting nat s
       | Support s -> Print.support s
 end
 

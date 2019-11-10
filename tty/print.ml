@@ -3,15 +3,15 @@ open Game
 open Printf
 
 module Build = struct
-  let status (ready, built, queued) =
-    Tty.ifpairln "buildings ready" (bld_ls2str ready);
-    Tty.ifpairln "build finished" (bld_ls2str built);
-    Tty.ifpairln "build queue" (bld_q2str queued)
+  let status nat (ready, built, queued) =
+    Tty.ifpairln "buildings ready" (bld_ls2str nat ready);
+    Tty.ifpairln "build finished" (bld_ls2str nat built);
+    Tty.ifpairln "build queue" (bld_q2str nat queued)
 
-  let all t =
-    bld_map2str (Build.ready t)
+  let all nat t =
+    bld_map2str nat (Build.ready t)
     |> Tty.ifpairln "buildings ready";
-    status Build.([], built t, queue t)
+    status nat Build.([], built t, queue t)
 
   let manp need bonus units =
     let base = Power.base bonus in
@@ -107,8 +107,10 @@ let disease (died, ldr_died) ldr =
   Tty.pairln "died" (units2str died |> str2none);
   if ldr_died then Leader.died ldr
 
-let facilities map =
-  Tty.ifpairln "facilities" (facs2clean map |> facs2str)
+let facilities nat map =
+  facs2clean map
+  |> facs2str nat
+  |> Tty.ifpairln "facilities"
 
 let mishap t =
   let print kind =
@@ -119,8 +121,8 @@ let mishap t =
   let f kind = if Mishap.has kind t then print kind in
   List.iter f Mishap.kinds
 
-let starting (module S : Starting.S) =
-  Tty.ifpairln "buildings" (bld_ls2str S.buildings);
+let starting nat (module S : Starting.S) =
+  Tty.ifpairln "buildings" (bld_ls2str nat S.buildings);
   Tty.pairln "month" (month2str S.month);
   Tty.pairln "supply" (sup2str S.supply);
   Tty.ifpairln "units" (units2str S.units)
