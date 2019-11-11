@@ -10,6 +10,7 @@ val reflected : t -> Defs.power
 val remaining : t -> Units.t
 
 module Damage : Dice.S -> sig
+  val absorb : Defs.power -> Power.t -> Units.t -> Units.t -> t
   val from : Defs.power -> Power.t -> Units.t -> Units.t -> t
 end
 
