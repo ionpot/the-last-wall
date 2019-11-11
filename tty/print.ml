@@ -114,7 +114,7 @@ let facilities nat map =
 
 let fear (fled, _) =
   if not (Units.is_empty fled)
-  then sprintf "%s fled out of fear" (units2str fled) |> Tty.writeln
+  then sprintf "%s fled in fear" (units2str fled) |> Tty.writeln
 
 let fear_end fled =
   if not (Units.is_empty fled)
