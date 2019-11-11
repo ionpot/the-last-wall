@@ -32,7 +32,7 @@ let indent = List.map (fun str -> "  " ^ str)
 let to_index enabled i str =
   if enabled
   then sprintf "%c) %s" (int2ichar i) str
-  else sprintf "    %s" str
+  else sprintf "   %s" str
 
 let indices = List.mapi (to_index true)
 
