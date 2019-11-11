@@ -1,11 +1,19 @@
 type chances = Nation.Chance.t
-type t
+type t = Nation.support
 
-val ls : t -> (Nation.kind * Resource.t) list
 val sum : t -> Resource.t
-val update_chances : t -> chances -> chances
+
+module Apply : State.S -> sig
+  val value : t -> unit
+end
+
+module Check : State.S -> sig
+  val has_traded : Nation.kind -> bool
+  val traded_mnp : Nation.kind -> Defs.manpower
+  val traded_sup : Nation.kind -> Defs.supply
+end
 
 module Roll : State.S -> sig
-  val chance_of : Nation.kind -> Nation.t -> float
+  val chance_of : Nation.kind -> Nation.t -> Defs.percent
   val from : Nation.t -> t
 end

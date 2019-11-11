@@ -3,17 +3,20 @@ open Game
 open Printf
 
 module Build = struct
-  let status (ready, built, queued) =
-    Tty.ifpairln "buildings ready" (bld_ls2str ready);
-    Tty.ifpairln "build finished" (bld_ls2str built);
-    Tty.ifpairln "build queue" (bld_q2str queued)
+  let status nat (ready, built, queued) =
+    Tty.ifpairln "buildings ready" (bld_ls2str nat ready);
+    Tty.ifpairln "build finished" (bld_ls2str nat built);
+    Tty.ifpairln "build queue" (bld_q2str nat queued)
 
-  let all t =
-    status Build.(ls_ready t, ls_built t, ls_queue t)
+  let all nat t =
+    bld_map2str nat (Build.ready t)
+    |> Tty.ifpairln "buildings ready";
+    status nat Build.([], built t, queue t)
 
-  let manp need units =
+  let manp need bonus units =
+    let base = Power.base bonus in
     if need > 0 then
-    units2work units
+    units2work base units
     |> min need
     |> manp2str
     |> sprintf "%s for construction"
@@ -53,10 +56,11 @@ module Leader = struct
 end
 
 module Combat = struct
-  let begins units enemies ldr =
+  let begins bonus units enemies ldr =
+    let base = Power.base bonus in
     Tty.lnwriteln "combat phase";
     Tty.pairln "attacking" (units2str enemies |> str2none);
-    Tty.pairln "defending" (units2mnpstr units);
+    Tty.pairln "defending" (units2mnpstr base units);
     Tty.ifpairln "leader" (Leader.to_full ldr)
 
   let stats atk def dmg =
@@ -82,34 +86,65 @@ module Combat = struct
     Tty.ifpairln "enemies remaining" (result2remaining O.enemies)
 end
 
-let ballista (n, enemies) =
+let ballista (n, enemies, _) =
   if n > 0 then
   sprintf "%d ballista kills %s" n (units2str enemies |> if_empty "nothing")
   |> Tty.writeln
 
-let can_barrage w =
-  let open Direct.CanBarrage in
+let barrage_status w =
+  let open Barrage in
   function
-    | No Leader -> Tty.writeln "no leader to lead arrow barrage"
-    | No Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
-    | Yes -> ()
+    | Available -> ()
+    | Disabled Leader -> Tty.writeln "no leader to lead arrow barrage"
+    | Disabled Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
 
-let cyclops (n, units) =
+let cyclops (n, units, _) =
   if n > 0 then
   sprintf "%d cyclops kills %s" n (units2str units |> if_empty "nothing")
   |> Tty.writeln
 
-let disease (units, died) ldr =
-  Tty.writeln "!!! disease outbreak !!!";
-  Tty.pairln "died" (units2str units |> str2none);
-  if died then Leader.died ldr
+let disease (died, ldr_died) ldr =
+  Tty.pairln "died" (units2str died |> str2none);
+  if ldr_died then Leader.died ldr
+
+let facilities nat map =
+  facs2clean map
+  |> facs2str nat
+  |> Tty.ifpairln "facilities"
+
+let fear (fled, _) =
+  if not (Units.is_empty fled)
+  then sprintf "%s fled out of fear" (units2str fled) |> Tty.writeln
+
+let fear_end fled =
+  if not (Units.is_empty fled)
+  then sprintf "%s returns" (units2str fled) |> Tty.writeln
+
+let mishap t =
+  let print kind =
+    mishap2str kind
+    |> sprintf "!!! %s !!!"
+    |> Tty.writeln
+  in
+  let f kind = if Mishap.has kind t then print kind in
+  List.iter f Mishap.kinds
+
+let starting nat (module S : Starting.S) =
+  Tty.ifpairln "buildings" (bld_ls2str nat S.buildings);
+  Tty.pairln "month" (month2str S.month);
+  Tty.pairln "supply" (sup2str S.supply);
+  Tty.ifpairln "units" (units2str S.units)
+
+let starvation (fled, starved) =
+  Tty.ifpairln "starved" (units2str starved);
+  Tty.ifpairln "fled" (units2str fled)
 
 let support s =
-  let f res =
-    if res = Resource.empty then "nothing"
-    else res2str res
+  let to_str nat res =
+    sprintf "%s sent %s" (nation2str nat) (res2nothing res)
   in
-  Support.ls s
-  |> List.map (fun (nat, res) -> (nation2str nat, f res))
-  |> List.map (fun (nat, res) -> sprintf "%s sent %s" nat res)
+  let module Map = Nation.Map in
+  Nation.kinds
+  |> List.filter (fun k -> Map.mem k s)
+  |> List.map (fun k -> to_str k (Map.find k s))
   |> Tty.writelns

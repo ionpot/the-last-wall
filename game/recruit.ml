@@ -1,8 +1,26 @@
 module With (S : State.S) = struct
   module Base = Units.Base
 
+  let is_cav = Units.Attr.is_cavalry
+
+  let ldr_is kind =
+    S.Leader.check (Leader.is_living kind)
+
+  let bonus_for kind =
+    if ldr_is Leader.Aristocrat && is_cav kind then 0.2
+    else if ldr_is Leader.Merchant && kind = Units.Merc then 0.1
+    else 0.
+
+  let avlb_sup kind =
+    Number.increase_by (bonus_for kind)
+    |> S.Supply.return
+
+  let cost_of kind n =
+    (Base.supply_cost kind * n)
+    |> Number.reduce_by (bonus_for kind)
+
   let dervish_range () =
-    if S.Build.check Build.(ready Guesthouse)
+    if S.Build.check Build.(is_ready Guesthouse)
     then 3, 12 else 2, 8
 
   module Missing = struct
@@ -25,7 +43,7 @@ module With (S : State.S) = struct
   let supply_limit kind cap =
     let cost = Base.supply_cost kind in
     if cost > 0 then
-      let supp = S.Supply.get () in
+      let supp = avlb_sup kind in
       min cap (supp / cost)
     else cap
 
@@ -40,7 +58,7 @@ module With (S : State.S) = struct
     exclude () |> Units.promotable kind |> supply_limit kind
 
   let sub_cost kind n =
-    S.Supply.sub (Base.supply_cost kind * n);
+    S.Supply.sub (cost_of kind n);
     S.Units.map Units.(cost n kind |> reduce)
 
   let promote kind n =

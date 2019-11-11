@@ -8,7 +8,7 @@ val dedupe_if : ('a -> bool) -> 'a list -> 'a list
 val discard : ('a -> bool) -> 'a list -> 'a list
 val filteri : (int -> 'a -> bool) -> 'a list -> 'a list
 val fold_map : ('a -> 'b -> 'a * 'b) -> 'a -> 'b list -> 'a * 'b list
-val group : 'a list -> (int * 'a) list
+val group : 'a list -> ('a * int) list
 val index_of : 'a -> 'a list -> int
 val in_both : 'a list -> 'a list -> 'a list
 val map_with : ('a -> 'b -> 'a * 'b) -> 'a -> 'b list -> 'b list

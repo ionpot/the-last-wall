@@ -1,17 +1,19 @@
 module type S = sig
   module Arena : Value.Num
   module Ballista : Value.Num
-  module Barraging : Value.Bit
+  module Barrage : Value.S with type t = Barrage.t
+  module Bonus : Value.S with type t = Bonus.t
   module Build : Value.S with type t = Build.t
   module Casualty : Value.S with type t = Units.t
   module Deity : Value.S with type t = Deity.t
   module Dervish : Value.Num
   module Dice : Dice.S
-  module Disease : Value.Float
   module Ended : Value.Bit
   module Enemy : Value.S with type t = Units.t
+  module Feared : Value.S with type t = Units.t
   module Harpy : Value.Float
   module Leader : Value.S with type t = Leader.t
+  module Mishap : Value.S with type t = Mishap.t
   module Month : Value.S with type t = Month.t
   module Nation : Value.S with type t = Nation.t
   module Scout : Value.Bit
@@ -25,17 +27,19 @@ end
 module Make (D : Dice.From) : S = struct
   module Arena = Value.Num(Value.Zero)
   module Ballista = Value.Num(Value.Zero)
-  module Barraging = Value.Bit(Value.False)
+  module Barrage = Value.From(Barrage)
+  module Bonus = Value.From(Bonus)
   module Build = Value.From(Build)
   module Casualty = Value.From(Units)
   module Deity = Value.From(Deity)
   module Dervish = Value.Num(Value.Zero)
   module Dice = Dice.From(D)
-  module Disease = Value.Float(Value.ZeroF)
   module Ended = Value.Bit(Value.False)
   module Enemy = Value.From(Units)
+  module Feared = Value.From(Units)
   module Harpy = Value.Float(Value.ZeroF)
   module Leader = Value.From(Leader)
+  module Mishap = Value.From(Mishap)
   module Month = Value.From(Month)
   module Nation = Value.From(Nation)
   module Scout = Value.Bit(Value.False)

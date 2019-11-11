@@ -5,7 +5,9 @@ module type S = sig
   val cavalry : Defs.count -> unit
   val dervish : unit -> unit
   val enemies : unit -> unit
-  val new_leader : Leader.t list -> unit
+  val facilities : Direct.Facilities.t -> unit
+  val leader : unit -> unit
+  val new_leader : Input.LeaderNew.t -> unit
   val ranger : unit -> unit
   val res : unit -> unit
   val templar : unit -> unit
@@ -54,23 +56,37 @@ module With (S : State.S) = struct
     print_enemies "enemies"
 
   let res () =
-    let m = S.Units.return Units.power |> truncate in
+    let base = S.Bonus.return Power.base in
+    let units =  S.Units.get () in
+    let m = Power.of_units units base |> truncate in
     let s = S.Supply.get () in
-    let w = S.Units.return Convert.units2work in
+    let w = Convert.units2work base units in
     Printf.sprintf "status: %s, %s (%s)"
       (Convert.sup2str s)
       (Convert.manp2str m)
       (Convert.work2str w)
     |> Tty.writeln
 
-  let new_leader = function
-    | [] -> ()
-    | ldr :: _ ->
-        sprintf "%s chosen" (Convert.ldr2first ldr)
-        |> Tty.writeln;
-        res ()
+  let facilities t =
+    if Convert.(facs2clean t |> facs2bool)
+    then res ()
+
+  let leader () =
+    S.Leader.return Convert.ldr2full
+    |> Tty.pairln "leader"
+
+  let new_leader =
+    let chosen ldr =
+      sprintf "%s chosen" (Convert.ldr2first ldr)
+      |> Tty.writeln
+    in
+    function
+      | (ldr, true), _
+      | _, (ldr, true) -> chosen ldr; res ()
+      | (_, false), (_, false) -> ()
 
   let units () =
-    S.Units.return Convert.units2mnpstr
+    let base = S.Bonus.return Power.base in
+    S.Units.return (Convert.units2mnpstr base)
     |> Tty.pairln "status"
 end

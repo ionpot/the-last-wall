@@ -1,10 +1,14 @@
 type kind = Clan | Hekatium | Numendor | Sodistan | Tulron
-type trade = Boost of kind | Certain of kind | NoTrade
 
-module Map = Map.Make(struct
+module Kind = struct
   type t = kind
   let compare = compare
-end)
+end
+
+module Map = Map.Make(Kind)
+module Set = Set.Make(Kind)
+
+type support = Resource.t Map.t
 
 let kinds = [Tulron; Sodistan; Hekatium; Numendor; Clan]
 let max_allowed = 3
@@ -13,7 +17,7 @@ let ranges_of =
   let low = (0, 10) in
   let mid = (10, 20) in
   let high = (20, 30) in
-  let f x = Pair.(x <+> 10) in
+  let f = Range.Int.add 10 in
   function
     | Tulron
     | Sodistan -> (high, f low)
@@ -21,34 +25,83 @@ let ranges_of =
     | Numendor -> (low, f high)
     | Clan -> (mid, f mid)
 
+let set2map f set =
+  let g kind map = Map.add kind (f kind) map in
+  Set.fold g set Map.empty
+
 module Chance = struct
-  type t = float Map.t
-  let base = 0.8
-  let step = 0.1
+  type t = Defs.percent Map.t
+  let cap = 80
+  let cap_trading = 90
   let base_map : t =
-    let f m k = Map.add k base m in
+    let f m k = Map.add k cap m in
     List.fold_left f Map.empty kinds
   let of_kind = Map.find
   let map f k t = Map.add k (of_kind k t |> f) t
-  let increase = map (fun c -> Float.add_if_ptv step c |> min base)
-  let reduce = map (Float.sub_by step)
+  let add step = map (Number.add_if_ptv step)
+  let cap_at cap = map (min cap)
+  let set_trading k = Map.add k cap_trading
+  let sub step = map (Number.sub_by step)
+  let sub_all step = Map.map (Number.sub_by step)
 end
 
 type t =
-  { chances : Chance.t;
-    chosen : kind list
+  { barracks : kind option
+  ; chances : Chance.t
+  ; chosen : Set.t
+  ; support : support
+  ; trade : kind option
   }
 
 let empty =
-  { chances = Chance.base_map;
-    chosen = []
+  { barracks = None
+  ; chances = Chance.base_map
+  ; chosen = Set.empty
+  ; support = Map.empty
+  ; trade = None
   }
 
+let barracks t = t.barracks
 let chances t = t.chances
-let which t = t.chosen
+let chosen t = t.chosen
+let trade t = t.trade
 
-let chosen ls t =
-  { t with chosen = Listx.pick_first max_allowed ls }
+let has_aided k t =
+  Map.mem k t.support
+
+let has_barracks k t =
+  t.barracks = Some k
+
+let has_trade k t =
+  t.trade = Some k
+
+let no_barracks t =
+  t.barracks = None
+
+let no_trade t =
+  t.trade = None
+
+let mnp_from k t =
+  if has_aided k t
+  then Map.find k t.support |> Resource.manp_of
+  else 0
+
+let sup_from k t =
+  if has_aided k t
+  then Map.find k t.support |> Resource.supp_of
+  else 0
+
+let set_chosen chosen t =
+  { t with chosen }
+
+let set_barracks barracks t =
+  { t with barracks }
 
 let map_chances f t =
   { t with chances = f t.chances }
+
+let set_support m t =
+  { t with support = Map.filter (fun _ -> (<>) Resource.empty) m }
+
+let set_trade trade t =
+  { t with trade }

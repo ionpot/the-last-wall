@@ -1,6 +1,7 @@
 Attack
+Barrage
+Bonus
 Build
-Build_bonus
 Check
 Combat
 Cond
@@ -8,11 +9,13 @@ Defs
 Deity
 Dice
 Direct
+Dist
 Dr
 Event
 Input
 Leader
 Main
+Mishap
 Month
 Name
 Names
@@ -23,8 +26,10 @@ Phase2
 Phase3
 Phases
 Pick
+Power
 Recruit
 Resource
+Starting
 State
 Step
 Steps

@@ -5,6 +5,8 @@ module Input = struct
 
   type event =
     | Ballista of Event.Ballista.t
+    | Barracks of Event.Barracks.t
+    | BarrageTrain of Event.BarrageTrain.t
     | Berserker of Event.Berserker.t
     | Build of Event.BuildAvlb.t
     | Dervish of Event.Dervish.t
@@ -13,14 +15,18 @@ module Input = struct
     | Mercs of Event.Mercs.t
     | Nations of Event.Nations.t
     | Ranger of Event.Ranger.t
+    | Sodistan of Event.Sodistan.t
     | Templar of Event.Templar.t
     | Trade of Event.Trade.t
+    | Veteran of Event.Veteran.t
     | Volunteers of Event.Volunteers.t
 
   module Apply (State : State.S) = struct
     module Apply = Phase.Apply(State)
     let event = function
       | Ballista x -> Apply.value x (module Event.Ballista)
+      | Barracks x -> Apply.value x (module Event.Barracks)
+      | BarrageTrain x -> Apply.value x (module Event.BarrageTrain)
       | Berserker x -> Apply.value x (module Event.Berserker)
       | Build x -> Apply.value x (module Event.BuildAvlb)
       | Dervish x -> Apply.value x (module Event.Dervish)
@@ -29,8 +35,10 @@ module Input = struct
       | Mercs x -> Apply.value x (module Event.Mercs)
       | Nations x -> Apply.value x (module Event.Nations)
       | Ranger x -> Apply.value x (module Event.Ranger)
+      | Sodistan x -> Apply.value x (module Event.Sodistan)
       | Templar x -> Apply.value x (module Event.Templar)
       | Trade x -> Apply.value x (module Event.Trade)
+      | Veteran x -> Apply.value x (module Event.Veteran)
       | Volunteers x -> Apply.value x (module Event.Volunteers)
   end
 end
@@ -46,8 +54,10 @@ module Output = struct
     | Defeat
     | Disease of Cond.Disease.t
     | Facilities of Direct.Facilities.t
+    | FearEnd of Direct.FearEnd.t
+    | Mishap of Direct.Mishap.t
     | Starvation of Direct.Starvation.t
-    | Support of Direct.Support.t
+    | Support of Direct.NationSupport.t
     | Turn of Direct.Turn.t
     | Upkeep of Direct.Upkeep.t
 end
@@ -61,6 +71,8 @@ module Convert = struct
     let direct : Convert.direct = function
       | Steps.Ballista -> (module struct module Event = Event.Ballista
           let make x = Input.Ballista x end)
+      | Steps.BarrageTrain -> (module struct module Event = Event.BarrageTrain
+          let make x = Input.BarrageTrain x end)
       | Steps.Berserker -> (module struct module Event = Event.Berserker
           let make x = Input.Berserker x end)
       | Steps.Build -> (module struct module Event = Event.BuildAvlb
@@ -69,29 +81,35 @@ module Convert = struct
           let make x = Input.Dervish x end)
       | Steps.Knight -> (module struct module Event = Event.Knight
           let make x = Input.Knight x end)
-      | Steps.Mercs -> (module struct module Event = Event.Mercs
-          let make x = Input.Mercs x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)
-      | Steps.Volunteers -> (module struct module Event = Event.Volunteers
-          let make x = Input.Volunteers x end)
+      | Steps.Sodistan -> (module struct module Event = Event.Sodistan
+          let make x = Input.Sodistan x end)
 
     let cond : Convert.cond = function
+      | Steps.Barracks -> (module struct module Event = Event.Barracks
+          let make x = Input.Barracks x end)
       | Steps.LeaderNew -> (module struct module Event = Event.LeaderNew
           let make x = Input.LeaderNew x end)
+      | Steps.Mercs -> (module struct module Event = Event.Mercs
+          let make x = Input.Mercs x end)
       | Steps.Ranger -> (module struct module Event = Event.Ranger
           let make x = Input.Ranger x end)
       | Steps.Templar -> (module struct module Event = Event.Templar
           let make x = Input.Templar x end)
       | Steps.Trade -> (module struct module Event = Event.Trade
           let make x = Input.Trade x end)
+      | Steps.Veteran -> (module struct module Event = Event.Veteran
+          let make x = Input.Veteran x end)
+      | Steps.Volunteers -> (module struct module Event = Event.Volunteers
+          let make x = Input.Volunteers x end)
   end
 
   module Output = struct
     module Steps = Steps.Output
     module Convert = Phase.Convert.Output(Steps)(Output)
 
-    let check () = failwith "no phase2 check"
+    let check () = failwith "no phase2 output check"
 
     let cond : Convert.cond = function
       | Steps.Defeat -> (module struct module Event = Cond.Defeat
@@ -114,9 +132,13 @@ module Convert = struct
           let make x = Output.Cavalry x end)
       | Steps.Facilities -> (module struct module Event = Direct.Facilities
           let make x = Output.Facilities x end)
+      | Steps.FearEnd -> (module struct module Event = Direct.FearEnd
+          let make x = Output.FearEnd x end)
+      | Steps.Mishap -> (module struct module Event = Direct.Mishap
+          let make x = Output.Mishap x end)
       | Steps.Starvation -> (module struct module Event = Direct.Starvation
           let make x = Output.Starvation x end)
-      | Steps.Support -> (module struct module Event = Direct.Support
+      | Steps.Support -> (module struct module Event = Direct.NationSupport
           let make x = Output.Support x end)
       | Steps.Turn -> (module struct module Event = Direct.Turn
           let make x = Output.Turn x end)

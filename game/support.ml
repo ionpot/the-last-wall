@@ -1,57 +1,97 @@
 module Chance = Nation.Chance
+module Map = Nation.Map
 
 type chances = Chance.t
-type t = (Nation.kind * Resource.t) list
+type t = Nation.support
 
-let ls t = t
+let is_empty k t =
+  Map.mem k t && Map.find k t = Resource.empty
 
-let sum =
-  let f total (_, res) =
-    Resource.(total ++ res)
-  in
-  List.fold_left f Resource.empty
+let sum t =
+  let f _ = Resource.(++) in
+  Map.fold f t Resource.empty
 
-let update_chances t chances =
-  let empty = List.filter (fun (_, res) -> res = Resource.empty) t in
-  let f cmap kind =
-    if List.mem_assoc kind empty
-    then Chance.reduce kind cmap
-    else Chance.increase kind cmap
-  in
-  List.fold_left f chances Nation.kinds
+module Check (S : State.S) = struct
+  let winter = S.Month.check Month.is_winter
+  let has_barracks kind =
+    S.Nation.check Nation.(has_barracks kind)
+  let has_trade kind =
+    S.Nation.check Nation.(has_trade kind)
+  let cap_of kind =
+    if has_trade kind
+    then Chance.cap_trading
+    else Chance.cap
+  let has_traded kind =
+    has_trade kind && S.Nation.check (Nation.has_aided kind)
+  let traded_mnp kind =
+    let mnp = S.Nation.return (Nation.mnp_from kind) in
+    has_trade kind |> Number.if_ok mnp
+  let traded_sup kind =
+    let sup = S.Nation.return (Nation.sup_from kind) in
+    has_trade kind |> Number.if_ok sup
+end
+
+module Apply (S : State.S) = struct
+  module Check = Check(S)
+
+  let adjust kind t cmap =
+    (if is_empty kind t
+    then Chance.sub
+    else Chance.add) 10 kind cmap
+
+  let boost kind cmap =
+    if Check.has_trade kind
+    then Chance.add 5 kind cmap
+    else cmap
+
+  let cap kind =
+    Chance.cap_at (Check.cap_of kind) kind
+
+  let chances t cmap =
+    let f cmap kind =
+      adjust kind t cmap
+      |> boost kind
+      |> cap kind
+    in
+    List.fold_left f cmap Nation.kinds
+
+  let value t =
+    chances t |> Nation.map_chances |> S.Nation.map;
+    Nation.set_support t |> S.Nation.map;
+    let clan = Check.has_traded Nation.Clan in
+    S.Bonus.map Bonus.(set Clan clan)
+end
 
 module Roll (S : State.S) = struct
-  let starved = S.Starved.return Units.count_all
-  let trade = S.Build.return Build.trade
+  module Check = Check(S)
 
   let bonuses kind res =
-    let leader = S.Leader.return Leader.res_bonus_of in
-    let trade = if trade = Nation.Boost kind then 10 else 0 in
-    Resource.(res ++ leader ++ of_supp trade)
+    let barracks = Check.has_barracks kind in
+    let trade = Check.has_trade kind in
+    let hekatium = kind = Nation.Hekatium in
+    let mnp = Number.if_ok 10 barracks in
+    let sup = Number.if_ok 10 trade in
+    Resource.bonus_if
+      (trade && hekatium)
+      Resource.Bonus.(Add (Both 0.1))
+      Resource.(res <+ Supply sup <+ Manpwr mnp)
 
-  let roll (a, b) = S.Dice.between a b
+  let roll = S.Dice.range
 
   let chance_of kind nats =
-    let starved = Defs.to_power starved 0.01 in
-    let winter = S.Month.check Month.is_winter in
-    if trade = Nation.Certain kind
-    then 1.0
-    else
-      Nation.chances nats
-      |> Chance.of_kind kind
-      |> Float.sub_if winter 0.1
-      |> Float.sub_by starved
+    Nation.chances nats
+    |> Chance.of_kind kind
+    |> Number.sub_if Check.winter 10
 
   let roll_res kind =
     let (a, b) = Nation.ranges_of kind in
     Resource.(of_manp (roll a) <+ Supply (roll b))
 
-  let to_res kind nats =
-    if chance_of kind nats |> S.Dice.chance
+  let to_res nats kind =
+    if chance_of kind nats |> S.Dice.percent
     then roll_res kind |> bonuses kind
     else Resource.empty
 
   let from nats =
-    Nation.which nats
-    |> List.map (fun kind -> kind, to_res kind nats)
+    Nation.(chosen nats |> set2map (to_res nats))
 end

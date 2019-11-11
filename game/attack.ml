@@ -12,12 +12,12 @@ module Make (S : State.S) = struct
     let chance = Base.chance kind in
     S.Dice.chance (chance +. growth')
 
-  let can_spawn turn kind =
-    if kind = Units.Harpy
-    then S.Harpy.check S.Dice.chance
-    else can_regular turn kind
+  let can_spawn turn = function
+    | Units.Dullahan -> turn > 19
+    | Units.Harpy -> S.Harpy.check S.Dice.chance
+    | kind -> can_regular turn kind
 
-  let roll_count turn kind =
+  let roll_regular turn kind =
     let abundance = Base.abundance kind in
     let minimum = 10. *. abundance in
     let amount =
@@ -26,6 +26,10 @@ module Make (S : State.S) = struct
     in
     let x = ceil (minimum +. amount) |> truncate in
     S.Dice.deviate x (x / 4)
+
+  let roll_count turn kind =
+    if kind = Units.Dullahan then 1
+    else roll_regular turn kind
 
   let roll turn =
     let add t kind = Units.add (roll_count turn kind) kind t in

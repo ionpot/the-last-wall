@@ -18,8 +18,7 @@ let str2chars str =
   next (String.length str) []
 
 let percent2intstr x =
-  truncate (x *. 100.)
-  |> sprintf "%d%%"
+  sprintf "%d%%" x
 
 let percent2str x =
   sprintf "%.2f%%" (x *. 100.)
@@ -48,10 +47,15 @@ let res2str res =
   |> List.map (fun (n, f) -> f n)
   |> commas
 
+let res2nothing res =
+  if res = Resource.empty
+  then "nothing"
+  else res2str res
+
 let ldr2kind = function
   | Leader.Aristocrat -> "aristocrat"
-  | Leader.Expert -> "expert"
-  | Leader.Warrior -> "warrior"
+  | Leader.Engineer -> "engineer"
+  | Leader.Merchant -> "merchant"
 
 let ldr2gender ldr =
   match Leader.gender_of ldr with
@@ -80,18 +84,19 @@ let nation2str = function
   | Nation.Sodistan -> "sodistan"
   | Nation.Tulron -> "tulron"
 
-let trade2str = function
-  | Nation.Boost kind -> "extra with " ^ nation2str kind
-  | Nation.Certain kind -> "certain with " ^ nation2str kind
-  | Nation.NoTrade -> ""
+let trade2str nation =
+  sprintf "trading with %s" (nation2str nation)
 
-let trade_suffix trade =
-  let str = trade2str trade in
-  if str = "" then str
-  else sprintf " (%s)" str
+let nation_suffix = function
+  | Some nation -> sprintf " (%s)" (nation2str nation)
+  | None -> ""
 
-let bld2str = function
+let bld2str nat = function
   | Build.Arena -> "arena"
+  | Build.Barracks ->
+      Nation.barracks nat
+      |> nation_suffix
+      |> sprintf "barracks%s"
   | Build.Engrs -> "engineers guild"
   | Build.Fort -> "fort"
   | Build.Foundry -> "iron foundry"
@@ -104,31 +109,48 @@ let bld2str = function
   | Build.Stable -> "stable"
   | Build.Tavern -> "tavern"
   | Build.Temple -> "temple"
-  | Build.Trade trade ->
-      sprintf "trade guild%s" (trade_suffix trade)
+  | Build.Trade ->
+      Nation.trade nat
+      |> nation_suffix
+      |> sprintf "trade guild%s"
 
-let bld_n2str (n, kind) =
-  let str = bld2str kind in
+let bld_n2str nat (kind, n) =
+  let str = bld2str nat kind in
   if n < 1 then ""
   else if n = 1 then str
   else sprintf "%s (%d)" str n
 
-let bld_ls2str ls =
-  Listx.group ls
-  |> List.map bld_n2str
+let bld_pairs2str nat ls =
+  List.map (bld_n2str nat) ls
   |> sort_str
   |> commas
 
-let bld_q2str ls =
+let bld_ls2str nat ls =
+  Listx.group ls
+  |> bld_pairs2str nat
+
+let bld_map2str nat map =
+  Build.Map.bindings map
+  |> bld_pairs2str nat
+
+let bld_q2str nat ls =
   ls
   |> List.rev_map (fun (kind, cost) ->
-      sprintf "%s (%s)" (bld2str kind) (res2str cost))
+      sprintf "%s (%s)" (bld2str nat kind) (res2str cost))
   |> commas
 
-let facs2str ls =
-  ls
-  |> List.map (fun (k, r) -> sprintf "%s (%s)" (bld2str k) (res2str r))
-  |> commas
+let facs2bool map =
+  not @@ Build.Map.is_empty map
+
+let facs2clean map =
+  Build.Map.filter (fun _ -> (<>) Resource.empty) map
+
+let facs2str nat map =
+  let f k r acc =
+    sprintf "%s (%s)" (bld2str nat k) (res2str r) :: acc
+  in
+  Build.Map.fold f map []
+  |> sort_str |> commas
 
 let deity2str = function
   | Deity.Arnerula -> "arnerula"
@@ -145,7 +167,7 @@ let deity_text = function
   | Deity.Sekrefir -> "leader of gods, envoy of order and justice"
 
 let unit_order =
-  Units.([Men; Merc; Berserker; Cavalry; Knight; Ranger; Templar; Dervish; Ballista; Skeleton; Orc; Demon; Harpy; Cyclops])
+  Units.([Men; Veteran; Merc; Berserker; Cavalry; Knight; Ranger; Templar; Dervish; Ballista; Skeleton; Orc; Demon; Harpy; Cyclops])
 
 let unit_cmp = Listx.compare unit_order
 
@@ -156,6 +178,7 @@ let unit2str = function
   | Units.Cyclops -> "cyclops"
   | Units.Demon -> "demon"
   | Units.Dervish -> "dervish"
+  | Units.Dullahan -> "dullahan"
   | Units.Harpy -> "harpy"
   | Units.Knight -> "knight"
   | Units.Men -> "men"
@@ -164,6 +187,7 @@ let unit2str = function
   | Units.Ranger -> "ranger"
   | Units.Skeleton -> "skeleton"
   | Units.Templar -> "templar"
+  | Units.Veteran -> "veteran"
 
 let party2str (kind, n) =
   if n > 0
@@ -181,22 +205,23 @@ let unit_pairs2str ls =
 let units2str t =
   unit_pairs2str (Units.report t)
 
-let units2mnpstr t =
-  Units.power t
+let units2mnpstr base t =
+  Power.of_units t base
   |> truncate
   |> manp2str
   |> sprintf "%s -> %s" (units2str t |> if_empty "no units")
 
-let units2work t =
-  Units.(filter Attr.can_build) t
-  |> Units.power
+let units2work base t =
+  let u = Units.(filter Attr.can_build) t in
+  Power.of_units u base
   |> truncate
 
 let report_type2str = function
   | Attack.Accurate ls -> unit_pairs2str ls
   | Attack.Vague (count, kinds) ->
+      let str = Units.Set.elements kinds |> unit_ls2str in
       if count > 0
-      then sprintf "about %d (%s)" count (unit_ls2str kinds)
+      then sprintf "about %d (%s)" count str
       else ""
 
 let report2str rp =
@@ -204,13 +229,13 @@ let report2str rp =
   |> if_empty "no enemies"
 
 let result2outcome r =
-  Units.Dist.outcome r |> units2str
+  Dist.outcome r |> units2str
 
 let result2remaining r =
-  Units.Dist.remaining r |> units2str
+  Dist.remaining r |> units2str
 
 let result2stats r =
-  Units.Dist.(["absorbed", absorbed r; "healed", healed r; "reflected", reflected r])
+  Dist.(["absorbed", absorbed r; "healed", healed r; "reflected", reflected r])
   |> List.filter (fun (_, n) -> n > 0.)
   |> List.map (fun (s, n) -> sprintf "%s %s" (power2str n) s)
   |> commas
@@ -220,6 +245,14 @@ let barrage2str x =
 
 let smite2str x =
   units2str Units.(make x Skeleton)
+
+let starve2bool (deserted, starved) =
+  not (Units.is_empty starved && Units.is_empty deserted)
+
+let mishap2str = function
+  | Mishap.Comet -> "comet sighted"
+  | Mishap.Disease -> "disease outbreak"
+  | Mishap.Tavern -> "tavern burnt down"
 
 let month2str = function
   | Month.Jan -> "january"

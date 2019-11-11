@@ -24,12 +24,6 @@ let swap_empty ls = function
 let indent = List.map (fun str -> "  " ^ str)
 let indices = List.mapi (fun i str -> sprintf "%c) %s" (int2ichar i) str)
 
-let highlight chosen to_str x =
-  let str = to_str x in
-  if List.mem x chosen
-  then brackets str
-  else str
-
 let horizontal prefix = function
   | [] -> ()
   | ls -> Tty.pairln prefix (indices ls |> spaces)
@@ -38,20 +32,43 @@ let vertical prefix ls =
   Tty.writeln (prefix ^ ":");
   indices ls |> indent |> Tty.writelns
 
+let one_nation str =
+  let ls = Game.Nation.kinds in
+  List.map nation2str ls
+  |> horizontal str;
+  Tty.prompt "choose"
+  |> choose_one ls (List.hd ls)
+
 let ballista n avlb =
   sprintf "have %d ballista, build more? (max %d)" n avlb
   |> Tty.writeln;
   Tty.prompt_amount avlb
 
-let barrage () =
-  Tty.prompt_yn "arrow barrage? y/n"
+let barracks () =
+  let chosen nat = sprintf "%s chosen for barracks" (nation2str nat) in
+  one_nation "barracks nation"
+  |> (fun nat -> Tty.writeln (chosen nat); Some nat)
+
+let barrage status =
+  if status = Game.Barrage.Available
+  then Tty.prompt_yn "arrow barrage? y/n"
+  else false
+
+let barrage_train ok cost =
+  let sup = sup2str cost in
+  if ok
+  then sprintf "train archers for %s? y/n" sup |> Tty.prompt_yn
+  else begin
+    sprintf "need %s to train archers" sup |> Tty.writeln;
+    false
+  end
 
 let berserker avlb =
   Tty.writeln (sprintf "can train %d berserker" avlb);
   Tty.prompt_amount avlb
 
-module Build (S : Game.State.S) = struct
-  module Bonus = Game.Build_bonus.From(S)
+module Build = struct
+  module Map = Game.Build.Map
 
   let add_from avlb ch out =
     try List.nth avlb (ichar2int ch) :: out
@@ -59,18 +76,22 @@ module Build (S : Game.State.S) = struct
 
   let choose avlb ls =
     List.fold_right (add_from avlb) ls []
-    |> Listx.dedupe_if (fun k -> not (Game.Build.multiple k))
+    |> Listx.dedupe_if (fun k -> not (Game.Build.is_multiple k))
 
-  let from avlb t =
-    let avlb' = sort_by_str bld2str avlb in
-    List.map (fun kind ->
-      let cost = Game.Build.cost_of kind Bonus.value in
-      sprintf "%s [%s]" (bld2str kind) (res2str cost)) avlb'
+  let from nat (_, avlb) =
+    let bldstr = bld2str nat in
+    let kinds =
+      Map.bindings avlb |> List.map fst |> sort_by_str bldstr in
+    let to_str kind =
+      Map.find kind avlb |> res2str |> sprintf "%s [%s]" (bldstr kind)
+    in
+    List.map to_str kinds
     |> vertical "buildings available";
     Tty.prompt_chars "build?"
-    |> choose avlb'
-    |> echo (fun ls -> if ls <> []
-      then List.map bld2str ls |> commas |> Tty.pairln "building")
+    |> choose kinds
+    |> echo (fun ls ->
+        List.map bldstr ls |> commas |> Tty.ifpairln "building")
+    |> (fun chosen -> chosen, avlb)
 end
 
 let deity () =
@@ -86,15 +107,36 @@ let dervish cap =
   Tty.writeln (sprintf "%d dervish available" cap);
   Tty.prompt_amount cap
 
-let leader () =
-  let ls = Game.Leader.kinds in
-  List.map ldr2kind ls |> horizontal "leaders";
-  Tty.prompt "choose"
-  |> choose_one ls Game.Leader.(kind_of empty)
+module Leader = struct
+  let first () =
+    let ls = Game.Leader.kinds in
+    List.map ldr2kind ls |> horizontal "leaders";
+    Tty.prompt "choose"
+    |> choose_one ls Game.Leader.(kind_of empty)
 
-let new_leader ls =
-  List.map ldr2full ls |> vertical "new leader";
-  Tty.prompt "choose" |> choose_from ls
+  let str_of = function
+    | Some ldr -> ldr2first ldr
+    | None -> "new leader"
+
+  let cant_afford ldr_opt =
+    str_of ldr_opt
+    |> sprintf "cannot afford %s"
+    |> Tty.writeln
+
+  let pair pairs =
+    let ((a, a_ok), (b, b_ok)) = pairs in
+    let to_pairs = function
+      | [] -> (a, false), (b, false)
+      | x :: _ -> (a, x = a), (b, x = b)
+    in
+    let ls = [a; b] in
+    List.map ldr2full ls |> vertical "new leader";
+    match a_ok, b_ok with
+    | true, true -> Tty.prompt "choose" |> choose_from ls |> to_pairs
+    | true, false -> cant_afford (Some b); pairs
+    | false, true -> cant_afford (Some a); pairs
+    | false, false -> cant_afford None; pairs
+end
 
 let knight cap =
   Tty.writeln (sprintf "can promote %d cavalry to knight" cap);
@@ -105,7 +147,14 @@ let mercs cap =
   Tty.prompt_amount cap
 
 module Nations (S : Game.State.S) = struct
+  module Set = Game.Nation.Set
   module Support = Game.Support.Roll(S)
+
+  let highlight chosen to_str x =
+    let str = to_str x in
+    if Set.mem x chosen
+    then brackets str
+    else str
 
   let to_str kind =
     Support.chance_of kind
@@ -120,7 +169,8 @@ module Nations (S : Game.State.S) = struct
     Tty.prompt "choose"
     |> choose_from ls
     |> Listx.pick_first Game.Nation.max_allowed
-    |> swap_empty chosen
+    |> swap_empty (Set.elements chosen)
+    |> Set.of_list
 end
 
 let ranger cap =
@@ -131,25 +181,21 @@ let scout () =
   Tty.prompt_yn "send scouts? y/n"
   |> echo (fun x -> if x then Tty.writeln "scouts sent")
 
+let sodistan cap =
+  Tty.writeln (sprintf "can convert %s from sodistan" (sup2str cap));
+  Tty.prompt_amount cap
+
 let templar cap =
   Tty.writeln (sprintf "can promote %d dervish to templar" cap);
   Tty.prompt_amount cap
 
-let trade_nation () =
-  let ls = Game.Nation.kinds in
-  List.map nation2str ls
-  |> horizontal "trade guild nation";
-  Tty.prompt "choose"
-  |> choose_one ls (List.hd ls)
-
 let trade () =
-  let nation = trade_nation () in
-  let boost, certain = Game.Nation.(Boost nation, Certain nation) in
-  [boost; certain]
-  |> List.map trade2str
-  |> horizontal "trade type";
-  if Tty.prompt_int "choose" = 2 then certain else boost
-  |> echo (fun x -> Tty.pairln "chosen" (trade2str x))
+  one_nation "trade guild nation"
+  |> (fun nat -> Tty.writeln (trade2str nat); Some nat)
+
+let veteran cap =
+  Tty.writeln (sprintf "can promote %d men to veteran" cap);
+  Tty.prompt_amount cap
 
 let volunteers cap =
   Tty.writeln (sprintf "%d volunteers want to join" cap);

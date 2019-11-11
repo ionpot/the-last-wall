@@ -1,15 +1,15 @@
 type name = { first : string; house : string }
 type t =
-  { name : name;
-    prev : name list;
-    title : string
+  { name : name
+  ; prev : name list
+  ; title : string
   }
 
 let empty_name = { first = ""; house = "" }
 let empty =
-  { name = empty_name;
-    prev = [];
-    title = ""
+  { name = empty_name
+  ; prev = []
+  ; title = ""
   }
 
 let first t = t.name.first
@@ -38,8 +38,8 @@ module Roll (Dice : Dice.S) = struct
       let name = make first house in
       if List.mem name t.prev then choose () else name
     in
-    { name = choose ();
-      prev = new_prev t;
-      title = pick title
+    { name = choose ()
+    ; prev = new_prev t
+    ; title = pick title
     }
 end

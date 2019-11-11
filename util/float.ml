@@ -25,13 +25,21 @@ let increase x ratio =
 let reduce x ratio =
   x -. x *. ratio
 
+let ssub_by a b = b -. a
+
+let ssub_if cond a b =
+  if cond then b -. a else b
+
 let sub a b =
   if a < b then 0. else a -. b
 
 let sub_by a b = sub b a
 
 let sub_if cond a b =
-  if cond then b -. a else b
+  if cond then sub b a else b
 
 let sub_opt a b =
   if a > b then Some (a -. b) else None
+
+let times n x =
+  float n *. x

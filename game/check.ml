@@ -14,7 +14,7 @@ module LevelUp (State : State.S) = struct
 end
 
 module NoEnemies (State : State.S) = struct
-  let value = State.Enemy.empty ()
+  let value = State.Enemy.check Units.is_empty
 end
 
 module HasEnemies = Not(NoEnemies)
