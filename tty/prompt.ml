@@ -17,12 +17,27 @@ let choose_one avlb other str =
   | [] -> other
   | x :: _ -> x
 
+let choose_with enabled ls str =
+  let f i (e, _) = if e then String.contains str (int2ichar i) else false in
+  List.combine enabled ls
+  |> Listx.filteri f
+  |> List.map snd
+
 let swap_empty ls = function
   | [] -> ls
   | ls -> ls
 
 let indent = List.map (fun str -> "  " ^ str)
-let indices = List.mapi (fun i str -> sprintf "%c) %s" (int2ichar i) str)
+
+let to_index enabled i str =
+  if enabled
+  then sprintf "%c) %s" (int2ichar i) str
+  else sprintf "    %s" str
+
+let indices = List.mapi (to_index true)
+
+let indices_with enabled =
+  List.mapi (fun i str -> to_index (List.nth enabled i) i str)
 
 let horizontal prefix = function
   | [] -> ()
@@ -31,6 +46,10 @@ let horizontal prefix = function
 let vertical prefix ls =
   Tty.writeln (prefix ^ ":");
   indices ls |> indent |> Tty.writelns
+
+let vertical_with enabled prefix ls =
+  Tty.writeln (prefix ^ ":");
+  indices_with enabled ls |> indent |> Tty.writelns
 
 let one_nation str =
   let ls = Game.Nation.kinds in
@@ -114,14 +133,8 @@ module Leader = struct
     Tty.prompt "choose"
     |> choose_one ls Game.Leader.(kind_of empty)
 
-  let str_of = function
-    | Some ldr -> ldr2first ldr
-    | None -> "new leader"
-
-  let cant_afford ldr_opt =
-    str_of ldr_opt
-    |> sprintf "cannot afford %s"
-    |> Tty.writeln
+  let cant_afford () =
+    Tty.writeln "cannot afford new leader"
 
   let pair pairs =
     let ((a, a_ok), (b, b_ok)) = pairs in
@@ -130,12 +143,11 @@ module Leader = struct
       | x :: _ -> (a, x = a), (b, x = b)
     in
     let ls = [a; b] in
-    List.map ldr2full ls |> vertical "new leader";
+    let enabled = [a_ok; b_ok] in
+    List.map ldr2full ls |> vertical_with enabled "new leader";
     match a_ok, b_ok with
-    | true, true -> Tty.prompt "choose" |> choose_from ls |> to_pairs
-    | true, false -> cant_afford (Some b); pairs
-    | false, true -> cant_afford (Some a); pairs
-    | false, false -> cant_afford None; pairs
+    | false, false -> cant_afford (); pairs
+    | _ -> Tty.prompt "choose" |> choose_with enabled ls |> to_pairs
 end
 
 let knight cap =
