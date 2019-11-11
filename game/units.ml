@@ -208,7 +208,7 @@ let upkeep t =
   Map.mapi to_upkeep t |> count_all
 
 let add n kind t =
-  Map.add kind (n + count kind t) t
+  if n > 0 then Map.add kind (n + count kind t) t else t
 
 let combine = Ops.add
 

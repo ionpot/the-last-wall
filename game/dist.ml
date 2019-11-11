@@ -7,6 +7,7 @@ let threshold = 4.
 type acc =
   { absorbed : Defs.power
   ; base : Power.t
+  ; full_absorb : bool
   ; healed : Defs.power
   ; reflected : Defs.power
   ; untouchable : Set.t
@@ -15,6 +16,7 @@ type acc =
 let empty_acc =
   { absorbed = 0.
   ; base = Power.empty
+  ; full_absorb = false
   ; healed = 0.
   ; reflected = 0.
   ; untouchable = Set.empty
@@ -33,7 +35,10 @@ let reflected (a, _, _) = a.reflected
 let remaining (a, m, _) = Power.ceil_count a.base m
 
 let absorb kind p acc =
-  let p', healed = Power.heal kind p acc.base in
+  let p', healed =
+    if acc.full_absorb then 0., p
+    else Power.heal kind p acc.base
+  in
   { acc with absorbed = acc.absorbed +. healed }, p'
 
 let heal kind p acc =
@@ -91,12 +96,18 @@ module Damage (Dice : Dice.S) = struct
       ratio cap |> picked kind input acc |> handle kind acc
   end)
 
-  let from cap base atk dfn =
+  let start acc cap base atk dfn =
     let untouchable = Power.untouchable atk dfn base in
-    let acc = { empty_acc with base; untouchable } in
+    let acc' = { acc with base; untouchable } in
     let input = Power.from_units dfn base in
     let output = Power.empty in
-    Pick.from acc cap input output
+    Pick.from acc' cap input output
+
+  let absorb =
+    start { empty_acc with full_absorb = true }
+
+  let from =
+    start empty_acc
 end
 
 module Fill (Dice : Dice.S) = struct

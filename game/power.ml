@@ -106,5 +106,5 @@ module Roll (Dice : Dice.S) = struct
   let fear units base =
     let a = float (Units.count_all units) in
     let b = of_units units base in
-    Dice.betweenf a (a *. b)
+    Dice.betweenf a b
 end
