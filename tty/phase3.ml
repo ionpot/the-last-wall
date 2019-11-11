@@ -31,7 +31,7 @@ module Make (S : Game.State.S) = struct
       | NoAttack -> ()
       | NoEnemies -> Tty.writeln "no enemies left"
       | Revive (x, _) -> Tty.pairln "revived" (units2str x |> str2none)
-      | Smite x -> Tty.pairln "smite" (smite2str x |> str2none)
+      | Smite x -> Tty.pairln "smite" (units2str x |> str2none)
       | Victory -> ()
 end
 
@@ -49,7 +49,7 @@ module After (S : Status.S) = struct
       | Barraged _ -> S.enemies ()
       | Cyclops (n, _, _) -> if n > 0 then S.units ()
       | Fear (x, _) -> if not (Game.Units.is_empty x) then S.units ()
-      | Smite _ -> S.enemies ()
+      | Smite x -> if Convert.units2bool x then S.enemies ()
       | Victory -> S.units ()
       | _ -> ()
 end

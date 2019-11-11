@@ -202,6 +202,9 @@ let unit_pairs2str ls =
   List.sort (fun (a, _) (b, _) -> unit_cmp a b) ls
   |> map_commas party2str
 
+let units2bool t =
+  Units.is_empty t |> not
+
 let units2str t =
   unit_pairs2str (Units.report t)
 
@@ -242,9 +245,6 @@ let result2stats r =
 
 let barrage2str x =
   units2str Units.(make x Orc)
-
-let smite2str x =
-  units2str Units.(make x Skeleton)
 
 let starve2bool (deserted, starved) =
   not (Units.is_empty starved && Units.is_empty deserted)
