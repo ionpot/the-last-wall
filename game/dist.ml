@@ -55,13 +55,16 @@ let handle kind acc dmg =
     else acc, dmg
   in acc', dmg, sub
 
-let unit2str = function
+let unit2str =
+  let open Units in
+  function
   | Ballista -> "ballista"
   | Berserker -> "berserker"
   | Cavalry -> "cavalry"
   | Cyclops -> "cyclops"
   | Demon -> "demon"
   | Dervish -> "dervish"
+  | Dullahan -> "dullahan"
   | Harpy -> "harpy"
   | Knight -> "knight"
   | Men -> "men"
@@ -70,6 +73,7 @@ let unit2str = function
   | Ranger -> "ranger"
   | Skeleton -> "skeleton"
   | Templar -> "templar"
+  | Veteran -> "veteran"
 
 let mitigate kind input acc cap =
   let ratio = Power.ceil_count acc.base input |> Units.ratio_of kind in
@@ -136,6 +140,7 @@ module Fill (Dice : Dice.S) = struct
         |> min (Power.Fn.count base kind cap)
         |> Dice.roll
       in
+      Printf.printf "roll: %.3f cap, %s -> %d\n" cap (unit2str kind) p;
       base, Power.Fn.mul base kind p, p
   end)
 
