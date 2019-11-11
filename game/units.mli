@@ -21,6 +21,7 @@ module Attr : sig
   val is_infectable : t
   val is_revivable : t
   val is_siege : t
+  val is_undead : t
 end
 
 module Base : sig

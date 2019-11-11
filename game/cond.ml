@@ -124,17 +124,20 @@ module Revive = struct
 end
 
 module Smite = struct
-  type t = Defs.count
+  type t = Units.t
   module Apply (S : State.S) = struct
-    let value n = S.Enemy.map Units.(sub n Skeleton)
+    let value died =
+      S.Enemy.map (Units.reduce died)
   end
   module Check (S : State.S) = struct
     let value = S.Deity.is Deity.Lerota
-      && S.Enemy.check Units.(has Skeleton)
   end
   module Make (S : State.S) = struct
-    let boost = if S.Build.check Build.(is_ready Observatory) then 15 else 0
-    let n = S.Dice.between 15 35 + boost
-    let value = S.Enemy.return Units.(find n Skeleton)
+    module Fill = Dist.Fill(S.Dice)
+    let obser = S.Build.check Build.(is_ready Observatory)
+    let cap = S.Dice.betweenf 5. 15. |> Float.add_if obser 10.
+    let base = S.Bonus.return Power.base
+    let units = S.Enemy.return Units.(filter Attr.is_undead)
+    let value = Fill.from cap base units |> fst
   end
 end
