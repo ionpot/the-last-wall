@@ -113,11 +113,11 @@ let facilities nat map =
   |> Tty.ifpairln "facilities"
 
 let fear (fled, _) =
-  if not (Units.is_empty fled)
+  if units2bool fled
   then sprintf "%s fled in fear" (units2str fled) |> Tty.writeln
 
 let fear_end fled =
-  if not (Units.is_empty fled)
+  if units2bool fled
   then sprintf "%s returns" (units2str fled) |> Tty.writeln
 
 let mishap t =

@@ -85,7 +85,7 @@ module After (S : Status.S) = struct
       | BuildSupply s -> if s > 0 then S.res ()
       | Cavalry n -> if n > 0 then begin S.cavalry n; S.res () end
       | Facilities x -> S.facilities x
-      | FearEnd x -> if not (Game.Units.is_empty x) then S.res ()
+      | FearEnd x -> if Convert.units2bool x then S.res ()
       | Starvation x -> if Convert.starve2bool x then S.res ()
       | Support _
       | Upkeep _ -> S.res ()

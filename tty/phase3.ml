@@ -48,7 +48,7 @@ module After (S : Status.S) = struct
       | Ballista (n, _, _) -> if n > 0 then S.enemies ()
       | Barraged _ -> S.enemies ()
       | Cyclops (n, _, _) -> if n > 0 then S.units ()
-      | Fear (x, _) -> if not (Game.Units.is_empty x) then S.units ()
+      | Fear (x, _) -> if Convert.units2bool x then S.units ()
       | Smite x -> if Convert.units2bool x then S.enemies ()
       | Victory -> S.units ()
       | _ -> ()
