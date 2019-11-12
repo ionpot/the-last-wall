@@ -37,6 +37,9 @@ module Attr = struct
   let is_infectable = (<>) Ballista
   let is_revivable = is_infantry
   let is_siege = (=) Ballista
+  let is_undead = function
+    | Skeleton | Dullahan -> true
+    | _ -> false
 end
 
 module Base = struct
@@ -66,11 +69,8 @@ module Base = struct
     | _ -> 0.
 
   let hit_chance = function
-    | Ballista -> 0.1
-    | Dervish -> 0.3
-    | Knight -> 0.8
-    | Ranger -> 0.2
-    | Templar -> 0.5
+    | Ballista -> 0.25
+    | Dervish | Ranger -> 0.5
     | _ -> 1.
 
   let power = function
@@ -208,7 +208,7 @@ let upkeep t =
   Map.mapi to_upkeep t |> count_all
 
 let add n kind t =
-  Map.add kind (n + count kind t) t
+  if n > 0 then Map.add kind (n + count kind t) t else t
 
 let combine = Ops.add
 
@@ -238,25 +238,15 @@ let starve supply t =
 let sub n kind t =
   Map.update kind (function Some x -> Number.sub_opt x n | x -> x) t
 
-module Roll (Dice : Dice.S) = struct
-  let kind t =
-    let n = Map.cardinal t |> Dice.roll in
-    let key, _ = Map.choose t in
-    let f k _ (k', n') =
-      if n' > 0 then k, pred n' else k', n'
-    in
-    Map.fold f t (key, n) |> fst
-end
-
 module Fill (Dice : Dice.S) = struct
-  module Roll = Roll(Dice)
+  module Roll = Dice.Map(Map)
   module Pick = Pick.With(struct
     module Cap = Pick.Int
     module Map = Map
     module Type = Cap
     type map = Type.t Map.t
     type step = Cap.t * Type.t
-    let choose = Roll.kind
+    let choose = Roll.key
     let roll cap kind t =
       let n = Map.find kind t |> min cap |> Dice.roll in
       n, n

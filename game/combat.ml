@@ -36,8 +36,19 @@ module Make (S : State.S) = struct
   let units = S.Units.get ()
   let mobile = Units.(discard Attr.is_siege) units
 
-  let dist dmg a b =
-    Damage.from dmg base a b
+  let dist_atk dmg a b =
+    let module D = Damage(struct
+      let full_absorb = true
+      let use_ratio = false
+    end) in
+    D.from dmg base a b
+
+  let dist_dfn dmg a b =
+    let module D = Damage(struct
+      let full_absorb = false
+      let use_ratio = true
+    end) in
+    D.from dmg base a b
 
   let power_of u =
     Power.of_units u base
@@ -47,7 +58,7 @@ module Make (S : State.S) = struct
     let attack = power_of enemies
     let defense = Dr.value
     let damage = Float.reduce attack defense
-    let result = dist damage enemies units
+    let result = dist_dfn damage enemies units
     let retreat = Dist.no_remaining result && have_fort
     let fled, fought =
       if retreat
@@ -56,12 +67,12 @@ module Make (S : State.S) = struct
     let power = power_of fought
     let casualty =
       if retreat
-      then dist power enemies fought
+      then dist_dfn power enemies fought
       else result
     let enemies =
       let refl = Dist.reflected casualty in
       let dmg = Float.increase power defense in
-      dist (dmg +. refl) fought enemies
+      dist_atk (dmg +. refl) fought enemies
     let ldr_died =
       if retreat then false
       else S.Leader.check LdrRoll.death

@@ -9,7 +9,12 @@ val outcome : t -> Units.t
 val reflected : t -> Defs.power
 val remaining : t -> Units.t
 
-module Damage : Dice.S -> sig
+module type Flags = sig
+  val full_absorb : bool
+  val use_ratio : bool
+end
+
+module Damage : Dice.S -> Flags -> sig
   val from : Defs.power -> Power.t -> Units.t -> Units.t -> t
 end
 

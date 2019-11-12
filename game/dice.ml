@@ -26,6 +26,9 @@ module type S = sig
   val rollf : float -> float
   val round : float -> int
   val yes : unit -> bool
+  module Map (Map : Map.S) : sig
+    val key : 'a Map.t -> Map.key
+  end
 end
 
 module From (M : From) : S = struct
@@ -95,4 +98,11 @@ module From (M : From) : S = struct
   let round x =
     let f = if yes () then floor else ceil in
     truncate (f x)
+
+  module Map (Map : Map.S) = struct
+    module Mapx = Mapx.Make(Map)
+
+    let key m =
+      Map.cardinal m |> roll |> Mapx.nth m
+  end
 end

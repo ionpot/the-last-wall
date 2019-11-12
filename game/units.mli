@@ -21,6 +21,7 @@ module Attr : sig
   val is_infectable : t
   val is_revivable : t
   val is_siege : t
+  val is_undead : t
 end
 
 module Base : sig
@@ -71,8 +72,4 @@ end
 module Report : Dice.S -> sig
   val from : t -> report
   val sum_from : t -> sum_report
-end
-
-module Roll : Dice.S -> sig
-  val kind : t -> kind
 end

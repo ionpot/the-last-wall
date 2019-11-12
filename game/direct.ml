@@ -116,11 +116,11 @@ module Facilities = struct
 end
 
 module Fear = struct
-  type t = Units.t * Units.t
+  type t = Units.t
   module Apply (S : State.S) = struct
-    let value (fled, rem) =
+    let value fled =
       S.Feared.set fled;
-      S.Units.set rem
+      S.Units.map (Units.reduce fled)
   end
   module Make (S : State.S) = struct
     module Fill = Dist.Fill(S.Dice)
@@ -129,7 +129,7 @@ module Fear = struct
     let base = S.Bonus.return Power.base
     let cap = Roll.fear e base
     let units = S.Units.return Units.(discard Attr.is_siege)
-    let value = Fill.from cap base units
+    let value = Fill.from cap base units |> fst
   end
 end
 
@@ -230,7 +230,7 @@ module Upkeep = struct
     module Check = Support.Check(S)
     let cav, rest = S.Units.return Units.(split Attr.is_cavalry)
     let tulron = Check.has_traded Nation.Tulron
-    let cav_bonus = Float.if_ok 0.1 tulron
+    let cav_bonus = Float.if_ok 0.2 tulron
     let cavs = Units.upkeep cav |> Number.reduce_by cav_bonus
     let scouts = S.Scout.return (Number.if_ok 10)
     let total = cavs + Units.upkeep rest + scouts
