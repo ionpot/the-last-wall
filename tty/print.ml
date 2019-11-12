@@ -112,7 +112,7 @@ let facilities nat map =
   |> facs2str nat
   |> Tty.ifpairln "facilities"
 
-let fear (fled, _) =
+let fear fled =
   if units2bool fled
   then sprintf "%s fled in fear" (units2str fled) |> Tty.writeln
 
