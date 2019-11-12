@@ -1,15 +1,17 @@
 module With (S : State.S) = struct
+  module Attr = Units.Attr
   module Base = Units.Base
-
-  let is_cav = Units.Attr.is_cavalry
+  module Check = Support.Check(S)
 
   let ldr_is kind =
     S.Leader.check (Leader.is_living kind)
 
-  let bonus_for kind =
-    if ldr_is Leader.Aristocrat && is_cav kind then 0.2
-    else if ldr_is Leader.Merchant && kind = Units.Merc then 0.1
-    else 0.
+  let traded = Check.has_traded
+
+  let bonus_for kind = 0.
+    |> Float.add_if (ldr_is Leader.Aristocrat && Attr.is_cavalry kind) 0.2
+    |> Float.add_if (ldr_is Leader.Merchant && kind = Units.Merc) 0.1
+    |> Float.add_if (traded Nation.Clan && Attr.is_siege kind) 0.2
 
   let avlb_sup kind =
     Number.increase_by (bonus_for kind)
@@ -30,12 +32,12 @@ module With (S : State.S) = struct
       |> Number.sub (S.Build.return Build.arena_cap)
 
     let stable () =
-      Units.(filter_count Attr.is_cavalry)
+      Units.filter_count Attr.is_cavalry
       |> S.Units.return
       |> Number.sub (S.Build.return Build.stable_cap)
 
     let temple () =
-      Units.(filter_count Attr.is_holy)
+      Units.filter_count Attr.is_holy
       |> S.Units.return
       |> Number.sub (S.Build.return Build.temple_cap)
   end

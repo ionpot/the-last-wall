@@ -73,7 +73,3 @@ module Report : Dice.S -> sig
   val from : t -> report
   val sum_from : t -> sum_report
 end
-
-module Roll : Dice.S -> sig
-  val kind : t -> kind
-end

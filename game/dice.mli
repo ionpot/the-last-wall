@@ -26,6 +26,9 @@ module type S = sig
   val rollf : float -> float
   val round : float -> int
   val yes : unit -> bool
+  module Map (Map : Map.S) : sig
+    val key : 'a Map.t -> Map.key
+  end
 end
 
 module From : From -> S
