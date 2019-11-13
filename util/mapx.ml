@@ -1,10 +1,12 @@
 module Make (Map : Map.S) = struct
+  let filterk f t =
+    Map.filter (fun k _ -> f k) t
+
+  let discardk f t =
+    filterk (fun k -> not (f k)) t
+
   let mapk f t =
     Map.mapi (fun k _ -> f k) t
-
-  let min t =
-    Map.min_binding t |> snd
-    |> Map.fold (fun _ -> min) t
 
   let nth t n =
     let key, _ = Map.choose t in
@@ -29,4 +31,46 @@ module Make (Map : Map.S) = struct
     let sum t =
       Map.fold (fun _ -> (+.)) t 0.
   end
+
+  module Int = struct
+    type t = int Map.t
+
+    let add t_a t_b =
+      Map.union (fun _ a b -> Some (a + b)) t_a t_b
+
+    let div t_a t_b =
+      let f _ a_opt = function
+        | Some b ->
+            if b > 0
+            then Some (Number.maybe 0 a_opt / b)
+            else None
+        | None -> None
+      in
+      Map.merge f t_a t_b
+
+    let min t =
+      let cmp n = function
+        | Some x -> Some (min x n)
+        | None -> Some n
+      in
+      Map.fold (fun _ -> cmp) t None
+      |> Number.maybe 0
+
+    let mul_by n t =
+      Map.map (( * ) n) t
+
+    let sub t_a t_b =
+      let f _ a_opt = function
+        | Some b -> Number.(sub_opt (maybe 0 a_opt) b)
+        | None -> a_opt
+      in
+      Map.merge f t_a t_b
+
+    let sum t =
+      Map.fold (fun _ -> (+)) t 0
+  end
+
+  let min t =
+    Map.min_binding t |> snd
+    |> Map.fold (fun _ -> min) t
 end
