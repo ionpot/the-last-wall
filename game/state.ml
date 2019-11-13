@@ -1,6 +1,5 @@
 module type S = sig
   module Arena : Value.Num
-  module Ballista : Value.Num
   module Barrage : Value.S with type t = Barrage.t
   module Bonus : Value.S with type t = Bonus.t
   module Build : Value.S with type t = Build.t
@@ -19,6 +18,7 @@ module type S = sig
   module Scout : Value.Bit
   module Starved : Value.S with type t = Units.t
   module Supply : Value.Num
+  module Training : Value.S with type t = Units.t
   module Turn : Value.Num
   module Units : Value.S with type t = Units.t
   module Weather : Value.S with type t = Weather.t
@@ -26,7 +26,6 @@ end
 
 module Make (D : Dice.From) : S = struct
   module Arena = Value.Num(Value.Zero)
-  module Ballista = Value.Num(Value.Zero)
   module Barrage = Value.From(Barrage)
   module Bonus = Value.From(Bonus)
   module Build = Value.From(Build)
@@ -45,6 +44,7 @@ module Make (D : Dice.From) : S = struct
   module Scout = Value.Bit(Value.False)
   module Starved = Value.From(Units)
   module Supply = Value.Num(Value.Zero)
+  module Training = Value.From(Units)
   module Turn = Value.Num(Value.Zero)
   module Units = Value.From(Units)
   module Weather = Value.From(Weather)
