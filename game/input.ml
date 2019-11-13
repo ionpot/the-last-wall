@@ -134,18 +134,9 @@ module Dervish = struct
   end
 end
 
-module Knight = struct
-  type t = Defs.count
+module Knight = Event.Promote(struct
   let kind = Units.Knight
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promotable kind
-  end
-end
+end)
 
 module LeaderKind = struct
   type t = Leader.kind
@@ -210,21 +201,12 @@ module Nations = struct
   end
 end
 
-module Ranger = struct
-  type t = Defs.count
+module Ranger = Event.PromoteCheck(struct
   let kind = Units.Ranger
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
   module Check (S : State.S) = struct
     let value = S.Deity.is Deity.Sitera
   end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promotable kind
-  end
-end
+end)
 
 module Scout = struct
   type t = bool
@@ -251,21 +233,12 @@ module Sodistan = struct
   end
 end
 
-module Templar = struct
-  type t = Defs.count
+module Templar = Event.PromoteCheck(struct
   let kind = Units.Templar
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
   module Check (S : State.S) = struct
     let value = not (S.Deity.is Deity.Sitera)
   end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promotable kind
-  end
-end
+end)
 
 module Trade = struct
   type t = Nation.kind option
@@ -289,21 +262,12 @@ module Trade = struct
   end
 end
 
-module Veteran = struct
-  type t = Defs.count
+module Veteran = Event.PromoteCheck(struct
   let kind = Units.Veteran
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
   module Check (S : State.S) = struct
     let value = S.Build.check Build.(is_ready Barracks)
   end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promotable kind
-  end
-end
+end)
 
 module Volunteers = struct
   module Range = Range.Int
