@@ -201,12 +201,14 @@ module Nations = struct
   end
 end
 
-module Ranger = Event.PromoteCheck(struct
-  let kind = Units.Ranger
+module Ranger = struct
+  include Event.Promote(struct
+    let kind = Units.Ranger
+  end)
   module Check (S : State.S) = struct
     let value = S.Deity.is Deity.Sitera
   end
-end)
+end
 
 module Scout = struct
   type t = bool
@@ -233,12 +235,14 @@ module Sodistan = struct
   end
 end
 
-module Templar = Event.PromoteCheck(struct
-  let kind = Units.Templar
+module Templar = struct
+  include Event.Promote(struct
+    let kind = Units.Templar
+  end)
   module Check (S : State.S) = struct
     let value = not (S.Deity.is Deity.Sitera)
   end
-end)
+end
 
 module Trade = struct
   type t = Nation.kind option
@@ -262,12 +266,14 @@ module Trade = struct
   end
 end
 
-module Veteran = Event.PromoteCheck(struct
-  let kind = Units.Veteran
+module Veteran = struct
+  include Event.Promote(struct
+    let kind = Units.Veteran
+  end)
   module Check (S : State.S) = struct
     let value = S.Build.check Build.(is_ready Barracks)
   end
-end)
+end
 
 module Volunteers = struct
   module Range = Range.Int

@@ -65,11 +65,6 @@ module type Kind = sig
   val kind : Units.kind
 end
 
-module type KindCheck = sig
-  include Kind
-  include CanCheck
-end
-
 module Promote (K : Kind) = struct
   type t = Defs.count
   module Apply (S : State.S) = struct
@@ -80,9 +75,4 @@ module Promote (K : Kind) = struct
     module Recruit = Recruit.With(S)
     let value = Recruit.promotable K.kind
   end
-end
-
-module PromoteCheck (K : KindCheck) = struct
-  include Promote(K)
-  module Check = K.Check
 end
