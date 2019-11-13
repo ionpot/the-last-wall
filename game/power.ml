@@ -1,4 +1,5 @@
 module Map = Units.Map
+module Mapx = Mapx.Make(Map)
 module Set = Units.Set
 
 type t = Defs.power Map.t
@@ -51,6 +52,8 @@ let min t =
 
 let max t =
   Map.fold (fun k -> max) t 0.
+
+let pick = Mapx.Float.pick
 
 let sum t =
   Map.fold (fun _ -> (+.)) t 0.
