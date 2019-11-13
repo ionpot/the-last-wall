@@ -1,6 +1,7 @@
 type kind = Arena | Barracks | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade
 
 module Map = Map.Make(struct type t = kind let compare = compare end)
+module Mapx = Mapx.Make(Map)
 
 type cost = Resource.t
 type cost_map = cost Map.t
@@ -136,37 +137,16 @@ module Ready = struct
   let add kind t =
     Map.add kind 1 t
 
-  let bump kind t =
-    let f = function
-      | Some x -> Some (succ x)
-      | None -> Some 1
-    in
-    Map.update kind f t
-
+  let bump = Mapx.Int.succ
   let bump_ls = fn_ls bump
-
-  let count kind t =
-    if Map.mem kind t
-    then Map.find kind t
-    else 0
-
-  let decr kind t =
-    let f = function
-      | Some x -> Number.sub_opt x 1
-      | None -> None
-    in
-    Map.update kind f t
-
-  let from ls =
-    bump_ls ls empty
-
+  let count = Mapx.Int.value
+  let decr = Mapx.Int.pred
+  let from ls = bump_ls ls empty
   let has = Map.mem
-
-  let sum t =
-    Map.fold (fun _ -> (+)) t 0
+  let sum = Mapx.Int.sum
 
   let mausoleums t =
-    Map.filter (fun k _ -> match k with Mausoleum _ -> true | _ -> false) t
+    Mapx.filterk (function Mausoleum _ -> true | _ -> false) t
     |> sum
 end
 

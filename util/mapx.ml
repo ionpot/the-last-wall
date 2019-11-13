@@ -68,6 +68,17 @@ module Make (Map : Map.S) = struct
 
     let sum t =
       Map.fold (fun _ -> (+)) t 0
+
+    let value k t =
+      if Map.mem k t then Map.find k t else 0
+
+    let pred k t =
+      match Number.sub_opt (value k t) 1 with
+      | Some x -> Map.add k x t
+      | None -> Map.remove k t
+
+    let succ k t =
+      Map.add k (value k t + 1) t
   end
 
   let min t =
