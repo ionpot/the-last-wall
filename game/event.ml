@@ -65,6 +65,18 @@ module type Kind = sig
   val kind : Units.kind
 end
 
+module Promote (K : Kind) = struct
+  type t = Defs.count
+  module Apply (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value = Recruit.promote K.kind
+  end
+  module Make (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value = Recruit.promotable K.kind
+  end
+end
+
 module Train (K : Kind) = struct
   type t = Defs.count
   module Apply (S : State.S) = struct

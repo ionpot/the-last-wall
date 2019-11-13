@@ -115,18 +115,9 @@ module Dervish = struct
   end
 end
 
-module Knight = struct
-  type t = Defs.count
+module Knight = Event.Promote(struct
   let kind = Units.Knight
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promotable kind
-  end
-end
+end)
 
 module LeaderKind = struct
   type t = Leader.kind
@@ -192,18 +183,11 @@ module Nations = struct
 end
 
 module Ranger = struct
-  type t = Defs.count
-  let kind = Units.Ranger
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
+  include Event.Promote(struct
+    let kind = Units.Ranger
+  end)
   module Check (S : State.S) = struct
     let value = S.Deity.is Deity.Sitera
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promotable kind
   end
 end
 
@@ -233,18 +217,11 @@ module Sodistan = struct
 end
 
 module Templar = struct
-  type t = Defs.count
-  let kind = Units.Templar
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
+  include Event.Promote(struct
+    let kind = Units.Templar
+  end)
   module Check (S : State.S) = struct
     let value = not (S.Deity.is Deity.Sitera)
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promotable kind
   end
 end
 
@@ -271,18 +248,11 @@ module Trade = struct
 end
 
 module Veteran = struct
-  type t = Defs.count
-  let kind = Units.Veteran
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
+  include Event.Promote(struct
+    let kind = Units.Veteran
+  end)
   module Check (S : State.S) = struct
     let value = S.Build.check Build.(is_ready Barracks)
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promotable kind
   end
 end
 
