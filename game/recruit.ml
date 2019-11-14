@@ -1,10 +1,37 @@
+module Attr = Units.Attr
+
+let bld_of k =
+  if k = Units.Berserker then Some Build.Arena
+  else if Attr.is_cavalry k then Some Build.Stable
+  else if Attr.is_holy k then Some Build.Temple
+  else if Attr.is_siege k then Some Build.Engrs
+  else None
+
+let attr_of b k =
+  match b, bld_of k with
+  | Some a, Some b -> a = b
+  | _ -> false
+
 module With (S : State.S) = struct
-  module Attr = Units.Attr
   module Base = Units.Base
   module Check = Support.Check(S)
 
+  let bld_cap_of b =
+    S.Build.return (Build.cap_of b)
+
+  let temple_cap () =
+    bld_cap_of Build.Temple + bld_cap_of Build.Guesthouse
+
+  let bld_cap = function
+    | Some Build.Temple -> temple_cap ()
+    | Some b -> bld_cap_of b
+    | None -> 0
+
   let ldr_is kind =
     S.Leader.check (Leader.is_living kind)
+
+  let is_fast kind =
+    if Attr.is_siege kind then ldr_is Engineer else false
 
   let traded = Check.has_traded
 
@@ -29,17 +56,17 @@ module With (S : State.S) = struct
     let arena () =
       Units.(count Berserker)
       |> S.Units.return
-      |> Number.sub (S.Build.return Build.arena_cap)
+      |> Number.sub (bld_cap_of Build.Arena)
 
     let stable () =
       Units.filter_count Attr.is_cavalry
       |> S.Units.return
-      |> Number.sub (S.Build.return Build.stable_cap)
+      |> Number.sub (bld_cap_of Build.Stable)
 
     let temple () =
       Units.filter_count Attr.is_holy
       |> S.Units.return
-      |> Number.sub (S.Build.return Build.temple_cap)
+      |> Number.sub (temple_cap ())
   end
 
   let supply_limit kind cap =
@@ -59,6 +86,18 @@ module With (S : State.S) = struct
   let promotable kind =
     exclude () |> Units.promotable kind |> supply_limit kind
 
+  let vacancy kind =
+    let bld = bld_of kind in
+    let attr = attr_of bld in
+    bld_cap bld
+    - S.Units.return (Units.filter_count attr)
+    - S.Training.return (Units.filter_count attr)
+
+  let trainable kind =
+    let cap = vacancy kind in
+    S.Units.return (Units.affordable kind cap)
+    |> supply_limit kind
+
   let sub_cost kind n =
     S.Supply.sub (cost_of kind n);
     S.Units.map Units.(cost n kind |> reduce)
@@ -66,4 +105,12 @@ module With (S : State.S) = struct
   let promote kind n =
     sub_cost kind n;
     S.Units.map Units.(add n kind)
+
+  let train kind n =
+    sub_cost kind n;
+    let pool, rest = S.Training.return (Units.pop kind) in
+    let a, b = if is_fast kind then 0, n else n, 0 in
+    let n' = Units.count_all pool + b in
+    S.Units.map (Units.add n' kind);
+    S.Training.set (Units.add a kind rest)
 end

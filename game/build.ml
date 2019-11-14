@@ -22,6 +22,14 @@ end
 let avlb_default =
   [Arena; Barracks; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; Trade]
 
+let base_cap = function
+  | Arena -> 10
+  | Engrs -> 5
+  | Guesthouse -> 20
+  | Stable -> 10
+  | Temple -> 20
+  | _ -> 0
+
 let base_cost =
   let open Resource in
   function
@@ -175,8 +183,8 @@ let cost_map t =
 let count kind t =
   Ready.count kind t.ready
 
-let arena_cap t =
-  count Arena t * 10
+let cap_of kind t =
+  count kind t * base_cap kind
 
 let is_built kind t =
   Built.has kind t.built
@@ -186,9 +194,6 @@ let is_ready kind t =
 
 let is_complete kind t =
   is_built kind t || is_ready kind t
-
-let ballista_cap t =
-  if is_ready Engrs t then 5 else 0
 
 let built t = t.built
 
@@ -205,17 +210,9 @@ let queue t = t.queue
 
 let ready t = t.ready
 
-let stable_cap t =
-  count Stable t * 10
-
 let status t =
   let built, ongoing = Queue.built t.queue in
   t.built, built, ongoing
-
-let temple_cap t =
-  if is_ready Guesthouse t then 40
-  else if is_ready Temple t then 20
-  else 0
 
 let died ldr t =
   { t with avlb = Avlb.add (Mausoleum ldr) t.avlb }

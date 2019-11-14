@@ -1,25 +1,6 @@
-module Ballista = struct
-  type t = Defs.count * Defs.count
+module Ballista = Event.Train(struct
   let kind = Units.Ballista
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value (n, _) =
-      Recruit.sub_cost kind n;
-      let eng = S.Leader.check Leader.(is_living Engineer) in
-      let normal, fast = if eng then 0, n else n, 0 in
-      let n' = S.Ballista.get () + fast in
-      S.Units.map (Units.add n' kind);
-      S.Ballista.set normal
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let have = S.Units.return (Units.count kind)
-    let total = have + S.Ballista.get ()
-    let cap = S.Build.return Build.ballista_cap
-    let avlb = Recruit.affordable kind (cap - total)
-    let value = avlb, total
-  end
-end
+end)
 
 module Barracks = struct
   type t = Nation.kind option

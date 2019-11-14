@@ -41,10 +41,9 @@ val is_multiple : kind -> bool
 val manpwr_range : kind -> manpower range
 val supply_range : kind -> supply range
 
-val arena_cap : t -> count
 val available : t -> Avlb.t
-val ballista_cap : t -> count
 val built : t -> Built.t
+val cap_of : kind -> t -> count
 val cost_map : t -> cost_map
 val count : kind -> t -> count
 val is_built : kind -> t -> bool
@@ -55,9 +54,7 @@ val need_manp : t -> manpower
 val need_supp : t -> supply
 val queue : t -> Queue.t
 val ready : t -> Ready.t
-val stable_cap : t -> count
 val status : t -> status
-val temple_cap : t -> count
 
 val died : Leader.t -> t -> t
 val manp : manpower -> manpower -> t -> t

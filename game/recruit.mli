@@ -11,7 +11,9 @@ module With : State.S -> sig
   val dervish_range : unit -> count range
   val promotable : Units.kind -> count
   val supply_limit : Units.kind -> count -> count
+  val trainable : Units.kind -> count
 
   val promote : Units.kind -> count -> unit
   val sub_cost : Units.kind -> count -> unit
+  val train : Units.kind -> count -> unit
 end

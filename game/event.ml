@@ -76,3 +76,15 @@ module Promote (K : Kind) = struct
     let value = Recruit.promotable K.kind
   end
 end
+
+module Train (K : Kind) = struct
+  type t = Defs.count
+  module Apply (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value = Recruit.train K.kind
+  end
+  module Make (S : State.S) = struct
+    module Recruit = Recruit.With(S)
+    let value = Recruit.trainable K.kind
+  end
+end
