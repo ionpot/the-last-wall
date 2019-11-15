@@ -1,5 +1,8 @@
+let add_if cond x n =
+  if cond then n + x else n
+
 let add_if_ptv x n =
-  if n > 0 then n + x else n
+  add_if (n > 0) x n
 
 let div a b =
   a / max b 1
