@@ -13,11 +13,13 @@ module Make (S : Map.S) : sig
   module Int : sig
     type t = int S.t
     val add : t -> t -> t
+    val add_to : S.key -> int -> t -> t
     val div : t -> t -> t
     val min : t -> int
     val mul_by : int -> t -> t
     val pred : S.key -> t -> t
     val sub : t -> t -> t
+    val sub_from : S.key -> int -> t -> t
     val succ : S.key -> t -> t
     val sum : t -> int
     val value : S.key -> t -> int
