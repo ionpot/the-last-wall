@@ -67,19 +67,12 @@ module BuildSupply = struct
   end
 end
 
-module Cavalry = struct
-  type t = Defs.count
+module Cavalry = Recruit.Event(struct
   let kind = Units.Cavalry
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let cap = Recruit.Missing.stable ()
-    let value = Recruit.affordable kind cap
-  end
-end
+  let action = Recruit.Add
+  let pool = None
+  module Cap = Recruit.NoCap
+end)
 
 module Combat = Combat
 

@@ -48,10 +48,6 @@ module With (S : State.S) = struct
     (Base.supply_cost kind * n)
     |> Number.reduce_by (bonus_for kind)
 
-  let dervish_range () =
-    if S.Build.check Build.(is_ready Guesthouse)
-    then 3, 12 else 2, 8
-
   module Missing = struct
     let arena () =
       Units.(count Berserker)
