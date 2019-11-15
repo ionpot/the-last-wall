@@ -1,3 +1,28 @@
+type action = Add | Promote | Train
+type pool =
+  | Exclude of Pool.kind
+  | From of Pool.kind * Units.kind
+  | To of Pool.kind
+
+module type Cap = State.S -> sig
+  val value : Defs.count option
+end
+
+module type Type = sig
+  val action : action
+  val kind : Units.kind
+  val pool : pool option
+  module Cap : Cap
+end
+
+module Event (T : Type) = struct
+  type t = Defs.count
+  module Apply (_ : State.S) = struct let value _ = () end
+  module Make (_ : State.S) = struct let value = 0 end
+end
+
+module NoCap (_ : State.S) = struct let value = None end
+
 module Attr = Units.Attr
 
 let bld_of k =
