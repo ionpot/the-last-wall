@@ -72,15 +72,11 @@ module With (S : State.S) = struct
       min cap (supp / cost)
     else cap
 
-  let exclude () =
-    let n = S.Dervish.get () in
-    S.Units.return Units.(sub n Dervish)
-
   let affordable kind cap =
-    exclude () |> Units.affordable kind cap |> supply_limit kind
+    S.Units.get () |> Units.affordable kind cap |> supply_limit kind
 
   let promotable kind =
-    exclude () |> Units.promotable kind |> supply_limit kind
+    S.Units.get () |> Units.promotable kind |> supply_limit kind
 
   let vacancy kind =
     let bld = bld_of kind in

@@ -82,11 +82,14 @@ module Facilities = struct
   let arena = Build.Arena
   module Apply (S : State.S) = struct
     module Add = Event.AddRes(S)
+    let arena_mnp t =
+      if Map.mem arena t
+      then Map.find arena t |> Resource.manp_of
+      else 0
     let value t =
       Map.iter (fun _ -> Add.value) t;
-      if Map.mem arena t
-      then Map.find arena t |> Resource.manp_of |> S.Arena.set
-      else S.Arena.clear ()
+      let n = arena_mnp t in
+      S.Pool.map Pool.(set Arena n)
   end
   module Make (S : State.S) = struct
     let disease = S.Mishap.check Mishap.(has Disease)
