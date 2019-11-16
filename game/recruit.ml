@@ -15,15 +15,94 @@ module type Type = sig
   module Cap : Cap
 end
 
+module Attr = Units.Attr
+module Base = Units.Base
+
+let translate n k_in k_out =
+  Power.translate k_in k_out n Power.empty
+
+module Check (S : State.S) = struct
+  module Check = Support.Check(S)
+
+  let ldr_is kind =
+    S.Leader.check (Leader.is_living kind)
+
+  let traded = Check.has_traded
+end
+
+module Pool (S : State.S) = struct
+  let map = S.Pool.map
+
+  let apply' n kind = function
+    | Exclude _ -> ()
+    | From (pk, kind') ->
+        let n' = translate n kind kind' in
+        Pool.sub pk n' |> map
+    | To pk -> Pool.add pk n |> map
+
+  let apply n kind = function
+    | Some ptype -> apply' n kind ptype
+    | None -> ()
+end
+
+module Supply (S : State.S) = struct
+  module Check = Check(S)
+
+  let ldr_is = Check.ldr_is
+  let traded = Check.traded
+
+  let bonus_for kind = 0.
+    |> Float.add_if (ldr_is Leader.Aristocrat && Attr.is_cavalry kind) 0.2
+    |> Float.add_if (ldr_is Leader.Merchant && kind = Units.Merc) 0.1
+    |> Float.add_if (traded Nation.Clan && Attr.is_siege kind) 0.2
+
+  let avlb kind =
+    Number.increase_by (bonus_for kind)
+    |> S.Supply.return
+
+  let cost n kind =
+    (n * Base.supply_cost kind)
+    |> Number.reduce_by (bonus_for kind)
+
+  let sub n kind =
+    S.Supply.sub (cost n kind)
+end
+
+module Train (S : State.S) = struct
+  module Check = Check(S)
+
+  let is_fast kind =
+    if Attr.is_siege kind
+    then Check.ldr_is Engineer
+    else false
+
+  let apply n kind =
+    let pop = Units.pop kind in
+    let trained, rest = S.Training.return pop in
+    let a, b = if is_fast kind then 0, n else n, 0 in
+    S.Training.set (Units.add a kind rest);
+    Units.add b kind trained
+    |> Units.combine
+    |> S.Units.map
+end
+
 module Event (T : Type) = struct
   type t = Defs.count
-  module Apply (_ : State.S) = struct let value _ = () end
+  module Apply (S : State.S) = struct
+    module Pool = Pool(S)
+    module Supply = Supply(S)
+    module Train = Train(S)
+    let value n =
+      Pool.apply n T.kind T.pool;
+      Supply.sub n T.kind;
+      if T.action = Train
+      then Train.apply n T.kind
+      else S.Units.map (Units.add n T.kind)
+  end
   module Make (_ : State.S) = struct let value = 0 end
 end
 
 module NoCap (_ : State.S) = struct let value = None end
-
-module Attr = Units.Attr
 
 let bld_of k =
   if k = Units.Berserker then Some Build.Arena
@@ -38,7 +117,6 @@ let attr_of b k =
   | _ -> false
 
 module With (S : State.S) = struct
-  module Base = Units.Base
   module Check = Support.Check(S)
 
   let bld_cap_of b =
