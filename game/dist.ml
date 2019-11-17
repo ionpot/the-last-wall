@@ -9,6 +9,7 @@ type acc =
   { absorbed : Defs.power
   ; base : Power.t
   ; healed : Defs.power
+  ; ratios : Power.t
   ; reflected : Defs.power
   ; untouchable : Set.t
   }
@@ -17,6 +18,7 @@ let empty_acc =
   { absorbed = 0.
   ; base = Power.empty
   ; healed = 0.
+  ; ratios = Power.empty
   ; reflected = 0.
   ; untouchable = Set.empty
   }
@@ -74,12 +76,22 @@ module Damage (Dice : Dice.S) (Flags : Flags) = struct
     in acc', dmg, sub
 
   let mitigate kind input acc cap =
-    let ratio = to_units acc input |> Units.ratio_of kind in
+    let ratio = Map.find kind acc.ratios in
     max (ratio *. cap) 0.1
 
   let picked kind input acc cap =
     (if cap > threshold then mitigate kind input acc cap else cap)
     |> min (Map.find kind input)
+
+  let choose ratios input =
+    if Flags.use_ratio
+    then
+      let hit_chance k ratio = ratio *. Units.Base.hit_chance k in
+      let probs = Map.mapi hit_chance ratios in
+      Power.sum probs |> Dice.rollf |> Power.pick probs
+    else
+      let module Roll = Dice.Map(Map) in
+      Roll.key input
 
   module Pick = Pick.WithAcc(struct
     module Cap = Pick.Float
@@ -89,17 +101,11 @@ module Damage (Dice : Dice.S) (Flags : Flags) = struct
     type map = Type.t Map.t
     type step = acc * Cap.t * Type.t
     let choose acc cap input =
-      if Flags.use_ratio
-      then
-        let units = to_units acc input in
-        let hit_chance k =
-          Units.ratio_of k units *. Units.Base.hit_chance k
-        in
-        let probs = Mapx.mapk hit_chance input in
-        Some (Power.sum probs |> Dice.rollf |> Mapx.Float.pick probs)
-      else
-        let module Roll = Dice.Map(Map) in
-        Some (Roll.key input)
+      let units = to_units acc input in
+      let f k = Units.ratio_of k units in
+      let ratios = Mapx.mapk f units in
+      let chosen = choose ratios input in
+      { acc with ratios }, Some chosen
     let roll acc cap kind input =
       ratio cap |> picked kind input acc |> handle kind acc
   end)
@@ -123,7 +129,7 @@ module Fill (Dice : Dice.S) = struct
     type step = acc * Cap.t * Type.t
     let choose base cap input =
       let p = Power.map_units input base |> Power.min in
-      if p > cap then None else Some (Roll.key input)
+      base, if p > cap then None else Some (Roll.key input)
     let roll base cap kind t =
       let p = Map.find kind t
         |> min (Power.Fn.count base kind cap)

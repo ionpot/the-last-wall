@@ -1,5 +1,8 @@
+let add_if cond x n =
+  if cond then n + x else n
+
 let add_if_ptv x n =
-  if n > 0 then n + x else n
+  add_if (n > 0) x n
 
 let div a b =
   a / max b 1
@@ -13,6 +16,15 @@ let increase_by ratio x =
 let maybe x = function
   | Some a -> a
   | None -> x
+
+let opt_min o n =
+  match o with
+  | Some x -> min n x
+  | None -> n
+
+let opt2_min o = function
+  | Some x -> opt_min o x
+  | None -> maybe 0 o
 
 let portion ratio x =
   truncate (float x *. ratio)

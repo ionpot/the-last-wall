@@ -6,6 +6,8 @@ module Kind = struct
 end
 
 module Map = Map.Make(Kind)
+module Mapx = Mapx.Make(Map)
+module Ops = Mapx.Int
 module Set = Set.Make(Kind)
 
 type report = (kind * Defs.count) list
@@ -110,47 +112,8 @@ let make n kind =
 
 let is_empty = Map.is_empty
 
-let discard attr t =
-  Map.filter (fun k _ -> not (attr k)) t
-
-let filter attr t =
-  Map.filter (fun k _ -> attr k) t
-
-module Ops = struct
-  let add t_a t_b =
-    Map.union (fun _ a b -> Some (a + b)) t_a t_b
-
-  let div t_a t_b =
-    let f _ a_opt = function
-      | Some b ->
-          if b > 0
-          then Some (Number.maybe 0 a_opt / b)
-          else None
-      | None -> None
-    in
-    Map.merge f t_a t_b
-
-  let min t =
-    let cmp n = function
-      | Some x -> Some (min x n)
-      | None -> Some n
-    in
-    Map.fold (fun _ -> cmp) t None
-    |> Number.maybe 0
-
-  let mul n t =
-    Map.map (( * ) n) t
-
-  let sub t_a t_b =
-    let f _ a_opt = function
-      | Some b -> Number.(sub_opt (maybe 0 a_opt) b)
-      | None -> a_opt
-    in
-    Map.merge f t_a t_b
-
-  let sum t =
-    Map.fold (fun _ -> (+)) t 0
-end
+let discard = Mapx.discardk
+let filter = Mapx.filterk
 
 let promotion_cost = function
   | Ballista
@@ -168,7 +131,7 @@ let affordable kind cap t =
   else Ops.min u |> min cap
 
 let cost n kind =
-  promotion_cost kind |> Ops.mul n
+  promotion_cost kind |> Ops.mul_by n
 
 let count kind t =
   if Map.mem kind t

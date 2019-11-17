@@ -20,6 +20,7 @@ val of_unit : Units.kind -> Units.t -> t -> Defs.power
 val of_units : Units.t -> t -> Defs.power
 val min : t -> Defs.power
 val max : t -> Defs.power
+val pick : t -> Defs.power -> Map.key
 val sum : t -> Defs.power
 val translate : Units.kind -> Units.kind -> Defs.count -> t -> Defs.count
 val untouchable : Units.t -> Units.t -> t -> Units.Set.t
