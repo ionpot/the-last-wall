@@ -17,6 +17,15 @@ let maybe x = function
   | Some a -> a
   | None -> x
 
+let opt_min o n =
+  match o with
+  | Some x -> min n x
+  | None -> n
+
+let opt2_min o = function
+  | Some x -> opt_min o x
+  | None -> maybe 0 o
+
 let portion ratio x =
   truncate (float x *. ratio)
 
