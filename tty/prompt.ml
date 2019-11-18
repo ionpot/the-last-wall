@@ -58,8 +58,8 @@ let one_nation str =
   Tty.prompt "choose"
   |> choose_one ls (List.hd ls)
 
-let ballista n avlb =
-  sprintf "have %d ballista, build more? (max %d)" n avlb
+let ballista avlb =
+  sprintf "can build %d ballista" avlb
   |> Tty.writeln;
   Tty.prompt_amount avlb
 
