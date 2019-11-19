@@ -1,7 +1,7 @@
 type action = Add | Promote | Train
 type pool =
   | Exclude of Pool.kind
-  | From of Pool.kind * Units.kind
+  | From of Pool.kind
   | To of Pool.kind
 
 module type Cap = State.S -> sig
@@ -17,6 +17,7 @@ end
 
 module Attr = Units.Attr
 module Base = Units.Base
+module Promote = Units.Promote
 
 let bld_of k =
   if k = Units.Berserker then Some Build.Arena
@@ -74,8 +75,9 @@ module Pool (S : State.S) = struct
 
   let apply' n kind = function
     | Exclude _ -> ()
-    | From (pk, kind') ->
-        let n' = translate n kind kind' in
+    | From pk ->
+        let k = Promote.needs kind in
+        let n' = translate n kind k in
         Pool.sub pk n' |> map
     | To pk -> Pool.add pk n |> map
 
@@ -87,7 +89,9 @@ module Pool (S : State.S) = struct
     | Exclude pk ->
         let n = get pk in
         S.Units.return (Units.sub n kind)
-    | From (pk, k) -> Units.make (get pk) k
+    | From pk ->
+        let k = Promote.needs kind in
+        Units.make (get pk) k
     | To _ -> S.Units.get ()
 
   let units kind = function
@@ -151,7 +155,7 @@ module Event (T : Type) = struct
     let value n =
       Pool.apply n T.kind T.pool;
       Supply.sub n T.kind;
-      Units.cost n T.kind |> Units.reduce |> S.Units.map;
+      Promote.cost n T.kind |> Units.reduce |> S.Units.map;
       if T.action = Train
       then Train.apply n T.kind
       else S.Units.map (Units.add n T.kind)
@@ -167,9 +171,9 @@ module Event (T : Type) = struct
       | Add | Train ->
           (Build.vacancy T.kind
           |> Number.opt2_min Cap.value
-          |> Units.affordable T.kind) units
+          |> Promote.affordable T.kind) units
       | Promote ->
-          Units.promotable T.kind units
+          Promote.max T.kind units
           |> Number.opt_min Cap.value
     let value = Supply.limit T.kind count
   end

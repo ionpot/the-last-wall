@@ -59,7 +59,7 @@ end
 module Berserker = Recruit.Event(struct
   let action = Recruit.Promote
   let kind = Units.Berserker
-  let pool = Some (Recruit.From (Pool.Arena, Units.Men))
+  let pool = Some (Recruit.From Pool.Arena)
   module Cap = Recruit.NoCap
 end)
 

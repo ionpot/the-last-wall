@@ -108,30 +108,49 @@ type t = Defs.count Map.t
 let empty : t = Map.empty
 
 let make n kind =
-  Map.singleton kind n
+  if n > 0 then Map.singleton kind n else empty
 
 let is_empty = Map.is_empty
 
 let discard = Mapx.discardk
 let filter = Mapx.filterk
 
-let promotion_cost = function
-  | Ballista
-  | Berserker -> make 2 Men
-  | Cavalry -> make 1 Men
-  | Knight -> make 1 Cavalry
-  | Ranger
-  | Templar -> make 1 Dervish
-  | Veteran -> make 1 Men
-  | _ -> empty
+module Promote = struct
+  let needs = function
+    | Knight -> Cavalry
+    | Ranger
+    | Templar -> Dervish
+    | _ -> Men
 
-let affordable kind cap t =
-  let u = Ops.div t (promotion_cost kind) in
-  if is_empty u then cap
-  else Ops.min u |> min cap
+  let amount = function
+    | Ballista
+    | Berserker -> 2
+    | Cavalry
+    | Knight
+    | Ranger
+    | Templar
+    | Veteran -> 1
+    | _ -> 0
 
-let cost n kind =
-  promotion_cost kind |> Ops.mul_by n
+  let affordable kind cap t =
+    let n = amount kind in
+    if n > 0 then
+      let k = needs kind in
+      if Map.mem k t
+      then min cap (Map.find k t / n)
+      else 0
+    else cap
+
+  let cost n kind =
+    make (n * amount kind) (needs kind)
+
+  let max kind t =
+    let n = amount kind in
+    let k = needs kind in
+    if n > 0 && Map.mem k t
+    then Map.find k t / n
+    else 0
+end
 
 let count kind t =
   if Map.mem kind t
@@ -153,11 +172,6 @@ let has kind t =
 let kinds_of t =
   let f k _ s = Set.add k s in
   Map.fold f t Set.empty
-
-let promotable kind t =
-  let u = Ops.div t (promotion_cost kind) in
-  if is_empty u then 0
-  else Ops.min u
 
 let ratio_of kind t =
   let n = count kind t in

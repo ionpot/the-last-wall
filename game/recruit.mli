@@ -1,7 +1,7 @@
 type action = Add | Promote | Train
 type pool =
   | Exclude of Pool.kind
-  | From of Pool.kind * Units.kind
+  | From of Pool.kind
   | To of Pool.kind
 
 module type Cap = State.S -> sig
