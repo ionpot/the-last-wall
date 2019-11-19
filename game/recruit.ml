@@ -85,14 +85,15 @@ module Pool (S : State.S) = struct
     | Some ptype -> apply' n kind ptype
     | None -> ()
 
-  let to_units kind = function
-    | Exclude pk ->
-        let n = get pk in
-        S.Units.return (Units.sub n kind)
+  let to_units kind ptype =
+    let units = S.Units.get () in
+    match ptype with
+    | Exclude pk -> Units.sub (get pk) kind units
     | From pk ->
         let k = Promote.needs kind in
-        Units.make (get pk) k
-    | To _ -> S.Units.get ()
+        let n = Units.count k units |> min (get pk) in
+        Units.make n k
+    | To _ -> units
 
   let units kind = function
     | Some p -> to_units kind p
