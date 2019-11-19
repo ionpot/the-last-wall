@@ -151,6 +151,7 @@ module Event (T : Type) = struct
     let value n =
       Pool.apply n T.kind T.pool;
       Supply.sub n T.kind;
+      Units.cost n T.kind |> Units.reduce |> S.Units.map;
       if T.action = Train
       then Train.apply n T.kind
       else S.Units.map (Units.add n T.kind)
