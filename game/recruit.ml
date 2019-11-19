@@ -87,8 +87,7 @@ module Pool (S : State.S) = struct
     | Exclude pk ->
         let n = get pk in
         S.Units.return (Units.sub n kind)
-    | From (pk, _) ->
-        Units.make (get pk) kind
+    | From (pk, k) -> Units.make (get pk) k
     | To _ -> S.Units.get ()
 
   let units kind = function
