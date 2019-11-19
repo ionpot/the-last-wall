@@ -48,6 +48,10 @@ module Make (Map : Map.S) = struct
       in
       Map.merge f t_a t_b
 
+    let div_by n t =
+      if n > 0 then Map.map (fun x -> x / n) t
+      else Map.empty
+
     let min t =
       let cmp n = function
         | Some x -> Some (min x n)

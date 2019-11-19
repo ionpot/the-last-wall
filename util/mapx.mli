@@ -15,6 +15,7 @@ module Make (S : Map.S) : sig
     val add : t -> t -> t
     val add_to : S.key -> int -> t -> t
     val div : t -> t -> t
+    val div_by : int -> t -> t
     val min : t -> int
     val mul_by : int -> t -> t
     val pred : S.key -> t -> t
