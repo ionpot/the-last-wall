@@ -206,7 +206,6 @@ module Turn = struct
   module Apply (S : State.S) = struct
     let value (t, m, w) =
       S.Casualty.clear ();
-      S.Pool.clear ();
       S.Turn.set t;
       S.Month.set m;
       S.Weather.set w
