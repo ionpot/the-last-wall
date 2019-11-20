@@ -1,8 +1,9 @@
 type action = New | Promote | Train
 type pool =
+  | Add of Pool.kind
   | Exclude of Pool.kind
   | From of Pool.kind
-  | To of Pool.kind
+  | Set of Pool.kind
 
 module type Cap = State.S -> sig
   val value : Defs.count option
@@ -74,6 +75,7 @@ module Pool (S : State.S) = struct
     S.Pool.return (Pool.get pk)
 
   let apply' n kind = function
+    | Add pk -> Pool.add pk n |> map
     | Exclude _ -> ()
     | From pk ->
         let k = Promote.needs kind in
@@ -81,7 +83,7 @@ module Pool (S : State.S) = struct
         let u = S.Units.return (Units.count k) in
         let n' = min p u - translate n kind k in
         Pool.set pk n' |> map
-    | To pk -> Pool.add pk n |> map
+    | Set pk -> Pool.set pk n |> map
 
   let apply n kind = function
     | Some ptype -> apply' n kind ptype
@@ -95,7 +97,8 @@ module Pool (S : State.S) = struct
         let k = Promote.needs kind in
         let n = Units.count k units |> min (get pk) in
         Units.make n k
-    | To _ -> units
+    | Add _
+    | Set _ -> units
 
   let units kind = function
     | Some p -> to_units kind p

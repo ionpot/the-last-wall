@@ -95,7 +95,7 @@ end
 module Dervish = Recruit.Event(struct
   let action = Recruit.New
   let kind = Units.Dervish
-  let pool = Some (Recruit.To Pool.Dervish)
+  let pool = Some (Recruit.Set Pool.Dervish)
   module Cap (S : State.S) = struct
     let range =
       if S.Build.check Build.(is_ready Guesthouse)
