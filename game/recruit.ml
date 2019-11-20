@@ -77,8 +77,10 @@ module Pool (S : State.S) = struct
     | Exclude _ -> ()
     | From pk ->
         let k = Promote.needs kind in
-        let n' = translate n kind k in
-        Pool.sub pk n' |> map
+        let p = get pk in
+        let u = S.Units.return (Units.count k) in
+        let n' = min p u - translate n kind k in
+        Pool.set pk n' |> map
     | To pk -> Pool.add pk n |> map
 
   let apply n kind = function
