@@ -48,6 +48,10 @@ module Make (Map : Map.S) = struct
       in
       Map.merge f t_a t_b
 
+    let div_by n t =
+      if n > 0 then Map.map (fun x -> x / n) t
+      else Map.empty
+
     let min t =
       let cmp n = function
         | Some x -> Some (min x n)
@@ -72,13 +76,19 @@ module Make (Map : Map.S) = struct
     let value k t =
       if Map.mem k t then Map.find k t else 0
 
+    let add_to k n t =
+      Map.add k (value k t + n) t
+
+    let sub_from k n t =
+      Map.add k (value k t - n) t
+
     let pred k t =
       match Number.sub_opt (value k t) 1 with
       | Some x -> Map.add k x t
       | None -> Map.remove k t
 
     let succ k t =
-      Map.add k (value k t + 1) t
+      add_to k 1 t
   end
 
   let min t =
