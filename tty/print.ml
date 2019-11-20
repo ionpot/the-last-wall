@@ -16,11 +16,12 @@ module Build = struct
   let manp need bonus units =
     let base = Power.base bonus in
     if need > 0 then
-    units2work base units
-    |> min need
-    |> manp2str
-    |> sprintf "%s for construction"
-    |> Tty.writeln
+      let w = units2work base units in
+      let r = need - w in
+      sprintf "%s -> %s queued -> %s"
+        (work2str w) (work2str need)
+        (if r > 0 then (work2str r) else "finished")
+      |> Tty.pairln "construction"
 
   let supply need =
     if need > 0 then
