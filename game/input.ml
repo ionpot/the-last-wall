@@ -1,25 +1,9 @@
-module Ballista = struct
-  type t = Defs.count * Defs.count
+module Ballista = Recruit.Event(struct
+  let action = Recruit.Train
   let kind = Units.Ballista
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value (n, _) =
-      Recruit.sub_cost kind n;
-      let eng = S.Leader.check Leader.(is_living Engineer) in
-      let normal, fast = if eng then 0, n else n, 0 in
-      let n' = S.Ballista.get () + fast in
-      S.Units.map (Units.add n' kind);
-      S.Ballista.set normal
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let have = S.Units.return (Units.count kind)
-    let total = have + S.Ballista.get ()
-    let cap = S.Build.return Build.ballista_cap
-    let avlb = Recruit.affordable kind (cap - total)
-    let value = avlb, total
-  end
-end
+  let pool = None
+  module Cap = Recruit.NoCap
+end)
 
 module Barracks = struct
   type t = Nation.kind option
@@ -72,21 +56,12 @@ module Barrage = struct
   end
 end
 
-module Berserker = struct
-  type t = Defs.count
+module Berserker = Recruit.Event(struct
+  let action = Recruit.Promote
   let kind = Units.Berserker
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let arena = S.Arena.get ()
-    let n = Power.translate Units.Men kind arena Power.empty
-    let cap = Recruit.(Missing.arena () |> affordable kind)
-    let value = min n cap
-  end
-end
+  let pool = Some (Recruit.From Pool.Arena)
+  module Cap = Recruit.NoCap
+end)
 
 module BuildAvlb = struct
   type chosen = Build.kind list
@@ -117,35 +92,24 @@ module DeityChoice = struct
   end
 end
 
-module Dervish = struct
-  type t = Defs.count
+module Dervish = Recruit.Event(struct
+  let action = Recruit.New
   let kind = Units.Dervish
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value n =
-      Recruit.promote kind n;
-      S.Dervish.set n
+  let pool = Some (Recruit.Set Pool.Dervish)
+  module Cap (S : State.S) = struct
+    let range =
+      if S.Build.check Build.(is_ready Guesthouse)
+      then 3, 12 else 2, 8
+    let value = Some (S.Dice.range range)
   end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let cap = Recruit.(Missing.temple () |> affordable kind)
-    let a, b = Recruit.dervish_range ()
-    let value = S.Dice.between_try a (min b cap)
-  end
-end
+end)
 
-module Knight = struct
-  type t = Defs.count
+module Knight = Recruit.Event(struct
+  let action = Recruit.Promote
   let kind = Units.Knight
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promotable kind
-  end
-end
+  let pool = None
+  module Cap = Recruit.NoCap
+end)
 
 module LeaderKind = struct
   type t = Leader.kind
@@ -184,19 +148,16 @@ module LeaderNew = struct
 end
 
 module Mercs = struct
-  type t = Defs.count
-  let kind = Units.Merc
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
+  include Recruit.Event(struct
+    let action = Recruit.New
+    let kind = Units.Merc
+    let pool = None
+    module Cap (S : State.S) = struct
+      let value = Some (S.Dice.between 10 20)
+    end
+  end)
   module Check (S : State.S) = struct
     let value = S.Build.check Build.(is_ready Tavern)
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let cap = S.Dice.between 10 20
-    let value = Recruit.supply_limit kind cap
   end
 end
 
@@ -211,18 +172,14 @@ module Nations = struct
 end
 
 module Ranger = struct
-  type t = Defs.count
-  let kind = Units.Ranger
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
+  include Recruit.Event(struct
+    let action = Recruit.Promote
+    let kind = Units.Ranger
+    let pool = Some (Recruit.Exclude Pool.Dervish)
+    module Cap = Recruit.NoCap
+  end)
   module Check (S : State.S) = struct
     let value = S.Deity.is Deity.Sitera
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promotable kind
   end
 end
 
@@ -252,19 +209,13 @@ module Sodistan = struct
 end
 
 module Templar = struct
-  type t = Defs.count
-  let kind = Units.Templar
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
-  module Check (S : State.S) = struct
-    let value = not (S.Deity.is Deity.Sitera)
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promotable kind
-  end
+  include Recruit.Event(struct
+    let action = Recruit.Promote
+    let kind = Units.Templar
+    let pool = Some (Recruit.Exclude Pool.Dervish)
+    module Cap = Recruit.NoCap
+  end)
+  module Check = Check.Not(Ranger.Check)
 end
 
 module Trade = struct
@@ -290,18 +241,14 @@ module Trade = struct
 end
 
 module Veteran = struct
-  type t = Defs.count
-  let kind = Units.Veteran
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
+  include Recruit.Event(struct
+    let action = Recruit.Promote
+    let kind = Units.Veteran
+    let pool = None
+    module Cap = Recruit.NoCap
+  end)
   module Check (S : State.S) = struct
     let value = S.Build.check Build.(is_ready Barracks)
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promotable kind
   end
 end
 
@@ -309,7 +256,6 @@ module Volunteers = struct
   module Range = Range.Int
   type t = Defs.count
   let kind = Units.Men
-  let base = 3, 9
   module Apply (S : State.S) = struct
     let value n = S.Units.map (Units.add n kind)
   end
@@ -319,7 +265,7 @@ module Volunteers = struct
   module Make (S : State.S) = struct
     let noble = S.Leader.check Leader.(is_living Aristocrat)
     let cha = S.Leader.return Leader.cha_mod_of
-    let bonus = Range.times cha (1, 3)
-    let value = Range.combine_if noble bonus base |> S.Dice.range
+    let n = Number.add_if noble cha 3
+    let value = Range.times n (1, 3) |> S.Dice.range
   end
 end

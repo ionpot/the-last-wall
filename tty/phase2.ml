@@ -5,8 +5,7 @@ module Make (S : Game.State.S) = struct
     let open Phase.Input in
     let check f x = if x > 0 then f x else x in
     function
-      | Ballista (avlb, have) ->
-          Ballista (check (Prompt.ballista have) avlb, have)
+      | Ballista avlb -> Ballista (check Prompt.ballista avlb)
       | Barracks _ -> Barracks (Prompt.barracks ())
       | BarrageTrain (ok, cost) ->
           BarrageTrain (Prompt.barrage_train ok cost, cost)
@@ -64,7 +63,7 @@ module After (S : Status.S) = struct
   let input =
     let open Phase.Input in
     function
-      | Ballista (n, _) -> if n > 0 then S.res ()
+      | Ballista n -> if n > 0 then S.res ()
       | BarrageTrain (ok, _) -> if ok then S.res ()
       | Berserker n -> if n > 0 then begin S.berserker (); S.res () end
       | Dervish n -> if n > 0 then begin S.dervish (); S.res () end

@@ -6,6 +6,8 @@ module Kind = struct
 end
 
 module Map = Map.Make(Kind)
+module Mapx = Mapx.Make(Map)
+module Ops = Mapx.Int
 module Set = Set.Make(Kind)
 
 type report = (kind * Defs.count) list
@@ -106,69 +108,49 @@ type t = Defs.count Map.t
 let empty : t = Map.empty
 
 let make n kind =
-  Map.singleton kind n
+  if n > 0 then Map.singleton kind n else empty
 
 let is_empty = Map.is_empty
 
-let discard attr t =
-  Map.filter (fun k _ -> not (attr k)) t
+let discard = Mapx.discardk
+let filter = Mapx.filterk
 
-let filter attr t =
-  Map.filter (fun k _ -> attr k) t
+module Promote = struct
+  let needs = function
+    | Knight -> Cavalry
+    | Ranger
+    | Templar -> Dervish
+    | _ -> Men
 
-module Ops = struct
-  let add t_a t_b =
-    Map.union (fun _ a b -> Some (a + b)) t_a t_b
+  let amount = function
+    | Ballista
+    | Berserker -> 2
+    | Cavalry
+    | Knight
+    | Ranger
+    | Templar
+    | Veteran -> 1
+    | _ -> 0
 
-  let div t_a t_b =
-    let f _ a_opt = function
-      | Some b ->
-          if b > 0
-          then Some (Number.maybe 0 a_opt / b)
-          else None
-      | None -> None
-    in
-    Map.merge f t_a t_b
+  let affordable kind cap t =
+    let n = amount kind in
+    if n > 0 then
+      let k = needs kind in
+      if Map.mem k t
+      then min cap (Map.find k t / n)
+      else 0
+    else cap
 
-  let min t =
-    let cmp n = function
-      | Some x -> Some (min x n)
-      | None -> Some n
-    in
-    Map.fold (fun _ -> cmp) t None
-    |> Number.maybe 0
+  let cost n kind =
+    make (n * amount kind) (needs kind)
 
-  let mul n t =
-    Map.map (( * ) n) t
-
-  let sub t_a t_b =
-    let f _ a_opt = function
-      | Some b -> Number.(sub_opt (maybe 0 a_opt) b)
-      | None -> a_opt
-    in
-    Map.merge f t_a t_b
-
-  let sum t =
-    Map.fold (fun _ -> (+)) t 0
+  let max kind t =
+    let n = amount kind in
+    let k = needs kind in
+    if n > 0 && Map.mem k t
+    then Map.find k t / n
+    else 0
 end
-
-let promotion_cost = function
-  | Ballista
-  | Berserker -> make 2 Men
-  | Cavalry -> make 1 Men
-  | Knight -> make 1 Cavalry
-  | Ranger
-  | Templar -> make 1 Dervish
-  | Veteran -> make 1 Men
-  | _ -> empty
-
-let affordable kind cap t =
-  let u = Ops.div t (promotion_cost kind) in
-  if is_empty u then cap
-  else Ops.min u |> min cap
-
-let cost n kind =
-  promotion_cost kind |> Ops.mul n
 
 let count kind t =
   if Map.mem kind t
@@ -190,11 +172,6 @@ let has kind t =
 let kinds_of t =
   let f k _ s = Set.add k s in
   Map.fold f t Set.empty
-
-let promotable kind t =
-  let u = Ops.div t (promotion_cost kind) in
-  if is_empty u then 0
-  else Ops.min u
 
 let ratio_of kind t =
   let n = count kind t in

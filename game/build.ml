@@ -1,6 +1,7 @@
 type kind = Arena | Barracks | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade
 
 module Map = Map.Make(struct type t = kind let compare = compare end)
+module Mapx = Mapx.Make(Map)
 
 type cost = Resource.t
 type cost_map = cost Map.t
@@ -20,6 +21,14 @@ end
 
 let avlb_default =
   [Arena; Barracks; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; Trade]
+
+let base_cap = function
+  | Arena -> 10
+  | Engrs -> 5
+  | Guesthouse -> 20
+  | Stable -> 10
+  | Temple -> 20
+  | _ -> 0
 
 let base_cost =
   let open Resource in
@@ -136,37 +145,16 @@ module Ready = struct
   let add kind t =
     Map.add kind 1 t
 
-  let bump kind t =
-    let f = function
-      | Some x -> Some (succ x)
-      | None -> Some 1
-    in
-    Map.update kind f t
-
+  let bump = Mapx.Int.succ
   let bump_ls = fn_ls bump
-
-  let count kind t =
-    if Map.mem kind t
-    then Map.find kind t
-    else 0
-
-  let decr kind t =
-    let f = function
-      | Some x -> Number.sub_opt x 1
-      | None -> None
-    in
-    Map.update kind f t
-
-  let from ls =
-    bump_ls ls empty
-
+  let count = Mapx.Int.value
+  let decr = Mapx.Int.pred
+  let from ls = bump_ls ls empty
   let has = Map.mem
-
-  let sum t =
-    Map.fold (fun _ -> (+)) t 0
+  let sum = Mapx.Int.sum
 
   let mausoleums t =
-    Map.filter (fun k _ -> match k with Mausoleum _ -> true | _ -> false) t
+    Mapx.filterk (function Mausoleum _ -> true | _ -> false) t
     |> sum
 end
 
@@ -195,8 +183,8 @@ let cost_map t =
 let count kind t =
   Ready.count kind t.ready
 
-let arena_cap t =
-  count Arena t * 10
+let cap_of kind t =
+  count kind t * base_cap kind
 
 let is_built kind t =
   Built.has kind t.built
@@ -206,9 +194,6 @@ let is_ready kind t =
 
 let is_complete kind t =
   is_built kind t || is_ready kind t
-
-let ballista_cap t =
-  if is_ready Engrs t then 5 else 0
 
 let built t = t.built
 
@@ -225,17 +210,9 @@ let queue t = t.queue
 
 let ready t = t.ready
 
-let stable_cap t =
-  count Stable t * 10
-
 let status t =
   let built, ongoing = Queue.built t.queue in
   t.built, built, ongoing
-
-let temple_cap t =
-  if is_ready Guesthouse t then 40
-  else if is_ready Temple t then 20
-  else 0
 
 let died ldr t =
   { t with avlb = Avlb.add (Mausoleum ldr) t.avlb }

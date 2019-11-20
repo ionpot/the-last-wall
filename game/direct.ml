@@ -67,19 +67,12 @@ module BuildSupply = struct
   end
 end
 
-module Cavalry = struct
-  type t = Defs.count
+module Cavalry = Recruit.Event(struct
   let kind = Units.Cavalry
-  module Apply (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let value = Recruit.promote kind
-  end
-  module Make (S : State.S) = struct
-    module Recruit = Recruit.With(S)
-    let cap = Recruit.Missing.stable ()
-    let value = Recruit.affordable kind cap
-  end
-end
+  let action = Recruit.New
+  let pool = None
+  module Cap = Recruit.NoCap
+end)
 
 module Combat = Combat
 
@@ -89,11 +82,14 @@ module Facilities = struct
   let arena = Build.Arena
   module Apply (S : State.S) = struct
     module Add = Event.AddRes(S)
+    let arena_mnp t =
+      if Map.mem arena t
+      then Map.find arena t |> Resource.manp_of
+      else 0
     let value t =
       Map.iter (fun _ -> Add.value) t;
-      if Map.mem arena t
-      then Map.find arena t |> Resource.manp_of |> S.Arena.set
-      else S.Arena.clear ()
+      let n = arena_mnp t in
+      S.Pool.map Pool.(set Arena n)
   end
   module Make (S : State.S) = struct
     let disease = S.Mishap.check Mishap.(has Disease)

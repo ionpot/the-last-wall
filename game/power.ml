@@ -1,4 +1,5 @@
 module Map = Units.Map
+module Mapx = Mapx.Make(Map)
 module Set = Units.Set
 
 type t = Defs.power Map.t
@@ -45,15 +46,10 @@ let heal kind p t =
   let pwr = Fn.find kind t in
   Float.floor_by pwr p, mod_float p pwr
 
-let min t =
-  Map.min_binding t |> snd
-  |> Map.fold (fun _ -> min) t
-
-let max t =
-  Map.fold (fun k -> max) t 0.
-
-let sum t =
-  Map.fold (fun _ -> (+.)) t 0.
+let min = Mapx.min
+let max = Mapx.Float.max
+let pick = Mapx.Float.pick
+let sum = Mapx.Float.sum
 
 let of_unit kind u t =
   Fn.mul t kind (Units.count kind u)
@@ -75,7 +71,7 @@ let ceil_count base t =
   ceil base t |> count base
 
 let map_units u t =
-  Map.mapi (fun k _ -> Fn.find k t) u
+  Mapx.mapk (fun k -> Fn.find k t) u
 
 let modulo base t =
   Map.mapi (Fn.modulo base) t
