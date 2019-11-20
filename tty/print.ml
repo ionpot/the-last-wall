@@ -25,8 +25,8 @@ module Build = struct
 
   let supply need =
     if need > 0 then
-    sprintf "construction costs %s" (sup2str need)
-    |> Tty.writeln
+      sprintf "construction costs %s" (sup2str need)
+      |> Tty.writeln
 end
 
 module Leader = struct
@@ -89,8 +89,8 @@ end
 
 let ballista (n, enemies, _) =
   if n > 0 then
-  sprintf "%d ballista kills %s" n (units2str enemies |> if_empty "nothing")
-  |> Tty.writeln
+    sprintf "%d ballista kills %s" n (units2str enemies |> if_empty "nothing")
+    |> Tty.writeln
 
 let barrage_status w =
   let open Barrage in
@@ -101,8 +101,8 @@ let barrage_status w =
 
 let cyclops (n, units, _) =
   if n > 0 then
-  sprintf "%d cyclops kills %s" n (units2str units |> if_empty "nothing")
-  |> Tty.writeln
+    sprintf "%d cyclops kills %s" n (units2str units |> if_empty "nothing")
+    |> Tty.writeln
 
 let disease (died, ldr_died) ldr =
   Tty.pairln "died" (units2str died |> str2none);
