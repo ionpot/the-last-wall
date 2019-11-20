@@ -64,6 +64,14 @@ module Combat = struct
     Tty.pairln "defending" (units2mnpstr base units);
     Tty.ifpairln "leader" (Leader.to_full ldr)
 
+  let cav_ratio ratio allowed too_many =
+    if ratio > 0. then
+      sprintf "%s / %s"
+        (percent2str ratio) (percent2str allowed)
+      |> Tty.pairln "cav ratio";
+    if too_many
+    then Tty.writeln "too many cavalry, defense reduced"
+
   let stats atk def dmg =
     let attack = sprintf "%s attack" (power2str atk) in
     let defense = sprintf "%s dr" (percent2str def) in
@@ -77,8 +85,7 @@ module Combat = struct
 
   let outcome (module O : Combat.Outcome) ldr =
     Tty.writeln "enemies attack";
-    if O.cav_too_many
-    then Tty.writeln "too many cavalry, defense reduced";
+    cav_ratio O.cav_ratio O.cav_allowed O.cav_too_many;
     Tty.writeln (stats O.attack O.defense O.damage);
     Tty.ifwriteln (result2stats O.casualty);
     Tty.pairln "casualty" (result2outcome O.casualty |> str2none);
