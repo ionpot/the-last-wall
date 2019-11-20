@@ -1,8 +1,9 @@
-type action = Add | Promote | Train
+type action = New | Promote | Train
 type pool =
+  | Add of Pool.kind
   | Exclude of Pool.kind
-  | From of Pool.kind * Units.kind
-  | To of Pool.kind
+  | From of Pool.kind
+  | Set of Pool.kind
 
 module type Cap = State.S -> sig
   val value : Defs.count option
@@ -17,6 +18,7 @@ end
 
 module Attr = Units.Attr
 module Base = Units.Base
+module Promote = Units.Promote
 
 let bld_of k =
   if k = Units.Berserker then Some Build.Arena
@@ -73,23 +75,30 @@ module Pool (S : State.S) = struct
     S.Pool.return (Pool.get pk)
 
   let apply' n kind = function
+    | Add pk -> Pool.add pk n |> map
     | Exclude _ -> ()
-    | From (pk, kind') ->
-        let n' = translate n kind kind' in
-        Pool.sub pk n' |> map
-    | To pk -> Pool.add pk n |> map
+    | From pk ->
+        let k = Promote.needs kind in
+        let p = get pk in
+        let u = S.Units.return (Units.count k) in
+        let n' = min p u - translate n kind k in
+        Pool.set pk n' |> map
+    | Set pk -> Pool.set pk n |> map
 
   let apply n kind = function
     | Some ptype -> apply' n kind ptype
     | None -> ()
 
-  let to_units kind = function
-    | Exclude pk ->
-        let n = get pk in
-        S.Units.return (Units.sub n kind)
-    | From (pk, _) ->
-        Units.make (get pk) kind
-    | To _ -> S.Units.get ()
+  let to_units kind ptype =
+    let units = S.Units.get () in
+    match ptype with
+    | Exclude pk -> Units.sub (get pk) kind units
+    | From pk ->
+        let k = Promote.needs kind in
+        let n = Units.count k units |> min (get pk) in
+        Units.make n k
+    | Add _
+    | Set _ -> units
 
   let units kind = function
     | Some p -> to_units kind p
@@ -152,6 +161,7 @@ module Event (T : Type) = struct
     let value n =
       Pool.apply n T.kind T.pool;
       Supply.sub n T.kind;
+      Promote.cost n T.kind |> Units.reduce |> S.Units.map;
       if T.action = Train
       then Train.apply n T.kind
       else S.Units.map (Units.add n T.kind)
@@ -164,12 +174,12 @@ module Event (T : Type) = struct
     let units = Pool.units T.kind T.pool
     let count =
       match T.action with
-      | Add | Train ->
+      | New | Train ->
           (Build.vacancy T.kind
           |> Number.opt2_min Cap.value
-          |> Units.affordable T.kind) units
+          |> Promote.affordable T.kind) units
       | Promote ->
-          Units.promotable T.kind units
+          Promote.max T.kind units
           |> Number.opt_min Cap.value
     let value = Supply.limit T.kind count
   end

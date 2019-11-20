@@ -1,8 +1,9 @@
-type action = Add | Promote | Train
+type action = New | Promote | Train
 type pool =
+  | Add of Pool.kind
   | Exclude of Pool.kind
-  | From of Pool.kind * Units.kind
-  | To of Pool.kind
+  | From of Pool.kind
+  | Set of Pool.kind
 
 module type Cap = State.S -> sig
   val value : Defs.count option

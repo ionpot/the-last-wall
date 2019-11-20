@@ -39,9 +39,15 @@ type t = Defs.count Map.t
 val empty : t
 
 val make : Defs.count -> kind -> t
-val cost : Defs.count -> kind -> t
 
-val affordable : kind -> Defs.count -> t -> Defs.count
+module Promote : sig
+  val affordable : kind -> Defs.count -> t -> Defs.count
+  val amount : kind -> Defs.count
+  val cost : Defs.count -> kind -> t
+  val max : kind -> t -> Defs.count
+  val needs : kind -> kind
+end
+
 val count : kind -> t -> Defs.count
 val count_all : t -> Defs.count
 val filter_count : Attr.t -> t -> Defs.count
@@ -49,7 +55,6 @@ val find : Defs.count -> kind -> t -> Defs.count
 val has : kind -> t -> bool
 val is_empty : t -> bool
 val kinds_of : t -> Set.t
-val promotable : kind -> t -> Defs.count
 val ratio_of : kind -> t -> float
 val report : t -> report
 val upkeep : t -> Defs.supply

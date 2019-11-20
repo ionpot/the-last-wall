@@ -59,7 +59,7 @@ end
 module Berserker = Recruit.Event(struct
   let action = Recruit.Promote
   let kind = Units.Berserker
-  let pool = Some (Recruit.From (Pool.Arena, Units.Men))
+  let pool = Some (Recruit.From Pool.Arena)
   module Cap = Recruit.NoCap
 end)
 
@@ -93,9 +93,9 @@ module DeityChoice = struct
 end
 
 module Dervish = Recruit.Event(struct
-  let action = Recruit.Add
+  let action = Recruit.New
   let kind = Units.Dervish
-  let pool = Some (Recruit.To Pool.Dervish)
+  let pool = Some (Recruit.Set Pool.Dervish)
   module Cap (S : State.S) = struct
     let range =
       if S.Build.check Build.(is_ready Guesthouse)
@@ -149,7 +149,7 @@ end
 
 module Mercs = struct
   include Recruit.Event(struct
-    let action = Recruit.Add
+    let action = Recruit.New
     let kind = Units.Merc
     let pool = None
     module Cap (S : State.S) = struct
