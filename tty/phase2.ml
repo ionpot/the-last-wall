@@ -44,7 +44,7 @@ module Make (S : Game.State.S) = struct
           |> S.Bonus.return
           |> S.Units.return
       | BuildStatus s -> ()
-      | BuildSupply s -> S.Supply.return (Print.Build.supply s)
+      | BuildSupply s -> Print.Build.supply s
       | Cavalry c -> ()
       | Defeat -> Tty.writeln "defeat"
       | Disease x -> Print.disease x |> S.Leader.return

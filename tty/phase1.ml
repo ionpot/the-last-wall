@@ -24,7 +24,7 @@ module Make (S : Game.State.S) = struct
   let output =
     let open Phase.Output in
     function
-      | BuildSupply s -> S.Supply.return (Print.Build.supply s)
+      | BuildSupply s -> Print.Build.supply s
       | Cavalry _ -> ()
       | Facilities x ->
           let nat = S.Nation.get () in
@@ -49,7 +49,7 @@ module After (S : Status.S) = struct
   let output =
     let open Phase.Output in
     function
-      | BuildSupply _ -> ()
+      | BuildSupply s -> if s > 0 then S.res ()
       | Cavalry n -> if n > 0 then begin S.cavalry n; S.res () end
       | Facilities x -> S.facilities x
       | Support _ -> S.res ()

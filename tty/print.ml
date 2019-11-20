@@ -22,9 +22,9 @@ module Build = struct
     |> sprintf "%s for construction"
     |> Tty.writeln
 
-  let supply need avlb =
+  let supply need =
     if need > 0 then
-    sprintf "construction costs %s, have %s" (sup2str need) (sup2str avlb)
+    sprintf "construction costs %s" (sup2str need)
     |> Tty.writeln
 end
 
