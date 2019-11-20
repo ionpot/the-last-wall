@@ -1,6 +1,8 @@
 module type Outcome = sig
   val attack : Defs.power
   val casualty : Dist.t
+  val cav_allowed : float
+  val cav_ratio : float
   val cav_too_many : bool
   val damage : Defs.power
   val defense : Defs.power
@@ -54,6 +56,8 @@ module Make (S : State.S) = struct
     Power.of_units u base
 
   let value = (module struct
+    let cav_allowed = Dr.cav_allowed
+    let cav_ratio = Dr.cav_ratio
     let cav_too_many = Dr.cav_too_many
     let attack = power_of enemies
     let defense = Dr.value

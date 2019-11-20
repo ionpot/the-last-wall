@@ -27,12 +27,12 @@ module From (S : State.S) = struct
   let units = S.Units.get ()
   let cavs = Units.(filter_count Attr.is_cavalry) units
   let infantry = Units.(filter_count Attr.is_infantry) units
-  let ratio = Number.ratio cavs infantry
-  let allowed =
+  let cav_ratio = Number.ratio cavs infantry
+  let cav_allowed =
     cav_men_ratio
     |> Float.add_if (S.Deity.is Deity.Elanis) 0.1
     |> Float.add_if (Check.has_traded Nation.Tulron) 0.1
-  let cav_too_many = ratio > allowed
+  let cav_too_many = cav_ratio > cav_allowed
   let cav_dr = cav_dr cav_too_many snow units
 
   let ldr = S.Leader.get ()
