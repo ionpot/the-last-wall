@@ -100,29 +100,6 @@ module Disease = struct
   end
 end
 
-module Revive = struct
-  type t = Units.t * Units.t
-  let kind = Units.Dervish
-  module Apply (S : State.S) = struct
-    let value (revived, rem) =
-      S.Units.map (Units.combine revived);
-      S.Casualty.set rem
-  end
-  module Check (S : State.S) = struct
-    let value = S.Units.check (Units.has kind)
-  end
-  module Make (S : State.S) = struct
-    module Fill = Dist.Fill(S.Dice)
-    let units = S.Units.get ()
-    let base = S.Bonus.return Power.base
-    let pwr = Power.of_unit kind units base
-    let value =
-      Units.(filter Attr.is_revivable)
-      |> S.Casualty.return
-      |> Fill.from pwr base
-  end
-end
-
 module Smite = struct
   type t = Units.t
   module Apply (S : State.S) = struct

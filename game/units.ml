@@ -1,4 +1,4 @@
-type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harpy | Knight | Men | Merc | Orc | Ranger | Skeleton | Templar | Veteran
+type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harpy | Knight | Men | Merc | Novice | Orc | Ranger | Skeleton | Templar | Veteran
 
 module Kind = struct
   type t = kind
@@ -14,7 +14,7 @@ type report = (kind * Defs.count) list
 type sum_report = (Defs.count * Set.t)
 
 let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops; Dullahan]
-let starve_order = [Men; Dervish; Berserker; Cavalry; Veteran; Ranger; Templar; Merc; Ballista; Knight]
+let starve_order = [Men; Novice; Dervish; Berserker; Cavalry; Veteran; Ranger; Templar; Merc; Ballista; Knight]
 
 module Attr = struct
   type t = kind -> bool
@@ -22,7 +22,7 @@ module Attr = struct
     | Men | Merc | Ranger | Veteran -> true
     | _ -> false
   let can_build = function
-    | Men | Dervish | Veteran -> true
+    | Dervish | Men | Novice | Veteran -> true
     | _ -> false
   let can_fear = (=) Dullahan
   let can_heal = (=) Templar
@@ -31,10 +31,10 @@ module Attr = struct
     | Cavalry | Knight -> true
     | _ -> false
   let is_holy = function
-    | Dervish | Ranger | Templar -> true
+    | Dervish | Novice | Ranger | Templar -> true
     | _ -> false
   let is_infantry = function
-    | Berserker | Men | Merc | Dervish | Ranger | Templar | Veteran -> true
+    | Berserker | Dervish | Men | Merc | Novice | Ranger | Templar | Veteran -> true
     | _ -> false
   let is_infectable = (<>) Ballista
   let is_revivable = is_infantry
@@ -79,14 +79,21 @@ module Base = struct
     | Dullahan -> 7.
     | Cyclops -> 5.
     | Harpy | Knight -> 4.
-    | Ballista | Berserker | Cavalry | Demon | Merc | Ranger | Templar | Veteran -> 2.
-    | Dervish | Men | Orc -> 1.
+    | Templar -> 3.
+    | Ballista | Berserker | Cavalry | Demon | Dervish | Merc | Ranger | Veteran -> 2.
+    | Men | Novice | Orc -> 1.
     | Skeleton -> 0.5
+
+  let revive = function
+    | Dervish -> 1.
+    | Novice -> 0.5
+    | _ -> 0.
 
   let supply_cost = function
     | Berserker -> 0
     | Merc
-    | Templar -> 2
+    | Dervish -> 2
+    | Templar -> 3
     | Knight -> 10
     | Ballista -> 12
     | _ -> 1
@@ -118,14 +125,16 @@ let filter = Mapx.filterk
 module Promote = struct
   let needs = function
     | Knight -> Cavalry
+    | Dervish
     | Ranger
-    | Templar -> Dervish
+    | Templar -> Novice
     | _ -> Men
 
   let amount = function
     | Ballista
     | Berserker -> 2
     | Cavalry
+    | Dervish
     | Knight
     | Ranger
     | Templar

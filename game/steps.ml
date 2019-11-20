@@ -66,8 +66,8 @@ end
 
 module Phase2 = struct
   module Input = struct
-    type cond = Barracks | LeaderNew | Mercs | Ranger | Templar | Trade | Veteran | Volunteers
-    type direct = Ballista | BarrageTrain | Berserker | Build | Dervish | Knight | Nations | Sodistan
+    type cond = Barracks | LeaderNew | Mercs | Ranger | Templar | Temple | Trade | Veteran | Volunteers
+    type direct = Ballista | BarrageTrain | Berserker | Build | Dervish | Knight | Nations | Novice | Sodistan
     type t = (cond, direct) input
   end
   module Output = struct
@@ -104,6 +104,8 @@ module Phase2 = struct
     ; Do (Direct Output.Cavalry)
     ; Ask (Direct Input.Knight)
     ; Ask (Cond Input.Veteran)
+    ; Ask (Cond Input.Temple)
+    ; Ask (Direct Input.Novice)
     ; Ask (Direct Input.Dervish)
     ; Ask (Cond Input.Templar)
     ; Ask (Cond Input.Ranger)
@@ -120,8 +122,8 @@ module Phase3 = struct
   end
   module Output = struct
     type check = Attack | LevelUp | NoAttack | NoEnemies
-    type cond = Ballista | Barraged | Cyclops | Defeat | Revive | Smite
-    type direct = Combat | Fear | Victory
+    type cond = Ballista | Barraged | Cyclops | Defeat | Smite
+    type direct = Combat | Fear | Revive | Victory
     type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
@@ -148,7 +150,7 @@ module Phase3 = struct
     ; check_enemies
     ; Do (Direct Output.Fear)
     ; Do (Direct Output.Combat)
-    ; Do (Cond Output.Revive)
+    ; Do (Direct Output.Revive)
     ; Do (Cond Output.Defeat)
     ; Go victory
     ]

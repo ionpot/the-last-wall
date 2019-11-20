@@ -6,6 +6,7 @@ val empty : t
 
 val base : Bonus.t -> t
 val dr : Units.t -> t
+val revive : Units.t -> t
 
 module Fn : sig
   val count : t -> Units.kind -> Defs.power -> Defs.count

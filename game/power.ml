@@ -6,6 +6,14 @@ type t = Defs.power Map.t
 
 let empty : t = Map.empty
 
+let dr u =
+  let f k n = Float.times n (Units.Base.dr k) in
+  Map.mapi f u
+
+let revive u =
+  Mapx.mapk Units.Base.revive u
+  |> Mapx.Float.clean
+
 module Fn = struct
   let find k t =
     if Map.mem k t then Map.find k t else Units.Base.power k
@@ -34,10 +42,6 @@ let from_units u t =
 
 let from_filter attr u t =
   from_units (Units.filter attr u) t
-
-let dr u =
-  let f k n = Float.times n (Units.Base.dr k) in
-  Map.mapi f u
 
 let count base t =
   Map.mapi (Fn.count base) t
