@@ -89,7 +89,7 @@ module Facilities = struct
     let value t =
       Map.iter (fun _ -> Add.value) t;
       let n = arena_mnp t in
-      S.Pool.map Pool.(set Arena n)
+      S.Pool.map Pool.(add Arena n)
   end
   module Make (S : State.S) = struct
     let disease = S.Mishap.check Mishap.(has Disease)

@@ -92,7 +92,8 @@ module Pool (S : State.S) = struct
   let to_units kind ptype =
     let units = S.Units.get () in
     match ptype with
-    | Exclude pk -> Units.sub (get pk) kind units
+    | Exclude pk ->
+        Units.sub (get pk) (Promote.needs kind) units
     | From pk ->
         let k = Promote.needs kind in
         let n = Units.count k units |> min (get pk) in
