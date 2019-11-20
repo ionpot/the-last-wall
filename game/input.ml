@@ -93,7 +93,7 @@ module DeityChoice = struct
 end
 
 module Dervish = Recruit.Event(struct
-  let action = Recruit.Add
+  let action = Recruit.New
   let kind = Units.Dervish
   let pool = Some (Recruit.To Pool.Dervish)
   module Cap (S : State.S) = struct
@@ -149,7 +149,7 @@ end
 
 module Mercs = struct
   include Recruit.Event(struct
-    let action = Recruit.Add
+    let action = Recruit.New
     let kind = Units.Merc
     let pool = None
     module Cap (S : State.S) = struct

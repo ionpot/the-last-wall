@@ -1,4 +1,4 @@
-type action = Add | Promote | Train
+type action = New | Promote | Train
 type pool =
   | Exclude of Pool.kind
   | From of Pool.kind
@@ -171,7 +171,7 @@ module Event (T : Type) = struct
     let units = Pool.units T.kind T.pool
     let count =
       match T.action with
-      | Add | Train ->
+      | New | Train ->
           (Build.vacancy T.kind
           |> Number.opt2_min Cap.value
           |> Promote.affordable T.kind) units

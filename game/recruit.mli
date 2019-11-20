@@ -1,4 +1,4 @@
-type action = Add | Promote | Train
+type action = New | Promote | Train
 type pool =
   | Exclude of Pool.kind
   | From of Pool.kind
