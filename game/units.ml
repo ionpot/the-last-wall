@@ -1,4 +1,4 @@
-type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harpy | Knight | Men | Merc | Novice | Orc | Ranger | Skeleton | Templar | Veteran
+type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harcher | Harpy | Knight | Men | Merc | Novice | Orc | Ranger | Skeleton | Templar | Veteran
 
 module Kind = struct
   type t = kind
@@ -14,21 +14,23 @@ type report = (kind * Defs.count) list
 type sum_report = (Defs.count * Set.t)
 
 let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops; Dullahan]
-let starve_order = [Men; Novice; Dervish; Berserker; Cavalry; Veteran; Ranger; Templar; Merc; Ballista; Knight]
+let starve_order = [Men; Novice; Dervish; Berserker; Cavalry; Harcher; Veteran; Ranger; Templar; Merc; Ballista; Knight]
 
 module Attr = struct
   type t = kind -> bool
   let can_barrage = function
-    | Men | Merc | Ranger | Veteran -> true
+    | Harcher | Men | Merc | Ranger | Veteran -> true
     | _ -> false
   let can_build = function
     | Dervish | Men | Novice | Veteran -> true
     | _ -> false
   let can_fear = (=) Dullahan
   let can_heal = (=) Templar
-  let can_reflect = (=) Berserker
+  let can_reflect = function
+    | Berserker | Harcher -> true
+    | _ -> false
   let is_cavalry = function
-    | Cavalry | Knight -> true
+    | Cavalry | Harcher | Knight -> true
     | _ -> false
   let not_cavalry = Fun.negate is_cavalry
   let is_holy = function
@@ -72,7 +74,7 @@ module Base = struct
 
   let hit_chance = function
     | Ballista -> 0.25
-    | Dervish | Ranger -> 0.5
+    | Dervish | Harcher | Ranger -> 0.5
     | _ -> 1.
 
   let power = function
@@ -80,7 +82,7 @@ module Base = struct
     | Cyclops -> 5.
     | Harpy | Knight -> 4.
     | Templar -> 3.
-    | Ballista | Berserker | Cavalry | Demon | Dervish | Merc | Ranger | Veteran -> 2.
+    | Ballista | Berserker | Cavalry | Demon | Dervish | Harcher | Merc | Ranger | Veteran -> 2.
     | Men | Novice | Orc -> 1.
     | Skeleton -> 0.5
 
@@ -124,6 +126,7 @@ let filter = Mapx.filterk
 
 module Promote = struct
   let needs = function
+    | Harcher
     | Knight -> Cavalry
     | Dervish
     | Ranger
@@ -135,6 +138,7 @@ module Promote = struct
     | Berserker -> 2
     | Cavalry
     | Dervish
+    | Harcher
     | Knight
     | Ranger
     | Templar

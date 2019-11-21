@@ -99,6 +99,18 @@ module Dervish = Recruit.Event(struct
   module Cap = Recruit.NoCap
 end)
 
+module Harcher = struct
+  include Recruit.Event(struct
+    let action = Recruit.Promote
+    let kind = Units.Harcher
+    let pool = None
+    module Cap = Recruit.NoCap
+  end)
+  module Check (S : State.S) = struct
+    let value = S.Build.check Build.(is_ready Barracks)
+  end
+end
+
 module Knight = Recruit.Event(struct
   let action = Recruit.Promote
   let kind = Units.Knight

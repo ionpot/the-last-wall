@@ -10,6 +10,7 @@ module Input = struct
     | Berserker of Event.Berserker.t
     | Build of Event.BuildAvlb.t
     | Dervish of Event.Dervish.t
+    | Harcher of Event.Harcher.t
     | Knight of Event.Knight.t
     | LeaderNew of Event.LeaderNew.t
     | Mercs of Event.Mercs.t
@@ -32,6 +33,7 @@ module Input = struct
       | Berserker x -> Apply.value x (module Event.Berserker)
       | Build x -> Apply.value x (module Event.BuildAvlb)
       | Dervish x -> Apply.value x (module Event.Dervish)
+      | Harcher x -> Apply.value x (module Event.Harcher)
       | Knight x -> Apply.value x (module Event.Knight)
       | LeaderNew x -> Apply.value x (module Event.LeaderNew)
       | Mercs x -> Apply.value x (module Event.Mercs)
@@ -95,6 +97,8 @@ module Convert = struct
     let cond : Convert.cond = function
       | Steps.Barracks -> (module struct module Event = Event.Barracks
           let make x = Input.Barracks x end)
+      | Steps.Harcher -> (module struct module Event = Event.Harcher
+          let make x = Input.Harcher x end)
       | Steps.LeaderNew -> (module struct module Event = Event.LeaderNew
           let make x = Input.LeaderNew x end)
       | Steps.Mercs -> (module struct module Event = Event.Mercs
