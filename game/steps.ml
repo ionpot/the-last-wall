@@ -123,7 +123,7 @@ module Phase3 = struct
   end
   module Output = struct
     type check = Attack | LevelUp | NoAttack | NoEnemies
-    type cond = Ballista | Barraged | Cyclops | Defeat | Smite
+    type cond = Ballista | Barraged | Cyclops | Defeat | HitRun | Smite
     type direct = Combat | Fear | Revive | Victory
     type t = (check, cond, direct) output
   end
@@ -148,6 +148,7 @@ module Phase3 = struct
       ])
     ; Ask (Direct Input.Barrage)
     ; Do (Cond Output.Barraged)
+    ; Do (Cond Output.HitRun)
     ; check_enemies
     ; Do (Direct Output.Fear)
     ; Do (Direct Output.Combat)

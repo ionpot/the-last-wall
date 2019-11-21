@@ -44,6 +44,7 @@ module Barrage = struct
     let value (ok, status) =
       let ok' = status = Barrage.Available && ok in
       S.Barrage.map (Barrage.set_choice ok');
+      S.Barrage.map (Barrage.set_status status);
       S.Bonus.map Bonus.(set Barrage ok')
   end
   module Make (S : State.S) = struct
@@ -52,7 +53,9 @@ module Barrage = struct
       then Barrage.(Disabled Leader)
       else if S.Weather.check Weather.is_bad
       then Barrage.(Disabled Weather)
-      else Barrage.Available
+      else if S.Enemy.check Units.(has_any Attr.can_barraged)
+      then Barrage.Available
+      else Barrage.(Disabled Target)
   end
 end
 

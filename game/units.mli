@@ -11,9 +11,11 @@ val attacks : kind list
 module Attr : sig
   type t = kind -> bool
   val can_barrage : t
+  val can_barraged : t
   val can_build : t
   val can_fear : t
   val can_heal : t
+  val can_hit_run : t
   val can_reflect : t
   val is_cavalry : t
   val is_holy : t
@@ -54,6 +56,7 @@ val count_all : t -> Defs.count
 val filter_count : Attr.t -> t -> Defs.count
 val find : Defs.count -> kind -> t -> Defs.count
 val has : kind -> t -> bool
+val has_any : Attr.t -> t -> bool
 val is_empty : t -> bool
 val kinds_of : t -> Set.t
 val ratio_of : kind -> t -> float

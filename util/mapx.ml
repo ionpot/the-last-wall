@@ -1,4 +1,7 @@
 module Make (Map : Map.S) = struct
+  let existsk f t =
+    Map.exists (fun k _ -> f k) t
+
   let filterk f t =
     Map.filter (fun k _ -> f k) t
 

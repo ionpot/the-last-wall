@@ -21,11 +21,13 @@ module Attr = struct
   let can_barrage = function
     | Harcher | Men | Merc | Ranger | Veteran -> true
     | _ -> false
+  let can_barraged = (=) Orc
   let can_build = function
     | Dervish | Men | Novice | Veteran -> true
     | _ -> false
   let can_fear = (=) Dullahan
   let can_heal = (=) Templar
+  let can_hit_run = (=) Harcher
   let can_reflect = function
     | Berserker | Harcher -> true
     | _ -> false
@@ -179,8 +181,8 @@ let find n kind t =
   let found = count kind t in
   min n found
 
-let has kind t =
-  count kind t > 0
+let has = Map.mem
+let has_any = Mapx.existsk
 
 let kinds_of t =
   let f k _ s = Set.add k s in
