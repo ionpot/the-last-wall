@@ -37,7 +37,7 @@ module Barraged = struct
     let bonus = S.Bonus.return Bonus.(set Training trained)
     let base = Power.base bonus
     let n =
-      (if trained then 0.1 else 0.05)
+      S.Barrage.return Barrage.coefficient
       |> Float.add_if clear 0.02
       |> Float.add_if numendor 0.02
       |> ( *. ) (Power.of_units units base)
