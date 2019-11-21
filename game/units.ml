@@ -30,15 +30,15 @@ module Attr = struct
   let is_cavalry = function
     | Cavalry | Knight -> true
     | _ -> false
+  let not_cavalry = Fun.negate is_cavalry
   let is_holy = function
     | Dervish | Novice | Ranger | Templar -> true
     | _ -> false
-  let is_infantry = function
-    | Berserker | Dervish | Men | Merc | Novice | Ranger | Templar | Veteran -> true
-    | _ -> false
   let is_siege = (=) Ballista
-  let is_infectable = Fun.negate is_siege
-  let is_revivable = Fun.negate is_siege
+  let not_siege = Fun.negate is_siege
+  let is_infantry k = not_cavalry k && not_siege k
+  let is_infectable = not_siege
+  let is_revivable = not_siege
   let is_undead = function
     | Skeleton | Dullahan -> true
     | _ -> false
