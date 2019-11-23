@@ -12,7 +12,6 @@ let dr u =
 
 let revive u =
   Mapx.mapk Units.Base.revive u
-  |> Mapx.Float.clean
 
 module Fn = struct
   let find k t =
