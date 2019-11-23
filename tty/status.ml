@@ -1,16 +1,14 @@
 open Game
 
 module type S = sig
-  val berserker : unit -> unit
   val cavalry : Defs.count -> unit
   val dervish : unit -> unit
   val enemies : unit -> unit
   val facilities : Direct.Facilities.t -> unit
   val leader : unit -> unit
   val new_leader : Input.LeaderNew.t -> unit
-  val ranger : unit -> unit
+  val promote : Units.kind -> unit
   val res : unit -> unit
-  val templar : unit -> unit
   val units : unit -> unit
 end
 
@@ -19,11 +17,6 @@ module With (S : State.S) = struct
 
   let count kind =
     Units.count kind |> S.Units.return
-
-  let berserker () =
-    count Units.Berserker
-    |> sprintf "%d berserker in total"
-    |> Tty.writeln
 
   let cavalry n =
     count Units.Cavalry
@@ -41,11 +34,8 @@ module With (S : State.S) = struct
     |> Convert.unit_pairs2str
     |> Tty.pairln "total"
 
-  let ranger () =
-    total Units.([Ranger; Dervish])
-
-  let templar () =
-    total Units.([Templar; Dervish])
+  let promote kind =
+    total [kind; Units.Promote.needs kind]
 
   let print_enemies prefix =
     S.Enemy.return Units.report

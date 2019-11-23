@@ -189,10 +189,13 @@ let unit2str = function
   | Units.Templar -> "templar"
   | Units.Veteran -> "veteran"
 
-let party2str (kind, n) =
+let unit_n2str n kind =
   if n > 0
   then sprintf "%d %s" n (unit2str kind)
   else ""
+
+let party2str (kind, n) =
+  unit_n2str n kind
 
 let unit_ls2str kinds =
   List.sort unit_cmp kinds

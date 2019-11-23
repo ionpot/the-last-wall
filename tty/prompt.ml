@@ -150,10 +150,6 @@ module Leader = struct
     | _ -> Tty.prompt "choose" |> choose_with enabled ls |> to_pairs
 end
 
-let knight cap =
-  Tty.writeln (sprintf "can promote %d cavalry to knight" cap);
-  Tty.prompt_amount cap
-
 let mercs cap =
   Tty.writeln (sprintf "%d mercenaries available" cap);
   Tty.prompt_amount cap
@@ -185,8 +181,11 @@ module Nations (S : Game.State.S) = struct
     |> Set.of_list
 end
 
-let ranger cap =
-  Tty.writeln (sprintf "can promote %d dervish to ranger" cap);
+let promote kind cap =
+  let k = Game.Units.Promote.needs kind in
+  sprintf "can promote %s to %s"
+    (unit_n2str cap k) (unit2str kind)
+  |> Tty.writeln;
   Tty.prompt_amount cap
 
 let scout () =
@@ -197,17 +196,15 @@ let sodistan cap =
   Tty.writeln (sprintf "can convert %s from sodistan" (sup2str cap));
   Tty.prompt_amount cap
 
-let templar cap =
-  Tty.writeln (sprintf "can promote %d dervish to templar" cap);
+let temple cap =
+  unit_n2str cap Game.Units.Men
+  |> sprintf "temple can aid with %s"
+  |> Tty.writeln;
   Tty.prompt_amount cap
 
 let trade () =
   one_nation "trade guild nation"
   |> (fun nat -> Tty.writeln (trade2str nat); Some nat)
-
-let veteran cap =
-  Tty.writeln (sprintf "can promote %d men to veteran" cap);
-  Tty.prompt_amount cap
 
 let volunteers cap =
   Tty.writeln (sprintf "%d volunteers want to join" cap);

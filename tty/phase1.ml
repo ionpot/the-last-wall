@@ -1,9 +1,11 @@
 module Phase = Game.Phase1
+module Units = Game.Units
 
 module Make (S : Game.State.S) = struct
   let input =
     let open Phase.Input in
     let check f x = if x > 0 then f x else x in
+    let promote k = check (Prompt.promote k) in
     function
       | Ballista avlb -> Ballista (check Prompt.ballista avlb)
       | Build avlb ->
@@ -11,7 +13,7 @@ module Make (S : Game.State.S) = struct
           S.Build.return (Print.Build.all nat);
           Build (Prompt.Build.from nat avlb)
       | Deity _ -> Deity (Prompt.deity ())
-      | Knight n -> Knight (check Prompt.knight n)
+      | Knight n -> Knight (promote Units.Knight n)
       | Leader _ -> Leader (Prompt.Leader.first ())
       | Nations chosen ->
           let module Prompt = Prompt.Nations(S) in
@@ -36,11 +38,14 @@ module Make (S : Game.State.S) = struct
 end
 
 module After (S : Status.S) = struct
+  let promote k n =
+    if n > 0 then begin S.promote k; S.res () end
+
   let input =
     let open Phase.Input in
     function
       | Ballista n -> if n > 0 then S.res ()
-      | Knight n -> if n > 0 then S.res ()
+      | Knight n -> promote Units.Knight n
       | Leader _ -> S.leader ()
       | Sodistan n
       | Volunteers n -> if n > 0 then S.res ()

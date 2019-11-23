@@ -1,31 +1,33 @@
 module Phase = Game.Phase2
+module Units = Game.Units
 
 module Make (S : Game.State.S) = struct
   let input =
     let open Phase.Input in
     let check f x = if x > 0 then f x else x in
+    let promote k = check (Prompt.promote k) in
     function
       | Ballista avlb -> Ballista (check Prompt.ballista avlb)
       | Barracks _ -> Barracks (Prompt.barracks ())
       | BarrageTrain (ok, cost) ->
           BarrageTrain (Prompt.barrage_train ok cost, cost)
-      | Berserker avlb -> Berserker (check Prompt.berserker avlb)
+      | Berserker avlb -> Berserker (promote Units.Berserker avlb)
       | Build avlb ->
           let nat = S.Nation.get () in
           S.Build.return (Print.Build.all nat);
           Build (Prompt.Build.from nat avlb)
       | Dervish count -> Dervish (check Prompt.dervish count)
       | LeaderNew x -> LeaderNew (Prompt.Leader.pair x)
-      | Knight count -> Knight (check Prompt.knight count)
+      | Knight avlb -> Knight (promote Units.Knight avlb)
       | Mercs count -> Mercs (Prompt.mercs count)
       | Nations chosen ->
           let module Prompt = Prompt.Nations(S) in
           Nations (Prompt.from chosen)
-      | Ranger count -> Ranger (check Prompt.ranger count)
+      | Ranger avlb -> Ranger (promote Units.Ranger avlb)
       | Sodistan sup -> Sodistan (check Prompt.sodistan sup)
-      | Templar count -> Templar (check Prompt.templar count)
+      | Templar avlb -> Templar (promote Units.Templar avlb)
       | Trade _ -> Trade (Prompt.trade ())
-      | Veteran count -> Veteran (check Prompt.veteran count)
+      | Veteran avlb -> Veteran (promote Units.Veteran avlb)
       | Volunteers count -> Volunteers (check Prompt.volunteers count)
 
   let output =
@@ -60,20 +62,23 @@ module Make (S : Game.State.S) = struct
 end
 
 module After (S : Status.S) = struct
+  let promote k n =
+    if n > 0 then begin S.promote k; S.res () end
+
   let input =
     let open Phase.Input in
     function
       | Ballista n -> if n > 0 then S.res ()
       | BarrageTrain (ok, _) -> if ok then S.res ()
-      | Berserker n -> if n > 0 then begin S.berserker (); S.res () end
+      | Berserker n -> promote Units.Berserker n
       | Dervish n -> if n > 0 then begin S.dervish (); S.res () end
       | LeaderNew x -> S.new_leader x
-      | Knight n -> if n > 0 then S.res ()
+      | Knight n -> promote Units.Knight n
       | Mercs n -> if n > 0 then S.res ()
-      | Ranger n -> if n > 0 then begin S.ranger (); S.res () end
+      | Ranger n -> promote Units.Ranger n
       | Sodistan n -> if n > 0 then S.res ()
-      | Templar n -> if n > 0 then begin S.templar (); S.res () end
-      | Veteran n
+      | Templar n -> promote Units.Templar n
+      | Veteran n -> promote Units.Veteran n
       | Volunteers n -> if n > 0 then S.res ()
       | _ -> ()
 
