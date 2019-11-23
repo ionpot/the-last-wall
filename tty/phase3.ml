@@ -27,6 +27,7 @@ module Make (S : Game.State.S) = struct
       | Cyclops x -> Print.cyclops x
       | Defeat -> Tty.writeln "defeat"
       | Fear x -> Print.fear x
+      | HitRun x -> Print.hit_run x
       | LevelUp -> S.Leader.return Print.Leader.lvup
       | NoAttack -> ()
       | NoEnemies -> Tty.writeln "no enemies left"
