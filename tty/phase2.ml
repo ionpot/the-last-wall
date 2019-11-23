@@ -17,6 +17,7 @@ module Make (S : Game.State.S) = struct
           S.Build.return (Print.Build.all nat);
           Build (Prompt.Build.from nat avlb)
       | Dervish count -> Dervish (check Prompt.dervish count)
+      | Harcher avlb -> Harcher (promote Units.Harcher avlb)
       | LeaderNew x -> LeaderNew (Prompt.Leader.pair x)
       | Knight avlb -> Knight (promote Units.Knight avlb)
       | Mercs count -> Mercs (Prompt.mercs count)
@@ -72,6 +73,7 @@ module After (S : Status.S) = struct
       | BarrageTrain (ok, _) -> if ok then S.res ()
       | Berserker n -> promote Units.Berserker n
       | Dervish n -> if n > 0 then begin S.dervish (); S.res () end
+      | Harcher n -> promote Units.Harcher n
       | LeaderNew x -> S.new_leader x
       | Knight n -> promote Units.Knight n
       | Mercs n -> if n > 0 then S.res ()
