@@ -21,28 +21,30 @@ module Ballista = struct
 end
 
 module Barraged = struct
-  type t = Defs.count
+  type t = Units.t
   module Apply (S : State.S) = struct
-    let value n = S.Enemy.map Units.(sub n Orc)
+    let value u = S.Enemy.map (Units.reduce u)
   end
   module Check (S : State.S) = struct
     let value = S.Barrage.check Barrage.is_chosen
   end
   module Make (S : State.S) = struct
     module Check = Support.Check(S)
+    module Fill = Dist.Fill(S.Dice)
     let clear = S.Weather.is Weather.Clear
     let numendor = Check.has_traded Nation.Numendor
     let trained = S.Barrage.check Barrage.is_trained
     let units = S.Units.return Units.(filter Attr.can_barrage)
     let bonus = S.Bonus.return Bonus.(set Training trained)
     let base = Power.base bonus
-    let n =
-      (if trained then 0.1 else 0.05)
+    let p =
+      S.Barrage.return Barrage.coefficient
       |> Float.add_if clear 0.02
       |> Float.add_if numendor 0.02
       |> ( *. ) (Power.of_units units base)
-      |> truncate
-    let value = S.Enemy.return Units.(find n Orc)
+    let value =
+      S.Enemy.return Units.(filter Attr.can_barraged)
+      |> Fill.from p base |> fst
   end
 end
 
@@ -100,26 +102,32 @@ module Disease = struct
   end
 end
 
-module Revive = struct
+module HitRun = struct
   type t = Units.t * Units.t
-  let kind = Units.Dervish
+  let hit_back_chance = 0.05
   module Apply (S : State.S) = struct
-    let value (revived, rem) =
-      S.Units.map (Units.combine revived);
-      S.Casualty.set rem
+    let value (enemy, units) =
+      S.Enemy.map (Units.reduce enemy);
+      S.Units.map (Units.reduce units)
   end
   module Check (S : State.S) = struct
-    let value = S.Units.check (Units.has kind)
+    let value = S.Barrage.check Barrage.can_hit_run
   end
   module Make (S : State.S) = struct
     module Fill = Dist.Fill(S.Dice)
-    let units = S.Units.get ()
     let base = S.Bonus.return Power.base
-    let pwr = Power.of_unit kind units base
+    let fill p u = Fill.from p base u |> fst
+    let units = S.Units.return Units.(filter Attr.can_hit_run)
+    let power = Power.of_units units base
+    let c = S.Barrage.return Barrage.coefficient
+    let enemy = S.Enemy.get ()
+    let epower = Power.of_units enemy base
+    let target = Units.(filter Attr.can_barraged) enemy
     let value =
-      Units.(filter Attr.is_revivable)
-      |> S.Casualty.return
-      |> Fill.from pwr base
+      fill (power *. c) target,
+      if S.Dice.chance hit_back_chance
+      then fill (epower *. 0.1) units
+      else Units.empty
   end
 end
 

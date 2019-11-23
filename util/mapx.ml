@@ -1,6 +1,12 @@
 module Make (Map : Map.S) = struct
+  let existsk f t =
+    Map.exists (fun k _ -> f k) t
+
   let filterk f t =
     Map.filter (fun k _ -> f k) t
+
+  let filterv f t =
+    Map.filter (fun _ -> f) t
 
   let discardk f t =
     filterk (fun k -> not (f k)) t
@@ -17,6 +23,9 @@ module Make (Map : Map.S) = struct
 
   module Float = struct
     type t = float Map.t
+
+    let clean t =
+      filterv ((<) 0.) t
 
     let max t =
       Map.fold (fun k -> max) t 0.
