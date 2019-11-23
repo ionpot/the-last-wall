@@ -20,7 +20,7 @@ module Make (S : Game.State.S) = struct
           |> S.Enemy.return
           |> S.Leader.return
       | Ballista x -> Print.ballista x
-      | Barraged x -> Tty.pairln "barraged" (barrage2str x |> str2none)
+      | Barraged x -> Tty.pairln "barraged" (units2str x |> str2none)
       | Combat x ->
           Print.Combat.outcome x
           |> S.Leader.return

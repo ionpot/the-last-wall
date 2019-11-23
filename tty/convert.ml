@@ -248,9 +248,6 @@ let result2stats r =
   |> List.map (fun (s, n) -> sprintf "%s %s" (power2str n) s)
   |> commas
 
-let barrage2str x =
-  units2str Units.(make x Orc)
-
 let starve2bool (deserted, starved) =
   not (Units.is_empty starved && Units.is_empty deserted)
 

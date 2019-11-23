@@ -104,6 +104,7 @@ let barrage_status w =
   function
     | Available -> ()
     | Disabled Leader -> Tty.writeln "no leader to lead arrow barrage"
+    | Disabled Target -> Tty.writeln "no target for arrow barrage"
     | Disabled Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
 
 let cyclops (n, units, _) =
