@@ -122,10 +122,6 @@ let deity () =
   |> choose_one ls Game.Deity.empty
   |> echo (fun d -> Tty.spln (deity2str d) "will enlighten our path in this holy quest")
 
-let dervish cap =
-  Tty.writeln (sprintf "%d dervish available" cap);
-  Tty.prompt_amount cap
-
 module Leader = struct
   let first () =
     let ls = Game.Leader.kinds in

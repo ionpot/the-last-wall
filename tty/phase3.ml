@@ -30,7 +30,7 @@ module Make (S : Game.State.S) = struct
       | LevelUp -> S.Leader.return Print.Leader.lvup
       | NoAttack -> ()
       | NoEnemies -> Tty.writeln "no enemies left"
-      | Revive (x, _) -> Tty.pairln "revived" (units2str x |> str2none)
+      | Revive (x, _) -> Tty.ifpairln "revived" (units2str x)
       | Smite x -> Tty.pairln "smite" (units2str x |> str2none)
       | Victory -> ()
 end

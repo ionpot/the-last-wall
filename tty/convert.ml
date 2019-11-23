@@ -184,6 +184,7 @@ let unit2str = function
   | Units.Knight -> "knight"
   | Units.Men -> "men"
   | Units.Merc -> "merc"
+  | Units.Novice -> "novice"
   | Units.Orc -> "orc"
   | Units.Ranger -> "ranger"
   | Units.Skeleton -> "skeleton"
