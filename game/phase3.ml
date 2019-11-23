@@ -23,10 +23,11 @@ module Output = struct
     | Cyclops of Cond.Cyclops.t
     | Defeat
     | Fear of Direct.Fear.t
+    | HitRun of Cond.HitRun.t
     | LevelUp
     | NoAttack
     | NoEnemies
-    | Revive of Cond.Revive.t
+    | Revive of Direct.Revive.t
     | Smite of Cond.Smite.t
     | Victory
 end
@@ -69,8 +70,8 @@ module Convert = struct
           let make x = Output.Cyclops x end)
       | Steps.Defeat -> (module struct module Event = Cond.Defeat
           let make () = Output.Defeat end)
-      | Steps.Revive -> (module struct module Event = Cond.Revive
-          let make x = Output.Revive x end)
+      | Steps.HitRun -> (module struct module Event = Cond.HitRun
+          let make x = Output.HitRun x end)
       | Steps.Smite -> (module struct module Event = Cond.Smite
           let make x = Output.Smite x end)
 
@@ -79,6 +80,8 @@ module Convert = struct
           let make x = Output.Combat x end)
       | Steps.Fear -> (module struct module Event = Direct.Fear
           let make x = Output.Fear x end)
+      | Steps.Revive -> (module struct module Event = Direct.Revive
+          let make x = Output.Revive x end)
       | Steps.Victory -> (module struct module Event = Direct.Victory
           let make () = Output.Victory end)
   end

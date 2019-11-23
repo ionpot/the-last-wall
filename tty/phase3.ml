@@ -20,17 +20,18 @@ module Make (S : Game.State.S) = struct
           |> S.Enemy.return
           |> S.Leader.return
       | Ballista x -> Print.ballista x
-      | Barraged x -> Tty.pairln "barraged" (barrage2str x |> str2none)
+      | Barraged x -> Tty.pairln "barraged" (units2str x |> str2none)
       | Combat x ->
           Print.Combat.outcome x
           |> S.Leader.return
       | Cyclops x -> Print.cyclops x
       | Defeat -> Tty.writeln "defeat"
       | Fear x -> Print.fear x
+      | HitRun x -> Print.hit_run x
       | LevelUp -> S.Leader.return Print.Leader.lvup
       | NoAttack -> ()
       | NoEnemies -> Tty.writeln "no enemies left"
-      | Revive (x, _) -> Tty.pairln "revived" (units2str x |> str2none)
+      | Revive (x, _) -> Tty.ifpairln "revived" (units2str x)
       | Smite x -> Tty.pairln "smite" (units2str x |> str2none)
       | Victory -> ()
 end

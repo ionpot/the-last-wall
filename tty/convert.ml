@@ -179,10 +179,12 @@ let unit2str = function
   | Units.Demon -> "demon"
   | Units.Dervish -> "dervish"
   | Units.Dullahan -> "dullahan"
+  | Units.Harcher -> "horse archer"
   | Units.Harpy -> "harpy"
   | Units.Knight -> "knight"
   | Units.Men -> "men"
   | Units.Merc -> "merc"
+  | Units.Novice -> "novice"
   | Units.Orc -> "orc"
   | Units.Ranger -> "ranger"
   | Units.Skeleton -> "skeleton"
@@ -245,9 +247,6 @@ let result2stats r =
   |> List.filter (fun (_, n) -> n > 0.)
   |> List.map (fun (s, n) -> sprintf "%s %s" (power2str n) s)
   |> commas
-
-let barrage2str x =
-  units2str Units.(make x Orc)
 
 let starve2bool (deserted, starved) =
   not (Units.is_empty starved && Units.is_empty deserted)

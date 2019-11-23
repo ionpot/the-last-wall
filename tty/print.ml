@@ -104,6 +104,7 @@ let barrage_status w =
   function
     | Available -> ()
     | Disabled Leader -> Tty.writeln "no leader to lead arrow barrage"
+    | Disabled Target -> Tty.writeln "no target for arrow barrage"
     | Disabled Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
 
 let cyclops (n, units, _) =
@@ -127,6 +128,12 @@ let fear fled =
 let fear_end fled =
   if units2bool fled
   then sprintf "%s returns" (units2str fled) |> Tty.writeln
+
+let hit_run (killed, died) =
+  if units2bool killed
+  then sprintf "horse archers kill %s" (units2str killed) |> Tty.writeln;
+  if units2bool died
+  then sprintf "lost %s" (units2str died) |> Tty.writeln
 
 let mishap t =
   let print kind =

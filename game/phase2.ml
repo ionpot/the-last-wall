@@ -10,13 +10,16 @@ module Input = struct
     | Berserker of Event.Berserker.t
     | Build of Event.BuildAvlb.t
     | Dervish of Event.Dervish.t
+    | Harcher of Event.Harcher.t
     | Knight of Event.Knight.t
     | LeaderNew of Event.LeaderNew.t
     | Mercs of Event.Mercs.t
     | Nations of Event.Nations.t
+    | Novice of Event.Novice.t
     | Ranger of Event.Ranger.t
     | Sodistan of Event.Sodistan.t
     | Templar of Event.Templar.t
+    | Temple of Event.Temple.t
     | Trade of Event.Trade.t
     | Veteran of Event.Veteran.t
     | Volunteers of Event.Volunteers.t
@@ -30,13 +33,16 @@ module Input = struct
       | Berserker x -> Apply.value x (module Event.Berserker)
       | Build x -> Apply.value x (module Event.BuildAvlb)
       | Dervish x -> Apply.value x (module Event.Dervish)
+      | Harcher x -> Apply.value x (module Event.Harcher)
       | Knight x -> Apply.value x (module Event.Knight)
       | LeaderNew x -> Apply.value x (module Event.LeaderNew)
       | Mercs x -> Apply.value x (module Event.Mercs)
       | Nations x -> Apply.value x (module Event.Nations)
+      | Novice x -> Apply.value x (module Event.Novice)
       | Ranger x -> Apply.value x (module Event.Ranger)
       | Sodistan x -> Apply.value x (module Event.Sodistan)
       | Templar x -> Apply.value x (module Event.Templar)
+      | Temple x -> Apply.value x (module Event.Temple)
       | Trade x -> Apply.value x (module Event.Trade)
       | Veteran x -> Apply.value x (module Event.Veteran)
       | Volunteers x -> Apply.value x (module Event.Volunteers)
@@ -83,12 +89,16 @@ module Convert = struct
           let make x = Input.Knight x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)
+      | Steps.Novice -> (module struct module Event = Event.Novice
+          let make x = Input.Novice x end)
       | Steps.Sodistan -> (module struct module Event = Event.Sodistan
           let make x = Input.Sodistan x end)
 
     let cond : Convert.cond = function
       | Steps.Barracks -> (module struct module Event = Event.Barracks
           let make x = Input.Barracks x end)
+      | Steps.Harcher -> (module struct module Event = Event.Harcher
+          let make x = Input.Harcher x end)
       | Steps.LeaderNew -> (module struct module Event = Event.LeaderNew
           let make x = Input.LeaderNew x end)
       | Steps.Mercs -> (module struct module Event = Event.Mercs
@@ -97,6 +107,8 @@ module Convert = struct
           let make x = Input.Ranger x end)
       | Steps.Templar -> (module struct module Event = Event.Templar
           let make x = Input.Templar x end)
+      | Steps.Temple -> (module struct module Event = Event.Temple
+          let make x = Input.Temple x end)
       | Steps.Trade -> (module struct module Event = Event.Trade
           let make x = Input.Trade x end)
       | Steps.Veteran -> (module struct module Event = Event.Veteran

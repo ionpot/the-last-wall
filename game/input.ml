@@ -44,6 +44,7 @@ module Barrage = struct
     let value (ok, status) =
       let ok' = status = Barrage.Available && ok in
       S.Barrage.map (Barrage.set_choice ok');
+      S.Barrage.map (Barrage.set_status status);
       S.Bonus.map Bonus.(set Barrage ok')
   end
   module Make (S : State.S) = struct
@@ -52,7 +53,9 @@ module Barrage = struct
       then Barrage.(Disabled Leader)
       else if S.Weather.check Weather.is_bad
       then Barrage.(Disabled Weather)
-      else Barrage.Available
+      else if S.Enemy.check Units.(has_any Attr.can_barraged)
+      then Barrage.Available
+      else Barrage.(Disabled Target)
   end
 end
 
@@ -93,16 +96,23 @@ module DeityChoice = struct
 end
 
 module Dervish = Recruit.Event(struct
-  let action = Recruit.New
+  let action = Recruit.Promote
   let kind = Units.Dervish
-  let pool = Some (Recruit.Set Pool.Dervish)
-  module Cap (S : State.S) = struct
-    let range =
-      if S.Build.check Build.(is_ready Guesthouse)
-      then 3, 12 else 2, 8
-    let value = Some (S.Dice.range range)
-  end
+  let pool = Some (Recruit.Exclude Pool.Novice)
+  module Cap = Recruit.NoCap
 end)
+
+module Harcher = struct
+  include Recruit.Event(struct
+    let action = Recruit.Promote
+    let kind = Units.Harcher
+    let pool = None
+    module Cap = Recruit.NoCap
+  end)
+  module Check (S : State.S) = struct
+    let value = S.Build.check Build.(is_ready Barracks)
+  end
+end
 
 module Knight = Recruit.Event(struct
   let action = Recruit.Promote
@@ -171,11 +181,18 @@ module Nations = struct
   end
 end
 
+module Novice = Recruit.Event(struct
+  let action = Recruit.New
+  let kind = Units.Novice
+  let pool = Some (Recruit.Set Pool.Novice)
+  module Cap = Recruit.NoCap
+end)
+
 module Ranger = struct
   include Recruit.Event(struct
     let action = Recruit.Promote
     let kind = Units.Ranger
-    let pool = Some (Recruit.Exclude Pool.Dervish)
+    let pool = Some (Recruit.Exclude Pool.Novice)
     module Cap = Recruit.NoCap
   end)
   module Check (S : State.S) = struct
@@ -212,10 +229,25 @@ module Templar = struct
   include Recruit.Event(struct
     let action = Recruit.Promote
     let kind = Units.Templar
-    let pool = Some (Recruit.Exclude Pool.Dervish)
+    let pool = Some (Recruit.Exclude Pool.Novice)
     module Cap = Recruit.NoCap
   end)
   module Check = Check.Not(Ranger.Check)
+end
+
+module Temple = struct
+  type t = Defs.count
+  module Apply (S : State.S) = struct
+    let value n = S.Units.map Units.(add n Men)
+  end
+  module Check (S : State.S) = struct
+    let value = S.Build.check Build.(is_ready Temple)
+  end
+  module Make (S : State.S) = struct
+    let guest = S.Build.check Build.(is_ready Guesthouse)
+    let n = Number.add_if guest 1 3
+    let value = Range.Int.times n (1, 4) |> S.Dice.range
+  end
 end
 
 module Trade = struct

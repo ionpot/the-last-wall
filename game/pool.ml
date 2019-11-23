@@ -1,4 +1,4 @@
-type kind = Arena | Dervish
+type kind = Arena | Novice
 type value = Defs.count
 
 module Kind = struct

@@ -16,16 +16,19 @@ module Make (S : Game.State.S) = struct
           let nat = S.Nation.get () in
           S.Build.return (Print.Build.all nat);
           Build (Prompt.Build.from nat avlb)
-      | Dervish count -> Dervish (check Prompt.dervish count)
+      | Dervish avlb -> Dervish (promote Units.Dervish avlb)
+      | Harcher avlb -> Harcher (promote Units.Harcher avlb)
       | LeaderNew x -> LeaderNew (Prompt.Leader.pair x)
       | Knight avlb -> Knight (promote Units.Knight avlb)
       | Mercs count -> Mercs (Prompt.mercs count)
       | Nations chosen ->
           let module Prompt = Prompt.Nations(S) in
           Nations (Prompt.from chosen)
+      | Novice avlb -> Novice (promote Units.Novice avlb)
       | Ranger avlb -> Ranger (promote Units.Ranger avlb)
       | Sodistan sup -> Sodistan (check Prompt.sodistan sup)
       | Templar avlb -> Templar (promote Units.Templar avlb)
+      | Temple count -> Temple (check Prompt.temple count)
       | Trade _ -> Trade (Prompt.trade ())
       | Veteran avlb -> Veteran (promote Units.Veteran avlb)
       | Volunteers count -> Volunteers (check Prompt.volunteers count)
@@ -71,13 +74,16 @@ module After (S : Status.S) = struct
       | Ballista n -> if n > 0 then S.res ()
       | BarrageTrain (ok, _) -> if ok then S.res ()
       | Berserker n -> promote Units.Berserker n
-      | Dervish n -> if n > 0 then begin S.dervish (); S.res () end
+      | Dervish n -> promote Units.Dervish n
+      | Harcher n -> promote Units.Harcher n
       | LeaderNew x -> S.new_leader x
       | Knight n -> promote Units.Knight n
       | Mercs n -> if n > 0 then S.res ()
+      | Novice n -> promote Units.Novice n
       | Ranger n -> promote Units.Ranger n
       | Sodistan n -> if n > 0 then S.res ()
       | Templar n -> promote Units.Templar n
+      | Temple n -> if n > 0 then S.res ()
       | Veteran n -> promote Units.Veteran n
       | Volunteers n -> if n > 0 then S.res ()
       | _ -> ()

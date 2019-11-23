@@ -2,7 +2,6 @@ open Game
 
 module type S = sig
   val cavalry : Defs.count -> unit
-  val dervish : unit -> unit
   val enemies : unit -> unit
   val facilities : Direct.Facilities.t -> unit
   val leader : unit -> unit

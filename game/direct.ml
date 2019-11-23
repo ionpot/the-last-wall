@@ -175,6 +175,25 @@ module NationSupport = struct
   end
 end
 
+module Revive = struct
+  type t = Units.t * Units.t
+  module Apply (S : State.S) = struct
+    let value (revived, rem) =
+      S.Units.map (Units.combine revived);
+      S.Casualty.set rem
+  end
+  module Make (S : State.S) = struct
+    module Fill = Dist.Fill(S.Dice)
+    let units = S.Units.get ()
+    let base = S.Bonus.return Power.base
+    let pwr = Power.revive units |> Power.of_units units
+    let value =
+      Units.(filter Attr.is_revivable)
+      |> S.Casualty.return
+      |> Fill.from pwr base
+  end
+end
+
 module Starting = Starting
 
 module Starvation = struct
