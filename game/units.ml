@@ -142,6 +142,7 @@ module Promote = struct
     | Dervish
     | Harcher
     | Knight
+    | Novice
     | Ranger
     | Templar
     | Veteran -> 1
