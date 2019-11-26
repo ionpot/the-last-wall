@@ -1,5 +1,3 @@
-open Printf
-
 let lf = "\r\n"
 
 let fopen () =
