@@ -39,9 +39,6 @@ end
 let from_units u t =
   Map.mapi (Fn.mul t) u
 
-let from_filter attr u t =
-  from_units (Units.filter attr u) t
-
 let count base t =
   Map.mapi (Fn.count base) t
 
@@ -78,10 +75,6 @@ let map_units u t =
 
 let modulo base t =
   Map.mapi (Fn.modulo base) t
-
-let reset = Map.remove
-
-let set = Map.add
 
 let sub kind pwr t =
   let p = Float.sub (Fn.find kind t) pwr in

@@ -75,7 +75,7 @@ module Damage (Dice : Dice.S) (Flags : Flags) = struct
       else acc, dmg
     in acc', dmg, sub
 
-  let mitigate kind input acc cap =
+  let mitigate kind _ acc cap =
     let ratio = Map.find kind acc.ratios in
     max (ratio *. cap) 0.1
 
@@ -100,7 +100,7 @@ module Damage (Dice : Dice.S) (Flags : Flags) = struct
     type nonrec acc = acc
     type map = Type.t Map.t
     type step = acc * Cap.t * Type.t
-    let choose acc cap input =
+    let choose acc _ input =
       let units = to_units acc input in
       let f k = Units.ratio_of k units in
       let ratios = Mapx.mapk f units in

@@ -142,14 +142,10 @@ module Ready = struct
 
   let empty : t = Map.empty
 
-  let add kind t =
-    Map.add kind 1 t
-
   let bump = Mapx.Int.succ
   let bump_ls = fn_ls bump
   let count = Mapx.Int.value
   let decr = Mapx.Int.pred
-  let from ls = bump_ls ls empty
   let has = Map.mem
   let sum = Mapx.Int.sum
 

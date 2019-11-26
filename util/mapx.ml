@@ -28,7 +28,7 @@ module Make (Map : Map.S) = struct
       filterv ((<) 0.) t
 
     let max t =
-      Map.fold (fun k -> max) t 0.
+      Map.fold (fun _ -> max) t 0.
 
     let pick t p =
       let key, _ = Map.min_binding t in
