@@ -2,6 +2,7 @@ module Map = Units.Map
 
 type t = Defs.power Map.t
 
+val barrage : t
 val empty : t
 
 val base : Bonus.t -> t

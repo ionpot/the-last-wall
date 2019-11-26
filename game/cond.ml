@@ -29,18 +29,13 @@ module Barraged = struct
     let value = S.Barrage.check Barrage.is_chosen
   end
   module Make (S : State.S) = struct
-    module Check = Support.Check(S)
     module Fill = Dist.Fill(S.Dice)
-    let clear = S.Weather.is Weather.Clear
-    let numendor = Check.has_traded Nation.Numendor
-    let trained = S.Barrage.check Barrage.is_trained
     let units = S.Units.return Units.(filter Attr.can_barrage)
-    let bonus = S.Bonus.return Bonus.(set Training trained)
-    let base = Power.base bonus
+    let base = Power.barrage
     let p =
-      S.Barrage.return Barrage.coefficient
-      |> Float.add_if clear 0.02
-      |> Float.add_if numendor 0.02
+      Barrage.coefficient
+      |> S.Bonus.return
+      |> S.Barrage.return
       |> ( *. ) (Power.of_units units base)
     let value =
       S.Enemy.return Units.(filter Attr.can_barraged)
@@ -119,7 +114,10 @@ module HitRun = struct
     let fill p u = Fill.from p base u |> fst
     let units = S.Units.return Units.(filter Attr.can_hit_run)
     let power = Power.of_units units base
-    let c = S.Barrage.return Barrage.coefficient
+    let c =
+      Barrage.coefficient
+      |> S.Bonus.return
+      |> S.Barrage.return
     let enemy = S.Enemy.get ()
     let epower = Power.of_units enemy base
     let target = Units.(filter Attr.can_barraged) enemy

@@ -22,8 +22,11 @@ let is_trained t = t.trained
 let can_hit_run t =
   is_available t && not (is_chosen t)
 
-let coefficient t =
-  if is_trained t then 0.1 else base_coefficient
+let coefficient bonus t =
+  let add_if b = Float.add_if (Bonus.has b bonus) in
+  (if is_trained t then 0.1 else base_coefficient)
+  |> add_if Bonus.ClearSky 0.02
+  |> add_if Bonus.NumendorTrade 0.02
 
 let set_choice choice t =
   { t with choice }
