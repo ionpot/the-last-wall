@@ -19,6 +19,9 @@ let is_available t = t.status = Available
 let is_chosen t = t.choice
 let is_trained t = t.trained
 
+let can_barrage t =
+  is_available t && is_chosen t
+
 let can_hit_run t =
   is_available t && not (is_chosen t)
 

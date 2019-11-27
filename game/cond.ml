@@ -26,7 +26,7 @@ module Barraged = struct
     let value u = S.Enemy.map (Units.reduce u)
   end
   module Check (S : State.S) = struct
-    let value = S.Barrage.check Barrage.is_chosen
+    let value = S.Barrage.check Barrage.can_barrage
   end
   module Make (S : State.S) = struct
     module Fill = Dist.Fill(S.Dice)
