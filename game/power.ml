@@ -6,9 +6,6 @@ type t = Defs.power Map.t
 
 let empty : t = Map.empty
 
-let barrage : t =
-  Map.add Units.Ranger 1. empty
-
 let dr u =
   let f k n = Float.times n (Units.Base.dr k) in
   Map.mapi f u
@@ -82,6 +79,9 @@ let modulo base t =
 let sub kind pwr t =
   let p = Float.sub (Fn.find kind t) pwr in
   Map.add kind p t
+
+let barrage =
+  add Units.Ranger 1. empty
 
 let base bonus =
   let apply b k p t =
