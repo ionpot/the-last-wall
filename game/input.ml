@@ -53,9 +53,9 @@ module Barrage = struct
       then Barrage.(Disabled Leader)
       else if S.Weather.check Weather.is_bad
       then Barrage.(Disabled Weather)
-      else if S.Enemy.check Units.(has_any Attr.can_barraged)
+      else if S.Units.check Units.(has_any Attr.can_barrage)
       then Barrage.Available
-      else Barrage.(Disabled Target)
+      else Barrage.(Disabled Archers)
   end
 end
 

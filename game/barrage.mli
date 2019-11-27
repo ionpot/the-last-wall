@@ -1,4 +1,4 @@
-type reason = Leader | Target | Weather
+type reason = Archers | Leader | Weather
 type status = Available | Disabled of reason
 
 val base_coefficient : Defs.power
