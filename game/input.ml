@@ -41,10 +41,16 @@ end
 module Barrage = struct
   type t = bool * Barrage.status
   module Apply (S : State.S) = struct
+    let count () =
+      S.Units.return Units.(filter_count Attr.can_hit_run)
+      >= S.Enemy.return Units.(count Harpy)
+    let bonus br =
+      Barrage.can_barrage br
+      || (Barrage.can_hit_run br && count ())
     let value (ok, status) =
-      let ok' = status = Barrage.Available && ok in
-      S.Barrage.map (Barrage.set_choice ok');
+      S.Barrage.map (Barrage.set_choice ok);
       S.Barrage.map (Barrage.set_status status);
+      let ok' = S.Barrage.check bonus in
       S.Bonus.map Bonus.(set Barrage ok')
   end
   module Make (S : State.S) = struct
@@ -53,9 +59,9 @@ module Barrage = struct
       then Barrage.(Disabled Leader)
       else if S.Weather.check Weather.is_bad
       then Barrage.(Disabled Weather)
-      else if S.Enemy.check Units.(has_any Attr.can_barraged)
+      else if S.Units.check Units.(has_any Attr.can_barrage)
       then Barrage.Available
-      else Barrage.(Disabled Target)
+      else Barrage.(Disabled Archers)
   end
 end
 
@@ -190,9 +196,9 @@ end)
 
 module Ranger = struct
   include Recruit.Event(struct
-    let action = Recruit.Promote
+    let action = Recruit.New
     let kind = Units.Ranger
-    let pool = Some (Recruit.Exclude Pool.Novice)
+    let pool = None
     module Cap = Recruit.NoCap
   end)
   module Check (S : State.S) = struct

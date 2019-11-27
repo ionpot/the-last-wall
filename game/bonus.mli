@@ -1,4 +1,4 @@
-type kind = Barrage | Clan | Training
+type kind = Barrage | ClanTrade | ClearSky | NumendorTrade
 
 type t
 

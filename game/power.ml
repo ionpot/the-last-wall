@@ -6,6 +6,9 @@ type t = Defs.power Map.t
 
 let empty : t = Map.empty
 
+let barrage : t =
+  Map.add Units.Ranger 1. empty
+
 let dr u =
   let f k n = Float.times n (Units.Base.dr k) in
   Map.mapi f u
@@ -86,8 +89,7 @@ let base bonus =
   in
   empty
   |> apply Bonus.Barrage Units.Harpy ~-.1.
-  |> apply Bonus.Clan Units.Ballista 1.
-  |> apply Bonus.Training Units.Ranger 1.
+  |> apply Bonus.ClanTrade Units.Ballista 1.
 
 let untouchable atk dfn t =
   let pwr = map_units atk t |> max in

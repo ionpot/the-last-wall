@@ -18,7 +18,7 @@ let cav_dr too_many snow units =
 module From (S : State.S) = struct
   module Check = Support.Check(S)
 
-  let barraging = S.Barrage.check Barrage.is_chosen
+  let barraging = S.Barrage.check Barrage.can_barrage
   let comet = S.Mishap.check Mishap.(has Comet)
   let heat = S.Weather.is Weather.Heat
   let snow = S.Weather.is Weather.(Snow Heavy)

@@ -55,11 +55,15 @@ module Apply (S : State.S) = struct
     in
     List.fold_left f cmap Nation.kinds
 
+  let set_bonus b nat =
+    let yes = Check.has_traded nat in
+    S.Bonus.map Bonus.(set b yes)
+
   let value t =
     chances t |> Nation.map_chances |> S.Nation.map;
     Nation.set_support t |> S.Nation.map;
-    let clan = Check.has_traded Nation.Clan in
-    S.Bonus.map Bonus.(set Clan clan)
+    set_bonus Bonus.ClanTrade Nation.Clan;
+    set_bonus Bonus.NumendorTrade Nation.Numendor
 end
 
 module Roll (S : State.S) = struct

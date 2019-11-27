@@ -223,11 +223,15 @@ end
 module Turn = struct
   type t = Defs.turn * Month.t * Weather.t
   module Apply (S : State.S) = struct
+    let set_bonus w =
+      let clear = w = Weather.Clear in
+      S.Bonus.map Bonus.(set ClearSky clear)
     let value (t, m, w) =
       S.Casualty.clear ();
       S.Turn.set t;
       S.Month.set m;
-      S.Weather.set w
+      S.Weather.set w;
+      set_bonus w
   end
   module Make (S : State.S) = struct
     module Weather = Weather.Roll(S.Dice)
