@@ -66,7 +66,7 @@ module Barrage = struct
 end
 
 module Berserker = Recruit.Event(struct
-  let action = Recruit.Promote
+  let action = Recruit.New
   let kind = Units.Berserker
   let pool = Some (Recruit.From Pool.Arena)
   module Cap = Recruit.NoCap
