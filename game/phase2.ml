@@ -17,6 +17,7 @@ module Input = struct
     | Nations of Event.Nations.t
     | Novice of Event.Novice.t
     | Ranger of Event.Ranger.t
+    | Research of Event.Research.t
     | Sodistan of Event.Sodistan.t
     | Templar of Event.Templar.t
     | Temple of Event.Temple.t
@@ -40,6 +41,7 @@ module Input = struct
       | Nations x -> Apply.value x (module Event.Nations)
       | Novice x -> Apply.value x (module Event.Novice)
       | Ranger x -> Apply.value x (module Event.Ranger)
+      | Research x -> Apply.value x (module Event.Research)
       | Sodistan x -> Apply.value x (module Event.Sodistan)
       | Templar x -> Apply.value x (module Event.Templar)
       | Temple x -> Apply.value x (module Event.Temple)
@@ -62,6 +64,8 @@ module Output = struct
     | Facilities of Direct.Facilities.t
     | FearEnd of Direct.FearEnd.t
     | Mishap of Direct.Mishap.t
+    | ResearchProgress of Direct.ResearchProgress.t
+    | ResearchStatus of Direct.ResearchStatus.t
     | Starvation of Direct.Starvation.t
     | Support of Direct.NationSupport.t
     | Turn of Direct.Turn.t
@@ -87,10 +91,14 @@ module Convert = struct
           let make x = Input.Dervish x end)
       | Steps.Knight -> (module struct module Event = Event.Knight
           let make x = Input.Knight x end)
+      | Steps.Mercs -> (module struct module Event = Event.Mercs
+          let make x = Input.Mercs x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)
       | Steps.Novice -> (module struct module Event = Event.Novice
           let make x = Input.Novice x end)
+      | Steps.Research -> (module struct module Event = Event.Research
+          let make x = Input.Research x end)
       | Steps.Sodistan -> (module struct module Event = Event.Sodistan
           let make x = Input.Sodistan x end)
 
@@ -101,8 +109,6 @@ module Convert = struct
           let make x = Input.Harcher x end)
       | Steps.LeaderNew -> (module struct module Event = Event.LeaderNew
           let make x = Input.LeaderNew x end)
-      | Steps.Mercs -> (module struct module Event = Event.Mercs
-          let make x = Input.Mercs x end)
       | Steps.Ranger -> (module struct module Event = Event.Ranger
           let make x = Input.Ranger x end)
       | Steps.Templar -> (module struct module Event = Event.Templar
@@ -148,6 +154,10 @@ module Convert = struct
           let make x = Output.FearEnd x end)
       | Steps.Mishap -> (module struct module Event = Direct.Mishap
           let make x = Output.Mishap x end)
+      | Steps.ResearchProgress -> (module struct module Event = Direct.ResearchProgress
+          let make x = Output.ResearchProgress x end)
+      | Steps.ResearchStatus -> (module struct module Event = Direct.ResearchStatus
+          let make x = Output.ResearchStatus x end)
       | Steps.Starvation -> (module struct module Event = Direct.Starvation
           let make x = Output.Starvation x end)
       | Steps.Support -> (module struct module Event = Direct.NationSupport

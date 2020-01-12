@@ -145,3 +145,13 @@ module Fill (Dice : Dice.S) = struct
       let _, rem, picked = Pick.from base cap units Units.empty in
       picked, rem
 end
+
+let fill ~base ~order power units =
+  let f (p, picked) kind =
+    let n = Power.Fn.count base kind p in
+    let count = Units.count kind units in
+    let n', count' = Number.take n count in
+    Power.Fn.mul base kind n',
+    Units.add count' kind picked
+  in
+  List.fold_left f (power, Units.empty) order

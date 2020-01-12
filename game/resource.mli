@@ -16,6 +16,7 @@ val empty : t
 val bonus_if : bool -> Bonus.t -> t -> t
 val bonus_to : t -> Bonus.t -> t
 
+val has : t -> t -> bool
 val has_manp : t -> bool
 val of_manp : manpower -> t
 val manp_of : t -> manpower

@@ -7,6 +7,7 @@ type report = (kind * Defs.count) list
 type sum_report = (Defs.count * Set.t)
 
 val attacks : kind list
+val starve_order : kind list
 
 module Attr : sig
   type t = kind -> bool
@@ -37,6 +38,14 @@ module Base : sig
   val supply_cost : kind -> Defs.supply
 end
 
+module Bonus : sig
+  type value = float
+  type t
+  val empty : t
+  val attr : Attr.t -> value -> t -> t
+  val kind : kind -> value -> t -> t
+end
+
 type t = Defs.count Map.t
 
 val empty : t
@@ -61,7 +70,7 @@ val is_empty : t -> bool
 val kinds_of : t -> Set.t
 val ratio_of : kind -> t -> float
 val report : t -> report
-val upkeep : t -> Defs.supply
+val upkeep : Bonus.t -> t -> Defs.supply
 
 val add : Defs.count -> kind -> t -> t
 val combine : t -> t -> t

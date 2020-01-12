@@ -163,19 +163,21 @@ module LeaderNew = struct
   end
 end
 
-module Mercs = struct
-  include Recruit.Event(struct
-    let action = Recruit.New
-    let kind = Units.Merc
-    let pool = None
-    module Cap (S : State.S) = struct
-      let value = Some (S.Dice.between 10 20)
-    end
-  end)
-  module Check (S : State.S) = struct
-    let value = S.Build.check Build.(is_ready Tavern)
+module Mercs = Recruit.Event(struct
+  let action = Recruit.New
+  let kind = Units.Merc
+  let pool = None
+  module Cap (S : State.S) = struct
+    let tavern = S.Build.check Build.(is_ready Tavern)
+    let army = S.Research.check Research.(is_complete BlackArmy)
+    let range = match tavern, army with
+      | true, true -> 20, 30
+      | true, false -> 10, 20
+      | false, true -> 0, 10
+      | false, false -> 0, 0
+    let value = Some (S.Dice.range range)
   end
-end
+end)
 
 module Nations = struct
   type t = Nation.Set.t
@@ -203,6 +205,25 @@ module Ranger = struct
   end)
   module Check (S : State.S) = struct
     let value = S.Deity.is Deity.Sitera
+  end
+end
+
+module Research = struct
+  type available = Research.Set.t
+  type start = Research.kind list
+  type t = start * available
+  module Apply (S : State.S) = struct
+    let value (s, _) =
+      Research.start s
+      |> S.Research.map
+  end
+  module Make (S : State.S) = struct
+    let lerota = S.Deity.is Deity.Lerota
+    let temple = S.Build.check Build.(is_ready Temple)
+    let value = [],
+      S.Research.get ()
+      |> Research.(unlock BlackArmy) (lerota && temple)
+      |> Research.available
   end
 end
 

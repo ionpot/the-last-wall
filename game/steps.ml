@@ -66,14 +66,14 @@ end
 
 module Phase2 = struct
   module Input = struct
-    type cond = Barracks | Harcher | LeaderNew | Mercs | Ranger | Templar | Temple | Trade | Veteran | Volunteers
-    type direct = Ballista | BarrageTrain | Berserker | Build | Dervish | Knight | Nations | Novice | Sodistan
+    type cond = Barracks | Harcher | LeaderNew | Ranger | Templar | Temple | Trade | Veteran | Volunteers
+    type direct = Ballista | BarrageTrain | Berserker | Build | Dervish | Knight | Mercs | Nations | Novice | Research | Sodistan
     type t = (cond, direct) input
   end
   module Output = struct
     type check = unit
     type cond = Defeat | Disease
-    type direct = Attack | Blessing | BuildManp | BuildStatus | BuildSupply | Cavalry | Facilities | FearEnd | Mishap | Starvation | Support | Turn | Upkeep
+    type direct = Attack | Blessing | BuildManp | BuildStatus | BuildSupply | Cavalry | Facilities | FearEnd | Mishap | ResearchProgress | ResearchStatus | Starvation | Support | Turn | Upkeep
     type t = (check, cond, direct) output
   end
   type t = (Input.t, Output.t) step
@@ -82,6 +82,7 @@ module Phase2 = struct
     ; Do (Direct Output.FearEnd)
     ; Do (Direct Output.BuildManp)
     ; Do (Direct Output.BuildStatus)
+    ; Do (Direct Output.ResearchStatus)
     ; Ask (Cond Input.LeaderNew)
     ; Do (Direct Output.Upkeep)
     ; Do (Direct Output.Starvation)
@@ -98,6 +99,8 @@ module Phase2 = struct
     ; Ask (Cond Input.Temple)
     ; Ask (Cond Input.Barracks)
     ; Ask (Cond Input.Trade)
+    ; Ask (Direct Input.Research)
+    ; Do (Direct Output.ResearchProgress)
     ; Ask (Direct Input.Build)
     ; Do (Direct Output.BuildSupply)
     ; Ask (Direct Input.Berserker)
@@ -110,7 +113,7 @@ module Phase2 = struct
     ; Ask (Direct Input.Dervish)
     ; Ask (Cond Input.Templar)
     ; Ask (Cond Input.Ranger)
-    ; Ask (Cond Input.Mercs)
+    ; Ask (Direct Input.Mercs)
     ; Ask (Direct Input.BarrageTrain)
     ]
 end

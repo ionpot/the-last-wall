@@ -108,6 +108,20 @@ module Base = struct
     | _ -> 1
 end
 
+module Bonus = struct
+  type value = float
+  type t = value Map.t
+
+  let empty : t = Map.empty
+
+  let kinds = starve_order
+
+  let kind = Mapx.Float.add_to
+  let attr a v t =
+    List.filter a kinds
+    |> List.fold_left (fun t k -> kind k v t) t
+end
+
 let from_upkeep kind sup =
   Number.div sup (Base.upkeep_cost kind)
 
@@ -196,8 +210,9 @@ let ratio_of kind t =
 let report t =
   Map.bindings t
 
-let upkeep t =
-  Map.mapi to_upkeep t |> count_all
+let upkeep bonus t =
+  let f k b t = Mapx.map_mem k (Number.reduce_by b) t in
+  Map.mapi to_upkeep t |> Map.fold f bonus |> count_all
 
 let add n kind t =
   if n > 0 then Map.add kind (n + count kind t) t else t

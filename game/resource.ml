@@ -26,6 +26,10 @@ let clr_supp (x, _) = (x, 0)
 let manp2supp (x, _) = (0, x)
 let supp2manp (_, x) = (x, 0)
 
+let has res t =
+  manp_of res <= manp_of t
+  && supp_of res <= supp_of t
+
 let deduce_manp m res =
   let m2, m3 = Number.deduce m (manp_of res) in
   m2, set_manp res m3

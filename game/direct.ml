@@ -175,6 +175,41 @@ module NationSupport = struct
   end
 end
 
+module ResearchProgress = struct
+  module type Progress = Research.Progress
+  type t = (module Progress)
+  module Apply (S : State.S) = struct
+    let handle (module P : Progress) =
+      S.Supply.set P.rem_supply;
+      S.Units.map Units.(sub P.men_used Men)
+    let value p =
+      handle p;
+      S.Research.get ()
+      |> Research.set_progress p
+      |> Research.tick
+      |> S.Research.set
+  end
+  module Make (S : State.S) = struct
+    let men = S.Units.return Units.(count Men)
+    let supply = S.Supply.get ()
+    let value =
+      Research.apply men supply
+      |> S.Research.return
+  end
+end
+
+module ResearchStatus = struct
+  type t = Research.Set.t
+  module Apply (S : State.S) = struct
+    let value s =
+      Research.set_complete s
+      |> S.Research.map
+  end
+  module Make (S : State.S) = struct
+    let value = S.Research.return Research.complete
+  end
+end
+
 module Revive = struct
   type t = Units.t * Units.t
   module Apply (S : State.S) = struct
@@ -247,17 +282,21 @@ module Upkeep = struct
   end
   module Make (S : State.S) = struct
     module Check = Support.Check(S)
-    let cav, rest = S.Units.return Units.(split Attr.is_cavalry)
-    let tulron = Check.has_traded Nation.Tulron
-    let cav_bonus = Float.if_ok 0.2 tulron
-    let cavs = Units.upkeep cav |> Number.reduce_by cav_bonus
-    let scouts = S.Scout.return (Number.if_ok 10)
-    let total = cavs + Units.upkeep rest + scouts
+    let units =
+      let army = S.Research.check Research.(is_complete BlackArmy) in
+      let mercs = Float.if_ok 0.1 army in
+      let tulron = Check.has_traded Nation.Tulron in
+      let cavs = Float.if_ok 0.2 tulron in
+      let bonus = Units.Bonus.(empty
+        |> attr Units.Attr.is_cavalry cavs
+        |> kind Units.Merc mercs)
+      in S.Units.return (Units.upkeep bonus)
+    let scouting = S.Scout.return (Number.if_ok 10)
     let engineer = S.Leader.check Leader.(is_living Engineer)
     let cha = S.Leader.return Leader.cha_mod_of
     let bonus = Float.times cha 0.03
     let ratio = Float.if_ok bonus engineer
-    let value = Number.reduce_by ratio total
+    let value = Number.reduce_by ratio (units + scouting)
   end
 end
 
