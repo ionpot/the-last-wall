@@ -43,6 +43,7 @@ module Attr = struct
   let is_infantry k = not_cavalry k && not_siege k
   let is_infectable = not_siege
   let is_revivable = not_siege
+  let is_trained = (=) Harcher
   let is_undead = function
     | Skeleton | Dullahan -> true
     | _ -> false

@@ -30,16 +30,23 @@ module Barraged = struct
   end
   module Make (S : State.S) = struct
     module Fill = Dist.Fill(S.Dice)
-    let units = S.Units.return Units.(filter Attr.can_barrage)
+    let trained, rest =
+      S.Units.return Units.(filter Attr.can_barrage)
+      |> Units.(split Attr.is_trained)
     let base = Power.barrage
-    let p =
-      Barrage.coefficient
-      |> S.Bonus.return
-      |> S.Barrage.return
-      |> ( *. ) (Power.of_units units base)
+    let bonus = S.Bonus.get ()
+    let brg = S.Barrage.get ()
+    let p_trained =
+      Barrage.set_trained true brg
+      |> Barrage.coefficient bonus
+      |> ( *. ) (Power.of_units trained base)
+    let p_rest =
+      Barrage.coefficient bonus brg
+      *. Power.of_units rest base
     let value =
       S.Enemy.return Units.(filter Attr.can_barraged)
-      |> Fill.from p base |> fst
+      |> Fill.from (p_trained +. p_rest) base
+      |> fst
   end
 end
 
@@ -100,6 +107,7 @@ end
 module HitRun = struct
   type t = Units.t * Units.t
   let hit_back_chance = 0.05
+  let loss_coef = 0.1
   module Apply (S : State.S) = struct
     let value (enemy, units) =
       S.Enemy.map (Units.reduce enemy);
@@ -114,17 +122,17 @@ module HitRun = struct
     let fill p u = Fill.from p base u |> fst
     let units = S.Units.return Units.(filter Attr.can_hit_run)
     let power = Power.of_units units base
-    let c =
-      Barrage.coefficient
-      |> S.Bonus.return
-      |> S.Barrage.return
+    let coef =
+      let bonus = S.Bonus.get () in
+      let brg = S.Barrage.return Barrage.(set_trained true) in
+      Barrage.coefficient bonus brg
     let enemy = S.Enemy.get ()
     let epower = Power.of_units enemy base
     let target = Units.(filter Attr.can_barraged) enemy
     let value =
-      fill (power *. c) target,
+      fill (power *. coef) target,
       if S.Dice.chance hit_back_chance
-      then fill (epower *. 0.1) units
+      then fill (epower *. loss_coef) units
       else Units.empty
   end
 end
