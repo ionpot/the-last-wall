@@ -83,12 +83,12 @@ let no_trade t =
 
 let mnp_from k t =
   if has_aided k t
-  then Map.find k t.support |> Resource.manp_of
+  then Map.find k t.support |> Resource.mnp
   else 0
 
 let sup_from k t =
   if has_aided k t
-  then Map.find k t.support |> Resource.supp_of
+  then Map.find k t.support |> Resource.sup
   else 0
 
 let set_chosen chosen t =

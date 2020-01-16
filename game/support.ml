@@ -75,10 +75,8 @@ module Roll (S : State.S) = struct
     let hekatium = kind = Nation.Hekatium in
     let mnp = Number.if_ok 10 barracks in
     let sup = Number.if_ok 10 trade in
-    Resource.bonus_if
-      (trade && hekatium)
-      Resource.Bonus.(Add (Both 0.1))
-      Resource.(res <+ Supply sup <+ Manpwr mnp)
+    Resource.add ~mnp ~sup res
+    |> Resource.(bonus_if (trade && hekatium) Bonus.(Add (Both 0.1)))
 
   let roll = S.Dice.range
 
@@ -89,7 +87,7 @@ module Roll (S : State.S) = struct
 
   let roll_res kind =
     let (a, b) = Nation.ranges_of kind in
-    Resource.(of_manp (roll a) <+ Supply (roll b))
+    Resource.make ~mnp:(roll a) ~sup:(roll b) ()
 
   let to_res nats kind =
     if chance_of kind nats |> S.Dice.percent

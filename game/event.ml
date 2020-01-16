@@ -51,8 +51,8 @@ end
 
 module AddRes (S : State.S) = struct
   let value res =
-    S.Supply.add (Resource.supp_of res);
-    S.Units.map Units.(add (Resource.manp_of res) Men)
+    S.Supply.add (Resource.sup res);
+    S.Units.map Units.(add (Resource.mnp res) Men)
 end
 
 module LdrDied (S : State.S) = struct

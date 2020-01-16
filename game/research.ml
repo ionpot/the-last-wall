@@ -8,7 +8,7 @@ module Cost = struct
     | BlackArmy -> 18
 
   let resource k =
-    Resource.(of_manp (men k) <+ Supply (supply k))
+    Resource.make ~mnp:(men k) ~sup:(supply k) ()
 end
 
 module Kind = struct
@@ -68,14 +68,14 @@ let empty =
   ; status = Status.empty
   }
 
-let apply men supply t =
-  let res = Resource.(of_supp supply <+ Manpwr men) in
+let apply mnp sup t =
+  let res = Resource.make ~mnp ~sup () in
   let rem, pass, fail = Queue.partition res t.queue in
   let used = Queue.cost pass in
   (module struct
     let cancelled = Queue.to_set fail
-    let men_used = Resource.manp_of used
-    let rem_supply = Resource.supp_of rem
+    let men_used = Resource.mnp used
+    let rem_supply = Resource.sup rem
     let started = Queue.to_set pass
   end : Progress)
 

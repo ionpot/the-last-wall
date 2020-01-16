@@ -39,7 +39,7 @@ module BuildManp = struct
     let base = S.Bonus.return Power.base
     let wrp = Power.of_units units base |> truncate
     let res = S.Build.return Build.needs
-    let value = min wrp (Resource.manp_of res)
+    let value = min wrp (Resource.mnp res)
   end
 end
 
@@ -65,7 +65,7 @@ module BuildSupply = struct
   module Make (S : State.S) = struct
     let sup = S.Supply.get ()
     let res = S.Build.return Build.needs
-    let value = min sup (Resource.supp_of res)
+    let value = min sup (Resource.sup res)
   end
 end
 
@@ -86,7 +86,7 @@ module Facilities = struct
     module Add = Event.AddRes(S)
     let arena_mnp t =
       if Map.mem arena t
-      then Map.find arena t |> Resource.manp_of
+      then Map.find arena t |> Resource.mnp
       else 0
     let value t =
       Map.iter (fun _ -> Add.value) t;
@@ -103,9 +103,8 @@ module Facilities = struct
     let to_mnp k = Build.manpwr_range k |> S.Dice.range
     let to_sup k = Build.supply_range k |> S.Dice.range
     let to_res k =
-      Resource.bonus_to
-      Resource.(empty <+ Supply (to_sup k) <+ Manpwr (to_mnp k))
-      Resource.Bonus.(Sub (Both disease))
+      Resource.make ~mnp:(to_mnp k) ~sup:(to_sup k) ()
+      |> Resource.(bonus Bonus.(Sub (Both disease)))
       |> Resource.bonus_if (k = Build.Market) bonus
     let value =
       S.Build.return Build.ready

@@ -19,7 +19,7 @@ module Bonus = struct
   let is kind = function To k -> k = kind | ToAll -> true
   let to_cost (target, bonus) =
     let f k res =
-      if is k target then Resource.bonus_to res bonus else res
+      if is k target then Resource.bonus bonus res else res
     in Map.mapi f
   let to_cost_if cond t map =
     if cond then to_cost t map else map
@@ -39,29 +39,25 @@ let base_cap = function
 let base_cost =
   let open Resource in
   function
-  | Arena -> Manpwr 43, Supply 49
-  | Barracks -> Manpwr 65, Supply 70
-  | Engrs -> Manpwr 60, Supply 62
-  | Fort -> Manpwr 124, Supply 136
-  | Foundry -> Manpwr 28, Supply 30
-  | Guesthouse -> Manpwr 21, Supply 23
-  | Market -> Manpwr 44, Supply 65
-  | Mausoleum _ -> Manpwr 14, Supply 14
-  | Observatory -> Manpwr 15, Supply 14
-  | Sawmill -> Manpwr 23, Supply 25
-  | Stable -> Manpwr 49, Supply 54
-  | Tavern -> Manpwr 39, Supply 41
-  | Temple -> Manpwr 61, Supply 63
-  | Trade -> Manpwr 51, Supply 49
-
-let base_cost_of kind =
-  let a, b = base_cost kind in
-  Resource.(empty <+ a <+ b)
+  | Arena -> make ~mnp:43 ~sup:49 ()
+  | Barracks -> make ~mnp:65 ~sup:70 ()
+  | Engrs -> make ~mnp:60 ~sup:62 ()
+  | Fort -> make ~mnp:124 ~sup:136 ()
+  | Foundry -> make ~mnp:28 ~sup:30 ()
+  | Guesthouse -> make ~mnp:21 ~sup:23 ()
+  | Market -> make ~mnp:44 ~sup:65 ()
+  | Mausoleum _ -> make ~mnp:14 ~sup:14 ()
+  | Observatory -> make ~mnp:15 ~sup:14 ()
+  | Sawmill -> make ~mnp:23 ~sup:25 ()
+  | Stable -> make ~mnp:49 ~sup:54 ()
+  | Tavern -> make ~mnp:39 ~sup:41 ()
+  | Temple -> make ~mnp:61 ~sup:63 ()
+  | Trade -> make ~mnp:51 ~sup:49 ()
 
 let cost_of kind costs =
   if Map.mem kind costs
   then Map.find kind costs
-  else base_cost_of kind
+  else base_cost kind
 
 let is_multiple kind =
   kind = Stable
@@ -150,7 +146,7 @@ let empty =
 let available t = t.avlb
 
 let cost_map t =
-  let f kind = Map.add kind (base_cost_of kind) in
+  let f kind = Map.add kind (base_cost kind) in
   Set.fold f t.avlb (Map.empty : cost_map)
 
 let count kind t =
@@ -184,14 +180,14 @@ let status t =
   t.built, built, ongoing
 
 let apply_mnp mnp t =
-  let res = Resource.of_manp mnp in
-  let cond cost = Resource.has_supp cost |> not in
+  let res = Resource.make ~mnp () in
+  let cond cost = Resource.has_sup cost |> not in
   { t with queue = Queue.apply_if cond res t.queue |> snd }
 
 let apply_sup sup t =
-  let res = Resource.of_supp sup in
+  let res = Resource.make ~sup () in
   let rem, queue = Queue.apply res t.queue in
-  Resource.supp_of rem, { t with queue }
+  Resource.sup rem, { t with queue }
 
 let died ldr t =
   { t with avlb = Avlb.add (Mausoleum ldr) t.avlb }
