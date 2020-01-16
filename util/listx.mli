@@ -12,6 +12,7 @@ val pick : float -> float list -> 'a list -> 'a
 val pick_first : int -> 'a list -> 'a list
 val rm : 'a -> 'a list -> 'a list
 val rm_from : 'a list -> 'a list -> 'a list
+val rmap_with : ('a -> 'b -> 'a * 'b) -> 'a -> 'b list -> 'a * 'b list
 val slice_from : ('a -> bool) -> 'a list -> 'a list
 val sum : int list -> int
 val sumf : float list -> float

@@ -1,7 +1,13 @@
 type kind = Arena | Barracks | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade
 
-module Map = Map.Make(struct type t = kind let compare = compare end)
+module Kind = struct
+  type t = kind
+  let compare = compare
+end
+module Map = Map.Make(Kind)
 module Mapx = Mapx.Make(Map)
+module Set = Set.Make(Kind)
+module Queue = Queue.Make(Set)
 
 type cost = Resource.t
 type cost_map = cost Map.t
@@ -52,6 +58,11 @@ let base_cost_of kind =
   let a, b = base_cost kind in
   Resource.(empty <+ a <+ b)
 
+let cost_of kind costs =
+  if Map.mem kind costs
+  then Map.find kind costs
+  else base_cost_of kind
+
 let is_multiple kind =
   kind = Stable
 
@@ -74,8 +85,6 @@ let fn_ls f ls t =
   List.fold_left (Fn.flip f) t ls
 
 module Avlb = struct
-  module Set = Set.Make(struct type t = kind let compare = compare end)
-
   type t = Set.t
 
   let add = Set.add
@@ -103,38 +112,6 @@ module Built = struct
   let empty : t = []
 
   let has = List.mem
-end
-
-module Queue = struct
-  type t = (kind * cost) list
-
-  let empty : t = []
-
-  let built t =
-    let f (_, cost) = cost = Resource.empty in
-    let built, ongoing = List.partition f t in
-    List.map fst built, ongoing
-
-  let cost_of kind costs =
-    if Map.mem kind costs
-    then Map.find kind costs
-    else base_cost_of kind
-
-  let from kinds costs =
-    let f kind = kind, cost_of kind costs in
-    List.rev_map f kinds
-
-  let map f need avlb t =
-    let f' acc (kind, cost) =
-      let acc', cost' = f acc cost in
-      acc', (kind, cost')
-    in
-    let x = Number.sub need avlb in
-    Listx.map_with f' x t
-
-  let sum_fn fn t =
-    let f acc (_, res) = acc + fn res in
-    List.fold_left f 0 t
 end
 
 module Ready = struct
@@ -174,7 +151,7 @@ let available t = t.avlb
 
 let cost_map t =
   let f kind = Map.add kind (base_cost_of kind) in
-  Avlb.Set.fold f t.avlb (Map.empty : cost_map)
+  Set.fold f t.avlb (Map.empty : cost_map)
 
 let count kind t =
   Ready.count kind t.ready
@@ -196,30 +173,28 @@ let built t = t.built
 let mausoleums t =
   Ready.mausoleums t.ready
 
-let need_manp t =
-  Queue.sum_fn Resource.manp_of t.queue
-
-let need_supp t =
-  Queue.sum_fn Resource.supp_of t.queue
+let needs t = Queue.cost t.queue
 
 let queue t = t.queue
 
 let ready t = t.ready
 
 let status t =
-  let built, ongoing = Queue.built t.queue in
+  let built, ongoing = Queue.pop_finished t.queue in
   t.built, built, ongoing
+
+let apply_mnp mnp t =
+  let res = Resource.of_manp mnp in
+  let cond cost = Resource.has_supp cost |> not in
+  { t with queue = Queue.apply_if cond res t.queue |> snd }
+
+let apply_sup sup t =
+  let res = Resource.of_supp sup in
+  let rem, queue = Queue.apply res t.queue in
+  Resource.supp_of rem, { t with queue }
 
 let died ldr t =
   { t with avlb = Avlb.add (Mausoleum ldr) t.avlb }
-
-let manp need avlb t =
-  let f mp cost =
-    if Resource.has_supp cost
-    then mp, cost
-    else Resource.take_manp mp cost
-  in
-  { t with queue = Queue.map f need avlb t.queue }
 
 let raze kind t =
   { t with avlb = Avlb.add kind t.avlb
@@ -233,14 +208,13 @@ let set_ready kind t =
 
 let set_ready_ls = fn_ls set_ready
 
-let start kinds costs t =
+let start kinds costmap t =
+  let f queue kind =
+    Queue.add kind (cost_of kind costmap) queue
+  in
   { t with avlb = Avlb.rm_ls kinds t.avlb
-  ; queue = Queue.from kinds costs @ t.queue
+  ; queue = List.fold_left f t.queue kinds
   }
-
-let supp need avlb t =
-  let f = Resource.take_supp in
-  { t with queue = Queue.map f need avlb t.queue }
 
 let update (ready, built, queue) t =
   { avlb = Avlb.unlock_ls built t.avlb

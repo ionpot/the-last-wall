@@ -32,14 +32,14 @@ end
 module BuildManp = struct
   type t = Defs.manpower
   module Apply (S : State.S) = struct
-    let units = S.Units.return Units.(filter Attr.can_build)
-    let base = S.Bonus.return Power.base
-    let avlb = Power.of_units units base |> truncate
-    let value need =
-      S.Build.map (Build.manp need avlb)
+    let value t = S.Build.map (Build.apply_mnp t)
   end
   module Make (S : State.S) = struct
-    let value = S.Build.return Build.need_manp
+    let units = S.Units.return Units.(filter Attr.can_build)
+    let base = S.Bonus.return Power.base
+    let wrp = Power.of_units units base |> truncate
+    let res = S.Build.return Build.needs
+    let value = min wrp (Resource.manp_of res)
   end
 end
 
@@ -57,13 +57,15 @@ end
 module BuildSupply = struct
   type t = Defs.supply
   module Apply (S : State.S) = struct
-    let avlb = S.Supply.get ()
-    let value need =
-      S.Build.map (Build.supp need avlb);
-      S.Supply.set (Number.sub avlb need)
+    let value t =
+      let t', b = S.Build.return (Build.apply_sup t) in
+      S.Build.set b;
+      S.Supply.set t'
   end
   module Make (S : State.S) = struct
-    let value = S.Build.return Build.need_supp
+    let sup = S.Supply.get ()
+    let res = S.Build.return Build.needs
+    let value = min sup (Resource.supp_of res)
   end
 end
 

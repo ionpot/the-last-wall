@@ -31,6 +31,7 @@ val mis_supp : t -> t
 val clr_supp : t -> t
 val map_supp : (supply -> supply) -> t -> t
 
+val deduce : t -> t -> t * t
 val deduce_manp : manpower -> t -> manpower * t
 val deduce_supp : supply -> t -> supply * t
 

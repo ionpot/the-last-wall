@@ -3,12 +3,13 @@ open Defs
 type kind = Arena | Barracks | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade
 
 module Map : Map.S with type key = kind
+module Set : Set.S with type elt = kind
+module Queue : module type of Queue.Make(Set)
 
 type cost = Resource.t
 type cost_map = cost Map.t
 
 module Avlb : sig
-  module Set : Set.S with type elt = kind
   type t = Set.t
 end
 
@@ -21,10 +22,6 @@ end
 
 module Built : sig
   type t = kind list
-end
-
-module Queue : sig
-  type t = (kind * cost) list
 end
 
 module Ready : sig
@@ -50,17 +47,16 @@ val is_built : kind -> t -> bool
 val is_complete : kind -> t -> bool
 val is_ready : kind -> t -> bool
 val mausoleums : t -> count
-val need_manp : t -> manpower
-val need_supp : t -> supply
+val needs : t -> Resource.t
 val queue : t -> Queue.t
 val ready : t -> Ready.t
 val status : t -> status
 
+val apply_mnp : manpower -> t -> t
+val apply_sup : supply -> t -> supply * t
 val died : Leader.t -> t -> t
-val manp : manpower -> manpower -> t -> t
 val raze : kind -> t -> t
 val set_ready : kind -> t -> t
 val set_ready_ls : kind list -> t -> t
 val start : kind list -> cost_map -> t -> t
-val supp : supply -> supply -> t -> t
 val update : status -> t -> t

@@ -19,7 +19,7 @@ end
 module Map = Map.Make(Kind)
 module Mapx = Mapx.Make(Map)
 module Set = Set.Make(Kind)
-module Queue = Resource_queue.FromSet(Set)
+module Queue = Queue.Make(Set)
 
 let map2set m =
   Map.fold (fun k _ s -> Set.add k s) m Set.empty

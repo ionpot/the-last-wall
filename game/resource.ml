@@ -30,6 +30,11 @@ let has res t =
   manp_of res <= manp_of t
   && supp_of res <= supp_of t
 
+let deduce a b =
+  let ma, mb = Number.deduce (manp_of a) (manp_of b) in
+  let sa, sb = Number.deduce (supp_of a) (supp_of b) in
+  (ma, sa), (mb, sb)
+
 let deduce_manp m res =
   let m2, m3 = Number.deduce m (manp_of res) in
   m2, set_manp res m3
