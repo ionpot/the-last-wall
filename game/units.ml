@@ -1,4 +1,4 @@
-type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harcher | Harpy | Knight | Men | Merc | Novice | Orc | Ranger | Skeleton | Templar | Veteran
+type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harcher | Harpy | Knight | Mangonel | Men | Merc | Novice | Orc | Ranger | Skeleton | Templar | Veteran
 
 module Kind = struct
   type t = kind
@@ -14,7 +14,7 @@ type report = (kind * Defs.count) list
 type sum_report = (Defs.count * Set.t)
 
 let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops; Dullahan]
-let starve_order = [Men; Novice; Berserker; Cavalry; Veteran; Harcher; Ranger; Dervish; Templar; Merc; Ballista; Knight]
+let starve_order = [Men; Novice; Berserker; Cavalry; Veteran; Harcher; Ranger; Dervish; Templar; Merc; Mangonel; Ballista; Knight]
 
 module Attr = struct
   type t = kind -> bool
@@ -35,10 +35,13 @@ module Attr = struct
     | Cavalry | Harcher | Knight -> true
     | _ -> false
   let not_cavalry = Fun.negate is_cavalry
+  let is_flying = (=) Harpy
   let is_holy = function
     | Dervish | Novice | Ranger | Templar -> true
     | _ -> false
-  let is_siege = (=) Ballista
+  let is_siege = function
+    | Ballista | Mangonel -> true
+    | _ -> false
   let not_siege = Fun.negate is_siege
   let is_infantry k = not_cavalry k && not_siege k
   let is_infectable = not_siege
@@ -76,7 +79,7 @@ module Base = struct
     | _ -> 0.
 
   let hit_chance = function
-    | Ballista -> 0.25
+    | Ballista | Mangonel -> 0.25
     | Dervish | Harcher | Ranger -> 0.5
     | _ -> 1.
 
@@ -85,7 +88,7 @@ module Base = struct
     | Cyclops -> 5.
     | Harpy | Knight -> 4.
     | Templar -> 3.
-    | Ballista | Berserker | Cavalry | Demon | Dervish | Harcher | Merc | Ranger | Veteran -> 2.
+    | Ballista | Berserker | Cavalry | Demon | Dervish | Harcher | Mangonel | Merc | Ranger | Veteran -> 2.
     | Men | Novice | Orc -> 1.
     | Skeleton -> 0.5
 
@@ -100,12 +103,13 @@ module Base = struct
     | Dervish -> 2
     | Templar -> 3
     | Knight -> 10
-    | Ballista -> 12
+    | Ballista
+    | Mangonel -> 12
     | _ -> 1
 
   let upkeep_cost = function
     | Knight -> 3
-    | Ballista | Merc | Veteran -> 2
+    | Ballista | Mangonel | Merc | Veteran -> 2
     | _ -> 1
 end
 

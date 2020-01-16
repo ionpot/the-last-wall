@@ -90,6 +90,7 @@ let base bonus =
   empty
   |> apply Bonus.Barrage Units.Harpy ~-.1.
   |> apply Bonus.ClanTrade Units.Ballista 1.
+  |> apply Bonus.ClanTrade Units.Mangonel 1.
 
 let untouchable atk dfn t =
   let pwr = map_units atk t |> max in

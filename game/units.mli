@@ -1,4 +1,4 @@
-type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harcher | Harpy | Knight | Men | Merc | Novice | Orc | Ranger | Skeleton | Templar | Veteran
+type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harcher | Harpy | Knight | Mangonel | Men | Merc | Novice | Orc | Ranger | Skeleton | Templar | Veteran
 
 module Map : Map.S with type key = kind
 module Set : Set.S with type elt = kind
@@ -19,6 +19,7 @@ module Attr : sig
   val can_hit_run : t
   val can_reflect : t
   val is_cavalry : t
+  val is_flying : t
   val is_holy : t
   val is_infantry : t
   val is_infectable : t

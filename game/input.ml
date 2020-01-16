@@ -165,6 +165,13 @@ module LeaderNew = struct
   end
 end
 
+module Mangonel = Recruit.Event(struct
+  let action = Recruit.Train
+  let kind = Units.Mangonel
+  let pool = None
+  module Cap = Recruit.NoCap
+end)
+
 module Mercs = Recruit.Event(struct
   let action = Recruit.New
   let kind = Units.Merc

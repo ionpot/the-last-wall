@@ -145,6 +145,28 @@ module HitRun = struct
   end
 end
 
+module Mangonel = struct
+  type t = Defs.count * Units.t * Units.t
+  let kind = Units.Mangonel
+  let power = 2.
+  module Apply (S : State.S) = struct
+    let value (_, _, remaining) = S.Enemy.set remaining
+  end
+  module Check = Check.NoFog
+  module Make (S : State.S) = struct
+    module Fill = Dist.Fill(S.Dice)
+    let count = S.Units.return (Units.count kind)
+    let eng = S.Leader.check Leader.(is_living Engineer)
+    let power = Float.add_if eng 1. power
+    let damage = Float.times count power
+    let base = S.Bonus.return Power.base
+    let killed, rem =
+      S.Enemy.return Units.(discard Attr.is_flying)
+      |> Fill.from damage base
+    let value = count, killed, rem
+  end
+end
+
 module Smite = struct
   type t = Units.t
   module Apply (S : State.S) = struct
