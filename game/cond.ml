@@ -117,8 +117,16 @@ module HitRun = struct
     let value = S.Barrage.check Barrage.can_hit_run
   end
   module Make (S : State.S) = struct
+    module Damage = Dist.Damage(S.Dice)(struct
+      let full_absorb = false
+      let use_ratio = false
+    end)
     module Fill = Dist.Fill(S.Dice)
     let base = S.Bonus.return Power.base
+    let damage p e u =
+      let t = Damage.from p base e u in
+      let rfl = Dist.reflected t in
+      Dist.outcome t |> Fill.from rfl base |> snd
     let fill p u = Fill.from p base u |> fst
     let units = S.Units.return Units.(filter Attr.can_hit_run)
     let power = Power.of_units units base
@@ -132,7 +140,7 @@ module HitRun = struct
     let value =
       fill (power *. coef) target,
       if S.Dice.chance hit_back_chance
-      then fill (epower *. loss_coef) units
+      then damage (epower *. loss_coef) enemy units
       else Units.empty
   end
 end
