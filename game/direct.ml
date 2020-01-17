@@ -292,7 +292,10 @@ module Upkeep = struct
         |> attr Units.Attr.is_cavalry cavs
         |> kind Units.Merc mercs)
       in S.Units.return (Units.upkeep bonus)
-    let scouting = S.Scout.return (Number.if_ok 10)
+    let scouting =
+      let cavs = S.Units.return Units.(count Cavalry) in
+      S.Scout.return (Number.if_ok 10)
+      |> Number.reduce_by (Float.times cavs 0.02)
     let engineer = S.Leader.check Leader.(is_living Engineer)
     let cha = S.Leader.return Leader.cha_mod_of
     let bonus = Float.times cha 0.03
