@@ -263,9 +263,9 @@ end
 
 module Templar = struct
   include Recruit.Event(struct
-    let action = Recruit.Promote
+    let action = Recruit.New
     let kind = Units.Templar
-    let pool = Some (Recruit.Exclude Pool.Novice)
+    let pool = None
     module Cap = Recruit.NoCap
   end)
   module Check = Check.Not(Ranger.Check)

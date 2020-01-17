@@ -152,8 +152,7 @@ module Promote = struct
   let needs = function
     | Harcher
     | Knight -> Cavalry
-    | Dervish
-    | Templar -> Novice
+    | Dervish -> Novice
     | _ -> Men
 
   let amount = function
