@@ -148,7 +148,7 @@ end
 module Mangonel = struct
   type t = Defs.count * Units.t * Units.t
   let kind = Units.Mangonel
-  let power = 2.
+  let power = 3.
   module Apply (S : State.S) = struct
     let value (_, _, remaining) = S.Enemy.set remaining
   end

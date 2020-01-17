@@ -103,8 +103,8 @@ module Base = struct
     | Dervish -> 2
     | Templar -> 3
     | Knight -> 10
-    | Ballista
-    | Mangonel -> 12
+    | Ballista -> 12
+    | Mangonel -> 16
     | _ -> 1
 
   let upkeep_cost = function
