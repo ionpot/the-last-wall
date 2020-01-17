@@ -99,9 +99,12 @@ module Base = struct
 
   let supply_cost = function
     | Berserker -> 0
+    | Cavalry
+    | Dervish
     | Merc
-    | Dervish -> 2
-    | Templar -> 3
+    | Ranger
+    | Veteran -> 2
+    | Templar -> 4
     | Knight -> 10
     | Ballista -> 12
     | Mangonel -> 16
@@ -109,7 +112,7 @@ module Base = struct
 
   let upkeep_cost = function
     | Knight -> 3
-    | Ballista | Mangonel | Merc | Veteran -> 2
+    | Ballista | Mangonel | Merc -> 2
     | _ -> 1
 end
 
