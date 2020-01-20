@@ -32,7 +32,7 @@ module BarrageTrain = struct
   module Make (S : State.S) = struct
     let units =
       S.Units.return Units.(filter Attr.can_barrage)
-      |> Units.(discard Attr.is_trained)
+      |> Units.(discard Attr.is_archer)
     let base = S.Bonus.return Power.base
     let power = Power.of_units units base
     let cost = (power *. 0.05) |> ceil |> truncate

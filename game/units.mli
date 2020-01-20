@@ -18,6 +18,7 @@ module Attr : sig
   val can_heal : t
   val can_hit_run : t
   val can_reflect : t
+  val is_archer : t
   val is_cavalry : t
   val is_flying : t
   val is_holy : t
@@ -25,7 +26,6 @@ module Attr : sig
   val is_infectable : t
   val is_revivable : t
   val is_siege : t
-  val is_trained : t
   val is_undead : t
 end
 

@@ -32,7 +32,7 @@ module Barraged = struct
     module Fill = Dist.Fill(S.Dice)
     let trained, rest =
       S.Units.return Units.(filter Attr.can_barrage)
-      |> Units.(split Attr.is_trained)
+      |> Units.(split Attr.is_archer)
     let base = Power.barrage
     let bonus = S.Bonus.get ()
     let brg = S.Barrage.get ()
