@@ -52,6 +52,8 @@ module Attr = struct
   let is_undead = function
     | Skeleton | Dullahan -> true
     | _ -> false
+  let to_list t =
+    List.filter t (attacks @ starve_order)
 end
 
 module Base = struct
@@ -61,6 +63,11 @@ module Base = struct
     | Harpy -> 0.15
     | Orc -> 0.6
     | Skeleton -> 1.25
+    | _ -> 0.
+
+  let artillery = function
+    | Ballista | Cyclops -> 2.
+    | Mangonel -> 3.
     | _ -> 0.
 
   let chance = function
@@ -116,20 +123,6 @@ module Base = struct
     | Knight -> 3
     | Ballista | Mangonel | Merc -> 2
     | _ -> 1
-end
-
-module Bonus = struct
-  type value = float
-  type t = value Map.t
-
-  let empty : t = Map.empty
-
-  let kinds = starve_order
-
-  let kind = Mapx.Float.add_to
-  let attr a v t =
-    List.filter a kinds
-    |> List.fold_left (fun t k -> kind k v t) t
 end
 
 let from_upkeep kind sup =
@@ -211,6 +204,10 @@ let kinds_of t =
   let f k _ s = Set.add k s in
   Map.fold f t Set.empty
 
+let power_of t =
+  Map.mapi (fun k c -> float c *. Base.power k) t
+  |> Mapx.Float.sum
+
 let ratio_of kind t =
   let n = count kind t in
   let sum = Ops.sum t in
@@ -219,9 +216,8 @@ let ratio_of kind t =
 let report t =
   Map.bindings t
 
-let upkeep bonus t =
-  let f k b t = Mapx.map_mem k (Number.reduce_by b) t in
-  Map.mapi to_upkeep t |> Map.fold f bonus |> count_all
+let upkeep t =
+  Map.mapi to_upkeep t |> count_all
 
 let add n kind t =
   if n > 0 then Map.add kind (n + count kind t) t else t

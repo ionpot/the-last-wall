@@ -1,22 +1,16 @@
 module Ballista = struct
-  type t = Defs.count * Units.t * Units.t
-  let kind = Units.Ballista
-  let power = 2.
+  type t = Units.t * Units.t
   module Apply (S : State.S) = struct
-    let value (_, _, remaining) = S.Enemy.set remaining
+    let value (_, remaining) = S.Enemy.set remaining
   end
   module Check = Check.NoFog
   module Make (S : State.S) = struct
+    module Bonus = Bonus.Make(S)
     module Fill = Dist.Fill(S.Dice)
-    let count = S.Units.return (Units.count kind)
-    let eng = S.Leader.check Leader.(is_living Engineer)
-    let power = Float.add_if eng 1. power
-    let damage = Float.times count power
-    let base = S.Bonus.return Power.base
-    let killed, rem =
-      Fill.from damage base
-      |> S.Enemy.return
-    let value = count, killed, rem
+    let ballista = S.Units.return (Units.only Ballista)
+    let power = Bonus.artillery (Power.artillery ballista)
+    let damage = Power.of_units ballista power
+    let value = S.Enemy.return (Fill.from damage Power.base)
   end
 end
 
@@ -29,20 +23,19 @@ module Barraged = struct
     let value = S.Barrage.check Barrage.can_barrage
   end
   module Make (S : State.S) = struct
+    module Bonus = Bonus.Make(S)
     module Fill = Dist.Fill(S.Dice)
     let trained, rest =
       S.Units.return Units.(filter Attr.can_barrage)
       |> Units.(split Attr.is_archer)
-    let base = Power.barrage
-    let bonus = S.Bonus.get ()
-    let brg = S.Barrage.get ()
+    let base = Power.base |> Bonus.brg_power
+    let power coef units =
+      Bonus.brg_coef coef *. Power.of_units units base
     let p_trained =
-      Barrage.set_trained true brg
-      |> Barrage.coefficient bonus
-      |> ( *. ) (Power.of_units trained base)
+      power Barrage.trained_coefficient trained
     let p_rest =
-      Barrage.coefficient bonus brg
-      *. Power.of_units rest base
+      let coef = S.Barrage.return Barrage.coefficient in
+      power coef rest
     let value =
       S.Enemy.return Units.(filter Attr.can_barraged)
       |> Fill.from (p_trained +. p_rest) base
@@ -51,23 +44,22 @@ module Barraged = struct
 end
 
 module Cyclops = struct
-  type t = Defs.count * Units.t * Units.t
-  let power = 2.
+  type t = Units.t * Units.t
   module Apply (S : State.S) = struct
-    let value (_, killed, rem) =
+    let value (killed, rem) =
       S.Casualty.map (Units.combine killed);
       S.Units.set rem
   end
   module Check = Check.NoFog
   module Make (S : State.S) = struct
+    module Bonus = Bonus.Make(S)
     module Fill = Dist.Fill(S.Dice)
-    let count = S.Enemy.return Units.(count Cyclops)
-    let damage = Float.times count power
-    let base = S.Bonus.return Power.base
-    let killed, rem =
-      Fill.from damage base
+    let cyclops = S.Enemy.return Units.(only Cyclops)
+    let damage = Power.(of_units cyclops base) 
+    let defense = Power.base |> Bonus.siege_boost
+    let value =
+      Fill.from damage defense
       |> S.Units.return
-    let value = count, killed, rem
   end
 end
 
@@ -117,71 +109,65 @@ module HitRun = struct
     let value = S.Barrage.check Barrage.can_hit_run
   end
   module Make (S : State.S) = struct
+    module Bonus = Bonus.Make(S)
     module Damage = Dist.Damage(S.Dice)(struct
       let full_absorb = false
       let use_ratio = false
     end)
     module Fill = Dist.Fill(S.Dice)
-    let base = S.Bonus.return Power.base
+    let base = Power.base
     let damage p e u =
       let t = Damage.from p base e u in
       let rfl = Dist.reflected t in
       Dist.outcome t |> Fill.from rfl base |> snd
+    let hit_back enemy =
+      let pwr = Power.of_units enemy base in
+      damage (pwr *. loss_coef) enemy
     let fill p u = Fill.from p base u |> fst
     let units = S.Units.return Units.(filter Attr.can_hit_run)
     let power = Power.of_units units base
-    let coef =
-      let bonus = S.Bonus.get () in
-      let brg = S.Barrage.return Barrage.(set_trained true) in
-      Barrage.coefficient bonus brg
+    let coef = Bonus.brg_coef Barrage.trained_coefficient
     let enemy = S.Enemy.get ()
-    let epower = Power.of_units enemy base
     let target = Units.(filter Attr.can_barraged) enemy
     let value =
       fill (power *. coef) target,
       if S.Dice.chance hit_back_chance
-      then damage (epower *. loss_coef) enemy units
+      then hit_back enemy units
       else Units.empty
   end
 end
 
 module Mangonel = struct
-  type t = Defs.count * Units.t * Units.t
-  let kind = Units.Mangonel
-  let power = 3.
+  type t = Units.t * Units.t
   module Apply (S : State.S) = struct
-    let value (_, _, remaining) = S.Enemy.set remaining
+    let value (_, remaining) = S.Enemy.set remaining
   end
   module Check = Check.NoFog
   module Make (S : State.S) = struct
+    module Bonus = Bonus.Make(S)
     module Fill = Dist.Fill(S.Dice)
-    let count = S.Units.return (Units.count kind)
-    let eng = S.Leader.check Leader.(is_living Engineer)
-    let power = Float.add_if eng 1. power
-    let damage = Float.times count power
-    let base = S.Bonus.return Power.base
-    let killed, rem =
+    let mang = S.Units.return (Units.only Mangonel)
+    let power = Bonus.artillery (Power.artillery mang)
+    let damage = Power.of_units mang power
+    let value =
       S.Enemy.return Units.(discard Attr.is_flying)
-      |> Fill.from damage base
-    let value = count, killed, rem
+      |> Fill.from damage Power.base
   end
 end
 
 module Smite = struct
   type t = Units.t
   module Apply (S : State.S) = struct
-    let value died =
-      S.Enemy.map (Units.reduce died)
+    let value died = S.Enemy.map (Units.reduce died)
   end
   module Check (S : State.S) = struct
     let value = S.Deity.is Deity.Lerota
   end
   module Make (S : State.S) = struct
+    module Bonus = Bonus.Make(S)
     module Fill = Dist.Fill(S.Dice)
-    let obser = S.Build.check Build.(is_ready Observatory)
-    let cap = S.Dice.betweenf 5. 15. |> Float.add_if obser 10.
-    let base = S.Bonus.return Power.base
+    let cap = S.Dice.betweenf 5. 15. |> Bonus.smite
     let units = S.Enemy.return Units.(filter Attr.is_undead)
-    let value = Fill.from cap base units |> fst
+    let value = Fill.from cap Power.base units |> fst
   end
 end

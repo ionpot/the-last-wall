@@ -33,7 +33,7 @@ let attr_of b k =
   | _ -> false
 
 let translate n k_in k_out =
-  Power.translate k_in k_out n Power.empty
+  Power.translate k_in k_out n Power.base
 
 module Build (S : State.S) = struct
   let cap_of b =
@@ -57,15 +57,6 @@ module Build (S : State.S) = struct
     match bld_cap bld with
     | Some x -> Some (Number.sub x count)
     | None -> None
-end
-
-module Check (S : State.S) = struct
-  module Check = Support.Check(S)
-
-  let ldr_is kind =
-    S.Leader.check (Leader.is_living kind)
-
-  let traded = Check.has_traded
 end
 
 module Pool (S : State.S) = struct
@@ -107,23 +98,14 @@ module Pool (S : State.S) = struct
 end
 
 module Supply (S : State.S) = struct
-  module Check = Check(S)
-
-  let ldr_is = Check.ldr_is
-  let traded = Check.traded
-
-  let bonus_for kind = 0.
-    |> Float.add_if (ldr_is Leader.Aristocrat && Attr.is_cavalry kind) 0.2
-    |> Float.add_if (ldr_is Leader.Merchant && kind = Units.Merc) 0.1
-    |> Float.add_if (traded Nation.Clan && Attr.is_siege kind) 0.2
+  module Bonus = Bonus.Make(S)
 
   let avlb kind =
-    Number.increase_by (bonus_for kind)
-    |> S.Supply.return
+    S.Supply.return (Bonus.recruit_sup kind)
 
   let cost n kind =
     (n * Base.supply_cost kind)
-    |> Number.reduce_by (bonus_for kind)
+    |> Bonus.recruit_sup kind
 
   let limit kind cap =
     let cost = Base.supply_cost kind in
@@ -136,17 +118,12 @@ module Supply (S : State.S) = struct
 end
 
 module Train (S : State.S) = struct
-  module Check = Check(S)
-
-  let is_fast kind =
-    if Attr.is_siege kind
-    then Check.ldr_is Engineer
-    else false
+  module Bonus = Bonus.Make(S)
 
   let apply n kind =
     let pop = Units.pop kind in
     let trained, rest = S.Training.return pop in
-    let a, b = if is_fast kind then 0, n else n, 0 in
+    let a, b = if Bonus.recruit_fast kind then 0, n else n, 0 in
     S.Training.set (Units.add a kind rest);
     Units.add b kind trained
     |> Units.combine

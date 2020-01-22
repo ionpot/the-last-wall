@@ -16,9 +16,9 @@ type acc =
 
 let empty_acc =
   { absorbed = 0.
-  ; base = Power.empty
+  ; base = Power.base
   ; healed = 0.
-  ; ratios = Power.empty
+  ; ratios = Power.base
   ; reflected = 0.
   ; untouchable = Set.empty
   }
@@ -114,7 +114,7 @@ module Damage (Dice : Dice.S) (Flags : Flags) = struct
     let untouchable = Power.untouchable atk dfn base in
     let acc = { empty_acc with base; untouchable } in
     let input = Power.from_units dfn base in
-    let output = Power.empty in
+    let output = Power.base in
     Pick.from acc cap input output
 end
 

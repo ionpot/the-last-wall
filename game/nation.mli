@@ -30,19 +30,24 @@ type t
 val empty : t
 
 val barracks : t -> kind option
+val cap_of : kind -> t -> percent
 val chances : t -> Chance.t
 val chosen : t -> Set.t
 val has_aided : kind -> t -> bool
 val has_barracks : kind -> t -> bool
 val has_trade : kind -> t -> bool
+val has_traded : kind -> t -> bool
 val no_barracks : t -> bool
 val no_trade : t -> bool
 val mnp_from : kind -> t -> manpower
 val sup_from : kind -> t -> supply
 val trade : t -> kind option
+val traded_mnp : kind -> t -> manpower
+val traded_sup : kind -> t -> supply
 
 val map_chances : (Chance.t -> Chance.t) -> t -> t
 val set_barracks : kind option -> t -> t
 val set_chosen : Set.t -> t -> t
 val set_support : support -> t -> t
 val set_trade : kind option -> t -> t
+val trim_chances : t -> t

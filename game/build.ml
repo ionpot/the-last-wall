@@ -10,20 +10,6 @@ module Set = Set.Make(Kind)
 module Queue = Queue.Make(Set)
 
 type cost = Resource.t
-type cost_map = cost Map.t
-
-module Bonus = struct
-  type target = To of kind | ToAll
-  type bonus = Resource.Bonus.t
-  type t = target * bonus
-  let is kind = function To k -> k = kind | ToAll -> true
-  let to_cost (target, bonus) =
-    let f k res =
-      if is k target then Resource.bonus bonus res else res
-    in Map.mapi f
-  let to_cost_if cond t map =
-    if cond then to_cost t map else map
-end
 
 let avlb_default =
   [Arena; Barracks; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; Trade]
@@ -53,11 +39,6 @@ let base_cost =
   | Tavern -> make ~mnp:39 ~sup:41 ()
   | Temple -> make ~mnp:61 ~sup:63 ()
   | Trade -> make ~mnp:51 ~sup:49 ()
-
-let cost_of kind costs =
-  if Map.mem kind costs
-  then Map.find kind costs
-  else base_cost kind
 
 let is_multiple kind =
   kind = Stable
@@ -92,8 +73,6 @@ module Avlb = struct
   let rm kind t =
     if is_multiple kind then t
     else Set.remove kind t
-
-  let rm_ls = fn_ls rm
 
   let unlock kind t =
     add_ls (unlocks kind) t
@@ -144,10 +123,6 @@ let empty =
   }
 
 let available t = t.avlb
-
-let cost_map t =
-  let f kind = Map.add kind (base_cost kind) in
-  Set.fold f t.avlb (Map.empty : cost_map)
 
 let count kind t =
   Ready.count kind t.ready
@@ -204,12 +179,9 @@ let set_ready kind t =
 
 let set_ready_ls = fn_ls set_ready
 
-let start kinds costmap t =
-  let f queue kind =
-    Queue.add kind (cost_of kind costmap) queue
-  in
-  { t with avlb = Avlb.rm_ls kinds t.avlb
-  ; queue = List.fold_left f t.queue kinds
+let start kind cost t =
+  { t with avlb = Avlb.rm kind t.avlb
+  ; queue = Queue.add kind cost t.queue
   }
 
 let update (ready, built, queue) t =

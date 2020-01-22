@@ -4,6 +4,7 @@ type manpower = int
 type percent = int
 type power = float
 type 'a range = 'a * 'a
+type ratio = float
 type scouting = bool
 type supply = int
 type turn = int

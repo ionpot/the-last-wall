@@ -27,10 +27,12 @@ module Attr : sig
   val is_revivable : t
   val is_siege : t
   val is_undead : t
+  val to_list : t -> kind list
 end
 
 module Base : sig
   val abundance : kind -> float
+  val artillery : kind -> Defs.power
   val chance : kind -> Defs.chance
   val chance_growth : kind -> Defs.chance
   val dr : kind -> Defs.power
@@ -38,14 +40,6 @@ module Base : sig
   val power : kind -> Defs.power
   val revive : kind -> Defs.power
   val supply_cost : kind -> Defs.supply
-end
-
-module Bonus : sig
-  type value = float
-  type t
-  val empty : t
-  val attr : Attr.t -> value -> t -> t
-  val kind : kind -> value -> t -> t
 end
 
 type t = Defs.count Map.t
@@ -70,9 +64,10 @@ val has : kind -> t -> bool
 val has_any : Attr.t -> t -> bool
 val is_empty : t -> bool
 val kinds_of : t -> Set.t
+val power_of : t -> Defs.power
 val ratio_of : kind -> t -> float
 val report : t -> report
-val upkeep : Bonus.t -> t -> Defs.supply
+val upkeep : t -> Defs.supply
 
 val add : Defs.count -> kind -> t -> t
 val combine : t -> t -> t
