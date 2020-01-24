@@ -43,7 +43,7 @@ module Make (S : State.S) = struct
 
   let artillery p =
     if ldr_is Leader.Engineer
-    then Power.attr Attr.is_siege 1. p
+    then Power.attr Attr.siege 1. p
     else p
 
   let brg_coef c = c
@@ -52,11 +52,11 @@ module Make (S : State.S) = struct
 
   let brg_penalty p =
     let count_ok =
-      S.Units.return Units.(filter_count Attr.can_hit_run)
-      >= S.Enemy.return Units.(filter_count Attr.is_flying)
+      S.Units.return Units.(filter_count Attr.hit_run)
+      >= S.Enemy.return Units.(filter_count Attr.flying)
     in
     if barraged () || (hit_run () && count_ok)
-    then Power.attr Attr.is_flying ~-.1. p
+    then Power.attr Attr.flying ~-.1. p
     else p
 
   let brg_power p =
@@ -91,12 +91,12 @@ module Make (S : State.S) = struct
 
   let dr_snow_penalty p =
     if weather Weather.(Snow Heavy)
-    then Power.set_attr Attr.is_cavalry 0. p
+    then Power.set_attr Attr.cavalry 0. p
     else p
 
   let dr_wind_penalty p =
     if weather Weather.Wind
-    then Power.set_attr Attr.is_flying 0. p
+    then Power.set_attr Attr.flying 0. p
     else p
 
   let market_boost kind =
@@ -106,15 +106,15 @@ module Make (S : State.S) = struct
     Resource.Bonus.(Add (Sup ratio))
 
   let recruit_fast kind =
-    if Attr.is_siege kind
+    if Attr.(is siege) kind
     then ldr_is Leader.Engineer
     else false
 
   let recruit_sup kind =
     let ratio = 0.
-      |> Float.add_if (ldr_is Leader.Aristocrat && Attr.is_cavalry kind) 0.2
+      |> Float.add_if (ldr_is Leader.Aristocrat && Attr.(is cavalry) kind) 0.2
       |> Float.add_if (ldr_is Leader.Merchant && kind = Units.Merc) 0.1
-      |> Float.add_if (traded Nation.Clan && Attr.is_siege kind) 0.2
+      |> Float.add_if (traded Nation.Clan && Attr.(is siege) kind) 0.2
     in Number.increase_by ratio
 
   let resource_disease res =
@@ -123,7 +123,7 @@ module Make (S : State.S) = struct
 
   let siege_boost p =
     if traded Nation.Clan
-    then Power.attr Attr.is_siege 1. p
+    then Power.attr Attr.siege 1. p
     else p
 
   let smite mnp = mnp
@@ -164,7 +164,7 @@ module Make (S : State.S) = struct
     let cavs = Float.if_ok 0.2 (traded Nation.Tulron) in
     let merc = Float.if_ok 0.1 (researched Research.BlackArmy) in
     sup
-    - discount cavs Units.(filter Attr.is_cavalry)
+    - discount cavs Units.(filter Attr.cavalry)
     - discount merc Units.(only Units.Merc)
 
   let volunteers n =

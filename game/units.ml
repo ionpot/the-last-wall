@@ -17,43 +17,27 @@ let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops; Dullahan]
 let starve_order = [Men; Novice; Berserker; Cavalry; Veteran; Harcher; Ranger; Dervish; Templar; Merc; Mangonel; Ballista; Knight]
 
 module Attr = struct
-  type t = kind -> bool
-  let can_barrage = function
-    | Harcher | Men | Merc | Ranger | Veteran -> true
-    | _ -> false
-  let can_barraged = (=) Orc
-  let can_build = function
-    | Dervish | Men | Novice | Veteran -> true
-    | _ -> false
-  let can_fear = (=) Dullahan
-  let can_heal = (=) Templar
-  let can_hit_run = (=) Harcher
-  let can_reflect = function
-    | Berserker | Harcher -> true
-    | _ -> false
-  let is_archer = function
-    | Harcher | Ranger -> true
-    | _ -> false
-  let is_cavalry = function
-    | Cavalry | Harcher | Knight -> true
-    | _ -> false
-  let not_cavalry = Fun.negate is_cavalry
-  let is_flying = (=) Harpy
-  let is_holy = function
-    | Dervish | Novice | Ranger | Templar -> true
-    | _ -> false
-  let is_siege = function
-    | Ballista | Mangonel -> true
-    | _ -> false
-  let not_siege = Fun.negate is_siege
-  let is_infantry k = not_cavalry k && not_siege k
-  let is_infectable = not_siege
-  let is_revivable = not_siege
-  let is_undead = function
-    | Skeleton | Dullahan -> true
-    | _ -> false
-  let to_list t =
-    List.filter t (attacks @ starve_order)
+  type t = Set.t
+  let all = Set.of_list (starve_order @ attacks)
+  let archer = Set.of_list [Harcher; Ranger]
+  let barrage = Set.of_list [Harcher; Men; Merc; Ranger; Veteran]
+  let barraged = Set.singleton Orc
+  let build = Set.of_list [Dervish; Men; Novice; Veteran]
+  let cavalry = Set.of_list [Cavalry; Harcher; Knight]
+  let fear = Set.singleton Dullahan
+  let flying = Set.singleton Harpy
+  let heal = Set.singleton Templar
+  let hit_run = Set.singleton Harcher
+  let holy = Set.of_list [Dervish; Novice; Ranger; Templar]
+  let reflect = Set.of_list [Berserker; Harcher]
+  let siege = Set.of_list [Ballista; Mangonel]
+  let undead = Set.of_list [Skeleton; Dullahan]
+  let infantry = Set.union cavalry siege |> Set.diff all
+  let infectable = Set.diff all siege
+  let revivable = Set.diff all siege
+  let fold t f = Set.fold f t
+  let is t k = Set.mem k t
+  let set_of t = t
 end
 
 module Base = struct
@@ -140,8 +124,9 @@ let make n kind =
 
 let is_empty = Map.is_empty
 
-let discard = Mapx.discardk
-let filter = Mapx.filterk
+let discard attr = Mapx.discardk (Attr.is attr)
+let filter attr = Mapx.filterk (Attr.is attr)
+let filterset = filter
 
 module Promote = struct
   let needs = function
@@ -198,7 +183,7 @@ let find n kind t =
   min n found
 
 let has = Map.mem
-let has_any = Mapx.existsk
+let has_any attr = Mapx.existsk (Attr.is attr)
 
 let kinds_of t =
   let f k _ s = Set.add k s in
@@ -235,7 +220,7 @@ let reduce t t' =
   Ops.sub t' t
 
 let split attr t =
-  Map.partition (fun k _ -> attr k) t
+  Map.partition (fun k _ -> Attr.is attr k) t
 
 let starve supply t =
   let f (sup, t') k =

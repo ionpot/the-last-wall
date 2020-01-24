@@ -68,9 +68,9 @@ module Damage (Dice : Dice.S) (Flags : Flags) = struct
     let acc', sub =
       if Set.mem kind acc.untouchable
       then absorb kind dmg acc
-      else if Attr.can_heal kind
+      else if Attr.(is heal) kind
       then heal kind dmg acc
-      else if Attr.can_reflect kind
+      else if Attr.(is reflect) kind
       then reflect kind dmg acc
       else acc, dmg
     in acc', dmg, sub

@@ -5,8 +5,8 @@ module From (S : State.S) = struct
   module Bonus = Bonus.Make(S)
 
   let units = S.Units.get ()
-  let cavs = Units.(filter Attr.is_cavalry) units
-  let infantry = Units.(filter_count Attr.is_infantry) units
+  let cavs = Units.(filter Attr.cavalry) units
+  let infantry = Units.(filter_count Attr.infantry) units
   let cav_ratio = Number.ratio (Units.count_all cavs) infantry
   let cav_allowed = Bonus.cav_allowed cav_men_ratio
   let cav_too_many = cav_ratio > cav_allowed

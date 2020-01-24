@@ -26,8 +26,8 @@ module Barraged = struct
     module Bonus = Bonus.Make(S)
     module Fill = Dist.Fill(S.Dice)
     let trained, rest =
-      S.Units.return Units.(filter Attr.can_barrage)
-      |> Units.(split Attr.is_archer)
+      S.Units.return Units.(filter Attr.barrage)
+      |> Units.(split Attr.archer)
     let base = Power.base |> Bonus.brg_power
     let power coef units =
       Bonus.brg_coef coef *. Power.of_units units base
@@ -37,7 +37,7 @@ module Barraged = struct
       let coef = S.Barrage.return Barrage.coefficient in
       power coef rest
     let value =
-      S.Enemy.return Units.(filter Attr.can_barraged)
+      S.Enemy.return Units.(filter Attr.barraged)
       |> Fill.from (p_trained +. p_rest) base
       |> fst
   end
@@ -89,7 +89,7 @@ module Disease = struct
   module Make (S : State.S) = struct
     module Fill = Units.Fill(S.Dice)
     module Roll = Leader.Roll(S.Dice)
-    let units = S.Units.return Units.(filter Attr.is_infectable)
+    let units = S.Units.return Units.(filter Attr.infectable)
     let loss = Units.count_all units |> Number.portion casualty
     let died, _ = Fill.from loss units
     let value = died, S.Leader.return Roll.death
@@ -124,11 +124,11 @@ module HitRun = struct
       let pwr = Power.of_units enemy base in
       damage (pwr *. loss_coef) enemy
     let fill p u = Fill.from p base u |> fst
-    let units = S.Units.return Units.(filter Attr.can_hit_run)
+    let units = S.Units.return Units.(filter Attr.hit_run)
     let power = Power.of_units units base
     let coef = Bonus.brg_coef Barrage.trained_coefficient
     let enemy = S.Enemy.get ()
-    let target = Units.(filter Attr.can_barraged) enemy
+    let target = Units.(filter Attr.barraged) enemy
     let value =
       fill (power *. coef) target,
       if S.Dice.chance hit_back_chance
@@ -150,7 +150,7 @@ module Mangonel = struct
     let power = Bonus.artillery (Power.artillery mang)
     let damage = Power.of_units mang power
     let value =
-      S.Enemy.return Units.(discard Attr.is_flying)
+      S.Enemy.return Units.(discard Attr.flying)
       |> Fill.from damage Power.base
   end
 end
@@ -167,7 +167,7 @@ module Smite = struct
     module Bonus = Bonus.Make(S)
     module Fill = Dist.Fill(S.Dice)
     let cap = S.Dice.betweenf 5. 15. |> Bonus.smite
-    let units = S.Enemy.return Units.(filter Attr.is_undead)
+    let units = S.Enemy.return Units.(filter Attr.undead)
     let value = Fill.from cap Power.base units |> fst
   end
 end

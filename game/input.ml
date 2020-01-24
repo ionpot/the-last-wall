@@ -31,8 +31,8 @@ module BarrageTrain = struct
   end
   module Make (S : State.S) = struct
     let units =
-      S.Units.return Units.(filter Attr.can_barrage)
-      |> Units.(discard Attr.is_archer)
+      S.Units.return Units.(filter Attr.barrage)
+      |> Units.(discard Attr.archer)
     let power = Units.power_of units
     let cost = (power *. 0.05) |> ceil |> truncate
     let value = S.Supply.has cost, cost
@@ -53,7 +53,7 @@ module Barrage = struct
       then Barrage.(Disabled Leader)
       else if S.Weather.check Weather.is_bad
       then Barrage.(Disabled Weather)
-      else if S.Units.check Units.(has_any Attr.can_barrage)
+      else if S.Units.check Units.(has_any Attr.barrage)
       then Barrage.Available
       else Barrage.(Disabled Archers)
   end

@@ -10,24 +10,26 @@ val attacks : kind list
 val starve_order : kind list
 
 module Attr : sig
-  type t = kind -> bool
-  val can_barrage : t
-  val can_barraged : t
-  val can_build : t
-  val can_fear : t
-  val can_heal : t
-  val can_hit_run : t
-  val can_reflect : t
-  val is_archer : t
-  val is_cavalry : t
-  val is_flying : t
-  val is_holy : t
-  val is_infantry : t
-  val is_infectable : t
-  val is_revivable : t
-  val is_siege : t
-  val is_undead : t
-  val to_list : t -> kind list
+  type t
+  val archer : t
+  val barrage : t
+  val barraged : t
+  val build : t
+  val cavalry : t
+  val fear : t
+  val flying : t
+  val heal : t
+  val hit_run : t
+  val holy : t
+  val infantry : t
+  val infectable : t
+  val reflect : t
+  val revivable : t
+  val siege : t
+  val undead : t
+  val fold : t -> (kind -> 'a -> 'a) -> 'a -> 'a
+  val is : t -> kind -> bool
+  val set_of : t -> Set.t
 end
 
 module Base : sig
@@ -73,6 +75,7 @@ val add : Defs.count -> kind -> t -> t
 val combine : t -> t -> t
 val discard : Attr.t -> t -> t
 val filter : Attr.t -> t -> t
+val filterset : Set.t -> t -> t
 val only : kind -> t -> t
 val pop : kind -> t -> t * t
 val reduce : t -> t -> t

@@ -62,8 +62,7 @@ let add kind pwr t =
   Map.add kind p t
 
 let attr a pwr t =
-  Units.Attr.to_list a
-  |> List.fold_left (fun t k -> add k pwr t) t
+  Units.Attr.fold a (fun k t -> add k pwr t) t
 
 let ceil base t =
   Map.mapi (Fn.ceil base) t
@@ -80,8 +79,7 @@ let modulo base t =
 let set = Map.add
 
 let set_attr a pwr t =
-  Units.Attr.to_list a
-  |> List.fold_left (fun t k -> set k pwr t) t
+  Units.Attr.fold a (fun k t -> set k pwr t) t
 
 let sub kind pwr t =
   let p = Float.sub (Fn.find kind t) pwr in

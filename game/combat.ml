@@ -39,7 +39,7 @@ module Make (S : State.S) = struct
   let enemies = S.Enemy.get ()
   let have_fort = S.Build.check Build.(is_ready Fort)
   let units = S.Units.get ()
-  let mobile = Units.(discard Attr.is_siege) units
+  let mobile = Units.(discard Attr.siege) units
 
   let dist_atk dmg a b =
     let module D = Damage(struct

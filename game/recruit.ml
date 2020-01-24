@@ -18,19 +18,15 @@ end
 
 module Attr = Units.Attr
 module Base = Units.Base
+module Map = Build.Map
 module Promote = Units.Promote
+module Set = Units.Set
 
-let bld_of k =
-  if k = Units.Berserker then Some Build.Arena
-  else if Attr.is_cavalry k then Some Build.Stable
-  else if Attr.is_holy k then Some Build.Temple
-  else if Attr.is_siege k then Some Build.Engrs
-  else None
-
-let attr_of b k =
-  match b, bld_of k with
-  | Some a, Some b -> a = b
-  | _ -> false
+let map = Map.empty
+  |> Map.add Build.Arena (Set.singleton Units.Berserker)
+  |> Map.add Build.Engrs Attr.(set_of siege)
+  |> Map.add Build.Stable Attr.(set_of cavalry)
+  |> Map.add Build.Temple Attr.(set_of holy)
 
 let translate n k_in k_out =
   Power.translate k_in k_out n Power.base
@@ -43,19 +39,24 @@ module Build (S : State.S) = struct
     cap_of Build.Temple + cap_of Build.Guesthouse
 
   let bld_cap = function
-    | Some Build.Temple -> Some (temple_cap ())
-    | Some b -> Some (cap_of b)
-    | None -> None
+    | Build.Temple -> temple_cap ()
+    | b -> cap_of b
+
+  let count set units =
+    Units.filterset set units |> Units.count_all
 
   let vacancy kind =
-    let bld = bld_of kind in
-    let attr = attr_of bld in
-    let count =
-      S.Units.return (Units.filter_count attr)
-      + S.Training.return (Units.filter_count attr)
+    let f k =
+      match Map.find_opt k map with
+      | Some s -> Set.mem kind s
+      | None -> false
     in
-    match bld_cap bld with
-    | Some x -> Some (Number.sub x count)
+    match Map.find_first_opt f map with
+    | Some (bld, set) ->
+        let n = S.Units.return (count set)
+          + S.Training.return (count set)
+        in
+        Some (Number.sub (bld_cap bld) n)
     | None -> None
 end
 

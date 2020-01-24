@@ -35,7 +35,7 @@ module BuildManp = struct
     let value t = S.Build.map (Build.apply_mnp t)
   end
   module Make (S : State.S) = struct
-    let units = S.Units.return Units.(filter Attr.can_build)
+    let units = S.Units.return Units.(filter Attr.build)
     let wrp = Units.power_of units |> truncate
     let res = S.Build.return Build.needs
     let value = min wrp (Resource.mnp res)
@@ -116,10 +116,10 @@ module Fear = struct
   module Make (S : State.S) = struct
     module Fill = Dist.Fill(S.Dice)
     module Roll = Power.Roll(S.Dice)
-    let e = S.Enemy.return Units.(filter Attr.can_fear)
+    let e = S.Enemy.return Units.(filter Attr.fear)
     let base = Power.base
     let cap = Roll.fear e base
-    let units = S.Units.return Units.(discard Attr.is_siege)
+    let units = S.Units.return Units.(discard Attr.siege)
     let value = Fill.from cap base units |> fst
   end
 end
@@ -146,7 +146,7 @@ module Mishap = struct
   end
   module Make (S : State.S) = struct
     module Roll = Mishap.Roll(S.Dice)
-    let units = S.Units.return Units.(filter_count Attr.is_infectable)
+    let units = S.Units.return Units.(filter_count Attr.infectable)
     let check = function
       | Mishap.Comet -> S.Turn.has 5
       | Mishap.Disease -> units >= 50
@@ -218,7 +218,7 @@ module Revive = struct
     let base = Power.base
     let pwr = Power.revive units |> Power.of_units units
     let value =
-      Units.(filter Attr.is_revivable)
+      Units.(filter Attr.revivable)
       |> S.Casualty.return
       |> Fill.from pwr base
   end
