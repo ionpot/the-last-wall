@@ -141,7 +141,8 @@ module Promote = struct
 
   let amount = function
     | Ballista
-    | Berserker -> 2
+    | Berserker
+    | Mangonel -> 2
     | _ -> 1
 
   let affordable kind cap t =
