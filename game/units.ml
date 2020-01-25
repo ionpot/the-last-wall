@@ -1,4 +1,4 @@
-type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harcher | Harpy | Knight | Mangonel | Men | Merc | Novice | Orc | Ranger | Skeleton | Templar | Veteran
+type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harcher | Harpy | Knight | Mangonel | Marms | Men | Merc | Novice | Orc | Ranger | Skeleton | Templar | Veteran
 
 module Kind = struct
   type t = kind
@@ -14,7 +14,7 @@ type report = (kind * Defs.count) list
 type sum_report = (Defs.count * Set.t)
 
 let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops; Dullahan]
-let starve_order = [Men; Novice; Berserker; Cavalry; Veteran; Harcher; Ranger; Dervish; Templar; Merc; Mangonel; Ballista; Knight]
+let starve_order = [Men; Novice; Berserker; Cavalry; Veteran; Harcher; Ranger; Dervish; Templar; Merc; Marms; Mangonel; Ballista; Knight]
 
 module Attr = struct
   type t = Set.t
@@ -23,7 +23,7 @@ module Attr = struct
   let barrage = Set.of_list [Harcher; Men; Merc; Ranger; Veteran]
   let barraged = Set.singleton Orc
   let build = Set.of_list [Dervish; Men; Novice; Veteran]
-  let cavalry = Set.of_list [Cavalry; Harcher; Knight]
+  let cavalry = Set.of_list [Cavalry; Harcher; Marms; Knight]
   let fear = Set.singleton Dullahan
   let flying = Set.singleton Harpy
   let heal = Set.singleton Templar
@@ -68,6 +68,7 @@ module Base = struct
   let dr = function
     | Dullahan -> 0.01
     | Knight -> 0.004
+    | Marms -> 0.003
     | Cavalry | Harpy -> 0.002
     | _ -> 0.
 
@@ -80,7 +81,7 @@ module Base = struct
     | Dullahan -> 7.
     | Cyclops -> 5.
     | Harpy | Knight -> 4.
-    | Templar -> 3.
+    | Marms | Templar -> 3.
     | Ballista | Berserker | Cavalry | Demon | Dervish | Harcher | Mangonel | Merc | Ranger | Veteran -> 2.
     | Men | Novice | Orc -> 1.
     | Skeleton -> 0.5
@@ -97,15 +98,16 @@ module Base = struct
     | Merc
     | Ranger
     | Veteran -> 2
+    | Marms -> 3
     | Templar -> 4
-    | Knight -> 10
+    | Knight -> 5
     | Ballista -> 12
     | Mangonel -> 16
     | _ -> 1
 
   let upkeep_cost = function
     | Knight -> 3
-    | Ballista | Mangonel | Merc -> 2
+    | Ballista | Mangonel | Marms | Merc -> 2
     | _ -> 1
 end
 
@@ -131,7 +133,8 @@ let filterset = filter
 module Promote = struct
   let needs = function
     | Harcher
-    | Knight -> Cavalry
+    | Marms -> Cavalry
+    | Knight -> Marms
     | Dervish -> Novice
     | _ -> Men
 
@@ -142,6 +145,7 @@ module Promote = struct
     | Dervish
     | Harcher
     | Knight
+    | Marms
     | Novice
     | Ranger
     | Templar

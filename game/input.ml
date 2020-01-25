@@ -113,9 +113,21 @@ end
 module Knight = Recruit.Event(struct
   let action = Recruit.Promote
   let kind = Units.Knight
-  let pool = None
+  let pool = Some (Recruit.Exclude Pool.Marms)
   module Cap = Recruit.NoCap
 end)
+
+module Marms = struct
+  include Recruit.Event(struct
+    let action = Recruit.Promote
+    let kind = Units.Marms
+    let pool = Some (Recruit.Set Pool.Marms)
+    module Cap = Recruit.NoCap
+  end)
+  module Check (S : State.S) = struct
+    let value = S.Build.check Build.(is_ready Barracks)
+  end
+end
 
 module LeaderKind = struct
   type t = Leader.kind

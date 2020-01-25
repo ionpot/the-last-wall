@@ -13,6 +13,7 @@ module Input = struct
     | Harcher of Event.Harcher.t
     | Knight of Event.Knight.t
     | LeaderNew of Event.LeaderNew.t
+    | Marms of Event.Marms.t
     | Mangonel of Event.Mangonel.t
     | Mercs of Event.Mercs.t
     | Nations of Event.Nations.t
@@ -39,6 +40,7 @@ module Input = struct
       | Knight x -> Apply.value x (module Event.Knight)
       | LeaderNew x -> Apply.value x (module Event.LeaderNew)
       | Mangonel x -> Apply.value x (module Event.Mangonel)
+      | Marms x -> Apply.value x (module Event.Marms)
       | Mercs x -> Apply.value x (module Event.Mercs)
       | Nations x -> Apply.value x (module Event.Nations)
       | Novice x -> Apply.value x (module Event.Novice)
@@ -113,6 +115,8 @@ module Convert = struct
           let make x = Input.Harcher x end)
       | Steps.LeaderNew -> (module struct module Event = Event.LeaderNew
           let make x = Input.LeaderNew x end)
+      | Steps.Marms -> (module struct module Event = Event.Marms
+          let make x = Input.Marms x end)
       | Steps.Ranger -> (module struct module Event = Event.Ranger
           let make x = Input.Ranger x end)
       | Steps.Templar -> (module struct module Event = Event.Templar
