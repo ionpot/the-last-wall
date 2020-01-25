@@ -142,17 +142,7 @@ module Promote = struct
   let amount = function
     | Ballista
     | Berserker -> 2
-    | Cavalry
-    | Dervish
-    | Harcher
-    | Knight
-    | Marms
-    | Novice
-    | Ranger
-    | Templar
-    | Veteran
-    | Xbowman -> 1
-    | _ -> 0
+    | _ -> 1
 
   let affordable kind cap t =
     let n = amount kind in
