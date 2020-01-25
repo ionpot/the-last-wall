@@ -18,7 +18,7 @@ let starve_order = [Men; Novice; Berserker; Cavalry; Veteran; Harcher; Ranger; D
 
 module Attr = struct
   type t = Set.t
-  let all = Set.of_list (starve_order @ attacks)
+  let all = Set.of_list starve_order
   let archer = Set.of_list [Harcher; Ranger; Xbowman]
   let barrage = Set.of_list [Men; Merc; Veteran] |> Set.union archer
   let barraged = Set.singleton Orc
