@@ -1,4 +1,4 @@
-type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harcher | Harpy | Knight | Mangonel | Marms | Men | Merc | Novice | Orc | Ranger | Skeleton | Templar | Veteran
+type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harcher | Harpy | Knight | Mangonel | Marms | Men | Merc | Novice | Orc | Ranger | Skeleton | Templar | Veteran | Xbowman
 
 module Kind = struct
   type t = kind
@@ -14,13 +14,13 @@ type report = (kind * Defs.count) list
 type sum_report = (Defs.count * Set.t)
 
 let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops; Dullahan]
-let starve_order = [Men; Novice; Berserker; Cavalry; Veteran; Harcher; Ranger; Dervish; Templar; Merc; Marms; Mangonel; Ballista; Knight]
+let starve_order = [Men; Novice; Berserker; Cavalry; Veteran; Harcher; Ranger; Dervish; Templar; Merc; Xbowman; Marms; Mangonel; Ballista; Knight]
 
 module Attr = struct
   type t = Set.t
   let all = Set.of_list (starve_order @ attacks)
-  let archer = Set.of_list [Harcher; Ranger]
-  let barrage = Set.of_list [Harcher; Men; Merc; Ranger; Veteran]
+  let archer = Set.of_list [Harcher; Ranger; Xbowman]
+  let barrage = Set.of_list [Men; Merc; Veteran] |> Set.union archer
   let barraged = Set.singleton Orc
   let build = Set.of_list [Dervish; Men; Novice; Veteran]
   let cavalry = Set.of_list [Cavalry; Harcher; Marms; Knight]
@@ -74,7 +74,7 @@ module Base = struct
 
   let hit_chance = function
     | Ballista | Mangonel -> 0.25
-    | Dervish | Harcher | Ranger -> 0.5
+    | Dervish | Harcher | Ranger | Xbowman -> 0.5
     | _ -> 1.
 
   let power = function
@@ -82,7 +82,7 @@ module Base = struct
     | Cyclops -> 5.
     | Harpy | Knight -> 4.
     | Marms | Templar -> 3.
-    | Ballista | Berserker | Cavalry | Demon | Dervish | Harcher | Mangonel | Merc | Ranger | Veteran -> 2.
+    | Ballista | Berserker | Cavalry | Demon | Dervish | Harcher | Mangonel | Merc | Ranger | Veteran | Xbowman -> 2.
     | Men | Novice | Orc -> 1.
     | Skeleton -> 0.5
 
@@ -136,6 +136,7 @@ module Promote = struct
     | Marms -> Cavalry
     | Knight -> Marms
     | Dervish -> Novice
+    | Xbowman -> Veteran
     | _ -> Men
 
   let amount = function
@@ -149,7 +150,8 @@ module Promote = struct
     | Novice
     | Ranger
     | Templar
-    | Veteran -> 1
+    | Veteran
+    | Xbowman -> 1
     | _ -> 0
 
   let affordable kind cap t =

@@ -29,6 +29,7 @@ val untouchable : Units.t -> Units.t -> t -> Units.Set.t
 val add : Units.kind -> Defs.power -> t -> t
 val attr : Units.Attr.t -> Defs.power -> t -> t
 val from_units : Units.t -> t -> t
+val inc_by : Units.kind -> Defs.ratio -> t -> t
 val map_units : Units.t -> t -> t
 val modulo : t -> t -> t
 val set : Units.kind -> Defs.power -> t -> t

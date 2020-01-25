@@ -59,8 +59,9 @@ module Make (S : State.S) = struct
     then Power.attr Attr.flying ~-.1. p
     else p
 
-  let brg_power p =
-    Power.add Units.Ranger 1. p
+  let brg_power p = p
+    |> Power.add Units.Ranger 1.
+    |> Power.inc_by Units.Xbowman 0.5
 
   let build_cost kind res =
     let engrs = bld_ready Build.Engrs in

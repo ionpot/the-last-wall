@@ -26,6 +26,7 @@ module Input = struct
     | Trade of Event.Trade.t
     | Veteran of Event.Veteran.t
     | Volunteers of Event.Volunteers.t
+    | Xbowman of Event.Xbowman.t
 
   module Apply (State : State.S) = struct
     module Apply = Phase.Apply(State)
@@ -52,6 +53,7 @@ module Input = struct
       | Trade x -> Apply.value x (module Event.Trade)
       | Veteran x -> Apply.value x (module Event.Veteran)
       | Volunteers x -> Apply.value x (module Event.Volunteers)
+      | Xbowman x -> Apply.value x (module Event.Xbowman)
   end
 end
 
@@ -107,6 +109,8 @@ module Convert = struct
           let make x = Input.Research x end)
       | Steps.Sodistan -> (module struct module Event = Event.Sodistan
           let make x = Input.Sodistan x end)
+      | Steps.Xbowman -> (module struct module Event = Event.Xbowman
+          let make x = Input.Xbowman x end)
 
     let cond : Convert.cond = function
       | Steps.Barracks -> (module struct module Event = Event.Barracks

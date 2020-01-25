@@ -70,6 +70,9 @@ let ceil base t =
 let ceil_count base t =
   ceil base t |> count base
 
+let inc_by kind ratio t =
+  add kind (Units.Base.power kind *. ratio) t
+
 let map_units u t =
   Mapx.mapk (fun k -> Fn.find k t) u
 

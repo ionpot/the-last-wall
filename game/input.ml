@@ -335,3 +335,10 @@ module Volunteers = struct
     let value = Range.times n (1, 3) |> S.Dice.range
   end
 end
+
+module Xbowman = Recruit.Event(struct
+  let action = Recruit.Promote
+  let kind = Units.Xbowman
+  let pool = None
+  module Cap = Recruit.NoCap
+end)
