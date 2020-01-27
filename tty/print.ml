@@ -94,11 +94,6 @@ module Combat = struct
     Tty.ifpairln "enemies remaining" (result2remaining O.enemies)
 end
 
-let ballista (n, enemies, _) =
-  if n > 0 then
-    sprintf "%d ballista kills %s" n (units2str enemies |> if_empty "nothing")
-    |> Tty.writeln
-
 let barrage_status w =
   let open Barrage in
   function
@@ -106,11 +101,6 @@ let barrage_status w =
     | Disabled Archers -> Tty.writeln "no archers for arrow barrage"
     | Disabled Leader -> Tty.writeln "no leader to lead arrow barrage"
     | Disabled Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
-
-let cyclops (n, units, _) =
-  if n > 0 then
-    sprintf "%d cyclops kills %s" n (units2str units |> if_empty "nothing")
-    |> Tty.writeln
 
 let disease (died, ldr_died) ldr =
   Tty.pairln "died" (units2str died |> str2none);
@@ -149,6 +139,12 @@ let research_progress (module S : Research.Progress) =
 
 let research_status s =
   Tty.ifpairln "research complete" (researchset2str s)
+
+let siege kind (units, _) =
+  if units2bool units then
+    sprintf "%s kills %s"
+    (unit2str kind) (units2str units |> if_empty "nothing")
+    |> Tty.writeln
 
 let starting nat (module S : Starting.S) =
   Tty.ifpairln "buildings" (bld_ls2str nat S.buildings);

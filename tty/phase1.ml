@@ -7,7 +7,7 @@ module Make (S : Game.State.S) = struct
     let check f x = if x > 0 then f x else x in
     let promote k = check (Prompt.promote k) in
     function
-      | Ballista avlb -> Ballista (check Prompt.ballista avlb)
+      | Ballista avlb -> Ballista (check (Prompt.siege Units.Ballista) avlb)
       | Build avlb ->
           let nat = S.Nation.get () in
           S.Build.return (Print.Build.all nat);

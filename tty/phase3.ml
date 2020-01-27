@@ -1,4 +1,5 @@
 module Phase = Game.Phase3
+module Units = Game.Units
 
 module Make (S : Game.State.S) = struct
   let input =
@@ -19,12 +20,12 @@ module Make (S : Game.State.S) = struct
           |> S.Units.return
           |> S.Enemy.return
           |> S.Leader.return
-      | Ballista x -> Print.ballista x
+      | Ballista x -> Print.siege Units.Ballista x
       | Barraged x -> Tty.pairln "barraged" (units2str x |> str2none)
       | Combat x ->
           Print.Combat.outcome x
           |> S.Leader.return
-      | Cyclops x -> Print.cyclops x
+      | Cyclops x -> Print.siege Units.Cyclops x
       | Defeat -> Tty.writeln "defeat"
       | Fear x -> Print.fear x
       | HitRun x -> Print.hit_run x
@@ -46,9 +47,9 @@ module After (S : Status.S) = struct
   let output =
     let open Phase.Output in
     function
-      | Ballista (n, _, _) -> if n > 0 then S.enemies ()
+      | Ballista (x, _) -> if Convert.units2bool x then S.enemies ()
       | Barraged _ -> S.enemies ()
-      | Cyclops (n, _, _) -> if n > 0 then S.units ()
+      | Cyclops (x, _) -> if Convert.units2bool x then S.units ()
       | Fear x -> if Convert.units2bool x then S.units ()
       | Smite x -> if Convert.units2bool x then S.enemies ()
       | Victory -> S.units ()

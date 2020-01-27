@@ -8,7 +8,7 @@ module Make (S : Game.State.S) = struct
     let check f x = if x > 0 then f x else x in
     let promote k = check (Prompt.promote k) in
     function
-      | Ballista avlb -> Ballista (check Prompt.ballista avlb)
+      | Ballista avlb -> Ballista (check (Prompt.siege Units.Ballista) avlb)
       | Barracks _ -> Barracks (Prompt.barracks ())
       | BarrageTrain (ok, cost) ->
           BarrageTrain (Prompt.barrage_train ok cost, cost)
