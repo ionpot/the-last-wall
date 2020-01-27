@@ -36,6 +36,7 @@ module Make (S : Game.State.S) = struct
       | Trade _ -> Trade (Prompt.trade ())
       | Veteran avlb -> Veteran (promote Units.Veteran avlb)
       | Volunteers count -> Volunteers (check Prompt.volunteers count)
+      | Xbowman avlb -> Xbowman (promote Units.Xbowman avlb)
 
   let output =
     let open Convert in
@@ -91,6 +92,7 @@ module After (S : Status.S) = struct
       | Temple n -> if n > 0 then S.res ()
       | Veteran n -> promote Units.Veteran n
       | Volunteers n -> if n > 0 then S.res ()
+      | Xbowman n -> promote Units.Xbowman n
       | _ -> ()
 
   let output =
