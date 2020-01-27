@@ -175,7 +175,7 @@ let researchset2str s =
   |> commas
 
 let unit_order =
-  Units.([Men; Veteran; Merc; Berserker; Cavalry; Harcher; Knight; Novice; Ranger; Templar; Dervish; Ballista; Mangonel; Skeleton; Orc; Demon; Harpy; Cyclops])
+  Units.([Men; Veteran; Merc; Berserker; Cavalry; Harcher; Marms; Knight; Novice; Ranger; Templar; Dervish; Ballista; Mangonel; Skeleton; Orc; Demon; Harpy; Cyclops])
 
 let unit_cmp = Listx.compare unit_order
 
@@ -191,6 +191,7 @@ let unit2str = function
   | Units.Harpy -> "harpy"
   | Units.Knight -> "knight"
   | Units.Mangonel -> "mangonel"
+  | Units.Marms -> "man-at-arms"
   | Units.Men -> "men"
   | Units.Merc -> "merc"
   | Units.Novice -> "novice"

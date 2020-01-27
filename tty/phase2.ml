@@ -22,6 +22,7 @@ module Make (S : Game.State.S) = struct
       | LeaderNew x -> LeaderNew (Prompt.Leader.pair x)
       | Knight avlb -> Knight (promote Units.Knight avlb)
       | Mangonel avlb -> Mangonel (check (Prompt.siege Units.Mangonel) avlb)
+      | Marms avlb -> Marms (promote Units.Marms avlb)
       | Mercs count -> Mercs (Prompt.mercs count)
       | Nations chosen ->
           let module Prompt = Prompt.Nations(S) in
@@ -81,6 +82,7 @@ module After (S : Status.S) = struct
       | LeaderNew x -> S.new_leader x
       | Knight n -> promote Units.Knight n
       | Mangonel n -> if n > 0 then S.res ()
+      | Marms n -> promote Units.Marms n
       | Mercs n -> if n > 0 then S.res ()
       | Novice n -> promote Units.Novice n
       | Ranger n -> promote Units.Ranger n
