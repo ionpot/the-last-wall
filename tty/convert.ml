@@ -42,7 +42,7 @@ let work2str wp =
   sprintf "%d wrp" wp
 
 let res2str res =
-  Resource.([supp_of res, sup2str; manp_of res, manp2str])
+  Resource.([sup res, sup2str; mnp res, manp2str])
   |> List.filter (fun (n, _) -> n > 0)
   |> List.map (fun (n, f) -> f n)
   |> commas
