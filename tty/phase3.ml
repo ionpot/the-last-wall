@@ -2,6 +2,8 @@ module Phase = Game.Phase3
 module Units = Game.Units
 
 module Make (S : Game.State.S) = struct
+  module Bonus = Game.Bonus.Make(S)
+
   let input =
     let open Phase.Input in
     function
@@ -15,8 +17,9 @@ module Make (S : Game.State.S) = struct
     let open Phase.Output in
     function
       | Attack ->
-          Print.Combat.begins
-          |> S.Bonus.return
+          Game.Power.base
+          |> Bonus.siege_boost
+          |> Print.Combat.begins
           |> S.Units.return
           |> S.Enemy.return
           |> S.Leader.return
