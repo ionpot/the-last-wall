@@ -4,6 +4,7 @@ module Make (Set : Set.S) : sig
   val empty : t
 
   val cost : t -> Resource.t
+  val to_list : t -> (Set.elt * Resource.t) list
   val to_set : t -> Set.t
 
   val add : Set.elt -> Resource.t -> t -> t

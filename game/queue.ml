@@ -5,6 +5,7 @@ module Make (Set : Set.S) = struct
   let cost t =
     List.map snd t
     |> List.fold_left Resource.(++) Resource.empty
+  let to_list t = t
   let to_set t = List.map fst t |> Set.of_list
   let add kind cost t = (kind, cost) :: t
   let apply_if cond res (t:t) =
