@@ -166,6 +166,14 @@ let deity_text = function
   | Deity.Sitera -> "mother earth, spring of all living"
   | Deity.Sekrefir -> "leader of gods, envoy of order and justice"
 
+let research2str = function
+  | Research.BlackArmy -> "black army"
+
+let researchset2str s =
+  Research.Set.elements s
+  |> List.map research2str
+  |> commas
+
 let unit_order =
   Units.([Men; Veteran; Merc; Berserker; Cavalry; Harcher; Knight; Novice; Ranger; Templar; Dervish; Ballista; Skeleton; Orc; Demon; Harpy; Cyclops])
 

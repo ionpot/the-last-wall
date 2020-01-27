@@ -184,6 +184,16 @@ let promote kind cap =
   |> Tty.writeln;
   Tty.prompt_amount cap
 
+let research avlb =
+  let ls = Game.Research.Set.elements avlb in
+  if ls = [] then ls
+  else begin
+    List.map research2str ls
+    |> horizontal "research available";
+    Tty.prompt "research?"
+    |> choose_from ls
+  end
+
 let scout () =
   Tty.prompt_yn "send scouts? y/n"
   |> echo (fun x -> if x then Tty.writeln "scouts sent")

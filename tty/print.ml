@@ -144,6 +144,12 @@ let mishap t =
   let f kind = if Mishap.has kind t then print kind in
   List.iter f Mishap.kinds
 
+let research_progress (module S : Research.Progress) =
+  Tty.ifpairln "researching" (researchset2str S.started)
+
+let research_status s =
+  Tty.ifpairln "research complete" (researchset2str s)
+
 let starting nat (module S : Starting.S) =
   Tty.ifpairln "buildings" (bld_ls2str nat S.buildings);
   Tty.pairln "month" (month2str S.month);

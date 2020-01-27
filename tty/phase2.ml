@@ -1,4 +1,5 @@
 module Phase = Game.Phase2
+module Research = Game.Research
 module Units = Game.Units
 
 module Make (S : Game.State.S) = struct
@@ -26,6 +27,7 @@ module Make (S : Game.State.S) = struct
           Nations (Prompt.from chosen)
       | Novice avlb -> Novice (promote Units.Novice avlb)
       | Ranger avlb -> Ranger (promote Units.Ranger avlb)
+      | Research (_, avlb) -> Research (Prompt.research avlb, avlb)
       | Sodistan sup -> Sodistan (check Prompt.sodistan sup)
       | Templar avlb -> Templar (promote Units.Templar avlb)
       | Temple count -> Temple (check Prompt.temple count)
@@ -58,6 +60,8 @@ module Make (S : Game.State.S) = struct
           Print.facilities nat x
       | FearEnd x -> Print.fear_end x
       | Mishap x -> Print.mishap x
+      | ResearchProgress x -> Print.research_progress x
+      | ResearchStatus x -> Print.research_status x
       | Starvation x -> Print.starvation x
       | Support s -> Print.support s
       | Turn t -> Tty.lnwriteln (turn2str t)
@@ -96,6 +100,8 @@ module After (S : Status.S) = struct
       | Cavalry n -> if n > 0 then begin S.cavalry n; S.res () end
       | Facilities x -> S.facilities x
       | FearEnd x -> if Convert.units2bool x then S.res ()
+      | ResearchProgress (module P : Research.Progress) ->
+          if not (Research.Set.is_empty P.started) then S.res ()
       | Starvation x -> if Convert.starve2bool x then S.res ()
       | Support _
       | Upkeep _ -> S.res ()
