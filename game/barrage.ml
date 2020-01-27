@@ -2,6 +2,7 @@ type reason = Archers | Leader | Weather
 type status = Available | Disabled of reason
 
 let base_coefficient = 0.05
+let trained_coefficient = 0.1
 
 type t =
   { choice : bool
@@ -25,11 +26,10 @@ let can_barrage t =
 let can_hit_run t =
   is_available t && not (is_chosen t)
 
-let coefficient bonus t =
-  let add_if b = Float.add_if (Bonus.has b bonus) in
-  (if is_trained t then 0.1 else base_coefficient)
-  |> add_if Bonus.ClearSky 0.02
-  |> add_if Bonus.NumendorTrade 0.02
+let coefficient t =
+  if is_trained t
+  then trained_coefficient
+  else base_coefficient
 
 let set_choice choice t =
   { t with choice }

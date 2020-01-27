@@ -75,21 +75,37 @@ let has_barracks k t =
 let has_trade k t =
   t.trade = Some k
 
+let has_traded kind t =
+  has_trade kind t && has_aided kind t
+
 let no_barracks t =
   t.barracks = None
 
 let no_trade t =
   t.trade = None
 
+let cap_of kind t =
+  if has_trade kind t
+  then Chance.cap_trading
+  else Chance.cap
+
 let mnp_from k t =
   if has_aided k t
-  then Map.find k t.support |> Resource.manp_of
+  then Map.find k t.support |> Resource.mnp
   else 0
 
 let sup_from k t =
   if has_aided k t
-  then Map.find k t.support |> Resource.supp_of
+  then Map.find k t.support |> Resource.sup
   else 0
+
+let traded_mnp kind t =
+  has_trade kind t
+  |> Number.if_ok (mnp_from kind t)
+
+let traded_sup kind t =
+  has_trade kind t
+  |> Number.if_ok (sup_from kind t)
 
 let set_chosen chosen t =
   { t with chosen }
@@ -105,3 +121,6 @@ let set_support m t =
 
 let set_trade trade t =
   { t with trade }
+
+let trim_chances t =
+  map_chances (Map.mapi (fun k v -> min v (cap_of k t))) t

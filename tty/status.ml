@@ -12,6 +12,8 @@ module type S = sig
 end
 
 module With (S : State.S) = struct
+  module Bonus = Bonus.Make(S)
+
   open Printf
 
   let count kind =
@@ -40,7 +42,7 @@ module With (S : State.S) = struct
     print_enemies "enemies"
 
   let res () =
-    let base = S.Bonus.return Power.base in
+    let base = Power.base |> Bonus.siege_boost in
     let units =  S.Units.get () in
     let m = Power.of_units units base |> truncate in
     let s = S.Supply.get () in
@@ -70,7 +72,7 @@ module With (S : State.S) = struct
       | (_, false), (_, false) -> ()
 
   let units () =
-    let base = S.Bonus.return Power.base in
+    let base = Power.base |> Bonus.siege_boost in
     S.Units.return (Convert.units2mnpstr base)
     |> Tty.pairln "status"
 end

@@ -21,3 +21,5 @@ end
 module Fill : Dice.S -> sig
   val from : Defs.power -> Power.t -> Units.t -> Units.t * Units.t
 end
+
+val fill : base:Power.t -> order:Units.kind list -> Defs.power -> Units.t -> Defs.power * Units.t

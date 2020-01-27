@@ -16,9 +16,9 @@ type acc =
 
 let empty_acc =
   { absorbed = 0.
-  ; base = Power.empty
+  ; base = Power.base
   ; healed = 0.
-  ; ratios = Power.empty
+  ; ratios = Power.base
   ; reflected = 0.
   ; untouchable = Set.empty
   }
@@ -68,9 +68,9 @@ module Damage (Dice : Dice.S) (Flags : Flags) = struct
     let acc', sub =
       if Set.mem kind acc.untouchable
       then absorb kind dmg acc
-      else if Attr.can_heal kind
+      else if Attr.(is heal) kind
       then heal kind dmg acc
-      else if Attr.can_reflect kind
+      else if Attr.(is reflect) kind
       then reflect kind dmg acc
       else acc, dmg
     in acc', dmg, sub
@@ -114,7 +114,7 @@ module Damage (Dice : Dice.S) (Flags : Flags) = struct
     let untouchable = Power.untouchable atk dfn base in
     let acc = { empty_acc with base; untouchable } in
     let input = Power.from_units dfn base in
-    let output = Power.empty in
+    let output = Power.base in
     Pick.from acc cap input output
 end
 
@@ -145,3 +145,13 @@ module Fill (Dice : Dice.S) = struct
       let _, rem, picked = Pick.from base cap units Units.empty in
       picked, rem
 end
+
+let fill ~base ~order power units =
+  let f (p, picked) kind =
+    let n = Power.Fn.count base kind p in
+    let count = Units.count kind units in
+    let n', count' = Number.take n count in
+    Power.Fn.mul base kind n',
+    Units.add count' kind picked
+  in
+  List.fold_left f (power, Units.empty) order

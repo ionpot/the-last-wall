@@ -42,7 +42,7 @@ let work2str wp =
   sprintf "%d wrp" wp
 
 let res2str res =
-  Resource.([supp_of res, sup2str; manp_of res, manp2str])
+  Resource.([sup res, sup2str; mnp res, manp2str])
   |> List.filter (fun (n, _) -> n > 0)
   |> List.map (fun (n, f) -> f n)
   |> commas
@@ -133,8 +133,8 @@ let bld_map2str nat map =
   Build.Map.bindings map
   |> bld_pairs2str nat
 
-let bld_q2str nat ls =
-  ls
+let bld_q2str nat queue =
+  Build.Queue.to_list queue
   |> List.rev_map (fun (kind, cost) ->
       sprintf "%s (%s)" (bld2str nat kind) (res2str cost))
   |> commas
@@ -166,15 +166,23 @@ let deity_text = function
   | Deity.Sitera -> "mother earth, spring of all living"
   | Deity.Sekrefir -> "leader of gods, envoy of order and justice"
 
+let research2str = function
+  | Research.BlackArmy -> "black army"
+
+let researchset2str s =
+  Research.Set.elements s
+  |> List.map research2str
+  |> commas
+
 let unit_order =
-  Units.([Men; Veteran; Merc; Berserker; Cavalry; Harcher; Knight; Novice; Ranger; Templar; Dervish; Ballista; Skeleton; Orc; Demon; Harpy; Cyclops])
+  Units.([Men; Veteran; Merc; Berserker; Cavalry; Harcher; Marms; Knight; Novice; Xbowman; Ranger; Templar; Dervish; Ballista; Mangonel; Skeleton; Orc; Demon; Harpy; Cyclops])
 
 let unit_cmp = Listx.compare unit_order
 
 let unit2str = function
   | Units.Ballista -> "ballista"
   | Units.Berserker -> "berserker"
-  | Units.Cavalry -> "cavalry"
+  | Units.Cavalry -> "light cavalry"
   | Units.Cyclops -> "cyclops"
   | Units.Demon -> "demon"
   | Units.Dervish -> "dervish"
@@ -182,6 +190,8 @@ let unit2str = function
   | Units.Harcher -> "horse archer"
   | Units.Harpy -> "harpy"
   | Units.Knight -> "knight"
+  | Units.Mangonel -> "mangonel"
+  | Units.Marms -> "man-at-arms"
   | Units.Men -> "men"
   | Units.Merc -> "merc"
   | Units.Novice -> "novice"
@@ -190,6 +200,7 @@ let unit2str = function
   | Units.Skeleton -> "skeleton"
   | Units.Templar -> "templar"
   | Units.Veteran -> "veteran"
+  | Units.Xbowman -> "crossbowman"
 
 let unit_n2str n kind =
   if n > 0
@@ -220,7 +231,7 @@ let units2mnpstr base t =
   |> sprintf "%s -> %s" (units2str t |> if_empty "no units")
 
 let units2work base t =
-  let u = Units.(filter Attr.can_build) t in
+  let u = Units.(filter Attr.build) t in
   Power.of_units u base
   |> truncate
 

@@ -13,19 +13,13 @@ module Build = struct
     |> Tty.ifpairln "buildings ready";
     status nat Build.([], built t, queue t)
 
-  let manp need bonus units =
-    let base = Power.base bonus in
-    if need > 0 then
-      let w = units2work base units in
-      let r = need - w in
-      sprintf "%s -> %s queued -> %s"
-        (work2str w) (work2str need)
-        (if r > 0 then (work2str r) else "finished")
-      |> Tty.pairln "construction"
+  let manp mnp =
+    if mnp > 0 then
+      Tty.pairln "construction" (work2str mnp)
 
-  let supply need =
-    if need > 0 then
-      sprintf "construction costs %s" (sup2str need)
+  let supply sup =
+    if sup > 0 then
+      sprintf "construction costs %s" (sup2str sup)
       |> Tty.writeln
 end
 
@@ -57,8 +51,7 @@ module Leader = struct
 end
 
 module Combat = struct
-  let begins bonus units enemies ldr =
-    let base = Power.base bonus in
+  let begins base units enemies ldr =
     Tty.lnwriteln "combat phase";
     Tty.pairln "attacking" (units2str enemies |> str2none);
     Tty.pairln "defending" (units2mnpstr base units);
@@ -94,11 +87,6 @@ module Combat = struct
     Tty.ifpairln "enemies remaining" (result2remaining O.enemies)
 end
 
-let ballista (n, enemies, _) =
-  if n > 0 then
-    sprintf "%d ballista kills %s" n (units2str enemies |> if_empty "nothing")
-    |> Tty.writeln
-
 let barrage_status w =
   let open Barrage in
   function
@@ -106,11 +94,6 @@ let barrage_status w =
     | Disabled Archers -> Tty.writeln "no archers for arrow barrage"
     | Disabled Leader -> Tty.writeln "no leader to lead arrow barrage"
     | Disabled Weather -> Tty.spln (weather2str w) "prevents arrow barrage"
-
-let cyclops (n, units, _) =
-  if n > 0 then
-    sprintf "%d cyclops kills %s" n (units2str units |> if_empty "nothing")
-    |> Tty.writeln
 
 let disease (died, ldr_died) ldr =
   Tty.pairln "died" (units2str died |> str2none);
@@ -143,6 +126,18 @@ let mishap t =
   in
   let f kind = if Mishap.has kind t then print kind in
   List.iter f Mishap.kinds
+
+let research_progress (module S : Research.Progress) =
+  Tty.ifpairln "researching" (researchset2str S.started)
+
+let research_status s =
+  Tty.ifpairln "research complete" (researchset2str s)
+
+let siege kind (units, _) =
+  if units2bool units then
+    sprintf "%s kills %s"
+    (unit2str kind) (units2str units |> if_empty "nothing")
+    |> Tty.writeln
 
 let starting nat (module S : Starting.S) =
   Tty.ifpairln "buildings" (bld_ls2str nat S.buildings);

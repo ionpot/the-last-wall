@@ -1,4 +1,4 @@
-type kind = Arena | Novice
+type kind = Arena | Marms | Novice
 type value = Defs.count
 
 type t

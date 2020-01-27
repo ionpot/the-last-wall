@@ -58,11 +58,6 @@ let one_nation str =
   Tty.prompt "choose"
   |> choose_one ls (List.hd ls)
 
-let ballista avlb =
-  sprintf "can build %d ballista" avlb
-  |> Tty.writeln;
-  Tty.prompt_amount avlb
-
 let barracks () =
   let chosen nat = sprintf "%s chosen for barracks" (nation2str nat) in
   one_nation "barracks nation"
@@ -184,9 +179,24 @@ let promote kind cap =
   |> Tty.writeln;
   Tty.prompt_amount cap
 
+let research avlb =
+  let ls = Game.Research.Set.elements avlb in
+  if ls = [] then ls
+  else begin
+    List.map research2str ls
+    |> horizontal "research available";
+    Tty.prompt "research?"
+    |> choose_from ls
+  end
+
 let scout () =
   Tty.prompt_yn "send scouts? y/n"
   |> echo (fun x -> if x then Tty.writeln "scouts sent")
+
+let siege kind avlb =
+  sprintf "can build %s" (unit_n2str avlb kind)
+  |> Tty.writeln;
+  Tty.prompt_amount avlb
 
 let sodistan cap =
   Tty.writeln (sprintf "can convert %s from sodistan" (sup2str cap));
