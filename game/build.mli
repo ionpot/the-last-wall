@@ -12,6 +12,8 @@ module Map : Map.S with type key = kind
 module Set : Set.S with type elt = kind
 module Queue : module type of Queue.Make(Set)
 
+type cost_map = cost Map.t
+
 module Avlb : sig
   type t = Set.t
 end
@@ -33,6 +35,7 @@ val empty : t
 val available : t -> Avlb.t
 val built : t -> Built.t
 val cap_of : kind -> t -> count
+val cost_map : t -> cost_map
 val count : kind -> t -> count
 val is_built : kind -> t -> bool
 val is_complete : kind -> t -> bool
@@ -49,5 +52,5 @@ val died : Leader.t -> t -> t
 val raze : kind -> t -> t
 val set_ready : kind -> t -> t
 val set_ready_ls : kind list -> t -> t
-val start : kind -> cost -> t -> t
+val start : kind -> cost_map -> t -> t
 val update : status -> t -> t

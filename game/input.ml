@@ -67,17 +67,16 @@ module Berserker = Recruit.Event(struct
 end)
 
 module BuildAvlb = struct
-  type t = Build.kind list
+  type t = Build.kind list * Build.cost_map
   module Apply (S : State.S) = struct
-    module Bonus = Bonus.Make(S)
-    let value = List.iter (fun kind ->
-      Build.base_cost kind
-      |> Bonus.build_cost kind
-      |> Build.start kind
-      |> S.Build.map)
+    let f cmap kind = S.Build.map (Build.start kind cmap)
+    let value (ls, cost_map) = List.iter (f cost_map) ls
   end
   module Make (S : State.S) = struct
-    let value = []
+    module Bonus = Bonus.Make(S)
+    let value = [],
+      S.Build.return Build.cost_map
+      |> Build.Map.mapi Bonus.build_cost
   end
 end
 

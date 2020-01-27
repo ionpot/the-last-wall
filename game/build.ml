@@ -10,6 +10,7 @@ module Set = Set.Make(Kind)
 module Queue = Queue.Make(Set)
 
 type cost = Resource.t
+type cost_map = cost Map.t
 
 let avlb_default =
   [Arena; Barracks; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; Trade]
@@ -74,6 +75,10 @@ module Avlb = struct
     if is_multiple kind then t
     else Set.remove kind t
 
+  let to_map t =
+    let f k map = Map.add k (base_cost k) map in
+    Set.fold f t Map.empty
+
   let unlock kind t =
     add_ls (unlocks kind) t
     |> rm kind
@@ -130,6 +135,9 @@ let count kind t =
 let cap_of kind t =
   count kind t * base_cap kind
 
+let cost_map t =
+  Avlb.to_map t.avlb
+
 let is_built kind t =
   Built.has kind t.built
 
@@ -179,7 +187,8 @@ let set_ready kind t =
 
 let set_ready_ls = fn_ls set_ready
 
-let start kind cost t =
+let start kind cost_map t =
+  let cost = Map.find kind cost_map in
   { t with avlb = Avlb.rm kind t.avlb
   ; queue = Queue.add kind cost t.queue
   }
