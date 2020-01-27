@@ -30,6 +30,7 @@ module Make (S : Game.State.S) = struct
       | Fear x -> Print.fear x
       | HitRun x -> Print.hit_run x
       | LevelUp -> S.Leader.return Print.Leader.lvup
+      | Mangonel x -> Print.siege Units.Mangonel x
       | NoAttack -> ()
       | NoEnemies -> Tty.writeln "no enemies left"
       | Revive (x, _) -> Tty.ifpairln "revived" (units2str x)
@@ -51,6 +52,7 @@ module After (S : Status.S) = struct
       | Barraged _ -> S.enemies ()
       | Cyclops (x, _) -> if Convert.units2bool x then S.units ()
       | Fear x -> if Convert.units2bool x then S.units ()
+      | Mangonel (x, _) -> if Convert.units2bool x then S.enemies ()
       | Smite x -> if Convert.units2bool x then S.enemies ()
       | Victory -> S.units ()
       | _ -> ()
