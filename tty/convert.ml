@@ -133,8 +133,8 @@ let bld_map2str nat map =
   Build.Map.bindings map
   |> bld_pairs2str nat
 
-let bld_q2str nat ls =
-  ls
+let bld_q2str nat queue =
+  Build.Queue.to_list queue
   |> List.rev_map (fun (kind, cost) ->
       sprintf "%s (%s)" (bld2str nat kind) (res2str cost))
   |> commas
