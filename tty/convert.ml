@@ -182,7 +182,7 @@ let unit_cmp = Listx.compare unit_order
 let unit2str = function
   | Units.Ballista -> "ballista"
   | Units.Berserker -> "berserker"
-  | Units.Cavalry -> "cavalry"
+  | Units.Cavalry -> "light cavalry"
   | Units.Cyclops -> "cyclops"
   | Units.Demon -> "demon"
   | Units.Dervish -> "dervish"
