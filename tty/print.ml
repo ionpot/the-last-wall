@@ -13,19 +13,13 @@ module Build = struct
     |> Tty.ifpairln "buildings ready";
     status nat Build.([], built t, queue t)
 
-  let manp need bonus units =
-    let base = Power.base bonus in
-    if need > 0 then
-      let w = units2work base units in
-      let r = need - w in
-      sprintf "%s -> %s queued -> %s"
-        (work2str w) (work2str need)
-        (if r > 0 then (work2str r) else "finished")
-      |> Tty.pairln "construction"
+  let manp mnp =
+    if mnp > 0 then
+      Tty.pairln "construction" (work2str mnp)
 
-  let supply need =
-    if need > 0 then
-      sprintf "construction costs %s" (sup2str need)
+  let supply sup =
+    if sup > 0 then
+      sprintf "construction costs %s" (sup2str sup)
       |> Tty.writeln
 end
 
