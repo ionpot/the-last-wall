@@ -4,14 +4,11 @@ module Set = Units.Set
 
 type t = Defs.power Map.t
 
-let empty : t = Map.empty
+let base : t = Map.empty
 
-let dr u =
-  let f k n = Float.times n (Units.Base.dr k) in
-  Map.mapi f u
-
-let revive u =
-  Mapx.mapk Units.Base.revive u
+let artillery = Mapx.mapk Units.Base.artillery
+let dr = Mapx.mapk Units.Base.dr
+let revive = Mapx.mapk Units.Base.revive
 
 module Fn = struct
   let find k t =
@@ -64,11 +61,17 @@ let add kind pwr t =
   let p = Fn.find kind t +. pwr in
   Map.add kind p t
 
+let attr a pwr t =
+  Units.Attr.fold a (fun k t -> add k pwr t) t
+
 let ceil base t =
   Map.mapi (Fn.ceil base) t
 
 let ceil_count base t =
   ceil base t |> count base
+
+let inc_by kind ratio t =
+  add kind (Units.Base.power kind *. ratio) t
 
 let map_units u t =
   Mapx.mapk (fun k -> Fn.find k t) u
@@ -76,20 +79,14 @@ let map_units u t =
 let modulo base t =
   Map.mapi (Fn.modulo base) t
 
+let set = Map.add
+
+let set_attr a pwr t =
+  Units.Attr.fold a (fun k t -> set k pwr t) t
+
 let sub kind pwr t =
   let p = Float.sub (Fn.find kind t) pwr in
   Map.add kind p t
-
-let barrage =
-  add Units.Ranger 1. empty
-
-let base bonus =
-  let apply b k p t =
-    if Bonus.has b bonus then add k p t else t
-  in
-  empty
-  |> apply Bonus.Barrage Units.Harpy ~-.1.
-  |> apply Bonus.ClanTrade Units.Ballista 1.
 
 let untouchable atk dfn t =
   let pwr = map_units atk t |> max in

@@ -86,6 +86,15 @@ let rm x ls =
 let rm_from ls xs =
   List.fold_left (fun ls' x -> rm x ls') ls xs
 
+let rmap_with f init ls =
+  let rec g acc out = function
+    | [] -> acc, out
+    | x :: xs ->
+        let acc, out = g acc out xs in
+        let acc', x' = f acc x in
+        acc', x' :: out
+  in g init [] ls
+
 let rec slice_from f = function
   | [] -> []
   | x :: xs as ls -> if f x then ls else slice_from f xs

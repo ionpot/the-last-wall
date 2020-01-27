@@ -1,23 +1,16 @@
 type kind = Arena | Barracks | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade
 
-module Map = Map.Make(struct type t = kind let compare = compare end)
+module Kind = struct
+  type t = kind
+  let compare = compare
+end
+module Map = Map.Make(Kind)
 module Mapx = Mapx.Make(Map)
+module Set = Set.Make(Kind)
+module Queue = Queue.Make(Set)
 
 type cost = Resource.t
 type cost_map = cost Map.t
-
-module Bonus = struct
-  type target = To of kind | ToAll
-  type bonus = Resource.Bonus.t
-  type t = target * bonus
-  let is kind = function To k -> k = kind | ToAll -> true
-  let to_cost (target, bonus) =
-    let f k res =
-      if is k target then Resource.bonus_to res bonus else res
-    in Map.mapi f
-  let to_cost_if cond t map =
-    if cond then to_cost t map else map
-end
 
 let avlb_default =
   [Arena; Barracks; Engrs; Fort; Foundry; Market; Sawmill; Stable; Temple; Trade]
@@ -33,24 +26,20 @@ let base_cap = function
 let base_cost =
   let open Resource in
   function
-  | Arena -> Manpwr 43, Supply 49
-  | Barracks -> Manpwr 65, Supply 70
-  | Engrs -> Manpwr 60, Supply 62
-  | Fort -> Manpwr 124, Supply 136
-  | Foundry -> Manpwr 28, Supply 30
-  | Guesthouse -> Manpwr 21, Supply 23
-  | Market -> Manpwr 44, Supply 65
-  | Mausoleum _ -> Manpwr 14, Supply 14
-  | Observatory -> Manpwr 15, Supply 14
-  | Sawmill -> Manpwr 23, Supply 25
-  | Stable -> Manpwr 49, Supply 54
-  | Tavern -> Manpwr 39, Supply 41
-  | Temple -> Manpwr 61, Supply 63
-  | Trade -> Manpwr 51, Supply 49
-
-let base_cost_of kind =
-  let a, b = base_cost kind in
-  Resource.(empty <+ a <+ b)
+  | Arena -> make ~mnp:43 ~sup:49 ()
+  | Barracks -> make ~mnp:65 ~sup:70 ()
+  | Engrs -> make ~mnp:60 ~sup:62 ()
+  | Fort -> make ~mnp:124 ~sup:136 ()
+  | Foundry -> make ~mnp:28 ~sup:30 ()
+  | Guesthouse -> make ~mnp:21 ~sup:23 ()
+  | Market -> make ~mnp:44 ~sup:65 ()
+  | Mausoleum _ -> make ~mnp:14 ~sup:14 ()
+  | Observatory -> make ~mnp:15 ~sup:14 ()
+  | Sawmill -> make ~mnp:23 ~sup:25 ()
+  | Stable -> make ~mnp:49 ~sup:54 ()
+  | Tavern -> make ~mnp:39 ~sup:41 ()
+  | Temple -> make ~mnp:61 ~sup:63 ()
+  | Trade -> make ~mnp:51 ~sup:49 ()
 
 let is_multiple kind =
   kind = Stable
@@ -74,8 +63,6 @@ let fn_ls f ls t =
   List.fold_left (Fn.flip f) t ls
 
 module Avlb = struct
-  module Set = Set.Make(struct type t = kind let compare = compare end)
-
   type t = Set.t
 
   let add = Set.add
@@ -88,7 +75,9 @@ module Avlb = struct
     if is_multiple kind then t
     else Set.remove kind t
 
-  let rm_ls = fn_ls rm
+  let to_map t =
+    let f k map = Map.add k (base_cost k) map in
+    Set.fold f t Map.empty
 
   let unlock kind t =
     add_ls (unlocks kind) t
@@ -103,38 +92,6 @@ module Built = struct
   let empty : t = []
 
   let has = List.mem
-end
-
-module Queue = struct
-  type t = (kind * cost) list
-
-  let empty : t = []
-
-  let built t =
-    let f (_, cost) = cost = Resource.empty in
-    let built, ongoing = List.partition f t in
-    List.map fst built, ongoing
-
-  let cost_of kind costs =
-    if Map.mem kind costs
-    then Map.find kind costs
-    else base_cost_of kind
-
-  let from kinds costs =
-    let f kind = kind, cost_of kind costs in
-    List.rev_map f kinds
-
-  let map f need avlb t =
-    let f' acc (kind, cost) =
-      let acc', cost' = f acc cost in
-      acc', (kind, cost')
-    in
-    let x = Number.sub need avlb in
-    Listx.map_with f' x t
-
-  let sum_fn fn t =
-    let f acc (_, res) = acc + fn res in
-    List.fold_left f 0 t
 end
 
 module Ready = struct
@@ -172,15 +129,14 @@ let empty =
 
 let available t = t.avlb
 
-let cost_map t =
-  let f kind = Map.add kind (base_cost_of kind) in
-  Avlb.Set.fold f t.avlb (Map.empty : cost_map)
-
 let count kind t =
   Ready.count kind t.ready
 
 let cap_of kind t =
   count kind t * base_cap kind
+
+let cost_map t =
+  Avlb.to_map t.avlb
 
 let is_built kind t =
   Built.has kind t.built
@@ -196,30 +152,28 @@ let built t = t.built
 let mausoleums t =
   Ready.mausoleums t.ready
 
-let need_manp t =
-  Queue.sum_fn Resource.manp_of t.queue
-
-let need_supp t =
-  Queue.sum_fn Resource.supp_of t.queue
+let needs t = Queue.cost t.queue
 
 let queue t = t.queue
 
 let ready t = t.ready
 
 let status t =
-  let built, ongoing = Queue.built t.queue in
+  let built, ongoing = Queue.pop_finished t.queue in
   t.built, built, ongoing
+
+let apply_mnp mnp t =
+  let res = Resource.make ~mnp () in
+  let cond cost = Resource.has_sup cost |> not in
+  { t with queue = Queue.apply_if cond res t.queue |> snd }
+
+let apply_sup sup t =
+  let res = Resource.make ~sup () in
+  let rem, queue = Queue.apply res t.queue in
+  Resource.sup rem, { t with queue }
 
 let died ldr t =
   { t with avlb = Avlb.add (Mausoleum ldr) t.avlb }
-
-let manp need avlb t =
-  let f mp cost =
-    if Resource.has_supp cost
-    then mp, cost
-    else Resource.take_manp mp cost
-  in
-  { t with queue = Queue.map f need avlb t.queue }
 
 let raze kind t =
   { t with avlb = Avlb.add kind t.avlb
@@ -233,14 +187,11 @@ let set_ready kind t =
 
 let set_ready_ls = fn_ls set_ready
 
-let start kinds costs t =
-  { t with avlb = Avlb.rm_ls kinds t.avlb
-  ; queue = Queue.from kinds costs @ t.queue
+let start kind cost_map t =
+  let cost = Map.find kind cost_map in
+  { t with avlb = Avlb.rm kind t.avlb
+  ; queue = Queue.add kind cost t.queue
   }
-
-let supp need avlb t =
-  let f = Resource.take_supp in
-  { t with queue = Queue.map f need avlb t.queue }
 
 let update (ready, built, queue) t =
   { avlb = Avlb.unlock_ls built t.avlb

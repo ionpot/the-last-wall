@@ -1,6 +1,5 @@
 module type S = sig
   module Barrage : Value.S with type t = Barrage.t
-  module Bonus : Value.S with type t = Bonus.t
   module Build : Value.S with type t = Build.t
   module Casualty : Value.S with type t = Units.t
   module Deity : Value.S with type t = Deity.t
@@ -14,6 +13,7 @@ module type S = sig
   module Month : Value.S with type t = Month.t
   module Nation : Value.S with type t = Nation.t
   module Pool : Value.S with type t = Pool.t
+  module Research : Value.S with type t = Research.t
   module Scout : Value.Bit
   module Starved : Value.S with type t = Units.t
   module Supply : Value.Num
@@ -26,7 +26,6 @@ end
 module Make (D : Dice.From) : S = struct
   module Arena = Value.Num(Value.Zero)
   module Barrage = Value.From(Barrage)
-  module Bonus = Value.From(Bonus)
   module Build = Value.From(Build)
   module Casualty = Value.From(Units)
   module Deity = Value.From(Deity)
@@ -41,6 +40,7 @@ module Make (D : Dice.From) : S = struct
   module Month = Value.From(Month)
   module Nation = Value.From(Nation)
   module Pool = Value.From(Pool)
+  module Research = Value.From(Research)
   module Scout = Value.Bit(Value.False)
   module Starved = Value.From(Units)
   module Supply = Value.Num(Value.Zero)

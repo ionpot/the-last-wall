@@ -1,4 +1,4 @@
-type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harcher | Harpy | Knight | Men | Merc | Novice | Orc | Ranger | Skeleton | Templar | Veteran
+type kind = Ballista | Berserker | Cavalry | Cyclops | Demon | Dervish | Dullahan | Harcher | Harpy | Knight | Mangonel | Marms | Men | Merc | Novice | Orc | Ranger | Skeleton | Templar | Veteran | Xbowman
 
 module Kind = struct
   type t = kind
@@ -14,38 +14,30 @@ type report = (kind * Defs.count) list
 type sum_report = (Defs.count * Set.t)
 
 let attacks = [Skeleton; Orc; Demon; Harpy; Cyclops; Dullahan]
-let starve_order = [Men; Novice; Berserker; Cavalry; Veteran; Harcher; Ranger; Dervish; Templar; Merc; Ballista; Knight]
+let starve_order = [Men; Novice; Berserker; Cavalry; Veteran; Harcher; Ranger; Dervish; Templar; Merc; Xbowman; Marms; Mangonel; Ballista; Knight]
 
 module Attr = struct
-  type t = kind -> bool
-  let can_barrage = function
-    | Harcher | Men | Merc | Ranger | Veteran -> true
-    | _ -> false
-  let can_barraged = (=) Orc
-  let can_build = function
-    | Dervish | Men | Novice | Veteran -> true
-    | _ -> false
-  let can_fear = (=) Dullahan
-  let can_heal = (=) Templar
-  let can_hit_run = (=) Harcher
-  let can_reflect = function
-    | Berserker | Harcher -> true
-    | _ -> false
-  let is_cavalry = function
-    | Cavalry | Harcher | Knight -> true
-    | _ -> false
-  let not_cavalry = Fun.negate is_cavalry
-  let is_holy = function
-    | Dervish | Novice | Ranger | Templar -> true
-    | _ -> false
-  let is_siege = (=) Ballista
-  let not_siege = Fun.negate is_siege
-  let is_infantry k = not_cavalry k && not_siege k
-  let is_infectable = not_siege
-  let is_revivable = not_siege
-  let is_undead = function
-    | Skeleton | Dullahan -> true
-    | _ -> false
+  type t = Set.t
+  let all = Set.of_list starve_order
+  let archer = Set.of_list [Harcher; Ranger; Xbowman]
+  let barrage = Set.of_list [Men; Merc; Veteran] |> Set.union archer
+  let barraged = Set.singleton Orc
+  let build = Set.of_list [Dervish; Men; Novice; Veteran]
+  let cavalry = Set.of_list [Cavalry; Harcher; Marms; Knight]
+  let fear = Set.singleton Dullahan
+  let flying = Set.singleton Harpy
+  let heal = Set.singleton Templar
+  let hit_run = Set.singleton Harcher
+  let holy = Set.of_list [Dervish; Novice; Ranger; Templar]
+  let reflect = Set.of_list [Berserker; Harcher]
+  let siege = Set.of_list [Ballista; Mangonel]
+  let undead = Set.of_list [Skeleton; Dullahan]
+  let infantry = Set.union cavalry siege |> Set.diff all
+  let infectable = Set.diff all siege
+  let revivable = Set.diff all siege
+  let fold t f = Set.fold f t
+  let is t k = Set.mem k t
+  let set_of t = t
 end
 
 module Base = struct
@@ -55,6 +47,11 @@ module Base = struct
     | Harpy -> 0.15
     | Orc -> 0.6
     | Skeleton -> 1.25
+    | _ -> 0.
+
+  let artillery = function
+    | Ballista | Cyclops -> 2.
+    | Mangonel -> 3.
     | _ -> 0.
 
   let chance = function
@@ -71,20 +68,21 @@ module Base = struct
   let dr = function
     | Dullahan -> 0.01
     | Knight -> 0.004
+    | Marms -> 0.003
     | Cavalry | Harpy -> 0.002
     | _ -> 0.
 
   let hit_chance = function
-    | Ballista -> 0.25
-    | Dervish | Harcher | Ranger -> 0.5
+    | Ballista | Mangonel -> 0.25
+    | Dervish | Harcher | Ranger | Xbowman -> 0.5
     | _ -> 1.
 
   let power = function
     | Dullahan -> 7.
     | Cyclops -> 5.
     | Harpy | Knight -> 4.
-    | Templar -> 3.
-    | Ballista | Berserker | Cavalry | Demon | Dervish | Harcher | Merc | Ranger | Veteran -> 2.
+    | Marms | Templar -> 3.
+    | Ballista | Berserker | Cavalry | Demon | Dervish | Harcher | Mangonel | Merc | Ranger | Veteran | Xbowman -> 2.
     | Men | Novice | Orc -> 1.
     | Skeleton -> 0.5
 
@@ -95,16 +93,21 @@ module Base = struct
 
   let supply_cost = function
     | Berserker -> 0
-    | Merc
-    | Dervish -> 2
-    | Templar -> 3
-    | Knight -> 10
+    | Cavalry
+    | Dervish
+    | Ranger
+    | Veteran -> 2
+    | Marms
+    | Merc -> 3
+    | Templar -> 4
+    | Knight -> 5
     | Ballista -> 12
+    | Mangonel -> 16
     | _ -> 1
 
   let upkeep_cost = function
     | Knight -> 3
-    | Ballista | Merc | Veteran -> 2
+    | Ballista | Mangonel | Marms | Merc -> 2
     | _ -> 1
 end
 
@@ -123,29 +126,24 @@ let make n kind =
 
 let is_empty = Map.is_empty
 
-let discard = Mapx.discardk
-let filter = Mapx.filterk
+let discard attr = Mapx.discardk (Attr.is attr)
+let filter attr = Mapx.filterk (Attr.is attr)
+let filterset = filter
 
 module Promote = struct
   let needs = function
     | Harcher
-    | Knight -> Cavalry
-    | Dervish
-    | Templar -> Novice
+    | Marms -> Cavalry
+    | Knight -> Marms
+    | Dervish -> Novice
+    | Xbowman -> Veteran
     | _ -> Men
 
   let amount = function
     | Ballista
-    | Berserker -> 2
-    | Cavalry
-    | Dervish
-    | Harcher
-    | Knight
-    | Novice
-    | Ranger
-    | Templar
-    | Veteran -> 1
-    | _ -> 0
+    | Berserker
+    | Mangonel -> 2
+    | _ -> 1
 
   let affordable kind cap t =
     let n = amount kind in
@@ -182,11 +180,15 @@ let find n kind t =
   min n found
 
 let has = Map.mem
-let has_any = Mapx.existsk
+let has_any attr = Mapx.existsk (Attr.is attr)
 
 let kinds_of t =
   let f k _ s = Set.add k s in
   Map.fold f t Set.empty
+
+let power_of t =
+  Map.mapi (fun k c -> float c *. Base.power k) t
+  |> Mapx.Float.sum
 
 let ratio_of kind t =
   let n = count kind t in
@@ -215,7 +217,7 @@ let reduce t t' =
   Ops.sub t' t
 
 let split attr t =
-  Map.partition (fun k _ -> attr k) t
+  Map.partition (fun k _ -> Attr.is attr k) t
 
 let starve supply t =
   let f (sup, t') k =

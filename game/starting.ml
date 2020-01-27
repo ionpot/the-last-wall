@@ -36,7 +36,7 @@ module Make (S : State.S) = struct
     let buildings = Build.([Tavern; building_of ldr])
     let month = Month.random ()
     let res = S.Deity.return Deity.starting
-    let supply = Resource.supp_of res
-    let units = to_units ldr (Resource.manp_of res)
+    let supply = Resource.sup res
+    let units = to_units ldr (Resource.mnp res)
   end : S)
 end

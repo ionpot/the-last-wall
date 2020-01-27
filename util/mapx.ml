@@ -8,11 +8,23 @@ module Make (Map : Map.S) = struct
   let filterv f t =
     Map.filter (fun _ -> f) t
 
+  let foldv f acc t =
+    Map.fold (fun _ v acc -> f acc v) t acc
+
   let discardk f t =
     filterk (fun k -> not (f k)) t
 
+  let keys t =
+    Map.bindings t |> List.map fst
+
   let mapk f t =
     Map.mapi (fun k _ -> f k) t
+
+  let map_mem k f t =
+    Map.update k (function Some x -> Some (f x) | x -> x) t
+
+  let maybe f v k t =
+    if Map.mem k t then Map.find k t |> f else v
 
   let nth t n =
     let key, _ = Map.choose t in
@@ -23,6 +35,12 @@ module Make (Map : Map.S) = struct
 
   module Float = struct
     type t = float Map.t
+
+    let value k t =
+      if Map.mem k t then Map.find k t else 0.
+
+    let add_to k v t =
+      Map.add k (value k t +. v) t
 
     let clean t =
       filterv ((<) 0.) t

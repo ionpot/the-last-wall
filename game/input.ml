@@ -30,9 +30,10 @@ module BarrageTrain = struct
       if ok then S.Supply.sub cost
   end
   module Make (S : State.S) = struct
-    let units = S.Units.return Units.(filter Attr.can_barrage)
-    let base = S.Bonus.return Power.base
-    let power = Power.of_units units base
+    let units =
+      S.Units.return Units.(filter Attr.barrage)
+      |> Units.(discard Attr.archer)
+    let power = Units.power_of units
     let cost = (power *. 0.05) |> ceil |> truncate
     let value = S.Supply.has cost, cost
   end
@@ -41,17 +42,10 @@ end
 module Barrage = struct
   type t = bool * Barrage.status
   module Apply (S : State.S) = struct
-    let count () =
-      S.Units.return Units.(filter_count Attr.can_hit_run)
-      >= S.Enemy.return Units.(count Harpy)
-    let bonus br =
-      Barrage.can_barrage br
-      || (Barrage.can_hit_run br && count ())
     let value (ok, status) =
-      S.Barrage.map (Barrage.set_choice ok);
-      S.Barrage.map (Barrage.set_status status);
-      let ok' = S.Barrage.check bonus in
-      S.Bonus.map Bonus.(set Barrage ok')
+      S.Barrage.return (Barrage.set_choice ok)
+      |> Barrage.set_status status
+      |> S.Barrage.set
   end
   module Make (S : State.S) = struct
     let value = false,
@@ -59,35 +53,30 @@ module Barrage = struct
       then Barrage.(Disabled Leader)
       else if S.Weather.check Weather.is_bad
       then Barrage.(Disabled Weather)
-      else if S.Units.check Units.(has_any Attr.can_barrage)
+      else if S.Units.check Units.(has_any Attr.barrage)
       then Barrage.Available
       else Barrage.(Disabled Archers)
   end
 end
 
 module Berserker = Recruit.Event(struct
-  let action = Recruit.Promote
+  let action = Recruit.New
   let kind = Units.Berserker
   let pool = Some (Recruit.From Pool.Arena)
   module Cap = Recruit.NoCap
 end)
 
 module BuildAvlb = struct
-  type chosen = Build.kind list
-  type t = chosen * Build.cost_map
-  module Bonus = Build.Bonus
+  type t = Build.kind list * Build.cost_map
   module Apply (S : State.S) = struct
-    let value (chosen, costs) = S.Build.map (Build.start chosen costs)
+    let f cmap kind = S.Build.map (Build.start kind cmap)
+    let value (ls, cost_map) = List.iter (f cost_map) ls
   end
   module Make (S : State.S) = struct
-    let has_engrs = S.Build.check Build.(is_ready Engrs)
-    let elanis = S.Deity.is Deity.Elanis
-    let costs = S.Build.return Build.cost_map
-      |> Bonus.to_cost_if has_engrs
-          (Bonus.ToAll, Resource.Bonus.(Sub (Sup 0.1)))
-      |> Bonus.to_cost_if elanis
-          (Bonus.To Build.Stable, Resource.Bonus.(Sub (Both 0.2)))
-    let value = [], costs
+    module Bonus = Bonus.Make(S)
+    let value = [],
+      S.Build.return Build.cost_map
+      |> Build.Map.mapi Bonus.build_cost
   end
 end
 
@@ -123,9 +112,21 @@ end
 module Knight = Recruit.Event(struct
   let action = Recruit.Promote
   let kind = Units.Knight
-  let pool = None
+  let pool = Some (Recruit.Exclude Pool.Marms)
   module Cap = Recruit.NoCap
 end)
+
+module Marms = struct
+  include Recruit.Event(struct
+    let action = Recruit.Promote
+    let kind = Units.Marms
+    let pool = Some (Recruit.Set Pool.Marms)
+    module Cap = Recruit.NoCap
+  end)
+  module Check (S : State.S) = struct
+    let value = S.Build.check Build.(is_ready Barracks)
+  end
+end
 
 module LeaderKind = struct
   type t = Leader.kind
@@ -163,19 +164,28 @@ module LeaderNew = struct
   end
 end
 
-module Mercs = struct
-  include Recruit.Event(struct
-    let action = Recruit.New
-    let kind = Units.Merc
-    let pool = None
-    module Cap (S : State.S) = struct
-      let value = Some (S.Dice.between 10 20)
-    end
-  end)
-  module Check (S : State.S) = struct
-    let value = S.Build.check Build.(is_ready Tavern)
+module Mangonel = Recruit.Event(struct
+  let action = Recruit.Train
+  let kind = Units.Mangonel
+  let pool = None
+  module Cap = Recruit.NoCap
+end)
+
+module Mercs = Recruit.Event(struct
+  let action = Recruit.New
+  let kind = Units.Merc
+  let pool = None
+  module Cap (S : State.S) = struct
+    let tavern = S.Build.check Build.(is_ready Tavern)
+    let army = S.Research.check Research.(is_complete BlackArmy)
+    let range = match tavern, army with
+      | true, true -> 20, 30
+      | true, false -> 10, 20
+      | false, true -> 0, 10
+      | false, false -> 0, 0
+    let value = Some (S.Dice.range range)
   end
-end
+end)
 
 module Nations = struct
   type t = Nation.Set.t
@@ -206,6 +216,25 @@ module Ranger = struct
   end
 end
 
+module Research = struct
+  type available = Research.Set.t
+  type start = Research.kind list
+  type t = start * available
+  module Apply (S : State.S) = struct
+    let value (s, _) =
+      Research.start s
+      |> S.Research.map
+  end
+  module Make (S : State.S) = struct
+    let lerota = S.Deity.is Deity.Lerota
+    let temple = S.Build.check Build.(is_ready Temple)
+    let value = [],
+      S.Research.get ()
+      |> Research.(unlock BlackArmy) (lerota && temple)
+      |> Research.available
+  end
+end
+
 module Scout = struct
   type t = bool
   module Apply (S : State.S) = struct
@@ -224,8 +253,7 @@ module Sodistan = struct
       S.Supply.add t
   end
   module Make (S : State.S) = struct
-    module Check = Support.Check(S)
-    let mnp = Check.traded_mnp Nation.Sodistan
+    let mnp = S.Nation.return Nation.(traded_mnp Sodistan)
     let men = S.Units.return Units.(count Men)
     let value = min mnp men / 2
   end
@@ -233,9 +261,9 @@ end
 
 module Templar = struct
   include Recruit.Event(struct
-    let action = Recruit.Promote
+    let action = Recruit.New
     let kind = Units.Templar
-    let pool = Some (Recruit.Exclude Pool.Novice)
+    let pool = None
     module Cap = Recruit.NoCap
   end)
   module Check = Check.Not(Ranger.Check)
@@ -250,8 +278,8 @@ module Temple = struct
     let value = S.Build.check Build.(is_ready Temple)
   end
   module Make (S : State.S) = struct
-    let guest = S.Build.check Build.(is_ready Guesthouse)
-    let n = Number.add_if guest 1 3
+    module Bonus = Bonus.Make(S)
+    let n = Bonus.temple_men 3
     let value = Range.Int.times n (1, 4) |> S.Dice.range
   end
 end
@@ -301,9 +329,15 @@ module Volunteers = struct
     let value = S.Build.check Build.(is_ready Tavern)
   end
   module Make (S : State.S) = struct
-    let noble = S.Leader.check Leader.(is_living Aristocrat)
-    let cha = S.Leader.return Leader.cha_mod_of
-    let n = Number.add_if noble cha 3
+    module Bonus = Bonus.Make(S)
+    let n = Bonus.volunteers 3
     let value = Range.times n (1, 3) |> S.Dice.range
   end
 end
+
+module Xbowman = Recruit.Event(struct
+  let action = Recruit.Promote
+  let kind = Units.Xbowman
+  let pool = None
+  module Cap = Recruit.NoCap
+end)

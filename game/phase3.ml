@@ -25,6 +25,7 @@ module Output = struct
     | Fear of Direct.Fear.t
     | HitRun of Cond.HitRun.t
     | LevelUp
+    | Mangonel of Cond.Mangonel.t
     | NoAttack
     | NoEnemies
     | Revive of Direct.Revive.t
@@ -72,6 +73,8 @@ module Convert = struct
           let make () = Output.Defeat end)
       | Steps.HitRun -> (module struct module Event = Cond.HitRun
           let make x = Output.HitRun x end)
+      | Steps.Mangonel -> (module struct module Event = Cond.Mangonel
+          let make x = Output.Mangonel x end)
       | Steps.Smite -> (module struct module Event = Cond.Smite
           let make x = Output.Smite x end)
 
