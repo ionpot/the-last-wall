@@ -229,7 +229,7 @@ let units2mnpstr base t =
   |> sprintf "%s -> %s" (units2str t |> if_empty "no units")
 
 let units2work base t =
-  let u = Units.(filter Attr.can_build) t in
+  let u = Units.(filter Attr.build) t in
   Power.of_units u base
   |> truncate
 
