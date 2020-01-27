@@ -95,10 +95,10 @@ module Base = struct
     | Berserker -> 0
     | Cavalry
     | Dervish
-    | Merc
     | Ranger
     | Veteran -> 2
-    | Marms -> 3
+    | Marms
+    | Merc -> 3
     | Templar -> 4
     | Knight -> 5
     | Ballista -> 12
