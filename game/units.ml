@@ -140,6 +140,7 @@ module Promote = struct
     | _ -> Men
 
   let amount = function
+    | Merc -> 0
     | Ballista
     | Berserker
     | Mangonel -> 2
