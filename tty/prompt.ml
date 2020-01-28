@@ -183,8 +183,12 @@ let research avlb =
   let ls = Game.Research.Set.elements avlb in
   if ls = [] then ls
   else begin
-    List.map research2str ls
-    |> horizontal "research available";
+    let to_str k =
+      let cost = Game.Research.Cost.resource k in
+      sprintf "%s [%s]" (research2str k) (res2str cost)
+    in
+    List.map to_str ls
+    |> vertical "research available";
     Tty.prompt "research?"
     |> choose_from ls
   end
