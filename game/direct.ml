@@ -56,15 +56,14 @@ end
 module BuildSupply = struct
   type t = Defs.supply
   module Apply (S : State.S) = struct
-    let value t =
-      let t', b = S.Build.return (Build.apply_sup t) in
+    let value _ =
+      let sup = S.Supply.get () in
+      let sup', b = S.Build.return (Build.apply_sup sup) in
       S.Build.set b;
-      S.Supply.set t'
+      S.Supply.set sup'
   end
   module Make (S : State.S) = struct
-    let sup = S.Supply.get ()
-    let res = S.Build.return Build.needs
-    let value = min sup (Resource.sup res)
+    let value = S.Build.return Build.needs |> Resource.sup
   end
 end
 
