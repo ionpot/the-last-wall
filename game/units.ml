@@ -94,7 +94,6 @@ module Base = struct
   let supply_cost = function
     | Berserker -> 0
     | Cavalry
-    | Dervish
     | Ranger
     | Veteran -> 2
     | Marms
