@@ -116,7 +116,7 @@ module Make (S : State.S) = struct
       |> Float.add_if (ldr_is Leader.Aristocrat && Attr.(is cavalry) kind) 0.2
       |> Float.add_if (ldr_is Leader.Merchant && kind = Units.Merc) 0.1
       |> Float.add_if (traded Nation.Clan && Attr.(is siege) kind) 0.2
-    in Number.increase_by ratio
+    in Number.reduce_by ratio
 
   let resource_disease res =
     let disease = Float.if_ok 0.2 (mishap Mishap.Disease) in
