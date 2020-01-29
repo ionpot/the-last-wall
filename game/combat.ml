@@ -82,3 +82,44 @@ module Make (S : State.S) = struct
       else S.Leader.check LdrRoll.death
   end : Outcome)
 end
+
+module HitRun (S : State.S) = struct
+  module Bonus = Bonus.Make(S)
+  module Fill = Dist.Fill(S.Dice)
+  module Map = Power.Map
+  module DiceMap = S.Dice.Map(Map)
+  let base = Power.base
+  module HitBack = Pick.With(struct
+    module Cap = Pick.Float
+    module Map = Map
+    module Type = Cap
+    type map = Type.t Map.t
+    type step = Cap.t * Type.t
+    let choose = DiceMap.key
+    let roll cap kind input =
+      let pwr = Power.Fn.find kind base in
+      let n = Map.find kind input in
+      let x = min cap (n +. pwr -. 0.01) |> S.Dice.rollf |> max 0.1 in
+      let n', _ = Power.heal kind x base in
+      x, n'
+  end)
+  let hit_back_chance = 0.05
+  let loss_coef = 0.1
+  let hit_back enemy units =
+    let pwr = Power.of_units enemy base in
+    let input = Power.from_units units base in
+    let output = Map.empty in
+    HitBack.from (pwr *. loss_coef) input output
+    |> fst |> Power.count base
+  let fill p u = Fill.from p base u |> fst
+  let units = S.Units.return Units.(filter Attr.hit_run)
+  let power = Power.of_units units base
+  let coef = Bonus.brg_coef Barrage.trained_coefficient
+  let enemy = S.Enemy.get ()
+  let target = Units.(filter Attr.barraged) enemy
+  let value =
+    fill (power *. coef) target,
+    if S.Dice.chance hit_back_chance
+    then hit_back enemy units
+    else Units.empty
+end

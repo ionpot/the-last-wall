@@ -10,6 +10,7 @@ val revive : Units.t -> t
 
 module Fn : sig
   val count : t -> Units.kind -> Defs.power -> Defs.count
+  val find : Units.kind -> t -> Defs.power
   val modulo : t -> Units.kind -> Defs.power -> Defs.power
   val mul : t -> Units.kind -> Defs.count -> Defs.power
 end

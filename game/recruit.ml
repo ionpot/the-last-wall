@@ -46,12 +46,8 @@ module Build (S : State.S) = struct
     Units.filterset set units |> Units.count_all
 
   let vacancy kind =
-    let f k =
-      match Map.find_opt k map with
-      | Some s -> Set.mem kind s
-      | None -> false
-    in
-    match Map.find_first_opt f map with
+    let f _ = Set.mem kind in
+    match Map.filter f map |> Map.choose_opt with
     | Some (bld, set) ->
         let n = S.Units.return (count set)
           + S.Training.return (count set)
