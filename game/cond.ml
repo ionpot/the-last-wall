@@ -98,8 +98,6 @@ end
 
 module HitRun = struct
   type t = Units.t * Units.t
-  let hit_back_chance = 0.05
-  let loss_coef = 0.1
   module Apply (S : State.S) = struct
     let value (enemy, units) =
       S.Enemy.map (Units.reduce enemy);
@@ -108,33 +106,7 @@ module HitRun = struct
   module Check (S : State.S) = struct
     let value = S.Barrage.check Barrage.can_hit_run
   end
-  module Make (S : State.S) = struct
-    module Bonus = Bonus.Make(S)
-    module Damage = Dist.Damage(S.Dice)(struct
-      let full_absorb = false
-      let use_ratio = false
-    end)
-    module Fill = Dist.Fill(S.Dice)
-    let base = Power.base
-    let damage p e u =
-      let t = Damage.from p base e u in
-      let rfl = Dist.reflected t in
-      Dist.outcome t |> Fill.from rfl base |> snd
-    let hit_back enemy =
-      let pwr = Power.of_units enemy base in
-      damage (pwr *. loss_coef) enemy
-    let fill p u = Fill.from p base u |> fst
-    let units = S.Units.return Units.(filter Attr.hit_run)
-    let power = Power.of_units units base
-    let coef = Bonus.brg_coef Barrage.trained_coefficient
-    let enemy = S.Enemy.get ()
-    let target = Units.(filter Attr.barraged) enemy
-    let value =
-      fill (power *. coef) target,
-      if S.Dice.chance hit_back_chance
-      then hit_back enemy units
-      else Units.empty
-  end
+  module Make = Combat.HitRun
 end
 
 module Mangonel = struct
