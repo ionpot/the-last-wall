@@ -8,6 +8,7 @@ val no_remaining : t -> bool
 val outcome : t -> Units.t
 val reflected : t -> Defs.power
 val remaining : t -> Units.t
+val retreated : t -> Units.t
 
 module type Flags = sig
   val full_absorb : bool
