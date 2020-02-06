@@ -68,9 +68,9 @@ module Damage (Dice : Dice.S) (Flags : Flags) = struct
     { acc with reflected = acc.reflected +. p' }, (p, p)
 
   let retreat kind p acc =
-    let p' = Power.Fn.modulo acc.base kind p in
-    let retreated = Power.add kind p' acc.retreated in
-    { acc with retreated }, (p, 0.)
+    let p', healed = Power.heal kind p acc.base in
+    let retreated = Power.add kind healed acc.retreated in
+    { acc with retreated }, (p, p')
 
   let handle kind acc dmg =
     let acc', sub =
