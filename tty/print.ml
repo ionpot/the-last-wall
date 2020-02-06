@@ -82,6 +82,8 @@ module Combat = struct
     Tty.writeln (stats O.attack O.defense O.damage);
     Tty.ifwriteln (result2stats O.casualty);
     Tty.pairln "casualty" (result2outcome O.casualty |> str2none);
+    if units2bool O.retreated
+    then sprintf "%s retreated back" (units2str O.retreated) |> Tty.writeln;
     if O.retreat then retreat ldr O.fled O.casualty;
     if O.ldr_died then Leader.died ldr;
     Tty.ifpairln "enemies remaining" (result2remaining O.enemies)
