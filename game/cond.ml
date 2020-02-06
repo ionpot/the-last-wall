@@ -55,7 +55,7 @@ module Cyclops = struct
     module Bonus = Bonus.Make(S)
     module Fill = Dist.Fill(S.Dice)
     let cyclops = S.Enemy.return Units.(only Cyclops)
-    let damage = Power.(of_units cyclops base) 
+    let damage = Power.(artillery cyclops |> of_units cyclops)
     let defense = Power.base |> Bonus.siege_boost
     let value =
       Fill.from damage defense

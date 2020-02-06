@@ -10,6 +10,7 @@ module type Outcome = sig
   val fled : Units.t
   val ldr_died : bool
   val retreat : bool
+  val retreated : Units.t
 end
 
 type t = (module Outcome)
@@ -19,7 +20,7 @@ module Apply (S : State.S) = struct
   let value (module O : Outcome) =
     S.Casualty.map (O.casualty |> Dist.outcome |> Units.combine);
     S.Enemy.set (Dist.remaining O.enemies);
-    S.Units.set O.fled;
+    S.Units.set (Units.combine O.fled O.retreated);
     if O.retreat then S.Build.map Build.(raze Fort);
     if O.ldr_died then LdrDied.value 2
 end
@@ -63,6 +64,7 @@ module Make (S : State.S) = struct
     let defense = Dr.value
     let damage = Float.reduce attack defense
     let result = dist_dfn damage enemies units
+    let retreated = Dist.retreated result
     let retreat = Dist.no_remaining result && have_fort
     let fled, fought =
       if retreat
@@ -85,32 +87,19 @@ end
 
 module HitRun (S : State.S) = struct
   module Bonus = Bonus.Make(S)
+  module Damage = Dist.Damage(S.Dice)(struct
+    let full_absorb = false
+    let use_ratio = false
+  end)
   module Fill = Dist.Fill(S.Dice)
   module Map = Power.Map
-  module DiceMap = S.Dice.Map(Map)
   let base = Power.base
-  module HitBack = Pick.With(struct
-    module Cap = Pick.Float
-    module Map = Map
-    module Type = Cap
-    type map = Type.t Map.t
-    type step = Cap.t * Type.t
-    let choose = DiceMap.key
-    let roll cap kind input =
-      let pwr = Power.Fn.find kind base in
-      let n = Map.find kind input in
-      let x = min cap (n +. pwr -. 0.01) |> S.Dice.rollf |> max 0.1 in
-      let n', _ = Power.heal kind x base in
-      x, n'
-  end)
   let hit_back_chance = 0.05
   let loss_coef = 0.1
   let hit_back enemy units =
     let pwr = Power.of_units enemy base in
-    let input = Power.from_units units base in
-    let output = Map.empty in
-    HitBack.from (pwr *. loss_coef) input output
-    |> fst |> Power.count base
+    Damage.from (pwr *. loss_coef) base enemy units
+    |> Dist.outcome
   let fill p u = Fill.from p base u |> fst
   let units = S.Units.return Units.(filter Attr.hit_run)
   let power = Power.of_units units base

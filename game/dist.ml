@@ -11,6 +11,7 @@ type acc =
   ; healed : Defs.power
   ; ratios : Power.t
   ; reflected : Defs.power
+  ; retreated : Power.t
   ; untouchable : Set.t
   }
 
@@ -20,6 +21,7 @@ let empty_acc =
   ; healed = 0.
   ; ratios = Power.base
   ; reflected = 0.
+  ; retreated = Power.(set_attr Attr.hit_run 0. base)
   ; untouchable = Set.empty
   }
 
@@ -37,6 +39,7 @@ let no_remaining (_, m, _) = Map.is_empty m
 let outcome (a, _, m) = Power.count a.base m
 let reflected (a, _, _) = a.reflected
 let remaining (a, m, _) = to_units a m
+let retreated (a, _, _) = Power.count a.base a.retreated
 
 module type Flags = sig
   val full_absorb : bool
@@ -54,15 +57,20 @@ module Damage (Dice : Dice.S) (Flags : Flags) = struct
       if Flags.full_absorb then 0., p
       else Power.heal kind p acc.base
     in
-    { acc with absorbed = acc.absorbed +. healed }, p'
+    { acc with absorbed = acc.absorbed +. healed }, (p', p')
 
   let heal kind p acc =
     let p', healed = Power.heal kind p acc.base in
-    { acc with healed = acc.healed +. healed }, p'
+    { acc with healed = acc.healed +. healed }, (p', p')
 
   let reflect kind p acc =
     let p' = Power.Fn.modulo acc.base kind p in
-    { acc with reflected = acc.reflected +. p' }, p
+    { acc with reflected = acc.reflected +. p' }, (p, p)
+
+  let retreat kind p acc =
+    let p', healed = Power.heal kind p acc.base in
+    let retreated = Power.add kind healed acc.retreated in
+    { acc with retreated }, (p, p')
 
   let handle kind acc dmg =
     let acc', sub =
@@ -72,7 +80,9 @@ module Damage (Dice : Dice.S) (Flags : Flags) = struct
       then heal kind dmg acc
       else if Attr.(is reflect) kind
       then reflect kind dmg acc
-      else acc, dmg
+      else if Attr.(is hit_run) kind
+      then retreat kind dmg acc
+      else acc, (dmg, dmg)
     in acc', dmg, sub
 
   let mitigate kind _ acc cap =
@@ -99,7 +109,7 @@ module Damage (Dice : Dice.S) (Flags : Flags) = struct
     module Type = Cap
     type nonrec acc = acc
     type map = Type.t Map.t
-    type step = acc * Cap.t * Type.t
+    type step = acc * Cap.t * (Type.t * Type.t)
     let choose acc _ input =
       let units = to_units acc input in
       let f k = Units.ratio_of k units in
@@ -126,7 +136,7 @@ module Fill (Dice : Dice.S) = struct
     module Type = Pick.Int
     type acc = Power.t
     type map = Type.t Map.t
-    type step = acc * Cap.t * Type.t
+    type step = acc * Cap.t * (Type.t * Type.t)
     let choose base cap input =
       let p = Power.map_units input base |> Power.min in
       base, if p > cap then None else Some (Roll.key input)
@@ -135,7 +145,7 @@ module Fill (Dice : Dice.S) = struct
         |> min (Power.Fn.count base kind cap)
         |> Dice.roll
       in
-      base, Power.Fn.mul base kind p, p
+      base, Power.Fn.mul base kind p, (p, p)
   end)
 
   let from cap base units =

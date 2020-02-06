@@ -30,7 +30,7 @@ end
 module type OpsAcc = sig
   include OpsBase
   type acc
-  type step = acc * Cap.t * Type.t
+  type step = acc * Cap.t * (Type.t * Type.t)
   val choose : acc -> Cap.t -> map -> acc * Map.key option
   val roll : acc -> Cap.t -> Map.key -> map -> step
 end
@@ -79,9 +79,9 @@ module WithAcc (S : OpsAcc) = struct
       let acc', choice = S.choose acc cap input in
       match choice with
       | Some key ->
-          let acc'', cap', n = S.roll acc' cap key input in
+          let acc'', cap', (ni, no) = S.roll acc' cap key input in
           from acc'' (S.Cap.sub cap cap')
-            (Base.sub key n input)
-            (Base.add key n output)
+            (Base.sub key ni input)
+            (Base.add key no output)
       | None -> acc', input, output
 end
