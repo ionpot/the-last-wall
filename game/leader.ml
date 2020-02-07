@@ -29,31 +29,37 @@ let empty =
 
 let kinds = [Aristocrat; Engineer; Merchant]
 
-let mod_of cha =
-  (cha - 10) / 2
-
+let cha_of t = t.cha
+let cha_mod_of t = (t.cha - 10) / 2
+let defense_of t = 0.1 +. (0.01 *. float t.level)
 let gender_of t = t.gender
 let is kind t = t.kind = kind
 let is_alive t = t.died = 0
 let is_dead t = t.died > 0
-let can_respawn turn t =
-  is_dead t && t.died + t.respawn <= turn
 let is_living kind t = is_alive t && is kind t
 let is_noble t = t.noble
+let can_level_up t = is_alive t && t.xp mod 2 = 0
+let can_respawn turn t =
+  is_dead t && t.died + t.respawn <= turn
 let kind_of t = t.kind
-let level_of t = t.level + t.xp / 2
+let level_of t = t.level
 let name_of t = t.name
-let cha_of t = t.cha + level_of t / 4
-let cha_mod_of t = t |> cha_of |> mod_of
-let lvup t = is_alive t && t.xp mod 2 = 0
 let victories t = t.xp
 
-let defense_of t =
-  let lv = level_of t in
-  0.1 +. (0.01 *. float lv)
+let add_cha t =
+  let i =
+    if t.level mod 5 = 0 then
+      if t.cha < 18 then 2 else 1
+    else 0
+  in
+  { t with cha = t.cha + i }
 
 let died respawn died t =
   { t with died; respawn }
+
+let level_up t =
+  { t with level = t.level + 1 }
+  |> add_cha
 
 let won t =
   { t with xp = t.xp + 1 }
@@ -80,7 +86,7 @@ module Roll (Dice : Dice.S) = struct
     ; kind
     ; level = Dice.between 3 5
     ; noble = noble kind
-    } |> name
+    } |> add_cha |> name
 
   let pair () =
     let a, kinds' = Dice.pop kinds in

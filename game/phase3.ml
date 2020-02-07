@@ -24,7 +24,7 @@ module Output = struct
     | Defeat
     | Fear of Direct.Fear.t
     | HitRun of Cond.HitRun.t
-    | LevelUp
+    | LeaderLvup of Cond.LeaderLvup.t
     | Mangonel of Cond.Mangonel.t
     | NoAttack
     | NoEnemies
@@ -55,8 +55,6 @@ module Convert = struct
     let check : Convert.check = function
       | Steps.Attack -> (module struct module Check = Check.HasEnemies
           let value = Output.Attack end)
-      | Steps.LevelUp -> (module struct module Check = Check.LevelUp
-          let value = Output.LevelUp end)
       | Steps.NoAttack -> (module struct module Check = Check.NoEnemies
           let value = Output.NoAttack end)
       | Steps.NoEnemies -> (module struct module Check = Check.NoEnemies
@@ -73,6 +71,8 @@ module Convert = struct
           let make () = Output.Defeat end)
       | Steps.HitRun -> (module struct module Event = Cond.HitRun
           let make x = Output.HitRun x end)
+      | Steps.LeaderLvup -> (module struct module Event = Cond.LeaderLvup
+          let make x = Output.LeaderLvup x end)
       | Steps.Mangonel -> (module struct module Event = Cond.Mangonel
           let make x = Output.Mangonel x end)
       | Steps.Smite -> (module struct module Event = Cond.Smite

@@ -9,10 +9,6 @@ end
 
 module NoFog = Not(Fog)
 
-module LevelUp (State : State.S) = struct
-  let value = State.Leader.check Leader.lvup
-end
-
 module NoEnemies (State : State.S) = struct
   let value = State.Enemy.check Units.is_empty
 end
