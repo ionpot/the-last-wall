@@ -187,6 +187,16 @@ module Mercs = Recruit.Event(struct
   end
 end)
 
+module MercsEnd = struct
+  type t = Defs.count
+  module Apply (S : State.S) = struct
+    let value n = S.Units.map Units.(sub n Merc)
+  end
+  module Make (S : State.S) = struct
+    let value = S.Units.return Units.(count Merc)
+  end
+end
+
 module Nations = struct
   type t = Nation.Set.t
   module Apply (S : State.S) = struct

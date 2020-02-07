@@ -24,6 +24,7 @@ module Make (S : Game.State.S) = struct
       | Mangonel avlb -> Mangonel (check (Prompt.siege Units.Mangonel) avlb)
       | Marms avlb -> Marms (promote Units.Marms avlb)
       | Mercs count -> Mercs (Prompt.mercs count)
+      | MercsEnd count -> MercsEnd (check Prompt.mercs_end count)
       | Nations chosen ->
           let module Prompt = Prompt.Nations(S) in
           Nations (Prompt.from chosen)

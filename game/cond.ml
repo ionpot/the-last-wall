@@ -109,6 +109,19 @@ module HitRun = struct
   module Make = Combat.HitRun
 end
 
+module LeaderLvup = struct
+  type t = Leader.t
+  module Apply (S : State.S) = struct
+    let value = S.Leader.set
+  end
+  module Check (S : State.S) = struct
+    let value = S.Leader.check Leader.can_level_up
+  end
+  module Make (S : State.S) = struct
+    let value = S.Leader.return Leader.level_up
+  end
+end
+
 module Mangonel = struct
   type t = Units.t * Units.t
   module Apply (S : State.S) = struct

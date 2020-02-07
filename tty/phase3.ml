@@ -32,7 +32,7 @@ module Make (S : Game.State.S) = struct
       | Defeat -> Tty.writeln "defeat"
       | Fear x -> Print.fear x
       | HitRun x -> Print.hit_run x
-      | LevelUp -> S.Leader.return Print.Leader.lvup
+      | LeaderLvup x -> Print.Leader.lvup x
       | Mangonel x -> Print.siege Units.Mangonel x
       | NoAttack -> ()
       | NoEnemies -> Tty.writeln "no enemies left"

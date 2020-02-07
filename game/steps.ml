@@ -67,7 +67,7 @@ end
 module Phase2 = struct
   module Input = struct
     type cond = Barracks | Harcher | LeaderNew | Marms | Ranger | Templar | Temple | Trade | Veteran | Volunteers
-    type direct = Ballista | BarrageTrain | Berserker | Build | Dervish | Knight | Mangonel | Mercs | Nations | Novice | Research | Sodistan | Xbowman
+    type direct = Ballista | BarrageTrain | Berserker | Build | Dervish | Knight | Mangonel | Mercs | MercsEnd | Nations | Novice | Research | Sodistan | Xbowman
     type t = (cond, direct) input
   end
   module Output = struct
@@ -116,6 +116,7 @@ module Phase2 = struct
     ; Ask (Direct Input.Dervish)
     ; Ask (Cond Input.Templar)
     ; Ask (Cond Input.Ranger)
+    ; Ask (Direct Input.MercsEnd)
     ; Ask (Direct Input.Mercs)
     ; Ask (Direct Input.BarrageTrain)
     ]
@@ -128,8 +129,8 @@ module Phase3 = struct
     type t = (cond, direct) input
   end
   module Output = struct
-    type check = Attack | LevelUp | NoAttack | NoEnemies
-    type cond = Ballista | Barraged | Cyclops | Defeat | HitRun | Mangonel | Smite
+    type check = Attack | NoAttack | NoEnemies
+    type cond = Ballista | Barraged | Cyclops | Defeat | HitRun | LeaderLvup | Mangonel | Smite
     type direct = Combat | Fear | Revive | Victory
     type t = (check, cond, direct) output
   end
@@ -137,7 +138,7 @@ module Phase3 = struct
   let scout : t = Ask (Direct Input.Scout)
   let victory : t list =
     [ Do (Direct Output.Victory)
-    ; Do (Check Output.LevelUp)
+    ; Do (Cond Output.LeaderLvup)
     ; scout
     ]
   let check_enemies : t =
