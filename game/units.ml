@@ -123,8 +123,6 @@ let empty : t = Map.empty
 let make n kind =
   if n > 0 then Map.singleton kind n else empty
 
-let is_empty = Map.is_empty
-
 let discard attr = Mapx.discardk (Attr.is attr)
 let filter attr = Mapx.filterk (Attr.is attr)
 let filterset = filter
@@ -181,6 +179,8 @@ let find n kind t =
 
 let has = Map.mem
 let has_any attr = Mapx.existsk (Attr.is attr)
+
+let is_empty t = Mapx.existsv ((<) 0) t |> not
 
 let kinds_of t =
   let f k _ s = Set.add k s in

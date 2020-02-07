@@ -1,6 +1,7 @@
 module Make (S : Map.S) : sig
   val discardk : (S.key -> bool) -> 'a S.t -> 'a S.t
   val existsk : (S.key -> bool) -> 'a S.t -> bool
+  val existsv : ('a -> bool) -> 'a S.t -> bool
   val filterk : (S.key -> bool) -> 'a S.t -> 'a S.t
   val filterv : ('a -> bool) -> 'a S.t -> 'a S.t
   val foldv : ('a -> 'b -> 'a) -> 'a -> 'b S.t -> 'a
