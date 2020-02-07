@@ -142,8 +142,12 @@ module Leader = struct
 end
 
 let mercs cap =
-  Tty.writeln (sprintf "%d mercenaries available" cap);
+  Tty.writeln (sprintf "%d mercenaries available, sign contract?" cap);
   Tty.prompt_amount cap
+
+let mercs_end n =
+  Tty.writeln (sprintf "%d mercenaries in army, end contract?" n);
+  Tty.prompt_amount n
 
 module Nations (S : Game.State.S) = struct
   module Set = Game.Nation.Set
