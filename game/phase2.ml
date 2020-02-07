@@ -16,6 +16,7 @@ module Input = struct
     | Marms of Event.Marms.t
     | Mangonel of Event.Mangonel.t
     | Mercs of Event.Mercs.t
+    | MercsEnd of Event.MercsEnd.t
     | Nations of Event.Nations.t
     | Novice of Event.Novice.t
     | Ranger of Event.Ranger.t
@@ -43,6 +44,7 @@ module Input = struct
       | Mangonel x -> Apply.value x (module Event.Mangonel)
       | Marms x -> Apply.value x (module Event.Marms)
       | Mercs x -> Apply.value x (module Event.Mercs)
+      | MercsEnd x -> Apply.value x (module Event.MercsEnd)
       | Nations x -> Apply.value x (module Event.Nations)
       | Novice x -> Apply.value x (module Event.Novice)
       | Ranger x -> Apply.value x (module Event.Ranger)
@@ -101,6 +103,8 @@ module Convert = struct
           let make x = Input.Mangonel x end)
       | Steps.Mercs -> (module struct module Event = Event.Mercs
           let make x = Input.Mercs x end)
+      | Steps.MercsEnd -> (module struct module Event = Event.MercsEnd
+          let make x = Input.MercsEnd x end)
       | Steps.Nations -> (module struct module Event = Event.Nations
           let make x = Input.Nations x end)
       | Steps.Novice -> (module struct module Event = Event.Novice
