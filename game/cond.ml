@@ -125,7 +125,7 @@ end
 module Mangonel = struct
   type t = Units.t * Units.t
   module Apply (S : State.S) = struct
-    let value (_, remaining) = S.Enemy.set remaining
+    let value (died, _) = S.Enemy.map (Units.reduce died)
   end
   module Check = Check.NoFog
   module Make (S : State.S) = struct
