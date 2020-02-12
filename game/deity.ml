@@ -14,14 +14,14 @@ module Roll (Dice : Dice.S) = struct
     else Resource.make ~sup:n ()
 
   let blessing = function
-    | Arnerula -> random 20 30
+    | Arnerula -> random 0 30
     | Elanis -> Resource.make ~mnp:(roll 10 20) ()
     | Lerota -> Resource.empty
     | Sekrefir -> Resource.make ~mnp:5 ~sup:10 ()
     | Sitera -> Resource.make ~sup:(roll 10 20) ()
 
   let boosted = function
-    | Arnerula -> random 30 40
+    | Arnerula -> random 10 40
     | Elanis as x -> blessing x |> Resource.add ~mnp:10
     | Lerota -> Resource.empty
     | Sekrefir as x -> blessing x |> Resource.add ~mnp:10 ~sup:10
