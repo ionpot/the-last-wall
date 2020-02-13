@@ -116,7 +116,7 @@ module Make (S : State.S) = struct
       |> Float.add_if (ldr_is Leader.Aristocrat && Attr.(is cavalry) kind) 0.2
       |> Float.add_if (ldr_is Leader.Merchant && kind = Units.Merc) 0.1
       |> Float.add_if (traded Nation.Clan && Attr.(is siege) kind) 0.2
-      |> Float.add_if (researched Research.BlackArmy && kind = Units.Merc) 0.1
+      |> Float.add_if (researched Research.BlackArmy && kind = Units.Merc) 0.2
     in Number.reduce_by ratio
 
   let resource_disease res =
@@ -164,7 +164,7 @@ module Make (S : State.S) = struct
       S.Units.return fn |> Units.upkeep |> Number.portion ratio
     in
     let cavs = Float.if_ok 0.2 (traded Nation.Tulron) in
-    let merc = Float.if_ok 0.1 (researched Research.BlackArmy) in
+    let merc = Float.if_ok 0.2 (researched Research.BlackArmy) in
     sup
     - discount cavs Units.(filter Attr.cavalry)
     - discount merc Units.(only Units.Merc)
