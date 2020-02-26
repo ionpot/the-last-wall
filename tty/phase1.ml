@@ -26,7 +26,10 @@ module Make (S : Game.State.S) = struct
   let output =
     let open Phase.Output in
     function
-      | BuildSupply s -> Print.Build.supply s
+      | BuildSupply s ->
+          Print.Build.supply s;
+          S.Build.return Game.Build.queue
+          |> Print.Build.wrp
       | Cavalry _ -> ()
       | Facilities x ->
           let nat = S.Nation.get () in

@@ -21,6 +21,12 @@ module Build = struct
     if sup > 0 then
       sprintf "construction costs %s" (sup2str sup)
       |> Tty.writeln
+
+  let wrp queue =
+    let wrp = Build.Queue.cost queue |> Resource.mnp in
+    if wrp > 0 then
+      sprintf "queue status: %s" (work2str wrp)
+      |> Tty.writeln
 end
 
 module Leader = struct

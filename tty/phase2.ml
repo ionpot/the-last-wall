@@ -52,7 +52,10 @@ module Make (S : Game.State.S) = struct
           |> Tty.ifpairln "blessing"
       | BuildManp m -> Print.Build.manp m
       | BuildStatus _ -> ()
-      | BuildSupply s -> Print.Build.supply s
+      | BuildSupply s ->
+          Print.Build.supply s;
+          S.Build.return Game.Build.queue
+          |> Print.Build.wrp
       | Cavalry _ -> ()
       | Defeat -> Tty.writeln "defeat"
       | Disease x -> Print.disease x |> S.Leader.return
