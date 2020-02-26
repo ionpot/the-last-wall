@@ -23,17 +23,17 @@ module Make (S : Game.State.S) = struct
           |> S.Units.return
           |> S.Enemy.return
           |> S.Leader.return
-      | Ballista x -> Print.siege Units.Ballista x
+      | Ballista x -> S.Units.return (Print.siege Units.Ballista x)
       | Barraged x -> Tty.pairln "barraged" (units2str x |> str2none)
       | Combat x ->
           Print.Combat.outcome x
           |> S.Leader.return
-      | Cyclops x -> Print.siege Units.Cyclops x
+      | Cyclops x -> S.Enemy.return (Print.siege Units.Cyclops x)
       | Defeat -> Tty.writeln "defeat"
       | Fear x -> Print.fear x
       | HitRun x -> Print.hit_run x
       | LeaderLvup x -> Print.Leader.lvup x
-      | Mangonel x -> Print.siege Units.Mangonel x
+      | Mangonel x -> S.Units.return (Print.siege Units.Mangonel x)
       | NoAttack -> ()
       | NoEnemies -> Tty.writeln "no enemies left"
       | Revive (x, _) -> Tty.ifpairln "revived" (units2str x)

@@ -141,10 +141,11 @@ let research_progress (module S : Research.Progress) =
 let research_status s =
   Tty.ifpairln "research complete" (researchset2str s)
 
-let siege kind (units, _) =
-  if units2bool units then
+let siege kind (died, _) units =
+  if units2bool died then
+    let n = Units.count kind units in
     sprintf "%s kills %s"
-    (unit2str kind) (units2str units |> if_empty "nothing")
+    (unit_n2str n kind) (units2str died |> if_empty "nothing")
     |> Tty.writeln
 
 let starting nat (module S : Starting.S) =
