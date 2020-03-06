@@ -59,12 +59,17 @@ module Barrage = struct
   end
 end
 
-module Berserker = Recruit.Event(struct
-  let action = Recruit.New
-  let kind = Units.Berserker
-  let pool = Some (Recruit.From Pool.Arena)
-  module Cap = Recruit.NoCap
-end)
+module Berserker = struct
+  include Recruit.Event(struct
+    let action = Recruit.New
+    let kind = Units.Berserker
+    let pool = Some (Recruit.From Pool.Arena)
+    module Cap = Recruit.NoCap
+  end)
+  module Check (S : State.S) = struct
+    let value = not (S.Deity.is Deity.Sekrefir)
+  end
+end
 
 module BuildAvlb = struct
   type t = Build.kind list * Build.cost_map
