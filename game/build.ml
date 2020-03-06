@@ -28,7 +28,7 @@ let base_cost =
   function
   | Arena -> make ~mnp:43 ~sup:49 ()
   | Barracks -> make ~mnp:65 ~sup:70 ()
-  | Engrs -> make ~mnp:60 ~sup:62 ()
+  | Engrs -> make ~mnp:57 ~sup:59 ()
   | Fort -> make ~mnp:124 ~sup:136 ()
   | Foundry -> make ~mnp:28 ~sup:30 ()
   | Guesthouse -> make ~mnp:21 ~sup:23 ()
