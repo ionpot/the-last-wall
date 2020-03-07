@@ -113,6 +113,7 @@ let bld2str nat = function
       Nation.trade nat
       |> nation_suffix
       |> sprintf "trade guild%s"
+  | Build.Workshop -> "workshop"
 
 let bld_n2str nat (kind, n) =
   let str = bld2str nat kind in
@@ -167,7 +168,9 @@ let deity_text = function
   | Deity.Sekrefir -> "leader of gods, envoy of order and justice"
 
 let research2str = function
+  | Research.AnimalTotems -> "animal totems"
   | Research.BlackArmy -> "black army"
+  | Research.CompositeBows -> "composite bows"
 
 let researchset2str s =
   Research.Set.elements s

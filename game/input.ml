@@ -59,12 +59,17 @@ module Barrage = struct
   end
 end
 
-module Berserker = Recruit.Event(struct
-  let action = Recruit.New
-  let kind = Units.Berserker
-  let pool = Some (Recruit.From Pool.Arena)
-  module Cap = Recruit.NoCap
-end)
+module Berserker = struct
+  include Recruit.Event(struct
+    let action = Recruit.New
+    let kind = Units.Berserker
+    let pool = Some (Recruit.From Pool.Arena)
+    module Cap = Recruit.NoCap
+  end)
+  module Check (S : State.S) = struct
+    let value = not (S.Deity.is Deity.Sekrefir)
+  end
+end
 
 module BuildAvlb = struct
   type t = Build.kind list * Build.cost_map
@@ -236,11 +241,18 @@ module Research = struct
       |> S.Research.map
   end
   module Make (S : State.S) = struct
+    let arena = S.Build.check Build.(is_ready Arena)
+    let barracks = S.Build.check Build.(is_ready Barracks)
     let lerota = S.Deity.is Deity.Lerota
+    let sawmill = S.Build.check Build.(is_ready Sawmill)
+    let sitera = S.Deity.is Deity.Sitera
+    let stable = S.Build.check Build.(is_ready Stable)
     let temple = S.Build.check Build.(is_ready Temple)
     let value = [],
       S.Research.get ()
+      |> Research.(unlock AnimalTotems) (arena && sitera && temple)
       |> Research.(unlock BlackArmy) (lerota && temple)
+      |> Research.(unlock CompositeBows) (barracks && sawmill && stable)
       |> Research.available
   end
 end

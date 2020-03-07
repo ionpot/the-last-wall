@@ -21,6 +21,7 @@ module Make : State.S -> sig
   val support_trade : Nation.kind -> Resource.t -> Resource.t
   val support_winter : Defs.percent -> Defs.percent
   val temple_men : Defs.count -> Defs.count
+  val totem_boost : Power.t -> Power.t
   val upkeep_engr : Defs.supply -> Defs.supply
   val upkeep_scouting : Defs.supply -> Defs.supply
   val upkeep_units : Defs.supply -> Defs.supply

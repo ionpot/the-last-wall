@@ -1,4 +1,4 @@
-type kind = Arena | Barracks | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade
+type kind = Arena | Barracks | Engrs | Fort | Foundry | Guesthouse | Market | Mausoleum of Leader.t | Observatory | Sawmill | Stable | Tavern | Temple | Trade | Workshop
 
 module Kind = struct
   type t = kind
@@ -21,6 +21,7 @@ let base_cap = function
   | Guesthouse -> 20
   | Stable -> 10
   | Temple -> 20
+  | Workshop -> 2
   | _ -> 0
 
 let base_cost =
@@ -28,7 +29,7 @@ let base_cost =
   function
   | Arena -> make ~mnp:43 ~sup:49 ()
   | Barracks -> make ~mnp:65 ~sup:70 ()
-  | Engrs -> make ~mnp:60 ~sup:62 ()
+  | Engrs -> make ~mnp:57 ~sup:59 ()
   | Fort -> make ~mnp:124 ~sup:136 ()
   | Foundry -> make ~mnp:28 ~sup:30 ()
   | Guesthouse -> make ~mnp:21 ~sup:23 ()
@@ -40,6 +41,7 @@ let base_cost =
   | Tavern -> make ~mnp:39 ~sup:41 ()
   | Temple -> make ~mnp:61 ~sup:63 ()
   | Trade -> make ~mnp:51 ~sup:49 ()
+  | Workshop -> make ~mnp:13 ~sup:14 ()
 
 let is_multiple kind =
   kind = Stable
@@ -56,6 +58,7 @@ let supply_range = function
   | _ -> (0, 0)
 
 let unlocks = function
+  | Engrs -> [Workshop]
   | Temple -> [Guesthouse; Observatory]
   | _ -> []
 
