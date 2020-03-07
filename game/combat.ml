@@ -95,7 +95,7 @@ module HitRun (S : State.S) = struct
   end)
   module Fill = Dist.Fill(S.Dice)
   module Map = Power.Map
-  let base = Power.base
+  let base = Power.base |> Bonus.brg_power
   let hit_back_chance = 0.05
   let loss_coef = 0.1
   let hit_back enemy units =

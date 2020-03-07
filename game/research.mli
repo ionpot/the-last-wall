@@ -1,4 +1,4 @@
-type kind = AnimalTotems | BlackArmy
+type kind = AnimalTotems | BlackArmy | CompositeBows
 
 module Cost : sig
   val men : kind -> Defs.manpower

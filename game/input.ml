@@ -242,13 +242,17 @@ module Research = struct
   end
   module Make (S : State.S) = struct
     let arena = S.Build.check Build.(is_ready Arena)
+    let barracks = S.Build.check Build.(is_ready Barracks)
     let lerota = S.Deity.is Deity.Lerota
+    let sawmill = S.Build.check Build.(is_ready Sawmill)
     let sitera = S.Deity.is Deity.Sitera
+    let stable = S.Build.check Build.(is_ready Stable)
     let temple = S.Build.check Build.(is_ready Temple)
     let value = [],
       S.Research.get ()
       |> Research.(unlock AnimalTotems) (arena && sitera && temple)
       |> Research.(unlock BlackArmy) (lerota && temple)
+      |> Research.(unlock CompositeBows) (barracks && sawmill && stable)
       |> Research.available
   end
 end
