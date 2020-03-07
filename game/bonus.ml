@@ -59,7 +59,11 @@ module Make (S : State.S) = struct
     then Power.attr Attr.flying ~-.1. p
     else p
 
-  let brg_power p = p
+  let brg_power p =
+    let bows = researched Research.CompositeBows in
+    let harcher = Float.if_ok 1. bows in
+    p
+    |> Power.add Units.Harcher harcher
     |> Power.add Units.Ranger 1.
     |> Power.inc_by Units.Xbowman 0.5
 
@@ -150,6 +154,11 @@ module Make (S : State.S) = struct
 
   let temple_men n =
     Number.add_if (bld_ready Build.Guesthouse) 1 n
+
+  let totem_boost p =
+    if researched Research.AnimalTotems
+    then Power.add Units.Berserker 1. p
+    else p
 
   let upkeep_engr sup =
     let cha = ldr_cha Leader.Engineer in

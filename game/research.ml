@@ -1,11 +1,15 @@
-type kind = BlackArmy
+type kind = AnimalTotems | BlackArmy | CompositeBows
 
 module Cost = struct
   let men = function
+    | AnimalTotems -> 9
     | BlackArmy -> 13
+    | CompositeBows -> 10
 
   let supply = function
+    | AnimalTotems -> 10
     | BlackArmy -> 18
+    | CompositeBows -> 12
 
   let resource k =
     Resource.make ~mnp:(men k) ~sup:(supply k) ()

@@ -35,11 +35,11 @@ module Build (S : State.S) = struct
   let cap_of b =
     S.Build.return (Build.cap_of b)
 
-  let temple_cap () =
-    cap_of Build.Temple + cap_of Build.Guesthouse
-
   let bld_cap = function
-    | Build.Temple -> temple_cap ()
+    | Build.Engrs ->
+        cap_of Build.Engrs + cap_of Build.Workshop
+    | Build.Temple ->
+        cap_of Build.Temple + cap_of Build.Guesthouse
     | b -> cap_of b
 
   let count set units =

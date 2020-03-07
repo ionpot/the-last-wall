@@ -35,7 +35,9 @@ module Make (S : State.S) = struct
   module LdrRoll = Leader.Roll(S.Dice)
 
   let a_power = Power.base |> Bonus.brg_penalty
-  let d_power = Power.base |> Bonus.siege_boost
+  let d_power = Power.base
+    |> Bonus.siege_boost
+    |> Bonus.totem_boost
 
   let enemies = S.Enemy.get ()
   let have_fort = S.Build.check Build.(is_ready Fort)
@@ -93,7 +95,7 @@ module HitRun (S : State.S) = struct
   end)
   module Fill = Dist.Fill(S.Dice)
   module Map = Power.Map
-  let base = Power.base
+  let base = Power.base |> Bonus.brg_power
   let hit_back_chance = 0.05
   let loss_coef = 0.1
   let hit_back enemy units =
