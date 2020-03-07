@@ -35,7 +35,9 @@ module Make (S : State.S) = struct
   module LdrRoll = Leader.Roll(S.Dice)
 
   let a_power = Power.base |> Bonus.brg_penalty
-  let d_power = Power.base |> Bonus.siege_boost
+  let d_power = Power.base
+    |> Bonus.siege_boost
+    |> Bonus.totem_boost
 
   let enemies = S.Enemy.get ()
   let have_fort = S.Build.check Build.(is_ready Fort)

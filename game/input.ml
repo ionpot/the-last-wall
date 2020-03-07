@@ -241,10 +241,13 @@ module Research = struct
       |> S.Research.map
   end
   module Make (S : State.S) = struct
+    let arena = S.Build.check Build.(is_ready Arena)
     let lerota = S.Deity.is Deity.Lerota
+    let sitera = S.Deity.is Deity.Sitera
     let temple = S.Build.check Build.(is_ready Temple)
     let value = [],
       S.Research.get ()
+      |> Research.(unlock AnimalTotems) (arena && sitera && temple)
       |> Research.(unlock BlackArmy) (lerota && temple)
       |> Research.available
   end

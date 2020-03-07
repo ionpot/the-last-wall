@@ -151,6 +151,11 @@ module Make (S : State.S) = struct
   let temple_men n =
     Number.add_if (bld_ready Build.Guesthouse) 1 n
 
+  let totem_boost p =
+    if researched Research.AnimalTotems
+    then Power.add Units.Berserker 1. p
+    else p
+
   let upkeep_engr sup =
     let cha = ldr_cha Leader.Engineer in
     Number.reduce_by (float cha *. 0.03) sup

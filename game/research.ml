@@ -1,10 +1,12 @@
-type kind = BlackArmy
+type kind = AnimalTotems | BlackArmy
 
 module Cost = struct
   let men = function
+    | AnimalTotems -> 9
     | BlackArmy -> 13
 
   let supply = function
+    | AnimalTotems -> 10
     | BlackArmy -> 18
 
   let resource k =
