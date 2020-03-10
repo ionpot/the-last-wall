@@ -19,6 +19,7 @@ module Make (S : Game.State.S) = struct
       | Attack ->
           Game.Power.base
           |> Bonus.siege_boost
+          |> Bonus.totem_boost
           |> Print.Combat.begins
           |> S.Units.return
           |> S.Enemy.return

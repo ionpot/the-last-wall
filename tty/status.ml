@@ -16,6 +16,9 @@ module With (S : State.S) = struct
 
   open Printf
 
+  let base_pwr () =
+    Power.base |> Bonus.siege_boost |> Bonus.totem_boost
+
   let count kind =
     Units.count kind |> S.Units.return
 
@@ -42,7 +45,7 @@ module With (S : State.S) = struct
     print_enemies "enemies"
 
   let res () =
-    let base = Power.base |> Bonus.siege_boost in
+    let base = base_pwr () in
     let units =  S.Units.get () in
     let m = Power.of_units units base |> truncate in
     let s = S.Supply.get () in
@@ -72,7 +75,7 @@ module With (S : State.S) = struct
       | (_, false), (_, false) -> ()
 
   let units () =
-    let base = Power.base |> Bonus.siege_boost in
+    let base = base_pwr () in
     S.Units.return (Convert.units2mnpstr base)
     |> Tty.pairln "status"
 end
