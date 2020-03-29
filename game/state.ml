@@ -49,3 +49,17 @@ module Make (D : Dice.From) : S = struct
   module Units = Value.From(Units)
   module Weather = Value.From(Weather)
 end
+
+(* move to state.ml
+module AddRes (S : State.S) = struct
+  let value res =
+    S.Supply.add (Resource.sup res);
+    S.Units.map Units.(add (Resource.mnp res) Men)
+end
+
+module LdrDied (S : State.S) = struct
+  let value respawn =
+    S.Leader.map (S.Turn.return Leader.died respawn);
+    S.Build.map (S.Leader.return Build.died)
+end
+*)
