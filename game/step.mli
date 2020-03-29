@@ -1,15 +1,9 @@
-module Of (Phase : Phase.S) : sig
-  type apply
-  type event =
-    | Input of Phase.Input.event
-    | Output of (Phase.Output.event * apply)
-  type steps
-  type t = event * steps
+type kind =
+  | Input of Input.event
+  | Output of (Output.event * State.t)
+type steps
+type t = kind * steps
 
-  val first : steps
+val start : steps
 
-  module Do : State.S -> sig
-    val apply : event -> unit
-    val next : steps -> t option
-  end
-end
+val next : State.t -> steps -> t option
