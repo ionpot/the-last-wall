@@ -1,29 +1,12 @@
-type t =
-  | Event of Phases.event
+type step =
+  | Next of Step.t
   | End
 
-module Make (State : State.S) = struct
-  module Handle = Phases.Handle(State)
+let make = function
+  | Some step -> Next step
+  | None -> End
 
-  let transition = function
-    | Phase.One -> Phase.Two
-    | Phase.Two -> Phase.Three
-    | Phase.Three -> Phase.Two
+let next steps state =
+  Step.next state steps |> make
 
-  let rec first_of phase =
-    check (Handle.first_of phase)
-
-  and check = function
-    | Phases.Next event -> Event event
-    | Phases.EndOf phase -> first_of (transition phase)
-
-  let next = function
-    | End -> End
-    | Event e ->
-        Handle.apply e;
-        if State.Ended.get () then End
-        else check (Handle.next_of e)
-
-  let first () =
-    first_of Phase.One
-end
+let first = next Steps.start

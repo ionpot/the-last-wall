@@ -28,7 +28,8 @@ module Output = struct
 end
 
 type kind = Input of Input.t | Output of Output.t
-type t = kind * Steps.t list
+type ls = Steps.t list
+type t = kind * ls
 
 let start = Steps.ls
 

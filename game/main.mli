@@ -1,8 +1,6 @@
-type t =
-  | Event of Phases.event
+type step =
+  | Next of Step.t
   | End
 
-module Make : State.S -> sig
-  val first : unit -> t
-  val next : t -> t
-end
+val first : State.t -> step
+val next : Step.ls -> State.t -> step

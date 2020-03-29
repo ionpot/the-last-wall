@@ -1,9 +1,9 @@
 type kind =
   | Input of Input.event
   | Output of (Output.event * State.t)
-type steps
-type t = kind * steps
+type ls
+type t = kind * ls
 
-val start : steps
+val start : ls
 
-val next : State.t -> steps -> t option
+val next : State.t -> ls -> t option
