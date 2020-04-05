@@ -3,4 +3,4 @@ type step =
   | End
 
 val first : State.t -> step
-val next : Step.ls -> State.t -> step
+val next : Steps.t list -> State.t -> step

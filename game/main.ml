@@ -9,4 +9,4 @@ let make = function
 let next steps state =
   Step.next state steps |> make
 
-let first = next Steps.start
+let first = next Steps.ls
