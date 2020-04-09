@@ -7,8 +7,8 @@ module Label = struct
 end
 
 module Input = struct
-  type direct = Ballista | BarrageTrain | Build | Deity | Dervish | Knight | Leader | Mangonel | Mercs | MercsEnd | Nations | Novice | Research | Scout | Sodistan | Xbowman
-  type cond = Barracks | Barrage | Berserker | Harcher | LeaderNew | Marms | Ranger | Templar | Temple | Trade | Veteran | Volunteers
+  type direct = BarrageTrain | Build | Deity | Leader | MercsEnd | Nations | Research | Scout | Sodistan
+  type cond = Barracks | Barrage | LeaderNew | Temple | Trade | Volunteers
   type t = (cond, direct) event
 end
 
@@ -37,9 +37,7 @@ let ls : t list =
   ; Ask (Cond Input.Volunteers)
   ; Ask (Direct Input.Build)
   ; Do (Direct Output.BuildSupply)
-  ; Ask (Direct Input.Ballista)
   ; Do (Direct Output.Cavalry)
-  ; Ask (Direct Input.Knight)
   ; Ask (Direct Input.Scout)
 
   ; Mark Label.Upkeep
@@ -67,19 +65,7 @@ let ls : t list =
   ; Do (Direct Output.ResearchProgress)
   ; Ask (Direct Input.Build)
   ; Do (Direct Output.BuildSupply)
-  ; Ask (Cond Input.Berserker)
-  ; Ask (Direct Input.Ballista)
-  ; Ask (Direct Input.Mangonel)
   ; Do (Direct Output.Cavalry)
-  ; Ask (Cond Input.Harcher)
-  ; Ask (Cond Input.Marms)
-  ; Ask (Direct Input.Knight)
-  ; Ask (Cond Input.Veteran)
-  ; Ask (Direct Input.Xbowman)
-  ; Ask (Direct Input.Novice)
-  ; Ask (Direct Input.Dervish)
-  ; Ask (Cond Input.Templar)
-  ; Ask (Cond Input.Ranger)
   ; Ask (Direct Input.MercsEnd)
   ; Ask (Direct Input.Mercs)
   ; Ask (Direct Input.BarrageTrain)
