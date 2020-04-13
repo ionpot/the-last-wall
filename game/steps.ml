@@ -67,7 +67,6 @@ let ls : t list =
   ; Do (Direct Output.BuildSupply)
   ; Do (Direct Output.Cavalry)
   ; Ask (Direct Input.MercsEnd)
-  ; Ask (Direct Input.Mercs)
   ; Ask (Direct Input.BarrageTrain)
 
   ; Mark Label.Combat
