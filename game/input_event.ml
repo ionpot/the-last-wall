@@ -1,5 +1,4 @@
 (*
-
 module Barracks = struct
   type t = Nation.kind option
   module Apply (S : State.S) = struct
@@ -237,3 +236,4 @@ module Volunteers = struct
     let value = Range.times n (1, 3) |> S.Dice.range
   end
 end
+*)
