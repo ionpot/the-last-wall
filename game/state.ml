@@ -1,28 +1,5 @@
-module type S = sig
-  module Barrage : Value.S with type t = Barrage.t
-  module Build : Value.S with type t = Build.t
-  module Casualty : Value.S with type t = Units.t
-  module Deity : Value.S with type t = Deity.t
-  module Dice : Dice.S
-  module Ended : Value.Bit
-  module Enemy : Value.S with type t = Units.t
-  module Feared : Value.S with type t = Units.t
-  module Harpy : Value.Float
-  module Leader : Value.S with type t = Leader.t
-  module Mishap : Value.S with type t = Mishap.t
-  module Month : Value.S with type t = Month.t
-  module Nation : Value.S with type t = Nation.t
-  module Pool : Value.S with type t = Pool.t
-  module Research : Value.S with type t = Research.t
-  module Scout : Value.Bit
-  module Starved : Value.S with type t = Units.t
-  module Supply : Value.Num
-  module Training : Value.S with type t = Units.t
-  module Turn : Value.Num
-  module Units : Value.S with type t = Units.t
-  module Weather : Value.S with type t = Weather.t
-end
-
+type t = unit
+(*
 module Make (D : Dice.From) : S = struct
   module Arena = Value.Num(Value.Zero)
   module Barrage = Value.From(Barrage)
@@ -49,6 +26,7 @@ module Make (D : Dice.From) : S = struct
   module Units = Value.From(Units)
   module Weather = Value.From(Weather)
 end
+*)
 
 (* move to state.ml
 module AddRes (S : State.S) = struct
