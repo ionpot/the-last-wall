@@ -1,8 +1,8 @@
 module Input = struct
-  type t = Input.kind
+  type kind = Input.kind
   let direct state (evt, fn) =
     Some (Event.Input.make evt state |> fn)
-  let cond : type a. State.t -> a Input.cond -> t option =
+  let cond : type a. State.t -> a Input.cond -> kind option =
     fun state ((module M), fn) ->
       if M.check state
       then direct state ((module M), fn)
@@ -13,7 +13,8 @@ module Input = struct
 end
 
 module Output = struct
-  type t = Output.kind * State.t
+  type kind = Output.kind
+  type t = kind * State.t
   let direct state (evt, fn) =
     let x, state' = Event.Output.make evt state in
     Some (fn x, state')
