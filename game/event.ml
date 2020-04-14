@@ -1,6 +1,6 @@
 module type Direct = sig
   type t
-  val apply : State.t -> t -> State.t
+  val apply : t -> State.t -> State.t
   val make : State.t -> t
 end
 
@@ -14,19 +14,19 @@ type 'a cond = (module Cond with type t = 'a)
 
 module Input = struct
   type 'a t =
-    { apply : State.t -> 'a -> State.t
+    { apply : 'a -> State.t -> State.t
     ; value : 'a
     }
   let make (type a) (module M : Direct with type t = a) state =
     { apply = M.apply
     ; value = M.make state
     }
-  let apply t = t.apply
+  let apply t s x = t.apply x s
   let value t = t.value
 end
 
 module Output = struct
   let make (type a) (module M : Direct with type t = a) state =
     let x = M.make state in
-    x, M.apply state x
+    x, M.apply x state
 end

@@ -1,6 +1,6 @@
 module type Direct = sig
   type t
-  val apply : State.t -> t -> State.t
+  val apply : t -> State.t -> State.t
   val make : State.t -> t
 end
 
