@@ -1,6 +1,7 @@
 open Input_event
 
-type 'a input = 'a Event.Input.t
+type 'a apply = State.t -> 'a -> State.t
+type 'a input = 'a * 'a apply
 
 type kind =
   | DeityChoice of DeityChoice.t input
@@ -23,7 +24,7 @@ type kind =
 
 let direct : type a. a Event.direct -> (a input -> kind) -> State.t -> kind =
   fun (module M) f state ->
-    Event.Input.make (module M) state |> f
+    f (M.make state, fun s x -> M.apply x s)
 
 let cond : type a. a Event.cond -> (a input -> kind) -> State.t -> kind option =
   fun (module M) f ->
