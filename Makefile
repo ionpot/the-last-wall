@@ -1,5 +1,5 @@
 .PHONY: all ctags
 all:
-	ocamlbuild game/main.cma
+	ocamlbuild -I util -r game/main.cma
 ctags:
 	ctags -R --exclude={.git,_build}
