@@ -2,6 +2,10 @@ type t =
   { deity : Deity.t
   }
 
+let empty =
+  { deity = Deity.empty
+  }
+
 let deity t = t.deity
 let deity_set deity t = { t with deity }
 
