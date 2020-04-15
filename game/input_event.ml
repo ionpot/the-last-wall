@@ -4,6 +4,12 @@ module DeityChoice = struct
   let make s = Deity.empty
 end
 
+module LeaderChoice = struct
+  type t = Leader.kind
+  let apply t = State.ldr_set (Leader.Roll.from t)
+  let make s = Leader.(kind_of empty)
+end
+
 (*
 module Barracks = struct
   type t = Nation.kind option
@@ -70,17 +76,6 @@ module BuildAvlb = struct
     let value = [],
       S.Build.return Build.cost_map
       |> Build.Map.mapi Bonus.build_cost
-  end
-end
-
-module LeaderKind = struct
-  type t = Leader.kind
-  module Apply (S : State.S) = struct
-    module Roll = Leader.Roll(S.Dice)
-    let value kind = S.Leader.set (Roll.from kind)
-  end
-  module Make (S : State.S) = struct
-    let value = Leader.(kind_of empty)
   end
 end
 

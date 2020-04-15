@@ -21,7 +21,7 @@ let full t =
   |> List.filter ((<>) "")
   |> String.concat " "
 
-module Roll (Dice : Dice.S) = struct
+module Roll = struct
   let new_prev t =
     if t.name = empty_name then t.prev
     else t.name :: t.prev

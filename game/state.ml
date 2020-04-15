@@ -1,13 +1,18 @@
 type t =
   { deity : Deity.t
+  ; leader : Leader.t
   }
 
 let empty =
   { deity = Deity.empty
+  ; leader = Leader.empty
   }
 
 let deity t = t.deity
 let deity_set deity t = { t with deity }
+
+let ldr t = t.leader
+let ldr_set leader t = { t with leader }
 
 (*
 module Make (D : Dice.From) : S = struct

@@ -9,7 +9,7 @@ module Input = struct
       else None
   let from state = function
     | Steps.Cond step -> Input.of_cond step |> cond state
-    | Steps.Direct step -> Input.of_direct step |> direct state
+    | Steps.Direct step -> Some (Input.of_direct state step)
 end
 
 module Output = struct

@@ -27,7 +27,7 @@ val died : Defs.count -> Defs.turn -> t -> t
 val level_up : t -> t
 val won : t -> t
 
-module Roll : Dice.S -> sig
+module Roll : sig
   val death : t -> bool
   val from : kind -> t
   val pair : unit -> t * t

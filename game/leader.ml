@@ -64,16 +64,14 @@ let level_up t =
 let won t =
   { t with xp = t.xp + 1 }
 
-module Roll (Dice : Dice.S) = struct
-  module Name = Name.Roll(Dice)
-
+module Roll = struct
   let death t =
     if is_alive t then Dice.chance 0.05 else false
 
   let name t =
     let first = Names.(if t.gender = Female then female else male) in
     let house = if t.noble then Names.house else [] in
-    { t with name = Name.from first house Names.title t.name }
+    { t with name = Name.Roll.from first house Names.title t.name }
 
   let noble = function
     | Aristocrat -> true
