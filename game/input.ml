@@ -20,16 +20,21 @@ type kind =
   | Trade of Trade.t t
   | Volunteers of Volunteers.t t
   *)
-type 'a convert = 'a input -> kind
-type 'a cond = 'a Event.cond * 'a convert
-type 'a direct = 'a Event.direct * 'a convert
 
-let of_direct state =
+let direct : type a. a Event.direct -> (a input -> kind) -> State.t -> kind =
+  fun (module M) f state ->
+    Event.Input.make (module M) state |> f
+
+let cond : type a. a Event.cond -> (a input -> kind) -> State.t -> kind option =
+  fun (module M) f ->
+    let g = direct (module M) f in
+    Event.cond (module M) g
+
+let of_direct =
   let module Direct = Steps.Input in
-  let make = Event.Input.make in
   function
-  | Direct.Deity -> DeityChoice (make (module DeityChoice) state)
-  | Direct.Leader -> LeaderChoice (make (module LeaderChoice) state)
+  | Direct.Deity -> direct (module DeityChoice) (fun x -> DeityChoice x)
+  | Direct.Leader -> direct (module LeaderChoice) (fun x -> LeaderChoice x)
 (*
   | Direct.BarrageTrain -> (module BarrageTrain), (fun x -> BarrageTrain x)
   | Direct.Build -> (module Build), (fun x -> Build x)
@@ -41,11 +46,11 @@ let of_direct state =
 *)
   | _ -> failwith "todo"
 
-let of_cond : Steps.Input.cond -> 'a cond =
+let of_cond =
   let module Cond = Steps.Input in
   function
 (*
-  | Cond.Barracks -> (module Barracks), (fun x -> Barracks x)
+  | Cond.Barracks -> cond (module Barracks) (fun x -> Barracks x)
   | Cond.Barrage -> (module Barrage), (fun x -> Barrage x)
   | Cond.LeaderNew -> (module LeaderNew), (fun x -> LeaderNew x)
   | Cond.Temple -> (module Temple), (fun x -> Temple x)

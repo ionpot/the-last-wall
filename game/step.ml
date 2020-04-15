@@ -1,15 +1,8 @@
 module Input = struct
   type kind = Input.kind
-  let direct state (evt, fn) =
-    Some (Event.Input.make evt state |> fn)
-  let cond : type a. State.t -> a Input.cond -> kind option =
-    fun state ((module M), fn) ->
-      if M.check state
-      then direct state ((module M), fn)
-      else None
   let from state = function
-    | Steps.Cond step -> Input.of_cond step |> cond state
-    | Steps.Direct step -> Some (Input.of_direct state step)
+    | Steps.Cond step -> Input.of_cond step state
+    | Steps.Direct step -> Some (Input.of_direct step state)
 end
 
 module Output = struct
