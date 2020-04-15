@@ -1,32 +1,17 @@
-module Input = struct
-  type kind = Input.kind
-  let from state = function
-    | Steps.Cond step -> Input.of_cond step state
-    | Steps.Direct step -> Some (Input.of_direct step state)
-end
-
-module Output = struct
-  type kind = Output.kind
-  type t = kind * State.t
-  let direct state (evt, fn) =
-    let x, state' = Event.Output.make evt state in
-    Some (fn x, state')
-  let cond : type a. State.t -> a Output.cond -> t option =
-    fun state ((module M), fn) ->
-      if M.check state
-      then direct state ((module M), fn)
-      else None
-  let from state = function
-    | Steps.Cond step -> Output.of_cond step |> cond state
-    | Steps.Direct step -> Output.of_direct step |> direct state
-end
-
 type kind = Input of Input.kind | Output of Output.kind
 type t =
   { kind : kind
   ; rest : Steps.t list
   ; state : State.t
   }
+
+let input state = function
+  | Steps.Cond step -> Input.of_cond step state
+  | Steps.Direct step -> Some (Input.of_direct step state)
+
+let output state = function
+  | Steps.Cond step -> Output.of_cond step state
+  | Steps.Direct step -> Some (Output.of_direct step state)
 
 let rec seek label = function
   | [] -> []
@@ -38,13 +23,13 @@ let rec seek label = function
 let rec next state = function
   | [] -> None
   | Steps.Ask x :: rest ->
-      begin match Input.from state x with
+      begin match input state x with
       | Some evt ->
           Some { kind = Input evt; rest; state }
       | None -> next state rest
       end
   | Steps.Do x :: rest ->
-      begin match Output.from state x with
+      begin match output state x with
       | Some (evt, state) ->
           let last = x = Steps.Output.last in
           let rest = if last then [] else rest in

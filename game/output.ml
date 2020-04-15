@@ -30,15 +30,23 @@ type kind = unit
   | Upkeep of Upkeep.t
   | Victory of Victory.t
 *)
-type 'a convert = 'a -> kind
-type 'a cond = 'a Event.cond * 'a convert
-type 'a direct = 'a Event.direct * 'a convert
+type t = kind * State.t
 
-let of_direct : Steps.Output.direct -> 'a direct =
+let direct : type a. a Event.direct -> (a -> kind) -> State.t -> t =
+  fun (module M) f s ->
+    let x = M.make s in
+    f x, M.apply x s
+
+let cond : type a. a Event.cond -> (a -> kind) -> State.t -> t option =
+  fun (module M) f ->
+    let g = direct (module M) f in
+    Event.cond (module M) g
+
+let of_direct =
   let module Direct = Steps.Output in
   function
 (*
-  | Direct.Attack -> (module Attack), (fun x -> Attack x)
+  | Direct.Attack -> direct (module Attack) (fun x -> Attack x)
   | Direct.Blessing -> (module Blessing), (fun x -> Blessing x)
   | Direct.BuildManp -> (module BuildManp), (fun x -> BuildManp x)
   | Direct.BuildStatus -> (module BuildStatus), (fun x -> BuildStatus x)
@@ -61,11 +69,11 @@ let of_direct : Steps.Output.direct -> 'a direct =
 *)
   | _ -> failwith "todo"
 
-let of_cond : Steps.Output.cond -> 'a cond =
+let of_cond =
   let module Cond = Steps.Output in
   function
 (*
-  | Cond.Barraged -> (module Barraged), (fun x -> Barraged x)
+  | Cond.Barraged -> cond (module Barraged) (fun x -> Barraged x)
   | Cond.Defeat -> (module Defeat), (fun x -> Defeat x)
   | Cond.Disease -> (module Disease), (fun x -> Disease x)
   | Cond.HitRun -> (module HitRun), (fun x -> HitRun x)
