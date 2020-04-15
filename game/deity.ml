@@ -1,10 +1,15 @@
 type t = Arnerula | Elanis | Lerota | Sekrefir | Sitera
 
-let empty = Arnerula
+module Set = Set.Make(struct
+  type nonrec t = t
+  let compare = compare
+end)
 
-let list = [Arnerula; Elanis; Lerota; Sekrefir; Sitera]
+let set = Set.of_list [Arnerula; Elanis; Lerota; Sekrefir; Sitera]
 
-module Roll (Dice : Dice.S) = struct
+let empty = Set.choose set
+
+module Roll = struct
   let roll = Dice.between
 
   let random a b =

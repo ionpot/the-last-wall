@@ -1,3 +1,9 @@
+module DeityChoice = struct
+  type t = Deity.t
+  let apply = State.deity_set
+  let make s = Deity.empty
+end
+
 (*
 module Barracks = struct
   type t = Nation.kind option
@@ -64,16 +70,6 @@ module BuildAvlb = struct
     let value = [],
       S.Build.return Build.cost_map
       |> Build.Map.mapi Bonus.build_cost
-  end
-end
-
-module DeityChoice = struct
-  type t = Deity.t
-  module Apply (S : State.S) = struct
-    let value = S.Deity.set
-  end
-  module Make (S : State.S) = struct
-    let value = Deity.empty
   end
 end
 

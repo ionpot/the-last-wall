@@ -1,12 +1,14 @@
 open Input_event
 
-type kind = unit
+type 'a input = 'a Event.Input.t
+
+type kind =
+  | Deity of DeityChoice.t input
 (*
   | Barracks of Barracks.t t
   | Barrage of Barrage.t t
   | BarrageTrain of BarrageTrain.t t
   | Build of Build.t t
-  | Deity of Deity.t t
   | Leader of Leader.t t
   | LeaderNew of LeaderNew.t t
   | MercsEnd of MercsEnd.t t
@@ -18,17 +20,17 @@ type kind = unit
   | Trade of Trade.t t
   | Volunteers of Volunteers.t t
   *)
-type 'a convert = 'a Event.Input.t -> kind
+type 'a convert = 'a input -> kind
 type 'a cond = 'a Event.cond * 'a convert
 type 'a direct = 'a Event.direct * 'a convert
 
 let of_direct : Steps.Input.direct -> 'a direct =
   let module Direct = Steps.Input in
   function
+  | Direct.Deity -> (module DeityChoice), (fun x -> Deity x)
 (*
   | Direct.BarrageTrain -> (module BarrageTrain), (fun x -> BarrageTrain x)
   | Direct.Build -> (module Build), (fun x -> Build x)
-  | Direct.Deity -> (module Deity), (fun x -> Deity x)
   | Direct.Leader -> (module Leader), (fun x -> Leader x)
   | Direct.MercsEnd -> (module MercsEnd), (fun x -> MercsEnd x)
   | Direct.Nations -> (module Nations), (fun x -> Nations x)

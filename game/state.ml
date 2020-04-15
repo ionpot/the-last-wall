@@ -1,4 +1,10 @@
-type t = unit
+type t =
+  { deity : Deity.t
+  }
+
+let deity t = t.deity
+let deity_set deity t = { t with deity }
+
 (*
 module Make (D : Dice.From) : S = struct
   module Arena = Value.Num(Value.Zero)
