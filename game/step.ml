@@ -31,9 +31,13 @@ let rec next state = function
   | Steps.Do x :: rest ->
       begin match output state x with
       | Some (evt, state) ->
-          let last = x = Steps.Output.last in
-          let rest = if last then [] else rest in
           Some { kind = Output evt; rest; state }
+      | None -> next state rest
+      end
+  | Steps.End x :: rest ->
+      begin match Output.of_cond x state with
+      | Some (evt, state) ->
+          Some { kind = Output evt; rest = []; state }
       | None -> next state rest
       end
   | Steps.GoTo label :: _ ->

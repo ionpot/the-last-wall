@@ -16,12 +16,12 @@ module Output = struct
   type direct = Attack | Blessing | BuildManp | BuildStatus | BuildSupply | Cavalry | Combat | Facilities | Fear | FearEnd | Mishap | ResearchProgress | ResearchStatus | Revive | SiegeCombat | Starting | Support | Turn | Upkeep | Victory
   type cond = Barraged | Defeat | Disease | HitRun | LeaderLvup | Mangonel | Smite
   type t = (cond, direct) event
-  let last = Cond Defeat
 end
 
 type t =
   | Ask of Input.t
   | Do of Output.t
+  | End of Output.cond
   | GoTo of Label.t
   | Mark of Label.t
 
@@ -48,7 +48,7 @@ let ls : t list =
   ; Do (Direct Output.ResearchStatus)
   ; Ask (Cond Input.LeaderNew)
   ; Do (Direct Output.Upkeep)
-  ; Do (Cond Output.Defeat)
+  ; End Output.Defeat
   ; Do (Direct Output.Mishap)
   ; Do (Cond Output.Disease)
   ; Do (Direct Output.Attack)
@@ -72,7 +72,6 @@ let ls : t list =
   ; Mark Label.Combat
   ; Do (Cond Output.Smite)
   ; Do (Direct Output.SiegeCombat)
-  ; Do (Cond Output.Defeat)
   ; Ask (Cond Input.Barrage)
   ; Do (Cond Output.Barraged)
   ; Do (Cond Output.Mangonel)
@@ -80,7 +79,7 @@ let ls : t list =
   ; Do (Direct Output.Fear)
   ; Do (Direct Output.Combat)
   ; Do (Direct Output.Revive)
-  ; Do (Cond Output.Defeat)
+  ; End Output.Defeat
   ; Do (Direct Output.Victory)
   ; Do (Cond Output.LeaderLvup)
   ; Ask (Direct Input.Scout)
