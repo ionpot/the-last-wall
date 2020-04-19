@@ -232,33 +232,33 @@ let starve supply t =
 let sub n kind t =
   Map.update kind (function Some x -> Number.sub_opt x n | x -> x) t
 
-module Fill (Dice : Dice.S) = struct
-  module Roll = Dice.Map(Map)
+module Roll = struct
+  module DiceMap = Dice.Map(Map)
   module Pick = Pick.With(struct
     module Cap = Pick.Int
     module Map = Map
     module Type = Cap
     type map = Type.t Map.t
     type step = Cap.t * Type.t
-    let choose = Roll.key
+    let choose = DiceMap.key
     let roll cap kind t =
       let n = Map.find kind t |> min cap |> Dice.roll in
       n, n
   end)
 
-  let from total t =
+  let fill total t =
     if total > count_all t then t, empty
     else Pick.from total t empty
-end
 
-module Report (Dice : Dice.S) = struct
   let try_round x =
-    if x > 10 then 10 * Dice.round (0.1 *. float x) else x
+    if x > 10
+    then 10 * Dice.round (0.1 *. float x)
+    else x
 
-  let from t =
+  let report t =
     Map.map try_round t
     |> report
 
-  let sum_from t =
+  let sum_report t =
     try_round (count_all t), (kinds_of t)
 end

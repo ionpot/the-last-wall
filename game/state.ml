@@ -1,18 +1,39 @@
 type t =
-  { deity : Deity.t
+  { build : Build.t
+  ; deity : Deity.t
   ; leader : Leader.t
+  ; manpower : Defs.manpower
+  ; month : Month.t
+  ; supply : Defs.supply
+  ; units : Units.t
   }
 
 let empty =
-  { deity = Deity.empty
+  { build = Build.empty
+  ; deity = Deity.empty
   ; leader = Leader.empty
+  ; manpower = 0
+  ; month = Month.empty
+  ; supply = 0
+  ; units = Units.empty
   }
+
+let build_map f t = { t with build = f t.build }
 
 let deity t = t.deity
 let deity_set deity t = { t with deity }
 
 let leader t = t.leader
 let leader_set leader t = { t with leader }
+
+let month_set month t = { t with month }
+
+let resource_set res t =
+  { t with manpower = Resource.mnp res
+  ; supply = Resource.sup res
+  }
+
+let units_set units t = { t with units }
 
 (*
 module Make (D : Dice.From) : S = struct

@@ -6,6 +6,6 @@ val is_winter : t -> bool
 
 val next : t -> t
 
-module Roll : Dice.S -> sig
+module Roll : sig
   val random : unit -> t
 end

@@ -1,6 +1,7 @@
 open Output_event
 
-type kind = unit
+type kind =
+  | Starting of Starting.t
 (*
   | Attack of Attack.t
   | Barraged of Barraged.t
@@ -24,7 +25,6 @@ type kind = unit
   | Revive of Revive.t
   | SiegeCombat of SiegeCombat.t
   | Smite of Smite.t
-  | Starting of Starting.t
   | Support of Support.t
   | Turn of Turn.t
   | Upkeep of Upkeep.t
@@ -45,6 +45,7 @@ let cond : type a. a Event.cond -> (a -> kind) -> State.t -> t option =
 let of_direct =
   let module Direct = Steps.Output in
   function
+  | Direct.Starting -> direct (module Starting) (fun x -> Starting x)
 (*
   | Direct.Attack -> direct (module Attack) (fun x -> Attack x)
   | Direct.Blessing -> (module Blessing), (fun x -> Blessing x)
@@ -61,7 +62,6 @@ let of_direct =
   | Direct.ResearchStatus -> (module ResearchStatus), (fun x -> ResearchStatus x)
   | Direct.Revive -> (module Revive), (fun x -> Revive x)
   | Direct.SiegeCombat -> (module SiegeCombat), (fun x -> SiegeCombat x)
-  | Direct.Starting -> (module Starting), (fun x -> Starting x)
   | Direct.Support -> (module Support), (fun x -> Support x)
   | Direct.Turn -> (module Turn), (fun x -> Turn x)
   | Direct.Upkeep -> (module Upkeep), (fun x -> Upkeep x)

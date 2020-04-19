@@ -22,6 +22,6 @@ let next = function
   | Nov -> Dec
   | Dec -> Jan
 
-module Roll (Dice : Dice.S) = struct
+module Roll = struct
   let random () = Dice.pick ls
 end

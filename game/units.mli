@@ -83,11 +83,8 @@ val split : Attr.t -> t -> t * t
 val starve : Defs.supply -> t -> t
 val sub : Defs.count -> kind -> t -> t
 
-module Fill : Dice.S -> sig
-  val from : Defs.count -> t -> t * t
-end
-
-module Report : Dice.S -> sig
-  val from : t -> report
-  val sum_from : t -> sum_report
+module Roll : sig
+  val fill : Defs.count -> t -> t * t
+  val report : t -> report
+  val sum_report : t -> sum_report
 end

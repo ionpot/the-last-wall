@@ -1,3 +1,5 @@
+module Starting = Starting
+
 (*
 module Attack = struct
   type t = Units.t * Attack.report
@@ -223,8 +225,6 @@ module Revive = struct
       |> Fill.from pwr base
   end
 end
-
-module Starting = Starting
 
 module Starvation = struct
   type deserted = Units.t
