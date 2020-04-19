@@ -6,7 +6,7 @@ end
 
 module LeaderChoice = struct
   type t = Leader.kind
-  let apply t = State.ldr_set (Leader.Roll.from t)
+  let apply t = State.leader_set (Leader.Roll.from t)
   let make s = Leader.(kind_of empty)
 end
 
