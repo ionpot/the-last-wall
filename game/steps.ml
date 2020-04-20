@@ -13,7 +13,7 @@ module Input = struct
 end
 
 module Output = struct
-  type direct = Attack | Blessing | BuildManp | BuildStatus | BuildSupply | Cavalry | Combat | Facilities | Fear | FearEnd | Mishap | ResearchProgress | ResearchStatus | Revive | SiegeCombat | Starting | Support | Turn | Upkeep | Victory
+  type direct = Attack | Blessing | BuildManp | BuildStatus | BuildSupply | Cavalry | Combat | Facilities | Fear | FearEnd | Mishap | NationChances | ResearchProgress | ResearchStatus | Revive | SiegeCombat | Starting | Support | Turn | Upkeep | Victory
   type cond = Barraged | Defeat | Disease | HitRun | LeaderLvup | Mangonel | Smite
   type t = (cond, direct) event
 end
@@ -30,6 +30,7 @@ let ls : t list =
   ; Ask (Direct Input.Leader)
   ; Do (Direct Output.Starting)
   ; Ask (Cond Input.Trade)
+  ; Do (Direct Output.NationChances)
   ; Do (Direct Output.Facilities)
   ; Ask (Direct Input.Nations)
   ; Do (Direct Output.Support)

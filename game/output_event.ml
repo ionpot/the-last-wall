@@ -1,3 +1,9 @@
+module NationChances = struct
+  type t = Nation.Chance.t
+  let apply t = State.nation_map (Nation.set_chances t)
+  let make s = Nation.chances_init (State.nation s)
+end
+
 module Starting = Starting
 
 (*

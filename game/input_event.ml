@@ -12,20 +12,11 @@ end
 
 module Trade = struct
   type t = Nation.kind option
-  let set_chance state = function
-    | Some kind ->
-        State.nation_map
-        Nation.(Chance.set_trading kind |> map_chances)
-        state
-    | None -> state
-  let apply trade state =
-    let turn = State.turn state in
-    let s = State.nation_map (Nation.set_trade trade) state in
-    if turn = 0 then set_chance s trade else s
-  let check state =
-    Build.(is_complete Trade) (State.build state)
-    && Nation.no_trade (State.nation state)
-  let make state = None
+  let apply t = State.nation_map (Nation.set_trade t)
+  let check s =
+    Build.(is_complete Trade) (State.build s)
+    && Nation.no_trade (State.nation s)
+  let make s = None
 end
 
 (*

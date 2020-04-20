@@ -1,6 +1,7 @@
 open Output_event
 
 type kind =
+  | NationChances of NationChances.t
   | Starting of Starting.t
 (*
   | Attack of Attack.t
@@ -45,6 +46,7 @@ let cond : type a. a Event.cond -> (a -> kind) -> State.t -> t option =
 let of_direct =
   let module Direct = Steps.Output in
   function
+  | Direct.NationChances -> direct (module NationChances) (fun x -> NationChances x)
   | Direct.Starting -> direct (module Starting) (fun x -> Starting x)
 (*
   | Direct.Attack -> direct (module Attack) (fun x -> Attack x)

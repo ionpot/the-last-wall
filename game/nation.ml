@@ -33,9 +33,7 @@ module Chance = struct
   type t = Defs.percent Map.t
   let cap = 80
   let cap_trading = 90
-  let base_map : t =
-    let f m k = Map.add k cap m in
-    List.fold_left f Map.empty kinds
+  let empty : t = Map.empty
   let of_kind = Map.find
   let map f k t = Map.add k (of_kind k t |> f) t
   let add step = map (Number.add_if_ptv step)
@@ -55,7 +53,7 @@ type t =
 
 let empty =
   { barracks = None
-  ; chances = Chance.base_map
+  ; chances = Chance.empty
   ; chosen = Set.empty
   ; support = Map.empty
   ; trade = None
@@ -89,6 +87,10 @@ let cap_of kind t =
   then Chance.cap_trading
   else Chance.cap
 
+let chances_init t =
+  let f m k = Map.add k (cap_of k t) m in
+  List.fold_left f Chance.empty kinds
+
 let mnp_from k t =
   if has_aided k t
   then Map.find k t.support |> Resource.mnp
@@ -112,6 +114,9 @@ let set_chosen chosen t =
 
 let set_barracks barracks t =
   { t with barracks }
+
+let set_chances chances t =
+  { t with chances }
 
 let map_chances f t =
   { t with chances = f t.chances }

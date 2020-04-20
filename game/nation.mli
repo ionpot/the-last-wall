@@ -32,6 +32,7 @@ val empty : t
 val barracks : t -> kind option
 val cap_of : kind -> t -> percent
 val chances : t -> Chance.t
+val chances_init : t -> Chance.t
 val chosen : t -> Set.t
 val has_aided : kind -> t -> bool
 val has_barracks : kind -> t -> bool
@@ -47,6 +48,7 @@ val traded_sup : kind -> t -> supply
 
 val map_chances : (Chance.t -> Chance.t) -> t -> t
 val set_barracks : kind option -> t -> t
+val set_chances : Chance.t -> t -> t
 val set_chosen : Set.t -> t -> t
 val set_support : support -> t -> t
 val set_trade : kind option -> t -> t
