@@ -1,6 +1,7 @@
 open Output_event
 
 type kind =
+  | Facilities of Facilities.t
   | NationChances of NationChances.t
   | Starting of Starting.t
 (*
@@ -14,7 +15,6 @@ type kind =
   | Combat of Combat.t
   | Defeat of Defeat.t
   | Disease of Disease.t
-  | Facilities of Facilities.t
   | Fear of Fear.t
   | FearEnd of FearEnd.t
   | HitRun of HitRun.t
@@ -46,6 +46,7 @@ let cond : type a. a Event.cond -> (a -> kind) -> State.t -> t option =
 let of_direct =
   let module Direct = Steps.Output in
   function
+  | Direct.Facilities -> direct (module Facilities) (fun x -> Facilities x)
   | Direct.NationChances -> direct (module NationChances) (fun x -> NationChances x)
   | Direct.Starting -> direct (module Starting) (fun x -> Starting x)
 (*
@@ -56,7 +57,6 @@ let of_direct =
   | Direct.BuildSupply -> (module BuildSupply), (fun x -> BuildSupply x)
   | Direct.Cavalry -> (module Cavalry), (fun x -> Cavalry x)
   | Direct.Combat -> (module Combat), (fun x -> Combat x)
-  | Direct.Facilities -> (module Facilities), (fun x -> Facilities x)
   | Direct.Fear -> (module Fear), (fun x -> Fear x)
   | Direct.FearEnd -> (module FearEnd), (fun x -> FearEnd x)
   | Direct.Mishap -> (module Mishap), (fun x -> Mishap x)

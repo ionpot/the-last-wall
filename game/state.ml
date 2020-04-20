@@ -3,8 +3,10 @@ type t =
   ; deity : Deity.t
   ; leader : Leader.t
   ; manpower : Defs.manpower
+  ; mishap : Mishap.t
   ; month : Month.t
   ; nation : Nation.t
+  ; pool : Pool.t
   ; supply : Defs.supply
   ; turn : Defs.turn
   ; units : Units.t
@@ -15,8 +17,10 @@ let empty =
   ; deity = Deity.empty
   ; leader = Leader.empty
   ; manpower = 0
+  ; mishap = Mishap.empty
   ; month = Month.empty
   ; nation = Nation.empty
+  ; pool = Pool.empty
   ; supply = 0
   ; turn = 0
   ; units = Units.empty
@@ -31,15 +35,21 @@ let deity_set deity t = { t with deity }
 let leader t = t.leader
 let leader_set leader t = { t with leader }
 
+let mishap t = t.mishap
+
 let month_set month t = { t with month }
 
 let nation t = t.nation
 let nation_map f t = { t with nation = f t.nation }
 
+let pool_map f t = { t with pool = f t.pool }
+
+let resource t = Resource.make ~mnp:t.manpower ~sup:t.supply ()
 let resource_set res t =
   { t with manpower = Resource.mnp res
   ; supply = Resource.sup res
   }
+let resource_map f t = resource_set (resource t |> f) t
 
 let turn t = t.turn
 

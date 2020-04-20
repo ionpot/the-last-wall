@@ -8,6 +8,6 @@ val empty : t
 
 val has : kind -> t -> bool
 
-module Roll : Dice.S -> sig
+module Roll : sig
   val from : (kind -> bool) -> t
 end

@@ -1,3 +1,28 @@
+module Facilities = struct
+  module Map = Build.Map
+  module Mapx = Mapx.Make(Map)
+  type t = Resource.t Map.t
+  let arena = Build.Arena
+  let arena_mnp t =
+    if Map.mem arena t
+    then Map.find arena t |> Resource.mnp
+    else 0
+  let add t res =
+    Mapx.foldv Resource.(++) res t
+  let apply t s =
+    let n = arena_mnp t in
+    State.resource_map (add t) s
+    |> State.pool_map Pool.(add Arena n)
+  let to_mnp k = Build.manpwr_range k |> Dice.range
+  let to_sup k = Build.supply_range k |> Dice.range
+  let to_res s k =
+    Resource.make ~mnp:(to_mnp k) ~sup:(to_sup k) ()
+    |> Bonus.facilities s k
+  let make s =
+    Build.ready (State.build s)
+    |> Mapx.mapk (to_res s)
+end
+
 module NationChances = struct
   type t = Nation.Chance.t
   let apply t = State.nation_map (Nation.set_chances t)
@@ -84,35 +109,6 @@ module Cavalry = Recruit.Event(struct
 end)
 
 module Combat = Combat
-
-module Facilities = struct
-  module Map = Build.Map
-  type t = Resource.t Map.t
-  let arena = Build.Arena
-  module Apply (S : State.S) = struct
-    module Add = Event.AddRes(S)
-    let arena_mnp t =
-      if Map.mem arena t
-      then Map.find arena t |> Resource.mnp
-      else 0
-    let value t =
-      Map.iter (fun _ -> Add.value) t;
-      let n = arena_mnp t in
-      S.Pool.map Pool.(add Arena n)
-  end
-  module Make (S : State.S) = struct
-    module Bonus = Bonus.Make(S)
-    let to_mnp k = Build.manpwr_range k |> S.Dice.range
-    let to_sup k = Build.supply_range k |> S.Dice.range
-    let to_res k =
-      Resource.make ~mnp:(to_mnp k) ~sup:(to_sup k) ()
-      |> Bonus.resource_disease
-      |> Bonus.market_boost k
-    let value =
-      S.Build.return Build.ready
-      |> Map.mapi (fun k _ -> to_res k)
-  end
-end
 
 module Fear = struct
   type t = Units.t

@@ -10,7 +10,7 @@ let has kind = function
   | Some k -> k = kind
   | None -> false
 
-module Roll (Dice : Dice.S) = struct
+module Roll = struct
   let from check =
     let ok = Dice.chance 0.05 in
     (if ok then List.filter check kinds else [])
