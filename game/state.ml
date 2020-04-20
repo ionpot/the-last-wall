@@ -4,7 +4,9 @@ type t =
   ; leader : Leader.t
   ; manpower : Defs.manpower
   ; month : Month.t
+  ; nation : Nation.t
   ; supply : Defs.supply
+  ; turn : Defs.turn
   ; units : Units.t
   }
 
@@ -14,10 +16,13 @@ let empty =
   ; leader = Leader.empty
   ; manpower = 0
   ; month = Month.empty
+  ; nation = Nation.empty
   ; supply = 0
+  ; turn = 0
   ; units = Units.empty
   }
 
+let build t = t.build
 let build_map f t = { t with build = f t.build }
 
 let deity t = t.deity
@@ -28,10 +33,15 @@ let leader_set leader t = { t with leader }
 
 let month_set month t = { t with month }
 
+let nation t = t.nation
+let nation_map f t = { t with nation = f t.nation }
+
 let resource_set res t =
   { t with manpower = Resource.mnp res
   ; supply = Resource.sup res
   }
+
+let turn t = t.turn
 
 let units_set units t = { t with units }
 

@@ -6,6 +6,7 @@ type 'a input = 'a * 'a apply
 type kind =
   | DeityChoice of DeityChoice.t input
   | LeaderChoice of LeaderChoice.t input
+  | Trade of Trade.t input
 (*
   | Barracks of Barracks.t t
   | Barrage of Barrage.t t
@@ -18,7 +19,6 @@ type kind =
   | Scout of Scout.t t
   | Sodistan of Sodistan.t t
   | Temple of Temple.t t
-  | Trade of Trade.t t
   | Volunteers of Volunteers.t t
   *)
 
@@ -50,12 +50,12 @@ let of_direct =
 let of_cond =
   let module Cond = Steps.Input in
   function
+  | Cond.Trade -> cond (module Trade) (fun x -> Trade x)
 (*
   | Cond.Barracks -> cond (module Barracks) (fun x -> Barracks x)
   | Cond.Barrage -> (module Barrage), (fun x -> Barrage x)
   | Cond.LeaderNew -> (module LeaderNew), (fun x -> LeaderNew x)
   | Cond.Temple -> (module Temple), (fun x -> Temple x)
-  | Cond.Trade -> (module Trade), (fun x -> Trade x)
   | Cond.Volunteers -> (module Volunteers), (fun x -> Volunteers x)
 *)
   | _ -> failwith "todo"

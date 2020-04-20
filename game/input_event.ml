@@ -10,6 +10,24 @@ module LeaderChoice = struct
   let make s = Leader.(kind_of empty)
 end
 
+module Trade = struct
+  type t = Nation.kind option
+  let set_chance state = function
+    | Some kind ->
+        State.nation_map
+        Nation.(Chance.set_trading kind |> map_chances)
+        state
+    | None -> state
+  let apply trade state =
+    let turn = State.turn state in
+    let s = State.nation_map (Nation.set_trade trade) state in
+    if turn = 0 then set_chance s trade else s
+  let check state =
+    Build.(is_complete Trade) (State.build state)
+    && Nation.no_trade (State.nation state)
+  let make state = None
+end
+
 (*
 module Barracks = struct
   type t = Nation.kind option
@@ -186,28 +204,6 @@ module Temple = struct
     module Bonus = Bonus.Make(S)
     let n = Bonus.temple_men 3
     let value = Range.Int.times n (1, 4) |> S.Dice.range
-  end
-end
-
-module Trade = struct
-  type t = Nation.kind option
-  module Apply (S : State.S) = struct
-    let set_chance = function
-      | Some kind ->
-          Nation.(Chance.set_trading kind |> map_chances)
-          |> S.Nation.map
-      | None -> ()
-    let value trade =
-      S.Nation.map (Nation.set_trade trade);
-      if S.Turn.is 0 then set_chance trade
-  end
-  module Check (S : State.S) = struct
-    let value =
-      S.Build.check Build.(is_complete Trade)
-      && S.Nation.check Nation.no_trade
-  end
-  module Make (S : State.S) = struct
-    let value = None
   end
 end
 
