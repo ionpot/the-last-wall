@@ -10,6 +10,12 @@ module LeaderChoice = struct
   let make s = Leader.(kind_of empty)
 end
 
+module Nations = struct
+  type t = Nation.Set.t
+  let apply t = State.nation_map (Nation.set_chosen t)
+  let make s = Nation.chosen (State.nation s)
+end
+
 module Trade = struct
   type t = Nation.kind option
   let apply t = State.nation_map (Nation.set_trade t)
@@ -120,16 +126,6 @@ module MercsEnd = struct
   end
   module Make (S : State.S) = struct
     let value = S.Units.return Units.(count Merc)
-  end
-end
-
-module Nations = struct
-  type t = Nation.Set.t
-  module Apply (S : State.S) = struct
-    let value x = S.Nation.map (Nation.set_chosen x)
-  end
-  module Make (S : State.S) = struct
-    let value = S.Nation.return Nation.chosen
   end
 end
 
