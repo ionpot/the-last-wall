@@ -11,6 +11,7 @@ module Make (S : Map.S) : sig
   val maybe : ('a -> 'b) -> 'b -> S.key -> 'a S.t -> 'b
   val min : 'a S.t -> 'a
   val nth : 'a S.t -> int -> S.key
+  val of_list : S.key list -> 'a -> 'a S.t
   module Float : sig
     type t = float S.t
     val add_to : S.key -> float -> t -> t

@@ -37,6 +37,7 @@ let leader_set leader t = { t with leader }
 
 let mishap t = t.mishap
 
+let month t = t.month
 let month_set month t = { t with month }
 
 let nation t = t.nation
@@ -50,6 +51,7 @@ let resource_set res t =
   ; supply = Resource.sup res
   }
 let resource_map f t = resource_set (resource t |> f) t
+let resource_add res = resource_map (Resource.(++) res)
 
 let turn t = t.turn
 

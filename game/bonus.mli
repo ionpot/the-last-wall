@@ -1,4 +1,6 @@
 val facilities : State.t -> Build.kind -> Resource.t -> Resource.t
+val support_chance : State.t -> Defs.percent -> Defs.percent
+val support : State.t -> Nation.kind -> Resource.t -> Resource.t
 (*
 val artillery : Power.t -> Power.t
 val brg_coef : Defs.power -> Defs.power
@@ -15,10 +17,6 @@ val recruit_fast : Units.kind -> bool
 val recruit_sup : Units.kind -> Defs.supply -> Defs.supply
 val siege_boost : Power.t -> Power.t
 val smite : Defs.power -> Defs.power
-val support_barracks : Nation.kind -> Resource.t -> Resource.t
-val support_hekatium : Nation.kind -> Resource.t -> Resource.t
-val support_trade : Nation.kind -> Resource.t -> Resource.t
-val support_winter : Defs.percent -> Defs.percent
 val temple_men : Defs.count -> Defs.count
 val totem_boost : Power.t -> Power.t
 val upkeep_engr : Defs.supply -> Defs.supply

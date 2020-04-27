@@ -1,3 +1,6 @@
+let barracks s kind =
+  Nation.has_barracks kind (State.nation s)
+
 let ldr_is s kind =
   Leader.is_living kind (State.leader s)
 
@@ -7,6 +10,12 @@ let ldr_cha s kind =
 
 let mishap s kind =
   Mishap.has kind (State.mishap s)
+
+let trade s kind =
+  Nation.has_trade kind (State.nation s)
+
+let winter s =
+  Month.is_winter (State.month s)
 
 let disease s =
   let x = Float.if_ok 0.2 (mishap s Mishap.Disease) in
@@ -21,11 +30,23 @@ let market s kind =
 let facilities s kind res = res
   |> disease s
   |> market s kind
+
+let support_chance s chance =
+  Number.sub_if (winter s) 10 chance
+
+let support_hekatium s kind =
+  let yes = kind = Nation.Hekatium in
+  Resource.bonus_if (trade s kind && yes)
+  Resource.Bonus.(Add (Both 0.1))
+
+let support s kind res =
+  let mnp = Number.if_ok 10 (barracks s kind) in
+  let sup = Number.if_ok 10 (trade s kind) in
+  support_hekatium s kind res
+  |> Resource.add ~mnp ~sup
+
 (*
 module Attr = Units.Attr
-
-let barracks kind =
-  S.Nation.check (Nation.has_barracks kind)
 
 let barraged () =
   S.Barrage.check Barrage.can_barrage
@@ -46,9 +67,6 @@ let ldr_defense () =
 
 let researched kind =
   S.Research.check (Research.is_complete kind)
-
-let trade kind =
-  S.Nation.check (Nation.has_trade kind)
 
 let traded kind =
   S.Nation.check (Nation.has_traded kind)
@@ -138,23 +156,6 @@ let siege_boost p =
 
 let smite mnp = mnp
   |> Float.add_if (bld_ready Build.Observatory) 10.
-
-let support_barracks kind res =
-  let mnp = Number.if_ok 10 (barracks kind) in
-  Resource.add ~mnp res
-
-let support_hekatium kind =
-  let hekatium = kind = Nation.Hekatium in
-  Resource.bonus_if (trade kind && hekatium)
-  Resource.Bonus.(Add (Both 0.1))
-
-let support_trade kind res =
-  let sup = Number.if_ok 10 (trade kind) in
-  Resource.add ~sup res
-
-let support_winter chance =
-  let winter = S.Month.check Month.is_winter in
-  Number.sub_if winter 10 chance
 
 let temple_men n =
   Number.add_if (bld_ready Build.Guesthouse) 1 n

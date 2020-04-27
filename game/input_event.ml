@@ -12,13 +12,13 @@ end
 
 module Nations = struct
   type t = Nation.Set.t
-  let apply t = State.nation_map (Nation.set_chosen t)
+  let apply t = State.nation_map (Nation.chosen_set t)
   let make s = Nation.chosen (State.nation s)
 end
 
 module Trade = struct
   type t = Nation.kind option
-  let apply t = State.nation_map (Nation.set_trade t)
+  let apply t = State.nation_map (Nation.trade_set t)
   let check s =
     Build.(is_complete Trade) (State.build s)
     && Nation.no_trade (State.nation s)

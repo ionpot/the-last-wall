@@ -24,10 +24,12 @@ module Facilities = struct
 end
 
 module NationChances = struct
-  type t = Nation.Chance.t
-  let apply t = State.nation_map (Nation.set_chances t)
-  let make s = Nation.chances_init (State.nation s)
+  type t = Nation.chances
+  let apply t = State.nation_map (Nation.chances_set t)
+  let make = Support.chances_init
 end
+
+module NationSupport = Support
 
 module Starting = Starting
 
@@ -156,21 +158,6 @@ module Mishap = struct
       | Mishap.Disease -> units >= 50
       | Mishap.Tavern -> S.Build.check Build.(is_ready Tavern)
     let value = Roll.from check
-  end
-end
-
-module NationSupport = struct
-  type t = Support.t
-  module Apply (S : State.S) = struct
-    module AddRes = Event.AddRes(S)
-    module Apply = Support.Apply(S)
-    let value t =
-      AddRes.value (Support.sum t);
-      Apply.value t
-  end
-  module Make (S : State.S) = struct
-    module Roll = Support.Roll(S)
-    let value = S.Nation.return Roll.from
   end
 end
 

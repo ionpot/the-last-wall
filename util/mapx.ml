@@ -36,6 +36,10 @@ module Make (Map : Map.S) = struct
     in
     Map.fold f t (key, n) |> fst
 
+  let of_list ls v =
+    let f acc k = Map.add k v acc in
+    List.fold_left f Map.empty ls
+
   module Float = struct
     type t = float Map.t
 

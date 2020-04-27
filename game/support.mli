@@ -1,13 +1,9 @@
-type chances = Nation.Chance.t
-type t = Nation.support
+type t
 
-val sum : t -> Resource.t
+val apply : t -> State.t -> State.t
+val make : State.t -> t
 
-module Apply : State.S -> sig
-  val value : t -> unit
-end
+val chances : t -> Nation.chances
+val resources : t -> Nation.resources
 
-module Roll : State.S -> sig
-  val chance_of : Nation.kind -> Nation.t -> Defs.percent
-  val from : Nation.t -> t
-end
+val chances_init : State.t -> Nation.chances

@@ -13,6 +13,7 @@ val leader_set : Leader.t -> t -> t
 
 val mishap : t -> Mishap.t
 
+val month : t -> Month.t
 val month_set : Month.t -> t -> t
 
 val nation : t -> Nation.t
@@ -21,6 +22,7 @@ val nation_map : (Nation.t -> Nation.t) -> t -> t
 val pool_map : (Pool.t -> Pool.t) -> t -> t
 
 val resource : t -> Resource.t
+val resource_add : Resource.t -> t -> t
 val resource_map : (Resource.t -> Resource.t) -> t -> t
 val resource_set : Resource.t -> t -> t
 

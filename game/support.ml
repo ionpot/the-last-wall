@@ -1,64 +1,109 @@
-module Chance = Nation.Chance
 module Map = Nation.Map
+module Mapx = Mapx.Make(Map)
+module Set = Nation.Set
 
-type chances = Chance.t
-type t = Nation.support
+module Range = struct
+  let low = 0, 10
+  let med = 10, 20
+  let high = 20, 30
 
-let is_empty k t =
-  Map.mem k t && Map.find k t = Resource.empty
+  let mnp = function
+    | Nation.Tulron
+    | Nation.Sodistan -> high
+    | Nation.Hekatium
+    | Nation.Numendor -> low
+    | Nation.Clan -> med
 
-let sum t =
-  let f _ = Resource.(++) in
-  Map.fold f t Resource.empty
-
-module Apply (S : State.S) = struct
-  let nats = S.Nation.get ()
-
-  let adjust kind t cmap =
-    (if is_empty kind t
-    then Chance.sub
-    else Chance.add) 10 kind cmap
-
-  let boost kind cmap =
-    if Nation.has_trade kind nats
-    then Chance.add 5 kind cmap
-    else cmap
-
-  let chances t cmap =
-    let f cmap kind = adjust kind t cmap |> boost kind in
-    List.fold_left f cmap Nation.kinds
-
-  let value t =
-    S.Nation.return (chances t |> Nation.map_chances)
-    |> Nation.trim_chances
-    |> Nation.set_support t
-    |> S.Nation.set
+  let sup =
+    let f = Range.Int.add 10 in
+    function
+    | Nation.Tulron
+    | Nation.Sodistan -> f low
+    | Nation.Hekatium
+    | Nation.Numendor -> f high
+    | Nation.Clan -> f med
 end
 
-module Roll (S : State.S) = struct
-  module Bonus = Bonus.Make(S)
+let is_chosen s kind =
+  State.nation s
+  |> Nation.chosen
+  |> Set.mem kind
 
-  let bonuses kind res = res
-    |> Bonus.support_barracks kind
-    |> Bonus.support_hekatium kind
-    |> Bonus.support_trade kind
+let is_empty k map =
+  Map.find k map = Resource.empty
 
-  let roll = S.Dice.range
+let sum =
+  Mapx.foldv Resource.(++) Resource.empty
 
-  let chance_of kind nats =
-    Nation.chances nats
-    |> Chance.of_kind kind
-    |> Bonus.support_winter
+module Chance = struct
+  let cap_of s kind =
+    if State.nation s |> Nation.has_trade kind
+    then 90 else 80
 
+  let add_trade s kind =
+    State.nation s
+    |> Nation.has_trade kind
+    |> Number.if_ok 5
+    |> (+)
+
+  let add_base s support kind =
+    if is_chosen s kind && is_empty kind support
+    then Number.sub_by 10
+    else Number.add_if_ptv 10
+
+  let f s support kind chance = chance
+    |> add_base s support kind
+    |> add_trade s kind
+    |> min (cap_of s kind)
+
+  let from s support =
+    State.nation s
+    |> Nation.chances
+    |> Map.mapi (f s support)
+end
+
+module Roll = struct
   let roll_res kind =
-    let (a, b) = Nation.ranges_of kind in
-    Resource.make ~mnp:(roll a) ~sup:(roll b) ()
+    let mnp = Dice.range (Range.mnp kind) in
+    let sup = Dice.range (Range.sup kind) in
+    Resource.make ~mnp ~sup ()
 
-  let to_res nats kind =
-    if chance_of kind nats |> S.Dice.percent
-    then roll_res kind |> bonuses kind
+  let to_res s kind chance =
+    let chance' = Bonus.support_chance s chance in
+    if is_chosen s kind && Dice.percent chance'
+    then roll_res kind |> Bonus.support s kind
     else Resource.empty
 
-  let from nats =
-    Nation.(chosen nats |> set2map (to_res nats))
+  let from s =
+    State.nation s
+    |> Nation.chances
+    |> Map.mapi (to_res s)
 end
+
+type t =
+  { chances : Nation.chances
+  ; resources : Nation.resources
+  }
+
+let apply t s = s
+  |> State.resource_add (sum t.resources)
+  |> State.nation_map (fun nats -> nats
+    |> Nation.chances_set t.chances
+    |> Nation.support_set t.resources
+  )
+
+let make s =
+  let map = Roll.from s in
+  { chances = Chance.from s map
+  ; resources = map
+  }
+
+let chances t = t.chances
+let resources t = t.resources
+
+let chances_init s =
+  let f acc k =
+    let chance = Chance.cap_of s k in
+    Map.add k chance acc
+  in
+  List.fold_left f Map.empty Nation.kinds

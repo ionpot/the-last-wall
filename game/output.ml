@@ -4,6 +4,7 @@ type kind =
   | Facilities of Facilities.t
   | NationChances of NationChances.t
   | Starting of Starting.t
+  | Support of NationSupport.t
 (*
   | Attack of Attack.t
   | Barraged of Barraged.t
@@ -26,7 +27,6 @@ type kind =
   | Revive of Revive.t
   | SiegeCombat of SiegeCombat.t
   | Smite of Smite.t
-  | Support of Support.t
   | Turn of Turn.t
   | Upkeep of Upkeep.t
   | Victory of Victory.t
@@ -49,6 +49,7 @@ let of_direct =
   | Direct.Facilities -> direct (module Facilities) (fun x -> Facilities x)
   | Direct.NationChances -> direct (module NationChances) (fun x -> NationChances x)
   | Direct.Starting -> direct (module Starting) (fun x -> Starting x)
+  | Direct.Support -> direct (module NationSupport) (fun x -> Support x)
 (*
   | Direct.Attack -> direct (module Attack) (fun x -> Attack x)
   | Direct.Blessing -> (module Blessing), (fun x -> Blessing x)
@@ -64,7 +65,6 @@ let of_direct =
   | Direct.ResearchStatus -> (module ResearchStatus), (fun x -> ResearchStatus x)
   | Direct.Revive -> (module Revive), (fun x -> Revive x)
   | Direct.SiegeCombat -> (module SiegeCombat), (fun x -> SiegeCombat x)
-  | Direct.Support -> (module Support), (fun x -> Support x)
   | Direct.Turn -> (module Turn), (fun x -> Turn x)
   | Direct.Upkeep -> (module Upkeep), (fun x -> Upkeep x)
   | Direct.Victory -> (module Victory), (fun x -> Victory x)
