@@ -1,4 +1,7 @@
-type kind = Input of Input.kind | Output of Output.kind
+type kind =
+  | Input of Input.kind
+  | Mark of Steps.Label.t
+  | Output of Output.kind
 type t =
   { kind : kind
   ; rest : Steps.t list
@@ -16,7 +19,8 @@ let output state = function
 let rec seek label = function
   | [] -> []
   | Steps.Mark x :: rest ->
-      if x = label then rest
+      if x = label
+      then Steps.Mark x :: rest
       else seek label rest
   | _ :: rest -> seek label rest
 
@@ -42,8 +46,8 @@ let rec next_of state = function
       end
   | Steps.GoTo label :: _ ->
       next_of state (seek label Steps.ls)
-  | Steps.Mark _ :: rest ->
-      next_of state rest
+  | Steps.Mark x :: rest ->
+      Some { kind = Mark x; rest; state }
 
 let next t = next_of t.state t.rest
 let first state = next_of state Steps.ls

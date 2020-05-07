@@ -1,5 +1,6 @@
 type kind =
   | Input of Input.kind
+  | Mark of Steps.Label.t
   | Output of Output.kind
 type t
 
