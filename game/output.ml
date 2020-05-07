@@ -1,6 +1,6 @@
 open Output_event
 
-type kind =
+type event =
   | Facilities of Facilities.t
   | NationChances of NationChances.t
   | Starting of Starting.t
@@ -31,14 +31,14 @@ type kind =
   | Upkeep of Upkeep.t
   | Victory of Victory.t
 *)
-type t = kind * State.t
+type t = event * State.t
 
-let direct : type a. a Event.direct -> (a -> kind) -> State.t -> t =
+let direct : type a. a Event.direct -> (a -> event) -> State.t -> t =
   fun (module M) f s ->
     let x = M.make s in
     f x, M.apply x s
 
-let cond : type a. a Event.cond -> (a -> kind) -> State.t -> t option =
+let cond : type a. a Event.cond -> (a -> event) -> State.t -> t option =
   fun (module M) f ->
     let g = direct (module M) f in
     Event.cond (module M) g

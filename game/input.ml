@@ -3,7 +3,7 @@ open Input_event
 type 'a apply = State.t -> 'a -> State.t
 type 'a input = 'a * 'a apply
 
-type kind =
+type event =
   | DeityChoice of DeityChoice.t input
   | LeaderChoice of LeaderChoice.t input
   | Nations of Nations.t input
@@ -22,11 +22,11 @@ type kind =
   | Volunteers of Volunteers.t t
   *)
 
-let direct : type a. a Event.direct -> (a input -> kind) -> State.t -> kind =
+let direct : type a. a Event.direct -> (a input -> event) -> State.t -> event =
   fun (module M) f state ->
     f (M.make state, fun s x -> M.apply x s)
 
-let cond : type a. a Event.cond -> (a input -> kind) -> State.t -> kind option =
+let cond : type a. a Event.cond -> (a input -> event) -> State.t -> event option =
   fun (module M) f ->
     let g = direct (module M) f in
     Event.cond (module M) g
