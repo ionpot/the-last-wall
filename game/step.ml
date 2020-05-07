@@ -20,31 +20,34 @@ let rec seek label = function
       else seek label rest
   | _ :: rest -> seek label rest
 
-let rec next state = function
+let rec next_of state = function
   | [] -> None
   | Steps.Ask x :: rest ->
       begin match input state x with
       | Some evt ->
           Some { kind = Input evt; rest; state }
-      | None -> next state rest
+      | None -> next_of state rest
       end
   | Steps.Do x :: rest ->
       begin match output state x with
       | Some (evt, state) ->
           Some { kind = Output evt; rest; state }
-      | None -> next state rest
+      | None -> next_of state rest
       end
   | Steps.End x :: rest ->
       begin match Output.of_cond x state with
       | Some (evt, state) ->
           Some { kind = Output evt; rest = []; state }
-      | None -> next state rest
+      | None -> next_of state rest
       end
   | Steps.GoTo label :: _ ->
-      next state (seek label Steps.ls)
+      next_of state (seek label Steps.ls)
   | Steps.Mark _ :: rest ->
-      next state rest
+      next_of state rest
+
+let next t = next_of t.state t.rest
+let first state = next_of state Steps.ls
 
 let kind t = t.kind
-let rest t = t.rest
 let state t = t.state
+let state_set state t = { t with state }

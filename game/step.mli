@@ -3,8 +3,9 @@ type kind =
   | Output of Output.kind
 type t
 
-val next : State.t -> Steps.t list -> t option
+val first : State.t -> t option
+val next : t -> t option
 
 val kind : t -> kind
-val rest : t -> Steps.t list
 val state : t -> State.t
+val state_set : State.t -> t -> t

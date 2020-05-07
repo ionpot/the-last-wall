@@ -6,7 +6,9 @@ let make = function
   | Some step -> Next step
   | None -> End
 
-let next steps state =
-  Step.next state steps |> make
+let next = function
+  | Next step -> Step.next step |> make
+  | End -> End
 
-let first = next Steps.ls
+let first state =
+  Step.first state |> make
