@@ -16,6 +16,16 @@ module Nations = struct
   let make s = Nation.chosen (State.nation s)
 end
 
+module Sodistan = struct
+  type t = Defs.supply
+  let apply t =
+    Resource.make ~mnp:(t * ~-2) ~sup:t ()
+    |> State.resource_add
+  let make s =
+    let cap = Nation.(traded_mnp Sodistan) (State.nation s) in
+    min cap (State.manpower s) / 2
+end
+
 module Trade = struct
   type t = Nation.kind option
   let apply t = State.nation_map (Nation.trade_set t)
@@ -162,20 +172,6 @@ module Scout = struct
   end
   module Make (S : State.S) = struct
     let value = S.Scout.get ()
-  end
-end
-
-module Sodistan = struct
-  type t = Defs.supply
-  module Apply (S : State.S) = struct
-    let value t =
-      S.Units.map Units.(sub (t * 2) Men);
-      S.Supply.add t
-  end
-  module Make (S : State.S) = struct
-    let mnp = S.Nation.return Nation.(traded_mnp Sodistan)
-    let men = S.Units.return Units.(count Men)
-    let value = min mnp men / 2
   end
 end
 

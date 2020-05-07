@@ -7,6 +7,7 @@ type kind =
   | DeityChoice of DeityChoice.t input
   | LeaderChoice of LeaderChoice.t input
   | Nations of Nations.t input
+  | Sodistan of Sodistan.t input
   | Trade of Trade.t input
 (*
   | Barracks of Barracks.t t
@@ -17,7 +18,6 @@ type kind =
   | MercsEnd of MercsEnd.t t
   | Research of Research.t t
   | Scout of Scout.t t
-  | Sodistan of Sodistan.t t
   | Temple of Temple.t t
   | Volunteers of Volunteers.t t
   *)
@@ -37,13 +37,13 @@ let of_direct =
   | Direct.Deity -> direct (module DeityChoice) (fun x -> DeityChoice x)
   | Direct.Leader -> direct (module LeaderChoice) (fun x -> LeaderChoice x)
   | Direct.Nations -> direct (module Nations) (fun x -> Nations x)
+  | Direct.Sodistan -> direct (module Sodistan) (fun x -> Sodistan x)
 (*
   | Direct.BarrageTrain -> (module BarrageTrain), (fun x -> BarrageTrain x)
   | Direct.Build -> (module Build), (fun x -> Build x)
   | Direct.MercsEnd -> (module MercsEnd), (fun x -> MercsEnd x)
   | Direct.Research -> (module Research), (fun x -> Research x)
   | Direct.Scout -> (module Scout), (fun x -> Scout x)
-  | Direct.Sodistan -> (module Sodistan), (fun x -> Sodistan x)
 *)
   | _ -> failwith "todo"
 

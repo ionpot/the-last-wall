@@ -11,6 +11,8 @@ val deity_set : Deity.t -> t -> t
 val leader : t -> Leader.t
 val leader_set : Leader.t -> t -> t
 
+val manpower : t -> Defs.manpower
+
 val mishap : t -> Mishap.t
 
 val month : t -> Month.t

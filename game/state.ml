@@ -35,6 +35,8 @@ let deity_set deity t = { t with deity }
 let leader t = t.leader
 let leader_set leader t = { t with leader }
 
+let manpower t = t.manpower
+
 let mishap t = t.mishap
 
 let month t = t.month
