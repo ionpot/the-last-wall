@@ -35,6 +35,15 @@ module Trade = struct
   let make s = None
 end
 
+module Volunteers = struct
+  type t = Defs.count
+  let apply = State.manpower_add
+  let check = State.build_ready Build.Tavern
+  let make s =
+    let n = Bonus.volunteers s 3 in
+    Range.Int.times n (1, 3) |> Dice.range
+end
+
 (*
 module Barracks = struct
   type t = Nation.kind option
@@ -187,23 +196,6 @@ module Temple = struct
     module Bonus = Bonus.Make(S)
     let n = Bonus.temple_men 3
     let value = Range.Int.times n (1, 4) |> S.Dice.range
-  end
-end
-
-module Volunteers = struct
-  module Range = Range.Int
-  type t = Defs.count
-  let kind = Units.Men
-  module Apply (S : State.S) = struct
-    let value n = S.Units.map (Units.add n kind)
-  end
-  module Check (S : State.S) = struct
-    let value = S.Build.check Build.(is_ready Tavern)
-  end
-  module Make (S : State.S) = struct
-    module Bonus = Bonus.Make(S)
-    let n = Bonus.volunteers 3
-    let value = Range.times n (1, 3) |> S.Dice.range
   end
 end
 *)

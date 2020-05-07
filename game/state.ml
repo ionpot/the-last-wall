@@ -26,14 +26,13 @@ let empty =
 
 let build t = t.build
 let build_map f t = { t with build = f t.build }
+let build_ready kind t = Build.is_ready kind t.build
 
 let deity t = t.deity
 let deity_set deity t = { t with deity }
 
 let leader t = t.leader
 let leader_set leader t = { t with leader }
-
-let manpower t = Resource.mnp t.res
 
 let mishap t = t.mishap
 
@@ -49,6 +48,10 @@ let resource t = t.res
 let resource_set res t = { t with res }
 let resource_map f t = resource_set (f t.res) t
 let resource_add res = resource_map (Resource.(++) res)
+
+let manpower t = Resource.mnp t.res
+let manpower_add mnp =
+  resource_map (Resource.add ~mnp)
 
 let turn t = t.turn
 

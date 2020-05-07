@@ -45,6 +45,9 @@ let support s kind res =
   support_hekatium s kind res
   |> Resource.add ~mnp ~sup
 
+let volunteers s n =
+  n + (ldr_cha s Leader.Aristocrat)
+
 (*
 module Attr = Units.Attr
 
@@ -182,7 +185,4 @@ let upkeep_units sup =
   sup
   - discount cavs Units.(filter Attr.cavalry)
   - discount merc Units.(only Units.Merc)
-
-let volunteers n =
-  n + (ldr_cha Leader.Aristocrat)
 *)

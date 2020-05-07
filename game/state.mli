@@ -4,6 +4,7 @@ val empty : t
 
 val build : t -> Build.t
 val build_map : (Build.t -> Build.t) -> t -> t
+val build_ready : Build.kind -> t -> bool
 
 val deity : t -> Deity.t
 val deity_set : Deity.t -> t -> t
@@ -12,6 +13,7 @@ val leader : t -> Leader.t
 val leader_set : Leader.t -> t -> t
 
 val manpower : t -> Defs.manpower
+val manpower_add : Defs.manpower -> t -> t
 
 val mishap : t -> Mishap.t
 

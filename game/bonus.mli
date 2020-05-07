@@ -1,6 +1,7 @@
 val facilities : State.t -> Build.kind -> Resource.t -> Resource.t
 val support_chance : State.t -> Defs.percent -> Defs.percent
 val support : State.t -> Nation.kind -> Resource.t -> Resource.t
+val volunteers : State.t -> Defs.count -> Defs.count
 (*
 val artillery : Power.t -> Power.t
 val brg_coef : Defs.power -> Defs.power
@@ -22,5 +23,4 @@ val totem_boost : Power.t -> Power.t
 val upkeep_engr : Defs.supply -> Defs.supply
 val upkeep_scouting : Defs.supply -> Defs.supply
 val upkeep_units : Defs.supply -> Defs.supply
-val volunteers : Defs.count -> Defs.count
 *)

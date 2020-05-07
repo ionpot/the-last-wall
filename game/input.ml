@@ -9,6 +9,7 @@ type event =
   | Nations of Nations.t input
   | Sodistan of Sodistan.t input
   | Trade of Trade.t input
+  | Volunteers of Volunteers.t input
 (*
   | Barracks of Barracks.t t
   | Barrage of Barrage.t t
@@ -19,7 +20,6 @@ type event =
   | Research of Research.t t
   | Scout of Scout.t t
   | Temple of Temple.t t
-  | Volunteers of Volunteers.t t
   *)
 
 let direct : type a. a Event.direct -> (a input -> event) -> State.t -> event =
@@ -51,11 +51,11 @@ let of_cond =
   let module Cond = Steps.Input in
   function
   | Cond.Trade -> cond (module Trade) (fun x -> Trade x)
+  | Cond.Volunteers -> cond (module Volunteers) (fun x -> Volunteers x)
 (*
   | Cond.Barracks -> cond (module Barracks) (fun x -> Barracks x)
   | Cond.Barrage -> (module Barrage), (fun x -> Barrage x)
   | Cond.LeaderNew -> (module LeaderNew), (fun x -> LeaderNew x)
   | Cond.Temple -> (module Temple), (fun x -> Temple x)
-  | Cond.Volunteers -> (module Volunteers), (fun x -> Volunteers x)
 *)
   | _ -> failwith "todo"
