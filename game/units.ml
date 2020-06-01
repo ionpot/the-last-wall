@@ -79,8 +79,8 @@ module Base = struct
 
   let power = function
     | Dullahan -> 7.
-    | Cyclops -> 5.
-    | Harpy | Knight -> 4.
+    | Cyclops | Knight -> 5.
+    | Harpy -> 4.
     | Marms | Templar -> 3.
     | Ballista | Berserker | Cavalry | Demon | Dervish | Harcher | Mangonel | Merc | Ranger | Veteran | Xbowman -> 2.
     | Men | Novice | Orc -> 1.
