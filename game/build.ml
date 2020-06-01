@@ -47,7 +47,7 @@ let is_multiple kind =
   kind = Stable
 
 let manpwr_range = function
-  | Arena -> (2, 8)
+  | Arena -> (3, 12)
   | _ -> (0, 0)
 
 let supply_range = function
